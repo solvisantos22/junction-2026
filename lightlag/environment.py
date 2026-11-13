@@ -110,6 +110,17 @@ class Environment:
                 "raw_score": value * factor, "alive": alive, "at_base": at_base,
                 "max_available_value": sum(target.value for target in self._world.targets)}
 
+    def replay(self):
+        """Evaluator-only artifact containing hidden truth, after the horizon."""
+        result = self.evaluate()
+        return deepcopy({
+            "version": "lightlag-replay-v1", "seed": self._seed,
+            "config": asdict(self._config), "world": self.map(),
+            "slip_coefficients": self._slip, "commands": self._sent,
+            "states": self._truth, "received_telemetry": self._received,
+            "result": result,
+        })
+
     def _step(self):
         self._tick += 1
         events = []

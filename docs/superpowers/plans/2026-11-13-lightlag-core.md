@@ -55,10 +55,10 @@ Files: `lightlag/model.py`, `lightlag/environment.py`, `tests/lightlag/test_miss
 
 Files: `lightlag/__main__.py`, `lightlag/README.md`, `lightlag/examples/return_to_base.jsonl`, `tests/lightlag/test_cli.py`, README entry, `docs/lightlag-handoff.md`, this plan and `TEAM_STATUS.md`.
 
-- [ ] Add failing subprocess tests for JSON-lines dispatch, recoverable malformed input, rejection of private/evaluator method names, completion-only artifact export, and identical replay files from the same script/seed.
-- [ ] Run `python3 -m unittest discover -s tests/lightlag -v` and confirm the new failures.
-- [ ] Implement an allowlisted JSON-lines CLI, evaluator replay with initial/per-tick truth and sent commands, and a runnable sample script. Reject nonfinite JSON numbers and invalid argument types without terminating the session. Do not export a partial episode as a final result.
-- [ ] Smoke test the documented command:
+- [x] Add failing subprocess tests for JSON-lines dispatch, recoverable malformed input, rejection of private/evaluator method names, completion-only artifact export, and identical replay files from the same script/seed.
+- [x] Run `python3 -m unittest discover -s tests/lightlag -v` and confirm the new failures.
+- [x] Implement an allowlisted JSON-lines CLI, evaluator replay with initial/per-tick truth and sent commands, and a runnable sample script. Reject nonfinite JSON numbers and invalid argument types without terminating the session. Do not export a partial episode as a final result.
+- [x] Smoke test the documented command:
 
   ```sh
   python3 -m lightlag --seed 7 --delay 3 --ticks 20 --replay /tmp/lightlag-replay.json --result /tmp/lightlag-result.json < lightlag/examples/return_to_base.jsonl
@@ -67,6 +67,6 @@ Files: `lightlag/__main__.py`, `lightlag/README.md`, `lightlag/examples/return_t
   git diff --check
   ```
 
-- [ ] Review the final API and artifacts; document verified results, simplifications and next task scopes. Mark the claim complete for this slice, fetch/integrate, push, and confirm `HEAD` equals `origin/main`.
+- [x] Review the final API and artifacts; document verified results, simplifications and next task scopes. Independent final review and 34 tests passed; documented CLI returns raw score 1.0. Completion publishes the handoff and releases the slice claim after final sync.
 
 No model benchmark, reference quality, security isolation or final project selection is claimed by completion of this plan.
