@@ -20,9 +20,9 @@ All policy state is fresh for each episode. No policy is told a seed or allowed 
 
 The reference reads the public map, rule family and initial briefing. Start terrain-slip estimates at the midpoint of the published ranges. From received drive telemetry, estimate slip using wheel and visual distance only when the observed leg is entirely on one terrain and has no safety stop or energy truncation. Learn from ordinary useful movement first; this version does not require a separate calibration phase. Maintain a deterministic weighted estimate within the published range.
 
-Keep acknowledged command IDs, sent ticks and execution ticks. Anchor the model at the most recent received state and replay still-unobserved commands up to the next command's execution slot. Include idle energy, terrain-dependent wheel energy and estimated sampling outcomes. Reconcile with actual telemetry when it arrives. On an observed safety stop, cancel only commands that had already been sent before that stop; retain later uplinks and the public reserved schedule.
+Keep acknowledged command IDs, sent ticks and execution ticks. Process every newly received packet for learning and safety events, then anchor the model at the most recent received state and replay still-unobserved commands up to the next command's execution slot. Include idle energy, terrain-dependent wheel energy and estimated sampling outcomes. Reconcile with actual telemetry when it arrives. On an observed safety stop at state tick `s`, cancel only outstanding commands with `sent_tick < s`; commands sent at `s` or later survive, even if they were sent before the stop telemetry arrived. Retain the public reserved schedule.
 
-Plan routes around visible hazard rectangles with a small safety margin, using a visibility graph or comparably small deterministic path search. Choose useful targets using public values, travel/energy estimates and the cost of returning home. Reserve idle energy through the full horizon, not merely until arrival at base. Use estimated slip to turn geometric distance into wheel distance, obey command limits, and correct from received packets. Near targets/base, aim inside the allowed radius with margin. Stop sending when no safe/feasible target remains, when return is necessary, or when the next execution slot exceeds the horizon.
+Plan routes around visible hazard rectangles with a small safety margin, using a visibility graph or comparably small deterministic path search. Choose useful targets using public values, travel/energy estimates and the cost of returning home. Reserve idle energy through the full horizon, not merely until arrival at base, and retain a strictly positive terminal energy margin. Include unobserved queued actions and avoid double-counting ticks already included in the predicted state. Use estimated slip to turn geometric distance into wheel distance, obey command limits, and correct from received packets. Near targets/base, aim inside the allowed radius with margin. Stop sending when no safe/feasible target remains, when return is necessary, or when the next execution slot exceeds the horizon.
 
 The reference need not be optimal or solve every custom map. It must return useful science reliably on the current map over development seeds at delays 0 and 3, avoid hidden-state access, and handle no targets, low energy, short horizons and an obstructed route without crashing. Report poor performance honestly; do not tune reward/physics to manufacture an ordering.
 
@@ -39,6 +39,8 @@ The reference need not be optimal or solve every custom map. It must return usef
 
 Names must match behavior. The intentionally weaker policies are diagnostic ablations, not frontier models. Do not promise that every policy ordering will hold on every seed.
 
+All surviving policies pay the same full-horizon idle drain. Move-and-wait therefore loses action opportunities before the deadline, not additional total idle energy. If the reference completes the mission before the quarter-horizon cutoff, `stop_early` may legitimately match it; label that probe uninformative rather than calling completed work a reward exploit.
+
 ## Evaluation and artifacts
 
 Provide `python3 -m lightlag.evaluation` with configurable integer seeds, delays, horizon, policy selection and an optional new output directory. Default comparison uses seeds 0–9 and delays 0 and 3 at horizon 80. Reject duplicate policies/seeds/delays and invalid configurations before running. No paid APIs or model credentials are involved.
@@ -48,6 +50,8 @@ Each run records policy, seed, delay, raw reward, sampled value, survival/return
 The optional output directory must not already exist. Write `summary.json`, `scores.csv`, and one unchanged `lightlag-replay-v1` file per policy/seed/delay, plus public-call transcripts if useful for review. A manifest must identify the experiment configuration and simulator version. Deterministic inputs must yield deterministic scientific results; omit elapsed time from equality-sensitive results. Never overwrite earlier experiments.
 
 After freezing the implementation, run a separate check on seeds 100–109 and report it separately from development seeds. This is a smoke test of generalization across hidden slip/noise on one fixed map, not a held-out map benchmark. If those results motivate changes, label subsequent runs as development rather than continuing to call them untouched holdout results.
+
+Shared seeds preserve terrain coefficients and the temporal noise field. Because drive noise is keyed by execution tick, changing policy timing or delay changes which noise each drive encounters. Describe the experiment as paired-seed policy comparisons, not perfect isolation of delay from realized action noise.
 
 ## Acceptance and handoff
 

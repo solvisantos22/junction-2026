@@ -14,8 +14,8 @@
 
 Files: `lightlag/controllers/__init__.py`, `lightlag/controllers/api.py`, `lightlag/controllers/baselines.py`, `lightlag/evaluation.py`, `tests/lightlag/test_evaluation.py`.
 
-- [ ] Write failing tests for public-only policy access, fresh isolated episodes, early return still consuming the full horizon, visible policy failures, transcript copy isolation and deterministic output.
-- [ ] Implement the five-callback `PublicTools` object, `do_nothing`, and evaluator-owned `run_episode`. The intended usage is:
+- [x] Write failing tests for public-only policy access, fresh isolated episodes, early return still consuming the full horizon, visible policy failures, transcript copy isolation and deterministic output.
+- [x] Implement the five-callback `PublicTools` object, `do_nothing`, and evaluator-owned `run_episode`. The intended usage is:
 
   ```python
   from lightlag import Config
@@ -28,7 +28,7 @@ Files: `lightlag/controllers/__init__.py`, `lightlag/controllers/api.py`, `light
   assert len(run["replay"]["states"]) == 81
   ```
 
-- [ ] Confirm red then green with `python3 -m unittest discover -s tests/lightlag -v`. Self-review, then independent spec and quality reviews. Root agent commits/pushes after fetching/integrating teammates' work; implementation agents do not change Git state.
+- [x] Confirm red then green with `python3 -m unittest discover -s tests/lightlag -v`. Self-review, then independent spec and quality reviews. All 47 tests passed. Review fixes prevent caught invalid calls (including argument-binding errors) from silently receiving benchmark scores. Root agent commits/pushes after fetching/integrating teammates' work; implementation agents do not change Git state.
 
 ## Task 2 — Reference and diagnostic controllers
 

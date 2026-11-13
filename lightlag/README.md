@@ -68,13 +68,28 @@ Use `{"action": "sample"}` to collect the nearest unsampled target within 0.75 m
 
 `env.replay()` is also evaluator-only and requires completion. There is no normalized score yet: a valid, nonzero reference score is required before introducing reference normalization.
 
+### Run a policy through public tools
+
+Evaluator code can run a callable without handing it the simulator or hidden seed:
+
+```python
+from lightlag.controllers.baselines import do_nothing
+from lightlag.evaluation import run_episode
+
+run = run_episode(do_nothing, seed=7, policy_name="do_nothing")
+print(run["result"])      # Scored at tick 80, even though this policy returns immediately.
+print(run["tool_calls"])  # Policy and evaluator calls are counted separately.
+```
+
+A policy receives only `rules`, `map`, `telemetry_log`, `uplink` and `advance` callbacks. Each run starts fresh and returns the final result, existing replay format and a copied public-call transcript. When a policy returns early, the evaluator advances the remaining horizon: queued commands still execute and idle energy still drains. Policy exceptions and invalid actions propagate as execution errors, not benchmark scores. This interface is for auditable trusted controllers; it is not a Python security sandbox.
+
 ## Verification and limits
 
 ```sh
 python3 -m unittest discover -s tests/lightlag -v
 ```
 
-The current 34 tests cover timing, independent seeded episodes, energy, invalid requests, copy isolation, safety, true-state scoring, CLI recovery and deterministic replay. Tests use only the standard library.
+The tests cover timing, independent seeded episodes, energy, invalid requests, copy isolation, safety, true-state scoring, CLI recovery, deterministic replay and public-tool episode execution. Tests use only the standard library.
 
 This pilot has one fixed flat map, two terrain types, constant per-terrain slip with per-drive noise, and exact visual odometry. Slopes, embedding, noisy odometry, map generation, baseline/reference controllers, HTTP/MCP, Harbor deployment and real agent evaluation remain follow-up work. The [design decisions](../docs/superpowers/specs/2026-11-13-lightlag-core-design.md) explain those choices. No project selection or benchmark difficulty claim follows from this implementation.
 
