@@ -7,6 +7,7 @@
 - Side by side with the team's notes
 - The team's round-two ideas: our read
 - Lightlag vs Bazaar vs Brewmaster: comparison and recommendation
+- Harbor tool access: can the agent's own code call the simulator? (Yes; design for it)
 - Lightlag deep dive: spec, reference, reward, fairness experiments, pilot plan
 - Bazaar deep dive: evidence for and against a gap, spec, reference, reward, pilot plan
 - Brewmaster deep dive: the reactor setting, built on a published beer fermentation model
@@ -127,7 +128,7 @@ The team's reviewer then re-scored all three sources on one scale (`afterquery-i
 - **Agreed: three sessions converged.** Our Pilot Plant ID combination, the round-two Brewmaster and the reviewer's "BatchPilot plus test batches" are the same environment. Deep dives for all three settings: "Lightlag deep dive", "Bazaar deep dive", "Brewmaster deep dive".
 - **Agreed: our gap scores assumed too little.** They were gut scores written before we assumed the agent has a shell. We have kept our own numbers so the history stays readable, but the reviewer's table is the better guide to "with shell" gaps.
 - **Partly disagreed: Python doesn't remove every habit.** The review's main argument is that Python access removes older models' habits. The literature in "Related research" supports that for *computing* (fitting, searching, simulating) but not for *deciding*: NewtonBench found a code interpreter made strong models stop exploring too early, and Causal Discovery Bench found that tools help with inference while 94.5% of mistakes stay in experiment design, and more budget doesn't fix it. So "a menu of terms plus Python is a regression script" (its verdict on Alien Physics Lab) holds only if the experiments that feed the regression are good. That is the same reason the converged mechanic works: its difficulty is choosing tests and committing, not computing.
-- **The deciding question, can the agent's code call the tools?** Three answers: check in Harbor whether the simulator can be reached only through the model's tool calls; design so it matters less, by putting the difficulty in budgeted, irreversible choices a loop can't undo (Brewmaster's tests, Lightlag's calibration); and measure it, by piloting with code access allowed, as the review recommends.
+- **The deciding question, can the agent's code call the tools?** Three answers: check in Harbor whether the simulator can be reached only through the model's tool calls; design so it matters less, by putting the difficulty in budgeted, irreversible choices a loop can't undo (Brewmaster's tests, Lightlag's calibration); and measure it, by piloting with code access allowed, as the review recommends. **Since answered from Harbor's docs: yes, the agent's code can call the tools** ("Harbor tool access"), so the second and third answers are the ones that matter.
 - **Its "best unwritten idea" is ours:** epidemic control with delayed interventions, from our raw ideas list. Of its new settings, **Fishery** (quotas set from old, noisy surveys; overfishing collapses the stock for good) has the strongest built-in irreversibility.
 
 ### Idea by idea
@@ -176,7 +177,7 @@ The team's reviewer then re-scored all three sources on one scale (`afterquery-i
 - Forecasting Arena re-scored; Cipher Lab, Alien Physics Lab and Patch Under Fire checked against the literature (see their notes).
 
 ### Questions for the team
-- Does the judges' harness give the agent a shell? The research and the reviewer both assume so. If not, much of the gap analysis changes.
+- Does the judges' harness give the agent a shell? Harbor's OpenCode integration says yes: OpenCode runs inside the task container with permission prompts switched off ("Harbor tool access"). Still worth confirming with the event's starter kit.
 - Lightlag: constant delay (cleaner ablation) or random delay with a published distribution (harder)?
 - Has the bare Lightlag loop with three agent runs been tried yet? It decides between Lightlag and Bazaar.
 
@@ -187,6 +188,8 @@ The three settings the team's second review ranks level, compared side by side u
 ### Recommendation in one paragraph
 
 **Pilot Brewmaster and Lightlag in parallel (half a day each), keep Bazaar as the fallback, and let one fact decide between the first two: can the agent's own code call the environment's tools?** If it can, Brewmaster is the safer bet, because its decisive choices (which tests to run, which profile to commit to) can't be undone by a script running a loop. If the simulator can be reached only through the model's own tool calls, Lightlag's per-step driving becomes a genuine test of the model, and its demo and novelty make it the stronger entry. If both pilots show the agent matching the reference, build Bazaar, the cheapest to build.
+
+**Update, late on 13 November: the deciding question is answered** in "Harbor tool access". Harbor's docs and its OpenCode integration say the agent's own code can call the simulator: OpenCode runs inside the task container and reaches MCP servers over the same network its shell uses. By the rule above this favours Brewmaster, but not decisively. The team has already started a Lightlag prototype whose contract enforces every rule in the simulator, which is exactly what code access requires. So run the Lightlag pilot with code access allowed, and keep Brewmaster ready in case the gap disappears.
 
 ### Against the judging rubric
 
@@ -229,15 +232,70 @@ The team reviewer's scores (gap shown as "agent has a shell / no shell") with ou
 
 ### A plan for the day
 
-1. **First hour, all together:** answer the deciding question in Harbor (can scripts reach the simulator?) and agree on the reward contract each pilot will use: do-nothing scores 0 and the reference sets 1.
+1. **First hour, all together:** confirm the deciding question by hand with the starter kit (the docs say scripts can reach the simulator; see "Harbor tool access" for a 10-minute check) and agree on the reward contract each pilot will use: do-nothing scores 0 and the reference sets 1.
 2. **Morning, in parallel** (one possible split): Manh builds the bare Brewmaster simulator (the printed equations, heat balance, jacket delay) with the thermostat baseline and the reference; Sölvi and Kristján build the bare Lightlag loop with the move-and-wait baseline and the reference.
 3. **Midday:** three real agent runs on each, with code access allowed. Apply each deep dive's go/no-go rule.
 4. **Afternoon:** commit to the one with the larger gap you can *explain*, and update the saved "Lightlag" draft if the setting changes. Bazaar only if both fail.
 
 ### Open questions this comparison can't settle
-- The tool-access question in Harbor decides a lot and is cheap to answer; nobody has checked it yet.
+- The tool-access question in Harbor is answered from the docs (yes, scripts can call the simulator) but not yet tested by hand; see "Harbor tool access".
 - Is the judges' "stronger reference run" expected to be a person, an algorithm or a stronger agent? All three plans assume an algorithm.
 - How much does the demo weigh against the rubric? Lightlag wins the demo; Brewmaster wins integrity.
+
+## Harbor tool access
+
+The team's second review and "Lightlag vs Bazaar vs Brewmaster" both hinge on one question: in Harbor with OpenCode, can scripts the agent writes call the environment's simulator directly, or only the model's own tool calls? This note answers it from Harbor's documentation and its OpenCode integration code, read on 13 November. **Nothing here has been tested hands-on yet**; the last section lists a 10-minute check for the starter kit.
+
+### The answer
+
+**Yes: assume the agent's own code can call the simulator.** OpenCode runs inside the task container with permission prompts switched off, and it reaches MCP servers over the same container network that its shell commands use. Nothing in Harbor tells a model's tool call apart from a `curl` or Python script sending the same request. The agent also has a shell, which answers the team's other open question.
+
+This doesn't force a change of idea. It means **every rule has to be enforced inside the simulator**, so a script gets the same budget, clock and information as the model and only computes faster. The team's Lightlag contract already works this way. The difficulty then has to come from what to learn and when to commit, not from computing.
+
+### The evidence
+
+| What we checked | What Harbor says or does | What it means |
+|---|---|---|
+| **Where OpenCode runs** | Installed agents such as OpenCode and Claude Code are installed into the task container and run there. Harbor's integration launches OpenCode with `--dangerously-skip-permissions` (v1) or `--auto` (v2) | Its shell commands run in the same container as its MCP client, without approval prompts. The agent has a shell |
+| **How MCP tools are reached** | MCP servers are declared under `[[environment.mcp_servers]]` in `task.toml` and run as Docker Compose sidecars. Sidecars share a network with the agent's `main` container and are reached by service name, for example `http://mcp-server:8000/mcp` | Any process in `main` can send the same requests. Streamable-HTTP MCP is JSON over HTTP POST, so a few lines of curl or Python can do it |
+| **Access tokens** | MCP headers such as `Authorization = "Bearer ${MCP_TOKEN}"` are supported. Harbor's OpenCode v1 integration doesn't forward headers at all; the v2 integration passes their values as environment variables of the OpenCode process | A token can't tell the model from its scripts: shell commands normally inherit the parent's environment (likely, not tested). With OpenCode v1 a token-protected server wouldn't even work |
+| **Network policy** | `network_mode` and `allowed_hosts` apply per sandbox and per phase (`[environment]`, `[agent]`, `[verifier]`), not per process. For Compose on Modal, the docs say "internal connectivity remains available" | No switch separates the model from its scripts. Cutting the sidecar off would cut OpenCode's own MCP client too |
+| **Harbor's own stance** | "Harbor treats tools as part of the agent." An agent inside the environment "can use any tools"; only an agent running outside it is limited to Harbor's basic environment commands | A model-only route would need an agent running outside the container. The event's OpenCode setup isn't one |
+| **The verifier** | By default the verifier runs in the agent's environment after the agent finishes, and `tests/` is uploaded only then. A separate verifier gets a fresh copy and sees the agent's work only through declared artifacts | A secret placed in `tests/` (and in the simulator's own image) stays out of the agent's reach during its run. Whether the verifier can reach sidecars isn't documented |
+
+### What this means for the choice
+
+- **Design for code access and say so.** Put it in the public rules ("you may script the tools") and perhaps ship a tiny client. Otherwise some runs find the HTTP route and others don't, which adds run-to-run variance unrelated to the skill being tested. It also matches the review's advice to pilot with code access allowed; the judges' runs will have it anyway.
+- **Enforce every rule in the simulator, never in the interface.** Clock, budget, battery, delays and test counts live in the sidecar. Then a scripted loop has nothing the model lacks except speed and precision.
+- **By the rule in "Lightlag vs Bazaar vs Brewmaster", this favours Brewmaster.** Its decisive choices (which tests to run, which profile to commit to) are spent once, so a loop can't undo them. But it isn't decisive on its own: the measured gap with code access allowed decides. Lightlag stays viable if its gap comes from learning the slip and choosing when to calibrate, not from the delay itself.
+
+### What it means for the Lightlag slice now being built
+
+The team has a provisional simulator contract (`docs/superpowers/specs/2026-11-13-lightlag-core-design.md`, 23:50) and has claimed the first slice. It already enforces the rules in the simulator: only `advance` moves time, uplinks are validated, evaluator methods can't be dispatched, and hidden state never appears in tool results. Its own boundary note says a separate simulator container and a restricted HTTP/MCP adapter are needed before benchmark claims; the points below are for whoever takes that adapter.
+
+- **Delay compensation will be scripted.** A loop that calls `advance(1)` each tick and replays the commands still in transit is a few dozen lines, so expect a script to match the reference's driving. The gap has to come from the slip and the choices.
+- **Exact visual odometry gives the slip away.** Packets carry wheel and visual odometry, and visual odometry is exact in this slice (a stated simplification). One short sand drive therefore reveals the sand slip to within the ±0.02 per-drive noise as soon as its telemetry arrives. With slip ranges of [0, 0.05] and [0.20, 0.45], little is left to learn. That's fine for a first slice; before the pilot claims a gap, add noisy odometry (already listed as a later experiment), wider ranges or slope-dependent slip.
+- **Adapter red-team list:**
+  1. **One episode per container**, seed fixed at start, and no reset or new-episode route. Otherwise a script can rehearse the same seed for free and learn the slip exactly.
+  2. **No evaluator route for the agent.** The verifier calls scoring with a secret that lives only in the simulator's image and in `tests/`, which Harbor uploads after the agent's run.
+  3. **Serialize calls.** Scripts can send requests in parallel, so guard the simulation with a lock.
+  4. **Run the clock out before scoring.** The contract scores only at the horizon; the verifier should advance any remaining ticks itself, so an agent that stops early still gets a defined score and stopping early never pays.
+  5. **Freeze the simulator when verification starts.** In the default shared mode, a background script the agent left running could keep calling the simulator during verification.
+  6. **Keep truth out of `main`.** No replay files, seeds or parameters in the agent's container; the contract already requires this.
+
+### Check by hand with the starter kit (about 10 minutes)
+
+1. In a test task with an MCP sidecar, have the agent's shell POST an MCP `initialize` and a `tools/call` to the sidecar URL with curl. Expected: it works.
+2. Run `env` in the agent's shell. Is an MCP header token visible?
+3. Can the verifier reach the sidecar, in shared and in separate mode?
+4. Which OpenCode version does the event use (v1 drops MCP headers)?
+5. On the event's provider, does `[agent] network_mode = "allowlist"` with no hosts cut the sidecar? If it does, it also cuts OpenCode's MCP client.
+
+### Sources
+
+- Harbor docs: [Task environment and MCP servers](https://docs.harborframework.com/tasks/environment) · [Multi-container tasks](https://docs.harborframework.com/tasks/multi-container) · [Network policies](https://docs.harborframework.com/tasks/network-policies) · [Verifier](https://docs.harborframework.com/tasks/verifier) · [Separate verifier](https://docs.harborframework.com/tasks/separate-verifier) · [Pre-integrated agents](https://docs.harborframework.com/agents/pre-integrated-agents)
+- Harbor source, OpenCode integration: [opencode.py](https://github.com/harbor-framework/harbor/blob/main/src/harbor/agents/installed/opencode.py) · [opencode_v2.py](https://github.com/harbor-framework/harbor/blob/main/src/harbor/agents/installed/opencode_v2.py) (main branch, read 13 November)
+- OpenCode's MCP configuration: [opencode.ai/docs/mcp-servers](https://opencode.ai/docs/mcp-servers)
 
 ## Lightlag deep dive
 
@@ -1475,10 +1533,10 @@ Please:
 
 ## Open questions
 
-- The research points to Harbor + OpenCode over MCP. What exactly does the event's starter kit contain (task format, verifier setup, time limits)?
+- The research points to Harbor + OpenCode over MCP. What exactly does the event's starter kit contain (task format, verifier setup, time limits)? Use it to run the 10-minute tool-access check in "Harbor tool access".
 - Which frontier model will the judges run, and how many credits do we get?
 - Which 2–3 ideas do we pilot first to measure a real gap? No gap is proven for any idea yet.
-- Does the agent get a shell in the judges' harness? The team's research and the round-two reviewer both assume so; much of the gap analysis depends on it.
+- Does the agent get a shell in the judges' harness? Harbor's docs and OpenCode integration say yes, and its scripts can call the simulator too (see "Harbor tool access"); not yet tested by hand.
 - Cipher Lab still ranks first here, but nothing published tests its real question. Is it worth a quick pilot next to Lightlag?
 - Lightlag: constant delay (cleaner ablation) or random delay with a published distribution (harder)?
 - BatchPilot: which process exactly (exothermic reactor, fermentation, crystallization cooling)?
