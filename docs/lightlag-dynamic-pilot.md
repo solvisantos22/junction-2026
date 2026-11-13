@@ -62,7 +62,7 @@ What this adds:
 - **This pilot's reference is a stand-in and not optimal.** On the simulator's map with deadlines the blind plan beats it (120% at delay 3), because it stops to confirm the sand target before sampling.
 - **The `rush` ranges and the fixed-map deadlines are hand-set difficulty dials.** `rush` was designed once and then checked on untouched seeds, not tuned per seed.
 - **Exact visual odometry still makes slip easy to learn.**
-- **20–40 seeds per row.** Differences of a few percent are noise.
+- **20–40 seeds per row.** Differences of a few percent are noise. Seed sets used: development 0–19, untouched check 100–139. Sölvi's frozen comparison uses 200–209 for its own check, so pick fresh seeds outside these for new checks.
 - **`DynamicEnvironment` uses private hooks of `lightlag.Environment`** (`_sample`, `_snapshot` and a few fields); a test guards them.
 
 ## Suggested next steps

@@ -300,7 +300,7 @@ The team has a provisional simulator contract (`docs/superpowers/specs/2026-11-1
 
 ## Dynamic pilot: varying samples in Lightlag
 
-The team's Lightlag simulator has three fixed targets and plenty of time, and on it the delay barely matters (see "Lightlag deep dive" and the team's own pilot). This pilot tests the "varying samples" idea: targets with deadlines, new targets discovered mid-mission, a fresh map every seed, and a time-pressured profile. **The code is local for now.** It sits in Manh's brainstorm folder (`Pilot/`, run instructions in `Pilot/README.md`), runs against the team's simulator without changing it, and hasn't been pushed to the repository yet. The plan is to publish it as `lightlag_dynamic/` with a claim row once Manh approves.
+The team's Lightlag simulator has three fixed targets and plenty of time, and on it the delay barely matters (see "Lightlag deep dive" and the team's own pilot). This pilot tests the "varying samples" idea: targets with deadlines, new targets discovered mid-mission, a fresh map every seed, and a time-pressured profile. **The code is in the team repository** as `lightlag_dynamic/` (pushed in 3d70374, claimed in `TEAM_STATUS.md`), with tests in `tests/lightlag_dynamic/` and the full results in `docs/lightlag-dynamic-pilot.md`. It runs on the team's simulator without changing it. Run instructions are in `lightlag_dynamic/README.md`.
 
 **No real agent has been run.** Every number compares scripted controllers; it shows how the environment behaves, not whether a frontier agent struggles.
 
