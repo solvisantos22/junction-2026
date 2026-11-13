@@ -16,8 +16,15 @@ from .environment import Environment
 from .model import Config
 
 
-def run_episode(policy, seed=0, config=None, world=None, policy_name=None):
+def run_episode(policy, seed=0, config=None, world=None, policy_name=None,
+                environment_factory=None):
     """Run one policy through public tools, then finish and grade the episode.
+
+    A trusted ``environment_factory`` receives ``seed`` and deep-copied
+    ``config``/``world`` keywords and must return a fresh environment with the
+    five public methods plus ``evaluate``/``replay``. When omitted or ``None``,
+    the module's ``Environment`` is resolved at call time. Policies receive
+    only the public callbacks, never the factory or environment.
 
     Exceptions propagate to the caller: an invalid action or broken policy is
     an execution failure, not a benchmark score. A policy that catches a tool
@@ -26,7 +33,8 @@ def run_episode(policy, seed=0, config=None, world=None, policy_name=None):
     distinguishes policy calls from the evaluator's initial rules read and
     any advances needed after the policy returns.
     """
-    env = Environment(seed=seed, config=deepcopy(config), world=deepcopy(world))
+    factory = Environment if environment_factory is None else environment_factory
+    env = factory(seed=seed, config=deepcopy(config), world=deepcopy(world))
     transcript = []
     tool_names = ("rules", "map", "telemetry_log", "uplink", "advance")
     methods = {name: getattr(env, name) for name in tool_names}

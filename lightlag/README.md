@@ -83,6 +83,25 @@ print(run["tool_calls"])  # Policy and evaluator calls are counted separately.
 
 A policy receives only `rules`, `map`, `telemetry_log`, `uplink` and `advance` callbacks. Each run starts fresh and returns the final result, existing replay format and a copied public-call transcript. When a policy returns early, the evaluator advances the remaining horizon: queued commands still execute and idle energy still drains. Policy exceptions and invalid actions propagate as execution errors, not benchmark scores. This interface is for auditable trusted controllers; it is not a Python security sandbox.
 
+Trusted evaluator code can construct a different compatible episode with `environment_factory`. The factory receives `seed`, deep-copied `config` and deep-copied `world` keywords; it must return a fresh environment. For example, Manh's dynamic pilot can use the same runner without replacing a module global:
+
+```python
+from lightlag import Config
+from lightlag.evaluation import run_episode
+from lightlag_dynamic.controllers import POLICIES as DYNAMIC_POLICIES
+from lightlag_dynamic.environment import DynamicEnvironment
+
+def rush_episode(*, seed, config, world):
+    return DynamicEnvironment(seed=seed, config=config, profile="rush")
+
+run = run_episode(DYNAMIC_POLICIES["reference"], seed=3,
+                  config=Config(delay_ticks=3, max_ticks=50),
+                  environment_factory=rush_episode)
+print(run["result"])
+```
+
+The factory stays on the evaluator side, and the policy still receives only the five callbacks. Horizon completion follows the constructed episode's public rules; factory errors propagate before policy execution. Omitting the factory preserves the existing default environment. This hook does not change `run_comparison` or the CLI's fixed-map experiment contract, and it does not choose a dynamic profile for the team.
+
 ### Conservative reference and diagnostic policies
 
 ```python

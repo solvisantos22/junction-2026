@@ -259,6 +259,124 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(run, before)
 
 
+class EnvironmentFactoryTests(unittest.TestCase):
+    def test_explicit_environment_matches_the_default_episode(self):
+        def drive_and_sample(tools):
+            tools.uplink([
+                {"action": "drive", "heading_deg": 0, "metres": 1},
+                {"action": "sample"},
+                {"action": "drive", "heading_deg": 180, "metres": 1},
+            ])
+            tools.advance(3)
+
+        config = Config(delay_ticks=0, max_ticks=6)
+        world = World(targets=(Target("near", 21, 20, 2),))
+        default = run_episode(drive_and_sample, 7, config, world, "collect")
+        explicit = run_episode(drive_and_sample, 7, config, world, "collect",
+                               environment_factory=Environment)
+        self.assertEqual(default, explicit)
+        self.assertEqual(explicit["result"]["raw_score"], 2)
+        self.assertEqual(len(explicit["replay"]["commands"]), 3)
+
+    def test_factory_receives_seed_and_deep_copied_inputs_by_keyword(self):
+        config = {"options": {"delay_ticks": 0, "max_ticks": 2}}
+        world = {"targets": [Target("home", 20, 20)]}
+        before = copy.deepcopy((config, world))
+        received = []
+
+        def build(*, seed, config, world):
+            received.append((seed, config, world))
+            config["options"]["max_ticks"] = 3
+            world["targets"].append(Target("far", 25, 20))
+            return Environment(seed=seed, config=Config(**config["options"]),
+                               world=World(targets=world["targets"]))
+
+        run = run_episode(do_nothing, seed=5, config=config, world=world,
+                          environment_factory=build)
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0][0], 5)
+        self.assertEqual((config, world), before)
+        self.assertEqual(run["result"]["tick"], 3)
+        self.assertEqual(len(run["replay"]["world"]["targets"]), 2)
+
+    def test_falsey_factory_preserves_public_tools_and_its_full_horizon(self):
+        class FalseyFactory:
+            def __bool__(self):
+                return False
+
+            def __call__(self, *, seed, config, world):
+                return Environment(seed=seed, world=world,
+                                   config=Config(delay_ticks=0, max_ticks=4,
+                                                 initial_battery=4))
+
+        def sample_and_return(tools):
+            self.assertIsInstance(tools, PublicTools)
+            self.assertEqual({name for name in dir(tools) if not name.startswith("_")},
+                             TOOL_NAMES)
+            self.assertEqual(tools.rules()["max_ticks"], 4)
+            self.assertEqual(tools.map()["targets"][0]["id"], "home")
+            self.assertEqual(tools.telemetry_log()[0]["tick"], 0)
+            tools.uplink([{"action": "sample"}])
+            self.assertEqual(tools.advance()["current_tick"], 1)
+
+        run = run_episode(sample_and_return, config=Config(max_ticks=1),
+                          world=World(targets=(Target("home", 20, 20, 2),)),
+                          environment_factory=FalseyFactory())
+        self.assertEqual(run["result"]["tick"], 4)
+        self.assertEqual(run["result"]["sampled_value"], 2)
+        self.assertFalse(run["result"]["alive"])
+        self.assertEqual(run["result"]["raw_score"], 0)
+        self.assertEqual(len(run["replay"]["states"]), 5)
+        self.assertEqual(run["tool_calls"]["by_tool"]["policy"],
+                         {name: 1 for name in TOOL_NAMES})
+        self.assertEqual(run["transcript"][-1]["source"], "evaluator")
+        self.assertEqual(run["transcript"][-1]["request"], {"ticks": 3})
+
+    def test_factory_errors_propagate_before_policy_execution(self):
+        policy_calls = []
+        failure = RuntimeError("factory failed deliberately")
+
+        def broken(*, seed, config, world):
+            raise failure
+
+        def policy(tools):
+            policy_calls.append(tools)
+
+        with self.assertRaises(RuntimeError) as caught:
+            run_episode(policy, environment_factory=broken)
+        self.assertIs(caught.exception, failure)
+        with self.assertRaisesRegex(TypeError, "'bool' object is not callable"):
+            run_episode(policy, environment_factory=False)
+        self.assertEqual(policy_calls, [])
+
+    def test_default_factory_resolves_the_module_environment_at_call_time(self):
+        def build(*, seed, config, world):
+            return Environment(seed=seed, config=Config(max_ticks=4), world=world)
+
+        with patch.object(evaluation, "Environment", build):
+            default = run_episode(do_nothing, config=Config(max_ticks=1),
+                                  environment_factory=None)
+            explicit = run_episode(do_nothing, config=Config(max_ticks=1),
+                                   environment_factory=Environment)
+        self.assertEqual(default["result"]["tick"], 4)
+        self.assertEqual(explicit["result"]["tick"], 1)
+
+    def test_dynamic_factory_agrees_with_the_pilot_runner(self):
+        from lightlag_dynamic.controllers import POLICIES as dynamic_policies
+        from lightlag_dynamic.environment import DynamicEnvironment
+        from lightlag_dynamic.tools import run_episode as run_dynamic_episode
+
+        def build(*, seed, config, world):
+            return DynamicEnvironment(seed=seed, config=config, profile="rush")
+
+        policy = dynamic_policies["reference"]
+        shared = run_episode(policy, seed=3, config=Config(delay_ticks=3, max_ticks=50),
+                             environment_factory=build)
+        pilot = run_dynamic_episode(policy, seed=3, delay=3, profile="rush", keep_replay=True)
+        self.assertEqual(shared["result"], pilot["result"])
+        self.assertEqual(shared["replay"], pilot["replay"])
+
+
 class ComparisonTests(unittest.TestCase):
     @staticmethod
     def collect_west(tools):
