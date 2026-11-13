@@ -2,6 +2,8 @@
 
 Checked Friday 13 November, approximately 22:10 Helsinki, against all 20 Developer Tools and Assets entries and all 19 Tech Challenges on the logged-in Junction platform. Offers can change. This is research: no credits redeemed, accounts created or prize entries submitted.
 
+**Update, Saturday 14 November at 01:35 Helsinki:** Ved announced that **AfterQuery will not supply inference credits**. Harbor packaging, a 0–1 text reward and at least one scored Harbor model run are now explicit. See the [announcement and Lightlag implications](docs/afterquery-update-2026-11-14.md). Other sponsor rows below retain their Friday verification date; they are not confirmation of a redeemed balance.
+
 ## Recommendation for our AfterQuery project
 
 **Start with AfterQuery + Best Use of Codex + one compute provider.** Modal is my initial preference for a deployed evaluation/demo; Verda is particularly attractive if we reach the optional model-training stretch. Add a model prize only when that model does useful, visible work in the project.
@@ -30,7 +32,7 @@ These are fit judgments, not confirmed eligibility decisions or estimates of win
 
 | Provider | Offer / access | Application to AfterQuery |
 |---|---|---|
-| [AfterQuery](https://hackjunction.app/participate/45/challenges/328) | Harbor + OpenCode harness over MCP, scoring skeleton, frontier API credits, mentors | **First dependency to obtain.** Exact starter-kit URL and model/budget need mentor confirmation. |
+| [AfterQuery](https://hackjunction.app/participate/45/challenges/328) | Harbor required; OpenCode encouraged; mentors. **No inference credits**, per Ved's Saturday 01:35 update. Upstream Harbor link supplied; no separate event starter kit in those posts. | Package the environment and obtain a scored model run. Confirm judging model/budget and source API access elsewhere. [Update](docs/afterquery-update-2026-11-14.md) |
 | [OpenAI](https://hackjunction.app/participate/45/hackerpacks/70) | **$100 / 2,500 Codex usage credits per participant**, 30 days after redemption, one-use personal link; works on Free accounts | Development tooling. **This offer excludes API credits and a paid subscription.** Separate from the prize above. |
 | [Google DeepMind](https://hackjunction.app/participate/45/hackerpacks/68) | Gemini API credits; amount not specified. [Apply once per team](https://forms.gle/bByXvjGkW9WZuYwW9). Challenge page says up to **400 teams**, participants 18+ | Apply early if Gemini is a serious option. Access instructions are supplied to eligible teams. |
 | [Anthropic](https://hackjunction.app/participate/45/hackerpacks/67) | **$20 Claude API credits per participant**; redemption link in the resource entry | Development evaluations or additional model comparisons, subject to AfterQuery harness rules. |
@@ -70,7 +72,7 @@ These are fit judgments, not confirmed eligibility decisions or estimates of win
 
 ## Tonight's actions
 
-1. Obtain AfterQuery's actual starter kit, model credits and required evaluation settings from its mentors.
+1. Follow [Ved's updated Harbor contract](docs/afterquery-update-2026-11-14.md), confirm the required evaluation settings with mentors, and secure API access from another provider; AfterQuery has withdrawn its inference-credit offer.
 2. If interested, have one teammate request Gemini credits promptly; places are limited to 400 teams. Each teammate can inspect their personal Codex offer.
 3. Pick one environment first, then choose Modal or Verda based on the compute we actually need. Keep a second model prize conditional.
 4. For NVIDIA, ask which hosted endpoint serves the **required Super VL model**; the example model mismatch needs clarification.
