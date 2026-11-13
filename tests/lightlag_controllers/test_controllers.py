@@ -252,6 +252,19 @@ class ClosedLoop(unittest.TestCase):
         self.assertEqual(first["target_id"], "east")
         self.assertEqual(outcome["raw_score"], outcome["max_value"])
 
+    def test_controllers_run_as_policies_in_the_team_evaluation_runner(self):
+        """Same score through lightlag.evaluation.run_episode, with no rejected request."""
+        from lightlag.evaluation import run_episode as team_run_episode
+        from lightlag_controllers import ALL_STRATEGIES, as_policy
+
+        for strategy in ALL_STRATEGIES:
+            report = team_run_episode(as_policy(strategy), seed=3, config=Config(delay_ticks=3))
+            mine, _, _ = episode(strategy, seed=3, delay=3)
+            self.assertEqual(report["policy"], strategy.name)
+            self.assertEqual(report["result"]["raw_score"], mine["raw_score"], strategy.name)
+            self.assertEqual(mine["rejected_uplinks"], 0, strategy.name)
+            self.assertFalse([r for r in report["transcript"] if "error" in r], strategy.name)
+
     def test_safety_stop_cancels_the_reference_belief_about_queued_commands(self):
         world = SimWorld(
             sand=(), hazards=(SimRect(23, 15, 24, 25),),

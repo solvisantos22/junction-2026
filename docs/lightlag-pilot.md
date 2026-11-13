@@ -10,6 +10,21 @@
 
 Three rule changes together make feedback necessary (the blind plan drops to 68–78% while the reference still gets home every time). They are in [Rule variants](#rule-variants). This needs a decision from whoever owns the simulator rules.
 
+## Overlap with the `lightlag/controllers/` claim
+
+This work was claimed locally at 23:54 on Friday, but the claim could not be pushed until this increment was done. Meanwhile Sölvi's session claimed the same scope at about 00:17 (reference, baselines and an evaluation runner under `lightlag/controllers/` and `lightlag/evaluation.py`). To avoid two references:
+
+- **These controllers already run in that runner.** `lightlag_controllers.as_policy(strategy)` returns a `policy(tools)` callable for `lightlag.evaluation.run_episode`. A test checks all six give the same score there as in this pilot, with no rejected request.
+- **Suggested split:** keep `lightlag/evaluation.py` and `PublicTools` as the evaluator boundary, and use the controllers here as the reference and baselines instead of writing a second set. The team should confirm this before either side builds further.
+
+```python
+from lightlag import Config
+from lightlag.evaluation import run_episode
+from lightlag_controllers import REFERENCE, as_policy
+
+report = run_episode(as_policy(REFERENCE), seed=3, config=Config(delay_ticks=3))
+```
+
 ## Run it
 
 From the repository root, Python 3.9+, no installation:
@@ -17,7 +32,7 @@ From the repository root, Python 3.9+, no installation:
 ```sh
 python3 -m lightlag_controllers.pilot                          # default map, delays 0 and 3, 10 seeds
 python3 -m lightlag_controllers.pilot --maps seeded --seeds 20 --delays 0 3 6
-python3 -m unittest discover -s tests/lightlag_controllers -v  # 24 tests, about 15 seconds
+python3 -m unittest discover -s tests/lightlag_controllers -v  # 25 tests, about 15 seconds
 ```
 
 `--maps seeded` uses 40 × 40 m maps generated per seed in `pilot.py` (three hazards, two sand patches, three targets worth 3, 2 and 1). They are my test maps, not part of the benchmark.
