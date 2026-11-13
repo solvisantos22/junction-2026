@@ -2,6 +2,8 @@
 
 Three teammates work concurrently. Keep `main` current with frequent, small, verified pushes so everyone sees progress promptly.
 
+These instructions apply to every chat, agent and worktree working on this repository. At the start of each new task, reread this file and `TEAM_STATUS.md`; do not rely on an older chat's remembered state. Use `origin/main` and the shared status file to coordinate across chats.
+
 ## Before starting work
 
 - Read `TEAM_STATUS.md`, inspect `git status`, fetch `origin`, and review recent changes on `origin/main`.
