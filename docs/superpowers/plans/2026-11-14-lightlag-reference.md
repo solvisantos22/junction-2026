@@ -58,8 +58,8 @@ Integration adjustment: task 2 is published as `6e580fc` after preserving Kristj
 
 Files: `lightlag/evaluation.py`, `tests/lightlag/test_evaluation.py`, `lightlag/README.md`, `docs/lightlag-reference-results.md`, `docs/lightlag-handoff.md`, README entry, this plan and `TEAM_STATUS.md`.
 
-- [ ] Write failing tests for matrix coverage/order, independent seeds, aggregation, positive/zero/missing reference normalization, repeatable JSON/CSV output, no-overwrite artifact exports and invalid CLI selections. Test a small full CLI matrix through subprocesses.
-- [ ] Implement `run_comparison` and a CLI accepting `--seeds` (default 0–9), `--delays` (default 0 3), `--ticks` (default 80), `--policies` (default all six), and `--output-dir` (optional new directory). Preserve raw per-run data; reference ratios are null if unavailable or denominator zero. Write summary, CSV and unchanged evaluator replay schema for viewer use. Fail visibly on policy errors.
+- [x] Write failing tests for matrix coverage/order, independent seeds, aggregation, positive/zero/missing reference normalization, repeatable JSON/CSV output, no-overwrite artifact exports and invalid CLI selections. Test a small full CLI matrix through subprocesses.
+- [x] Implement `run_comparison` and a CLI accepting `--seeds` (default 0–9), `--delays` (default 0 3), `--ticks` (default 80), `--policies` (default all six), and `--output-dir` (optional new directory). Preserve raw per-run data; reference ratios are null if unavailable or denominator zero. Write summary, CSV and unchanged evaluator replay schema for viewer use. Fail visibly on policy errors. The integrated CLI also offers the six `team_` aliases and explicit reference selection; full episode returns are separate from the compact summary.
 - [ ] Run the full tests, obtain spec/quality review, and verify this concrete invocation with a fresh directory:
 
   ```sh

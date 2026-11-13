@@ -83,7 +83,7 @@ print(run["tool_calls"])  # Policy and evaluator calls are counted separately.
 
 A policy receives only `rules`, `map`, `telemetry_log`, `uplink` and `advance` callbacks. Each run starts fresh and returns the final result, existing replay format and a copied public-call transcript. When a policy returns early, the evaluator advances the remaining horizon: queued commands still execute and idle energy still drains. Policy exceptions and invalid actions propagate as execution errors, not benchmark scores. This interface is for auditable trusted controllers; it is not a Python security sandbox.
 
-### Reference and diagnostic policies
+### Conservative reference and diagnostic policies
 
 ```python
 from lightlag import Config
@@ -106,14 +106,50 @@ print(run["result"])
 
 The reference uses public terrain/hazard geometry, a weighted slip estimate and conservative travel budgeting. It waits for actual sample confirmation before abandoning a target, and can back out of a safety margin after a stop. The planner is greedy and geometrically routes around hazards; it is not an energy-optimal tour solver. On the default development map it chooses the north and west targets and conservatively skips east, so its partial score does not demonstrate a need to learn sand. These policies are diagnostic algorithms; frontier-agent comparison still requires harness integration.
 
+Kristján's independently developed family is in `lightlag_controllers/`. Its `as_policy(strategy)` adapter runs through the same public interface. Further work on the conservative planner above is frozen so the team can concentrate reference improvements in one package. The [pilot](../docs/lightlag-pilot.md) describes the adaptive planner and its separate varied-map experiments.
+
+### Reproducible comparisons and replay exports
+
+Run a small comparison through the shared evaluator:
+
+```sh
+lightlag_batch_parent="$(mktemp -d)"
+python3 -m lightlag.evaluation --seeds 0 1 --delays 0 3 \
+  --policies team_reference team_open_loop_nominal team_move_and_wait \
+  --reference-policy team_reference \
+  --output-dir "$lightlag_batch_parent/comparison"
+```
+
+The CLI defaults to seeds 0–9, delays 0 and 3, horizon 80 and the six local registry names above. It also accepts `team_reference`, `team_move_and_wait`, `team_stale_telemetry`, `team_open_loop_nominal`, `team_stop_early` and `team_no_op`, which wrap the teammate's strategies. Select the denominator explicitly with `--reference-policy`; its default is the local `reference`. The two stop-early policies differ: local stops after one quarter of the horizon, team after tick 5.
+
+Each comparison starts fresh episodes in policy/delay/seed order. It prints a JSON summary and optionally writes `summary.json`, `scores.csv` and evaluator replays into a **new** output directory whose parent exists. Existing paths are rejected before running policies. Invalid inputs, invalid tool calls and policy exceptions fail visibly. A failed policy batch produces no completed experiment exports.
+
+Summary rows retain raw score, sampled value, survival, base status and tool-call counts. Return rate means **alive and at base**. Ratios divide each run's score by the selected reference on the same seed and delay; a zero or absent denominator yields null with a reason. Aggregate ratios are means of defined per-seed ratios, with defined/undefined counts, and may exceed 1. They differ from the ratio of aggregate mean scores used in the older pilot.
+
+The summary records public rules, world, seed/delay selections, horizon, policies and denominator. Replays retain `lightlag-replay-v1`; keep them outside any agent container. No timestamps or timing measurements enter the scientific output. Matching seeds preserve terrain coefficients and the temporal noise field, but different action timing encounters different noise samples.
+
+Programmatic callers can select any named trusted public-tool policies:
+
+```python
+from lightlag.controllers import POLICIES
+from lightlag.evaluation import run_comparison
+
+batch = run_comparison({"reference": POLICIES["reference"],
+                        "nominal": POLICIES["nominal_open_loop"]},
+                       seeds=(0, 1), delays=(0, 3), reference_policy="reference")
+print(batch["summary"]["aggregates"])
+# batch["episodes"] contains full run_episode results, including replays/transcripts.
+```
+
 ## Verification and limits
 
 ```sh
 python3 -m unittest discover -s tests/lightlag -v
+python3 -m unittest discover -s tests/lightlag_controllers -v
 ```
 
 The tests cover timing, independent seeded episodes, energy, invalid requests, copy isolation, safety, true-state scoring, CLI recovery, deterministic replay and public-tool episode execution. Tests use only the standard library.
 
-This pilot has one fixed flat map, two terrain types, constant per-terrain slip with per-drive noise, and exact visual odometry. Slopes, embedding, noisy odometry, map generation, further reference optimization, HTTP/MCP, Harbor deployment and real agent evaluation remain follow-up work. The [simulator design](../docs/superpowers/specs/2026-11-13-lightlag-core-design.md) and [reference design](../docs/superpowers/specs/2026-11-14-lightlag-reference-design.md) explain those choices. No project selection or benchmark difficulty claim follows from this implementation.
+This core has one fixed flat map, two terrain types, constant per-terrain slip with per-drive noise, and exact visual odometry. Teammates have also published a separate [dynamic-rules pilot](../docs/lightlag-dynamic-pilot.md) and an optional [MCP service](../docs/lightlag-mcp.md), which has its own runtime requirements. Those additions do not change the batch CLI's fixed-map defaults. Slopes, embedding, noisy odometry, further reference optimization, Harbor deployment and real agent evaluation remain follow-up work. The [simulator design](../docs/superpowers/specs/2026-11-13-lightlag-core-design.md) and [reference design](../docs/superpowers/specs/2026-11-14-lightlag-reference-design.md) explain those choices. No project selection or benchmark difficulty claim follows from this implementation.
 
 The in-process API and local runner do not isolate hidden state from an agent that can inspect Python, launch options or files. Benchmark deployment needs a separate simulator container, a serialized adapter and evaluator-only access to score/replay. See the team's [Harbor tool-access research](../afterquery-brainstorm.md#harbor-tool-access) and the [handoff](../docs/lightlag-handoff.md).
