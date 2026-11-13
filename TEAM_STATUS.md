@@ -4,8 +4,8 @@ Update and push your claim before substantial work. Use a narrow scope and inclu
 
 | Owner | Work | Scope | Status |
 |---|---|---|---|
-| Sölvi / Codex research lead | AfterQuery literature review and decision synthesis | `docs/research/README.md`, `docs/research/afterquery-research.md`, README link; reviews and pushes research sections | In progress: primary-source research, no project implementation |
-| Codex benchmark researcher | Prior agent environments and long-horizon benchmarks | `docs/research/benchmark-landscape.md` | Complete: source-linked section audited and shared; reviewing companion sections read-only |
+| Sölvi / Codex research lead | AfterQuery literature review and decision synthesis | `docs/research/README.md`, `docs/research/afterquery-research.md`, README link; reviews and pushes research sections | Complete: decision brief and three deep dives published; independent evidence/fairness reviews and link checks passed. No project implementation or measured gap; team choice remains pending. |
+| Codex benchmark researcher | Prior agent environments and long-horizon benchmarks | `docs/research/benchmark-landscape.md` | Complete: section published; companion sections and final synthesis independently reviewed with no outstanding blockers |
 | Codex control researcher | Planning, routing, process control and reference methods | `docs/research/control-and-optimization.md` | Complete: ten source families, limitations and a proposed falsification experiment; independent review found no blockers |
 | Codex evaluation researcher | Reward hacking, fair comparisons and incident recovery | `docs/research/reward-and-evaluation.md` | Complete: source-linked section audited; judging minimum separated from optional internal tests |
 | Sölvi / Codex | Share the frequent-push workflow as a repository skill | `.agents/skills/junction-team-workflow/`, `AGENTS.md`, README link | Complete: shared skill contains the workflow; AGENTS requires it in every repo chat |

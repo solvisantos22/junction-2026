@@ -10,9 +10,9 @@ Published deep dives:
 - [Control, routing and optimization](control-and-optimization.md): successful solver/controller approaches, closest prior art and a proposed early falsification test.
 - [Reward integrity and evaluation](reward-and-evaluation.md): specification gaming, recovery benchmarks, fair comparisons and proposed exploit probes.
 
-The three deep dives and combined recommendation are published. A final independent evidence audit is in progress.
+The three deep dives and combined recommendation are complete and published. Independent reviews checked factual scope, comparison fairness and consistency; local document links and Git whitespace checks pass. Primary-source checks did not include executing external benchmark artifacts. The project decision and a measured agent/reference gap remain pending.
 
-The review covers three independent areas: agent benchmarks and long-horizon environments; planning, routing and process control; reward integrity and evaluation design. Findings are pushed as verified sections are ready, then combined into the decision brief.
+The review covers three independent areas: agent benchmarks and long-horizon environments; planning, routing and process control; reward integrity and evaluation design. Findings were pushed in verified increments, then combined into the decision brief. Additional evidence there covers delayed consequences, supply-chain reliability, failure localization and inference latency.
 
 Evidence standard: use primary papers, official repositories and project documentation; identify model/version and evaluation conditions when citing scores; distinguish measured findings from our proposed applications. Older benchmark failures do not prove that today's frontier models will fail. Search cutoff: 13 November 2026; this is a focused review, not a systematic or exhaustive survey.
 
