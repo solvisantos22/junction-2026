@@ -6,6 +6,7 @@
 - The challenge (original text)
 - Side by side with the team's notes
 - The team's round-two ideas: our read
+- Lightlag vs Bazaar vs Brewmaster: comparison and recommendation
 - Lightlag deep dive: spec, reference, reward, fairness experiments, pilot plan
 - Bazaar deep dive: evidence for and against a gap, spec, reference, reward, pilot plan
 - Brewmaster deep dive: the reactor setting, built on a published beer fermentation model
@@ -122,6 +123,7 @@ Pointers on the eight ideas in the team's `afterquery-ideas-round2.md` (from Kri
 
 The team's reviewer then re-scored all three sources on one scale (`afterquery-ideas-round2.md`, "Second review"), and Kristján saved **"Lightlag" as an editable draft** on the Junction platform at 23:33; the project choice is still open. In short, the review finds Lightlag, BatchPilot with test batches (that is, Brewmaster) and Bazaar level, and advises committing to the mechanic they share: learn a partly unknown, delayed system with a few cheap trials, then operate it where mistakes can't be undone. It also re-scored this brainstorm's 13 ideas on its "with shell / without shell" scale, mostly lower, and put BatchPilot first among them.
 
+- **Side-by-side comparison and recommendation:** "Lightlag vs Bazaar vs Brewmaster".
 - **Agreed: three sessions converged.** Our Pilot Plant ID combination, the round-two Brewmaster and the reviewer's "BatchPilot plus test batches" are the same environment. Deep dives for all three settings: "Lightlag deep dive", "Bazaar deep dive", "Brewmaster deep dive".
 - **Agreed: our gap scores assumed too little.** They were gut scores written before we assumed the agent has a shell. We have kept our own numbers so the history stays readable, but the reviewer's table is the better guide to "with shell" gaps.
 - **Partly disagreed: Python doesn't remove every habit.** The review's main argument is that Python access removes older models' habits. The literature in "Related research" supports that for *computing* (fitting, searching, simulating) but not for *deciding*: NewtonBench found a code interpreter made strong models stop exploring too early, and Causal Discovery Bench found that tools help with inference while 94.5% of mistakes stay in experiment design, and more budget doesn't fix it. So "a menu of terms plus Python is a regression script" (its verdict on Alien Physics Lab) holds only if the experiments that feed the regression are good. That is the same reason the converged mechanic works: its difficulty is choosing tests and committing, not computing.
@@ -177,6 +179,65 @@ The team's reviewer then re-scored all three sources on one scale (`afterquery-i
 - Does the judges' harness give the agent a shell? The research and the reviewer both assume so. If not, much of the gap analysis changes.
 - Lightlag: constant delay (cleaner ablation) or random delay with a published distribution (harder)?
 - Has the bare Lightlag loop with three agent runs been tried yet? It decides between Lightlag and Bazaar.
+
+## Lightlag vs Bazaar vs Brewmaster
+
+The three settings the team's second review ranks level, compared side by side using the deep dives ("Lightlag deep dive", "Bazaar deep dive", "Brewmaster deep dive") and "Related research". Lightlag and Brewmaster are two settings of the same mechanic (learn a partly unknown, delayed system with a few trials, then operate it where mistakes can't be undone); Bazaar is the cheaper fallback with a different mechanic. **No gap has been measured for any of them.** Everything below is judgment until the pilots run.
+
+### Recommendation in one paragraph
+
+**Pilot Brewmaster and Lightlag in parallel (half a day each), keep Bazaar as the fallback, and let one fact decide between the first two: can the agent's own code call the environment's tools?** If it can, Brewmaster is the safer bet, because its decisive choices (which tests to run, which profile to commit to) can't be undone by a script running a loop. If the simulator can be reached only through the model's own tool calls, Lightlag's per-step driving becomes a genuine test of the model, and its demo and novelty make it the stronger entry. If both pilots show the agent matching the reference, build Bazaar, the cheapest to build.
+
+### Against the judging rubric
+
+| Criterion (points) | Lightlag | Bazaar | Brewmaster | Edge |
+|---|---|---|---|---|
+| **The gap (30)** | No direct evidence; adjacent work shows time pressure, stale state and position tracking hurt agents. Risk: delay compensation is textbook and scriptable | The most direct evidence (PrefBench, Magentic Marketplace), but counter-evidence too: top LLMs beat an algorithmic bidder on Mazur's BAZAAR | Indirect but strong: agents fail at experiment design (Causal Discovery Bench, NewtonBench), and the identifiability trap targets exactly that | Unclear; Bazaar has the most evidence for and against |
+| **Meaningful difficulty (30)** | Cleanest: one dial (delay), and the zero-delay run is a fairness proof | Explainable with the revealed-type ablation; less physical | Very explainable: the "two yeasts identical at 12 °C" chart, plus known-strain and double-budget ablations | Lightlag ≈ Brewmaster |
+| **Reward integrity (25)** | Good: simulator-verified samples; watch the 0.5 survival factor and safety-stop probing | Weakest by the reviewer's reading; numbers-only offers and share-of-surplus scoring fix the worst of it, but there is the most for judges to probe | Strongest: final-state quality, graded batches final, tests unscored, few surfaces to attack | Brewmaster |
+| **Craft (15)** | Moderate build: 2D world, slip, battery, delay queue, replay visual; parameters need tuning | Easiest build: no physics | Published model (7 equations, constants printed) plus a heat balance; units need care, and Manh can validate them | Bazaar on effort, Brewmaster on credibility |
+| **Tiebreaker: small model** | Delay is a ready curriculum dial | Many short deals with a continuous score: the best training signal | Few, long batches per episode; continuous score helps; fast to simulate | Bazaar |
+
+### Other things that matter
+
+| | Lightlag | Bazaar | Brewmaster |
+|---|---|---|---|
+| **Does code-in-the-loop close the gap?** | Most exposed: per-step control is exactly what a script loop does well | Moderately: type inference can be scripted | Least: tests are spent once, and an onboard controller already tracks setpoints |
+| **Prior art / novelty** | No benchmark of LLM agents under a fixed signal delay found | Crowded (AgenticPay, PrefBench, TERMS-Bench, PACT, ANAC); **name clash** with Mazur's BAZAAR | No LLM fermentation benchmark found; OperAItor is a different problem (fault handling in a continuous plant) |
+| **Grounding for the pitch** | Lunokhod, Mars operations, Spirit stuck at Troy, the 2025 AI-planned Perseverance drive | Agentic commerce: Anthropic's Project Deal, Microsoft's Magentic Marketplace | A published industrial beer model, brewing practice, and a 2025 AI fermentation trial |
+| **10-minute demo** | Best: a rover trusting a stale "ghost" and driving off a rim | Good: merchant ask curves against the agent's bids | Weakest visually, but the identifiability chart explains the failure in one slide |
+| **Team fit** | Sölvi's routing and optimisation plus Manh's control | Anyone | Manh's control background, directly |
+| **Run-to-run variance** | Highest (random slip); needs several maps per run | Low in the simulator; deals per run limited by tool calls | Low: deterministic equations; only 3 graded batches per run |
+| **Biggest single risk** | The agent writes the predictor and slip estimator and matches the reference | Frontier models simply bargain well | The agent runs a step test, fits well and matches the reference |
+| **What we already checked** | Real-world grounding, control theory | The evidence for and against | Simulated the published model: no constant temperature meets a sample spec, and only 3 of 224 two-step profiles do |
+
+### Scores on the reviewer's scale
+
+The team reviewer's scores (gap shown as "agent has a shell / no shell") with our view next to them. Our view is a judgment, not a measurement.
+
+| | Reviewer: gap | Diff. | Integ. | Build | Fun | Our view |
+|---|---|---|---|---|---|---|
+| **Lightlag** | 2 / 4 | 4 | 4 | 3 | 5 | Agree. The gap rests on unknown slip and calibration choices, not on the delay itself |
+| **Brewmaster** (BatchPilot + tests) | 2 / 4 | 5 | 4 | 3 | 3 | Gap maybe 3 with a shell: the identifiability trap targets the step a script doesn't solve. Build closer to 4 with the published model; integrity 5 with tests unscored and batches final |
+| **Bazaar** | 3 / 4 | 4 | 3 | 5 | 4 | Gap maybe lower than 3 given the BAZAAR counter-evidence; integrity 4 with our numbers-only design |
+
+### How each one would fail the pilot, and what to try next
+
+- **Lightlag:** the agent matches the reference at delay 3. First, tighten the battery and widen the slip ranges; then check whether it calibrated on purpose. If it did, the delay part is solved; switch to Brewmaster, which keeps the learning part.
+- **Brewmaster:** the thermostat baseline scores close to the reference (physics too forgiving), or the agent designs a step test and matches. First, reduce cooling power and widen the strain ranges; if the agent still matches after good tests, fall back to Bazaar.
+- **Bazaar:** the agent reaches about 85% of the reference's share. Widen the merchant style mix and tighten patience; if it still matches, frontier bargaining is simply good, and the team should go back to whichever control pilot had the larger gap.
+
+### A plan for the day
+
+1. **First hour, all together:** answer the deciding question in Harbor (can scripts reach the simulator?) and agree on the reward contract each pilot will use: do-nothing scores 0 and the reference sets 1.
+2. **Morning, in parallel** (one possible split): Manh builds the bare Brewmaster simulator (the printed equations, heat balance, jacket delay) with the thermostat baseline and the reference; Sölvi and Kristján build the bare Lightlag loop with the move-and-wait baseline and the reference.
+3. **Midday:** three real agent runs on each, with code access allowed. Apply each deep dive's go/no-go rule.
+4. **Afternoon:** commit to the one with the larger gap you can *explain*, and update the saved "Lightlag" draft if the setting changes. Bazaar only if both fail.
+
+### Open questions this comparison can't settle
+- The tool-access question in Harbor decides a lot and is cheap to answer; nobody has checked it yet.
+- Is the judges' "stronger reference run" expected to be a person, an algorithm or a stronger agent? All three plans assume an algorithm.
+- How much does the demo weigh against the rubric? Lightlag wins the demo; Brewmaster wins integrity.
 
 ## Lightlag deep dive
 
