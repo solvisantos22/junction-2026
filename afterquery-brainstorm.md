@@ -8,6 +8,7 @@
 - The team's round-two ideas: our read
 - Lightlag vs Bazaar vs Brewmaster: comparison and recommendation
 - Harbor tool access: can the agent's own code call the simulator? (Yes; design for it)
+- Dynamic pilot: deadlines, discoveries and time pressure on the team's Lightlag simulator, cross-checked with the team's controllers
 - Lightlag deep dive: spec, reference, reward, fairness experiments, pilot plan
 - Bazaar deep dive: evidence for and against a gap, spec, reference, reward, pilot plan
 - Brewmaster deep dive: the reactor setting, built on a published beer fermentation model
@@ -296,6 +297,107 @@ The team has a provisional simulator contract (`docs/superpowers/specs/2026-11-1
 - Harbor docs: [Task environment and MCP servers](https://docs.harborframework.com/tasks/environment) · [Multi-container tasks](https://docs.harborframework.com/tasks/multi-container) · [Network policies](https://docs.harborframework.com/tasks/network-policies) · [Verifier](https://docs.harborframework.com/tasks/verifier) · [Separate verifier](https://docs.harborframework.com/tasks/separate-verifier) · [Pre-integrated agents](https://docs.harborframework.com/agents/pre-integrated-agents)
 - Harbor source, OpenCode integration: [opencode.py](https://github.com/harbor-framework/harbor/blob/main/src/harbor/agents/installed/opencode.py) · [opencode_v2.py](https://github.com/harbor-framework/harbor/blob/main/src/harbor/agents/installed/opencode_v2.py) (main branch, read 13 November)
 - OpenCode's MCP configuration: [opencode.ai/docs/mcp-servers](https://opencode.ai/docs/mcp-servers)
+
+## Dynamic pilot: varying samples in Lightlag
+
+The team's Lightlag simulator has three fixed targets and plenty of time, and on it the delay barely matters (see "Lightlag deep dive" and the team's own pilot). This pilot tests the "varying samples" idea: targets with deadlines, new targets discovered mid-mission, a fresh map every seed, and a time-pressured profile. **The code is local for now.** It sits in Manh's brainstorm folder (`Pilot/`, run instructions in `Pilot/README.md`), runs against the team's simulator without changing it, and hasn't been pushed to the repository yet. The plan is to publish it as `lightlag_dynamic/` with a claim row once Manh approves.
+
+**No real agent has been run.** Every number compares scripted controllers; it shows how the environment behaves, not whether a frontier agent struggles.
+
+### The result in short
+
+- **Time pressure is what makes the delay matter.** On the "rush" profile (50 ticks, five targets plus one or two discoveries, tight windows), on 40 seeds never used during development:
+
+  | Controller | Delay 0 | Delay 3 | Delay 5 |
+  |---|---|---|---|
+  | Cautious (send a leg, wait to see it land) | 99% | 80% | 59% |
+  | Blind plan (plan once, never read telemetry) | 71% | 81% | 86% |
+  | Ignores deadlines and discoveries | 79% | 83% | 83% |
+  | Treats old telemetry as the present | 99% | 1% (90% die) | 1% (88% die) |
+  | Do nothing | 0 | 0 | 0 |
+
+  Shares are of the reference's score on the same seed. The reference got home alive in every episode.
+- **Neither shortcut closes the gap.** The blind plan misses discoveries, which arrive only through telemetry (71% even with no delay). Careful waiting runs out of clock (59% at delay 5). To match the reference, an agent has to use late information without waiting for it, which is the skill Lightlag is meant to test.
+- **The fairness check holds.** With no delay, the cautious controller ties the reference (99%), so its loss at delays 3 and 5 comes from the delay itself.
+- **Without time pressure there is no gap.** On the team's map, and on seeded maps with loose deadlines, the cautious controller scores 95–102% at every delay. This agrees with the team pilot: waiting costs clock, not battery.
+- **Deadlines change the plan.** A controller that ignores them loses 13–24% on rush, and 36–44% on the team's map with deadlines at delays 3 and 5.
+
+### What was added to the simulator
+
+| Profile | Map | Deadlines | Discoveries | Horizon |
+|---|---|---|---|---|
+| `static` | team's fixed map | no | no | 80 |
+| `windows` | team's fixed map | north 10, west 16, east 26 | no | 80 |
+| `random` | seeded | no | no | 80 |
+| `dynamic` | seeded | 18–55 | 1–2, windows 10–18 ticks | 80 |
+| `rush` | seeded, 5 targets 3–9 m out | 10–32 | 1–2, windows 6–12 ticks | 50 |
+
+- **Windows:** full value if the sample executes by `deadline_tick`, a quarter of it afterwards. The scoring stays continuous (good for training) and published.
+- **Discoveries:** a target appears at its appear tick, but the controller learns about it only when that tick's telemetry arrives, `delay` ticks later. That makes delay and information the same mechanism: in real rover work, the science team spots something in images that are minutes old.
+- **Seeded maps:** published generator ranges, hidden instance (Public Rules, Hidden Instance).
+- Everything else (physics, timing, battery, safety stops, the five tools, the 1 / 0.5 / 0 return rule) is the team's, inherited unchanged.
+
+### How it connects to the team's work
+
+Two pushes landed while this was being built (14 November, after midnight):
+
+- **Sölvi:** `lightlag/evaluation.py`, the official episode runner with its five-callback `PublicTools` boundary.
+- **Kristján:** `lightlag_controllers/`, a reference, five baselines and `docs/lightlag-pilot.md`. Its key finding: under the current rules a plan that never reads telemetry scores 97–101% of the reference, so the delay doesn't force feedback. It recommends a tighter sampling radius (0.4 m), more slip noise (±0.08) and a wider sand range (0.15–0.60), which brings the blind plan down to 68–78%. It also notes that a shorter horizon is "the right lever against move_and_wait" but needs a faster reference first.
+
+How the pieces join up:
+- **The two fixes are complementary.** Kristján's physics changes attack the blind plan through precision; the dynamic rules attack it through information (discoveries) and attack careful waiting through time (rush). The cross-check below tests them together.
+- **Already connected, locally:**
+  - The team's evaluator runs the dynamic environment and gives identical scores (5 of 5 seeds on both profiles).
+  - Kristján's controllers run on it unchanged. They read the map once and ignore deadlines, so on rush they behave like the "ignores deadlines" baseline.
+  - The JSON-lines runner reuses the team runner's dispatch, so any harness that drives `python3 -m lightlag` can drive this.
+  - Kristján's new MCP server claim (`lightlag_mcp/`, 00:45) wraps the simulator's five public methods. `DynamicEnvironment` has the same five, so the server could host it unchanged by building it instead of `Environment`.
+- **What a permanent hookup would need:**
+  - An environment-factory argument in `lightlag.evaluation.run_episode` (one line, owned by Sölvi).
+  - A rules decision from the simulator owner.
+
+### Cross-check with the team's controllers and tougher physics
+
+Seeds 0–19. Shares are of this pilot's reference on the same seed. "Tougher physics" is Kristján's recommended variant (radius 0.4 m, slip noise ±0.08, sand 0.15–0.60), applied with his own `physics_overrides()` helper. Sölvi's evaluator matched this pilot's runner on 5 of 5 seeds in all four settings.
+
+**Rush, current physics**
+
+| Controller | Delay 0 | Delay 3 | Delay 5 |
+|---|---|---|---|
+| Reference (this pilot), raw score | 8.95 | 7.97 | 7.05 |
+| Cautious: whole leg, then wait | 100% | 77% | 59% |
+| Team `move_and_wait`: one command, then wait | 76% | 20% | 13% |
+| Blind plan (this pilot / team) | 70% / 76% | 78% / 82% | 86% / 87% |
+| Team reference (knows no deadlines or discoveries) | 76% | 76% | 68% |
+| Old telemetry as the present (both) | 100% / 76% | 2% / 0% | 0% / 0% |
+
+**Rush, tougher physics**
+
+| Controller | Delay 0 | Delay 3 | Delay 5 |
+|---|---|---|---|
+| Reference (this pilot), raw score | 8.86 | 6.03 | 5.10 |
+| Cautious: whole leg, then wait | 99% | 96% | 73% |
+| Blind plan (this pilot / team) | 46% / 57% | 78% / 78% | 67% / 88% |
+| Team reference | 76% | 59% | 26% |
+
+What this adds:
+- **The team's "cautious" baseline is much weaker than a sensible cautious agent.** Sending one command and then waiting loses heavily (20% on rush and 80% on the team's map at delay 3). Sending a whole leg and then waiting scores 95–98% on the team's map and 77% on rush. The team pilot's 70%/77% `move_and_wait` figures therefore overstate what caution costs. Adding a leg-and-wait baseline there would show the real gap.
+- **On rush, the team's blind plan beats the team's reference** (82% vs 76% at delay 3, 87% vs 68% at delay 5). Their reference was built for the plain map: it stops to confirm, and it knows nothing about deadlines or discoveries. A time-pressured rule set needs a reference built for it.
+- **Tougher physics and rush don't simply add up yet.** With noise ±0.08 and a 0.4 m radius, this pilot's reference loses a quarter of its score at delay 3 (7.97 → 6.03), and the cautious controller nearly catches up (96%). Before adopting both, the reference has to handle noise better, for example by aiming with a margin and confirming only near the target. This matches Kristján's own warning that a shorter horizon needs a faster reference first.
+- **On the plain map the team reference is the stronger one** (104–107% of this pilot's; 122–128% under tougher physics). This pilot's reference only earns its keep on the dynamic rules.
+
+### Honest limits
+
+- **My reference is a local stand-in and not optimal.** On the team's map with deadlines, the blind plan beats it (120% at delay 3), because it stops to confirm the sand target before sampling. Only on rush does it beat every baseline. Kristján's reference is stronger on the plain map; neither handles discoveries except mine.
+- **The rush ranges and the fixed-map deadlines are hand-set difficulty dials.** Rush was designed once, then checked on untouched seeds (100–139), not tuned per seed.
+- **Exact visual odometry still makes slip easy to learn.**
+- **20–40 seeds per row.** Differences of a few percent are noise.
+
+### Suggested next steps
+
+1. **Rules decision (team):** the cleanest result so far is rush-style time pressure, deadlines and discoveries on the current physics. Kristján's tougher physics should be added only once the reference handles noise; otherwise the reference itself suffers most.
+2. **One reference:** port the deadline and discovery handling into the team's `lightlag_controllers` reference, which plans better on the plain map, instead of keeping two references.
+3. **A fairer cautious baseline:** add "whole leg, then wait" to the team pilot next to `move_and_wait`.
+4. **Real agent runs:** three runs each at delays 0 and 3 on rush, compared against the reference, the blind plan and the cautious controller. If the agent matches the blind plan, it isn't using feedback; if it matches the cautious one, it isn't predicting.
 
 ## Lightlag deep dive
 
