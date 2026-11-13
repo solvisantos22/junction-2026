@@ -7,9 +7,10 @@ Start with the [working decision brief](afterquery-research.md), which contains 
 Published deep dives:
 
 - [Agent benchmark landscape](benchmark-landscape.md): ten benchmark families, recent successes, older failures and what changed.
+- [Control, routing and optimization](control-and-optimization.md): successful solver/controller approaches, closest prior art and a proposed early falsification test.
 - [Reward integrity and evaluation](reward-and-evaluation.md): specification gaming, recovery benchmarks, fair comparisons and proposed exploit probes.
 
-The control/planning section and combined recommendation are still being reviewed.
+The three deep dives are published. The combined recommendation and a final evidence audit are in progress.
 
 The review covers three independent areas: agent benchmarks and long-horizon environments; planning, routing and process control; reward integrity and evaluation design. Findings are pushed as verified sections are ready, then combined into the decision brief.
 
