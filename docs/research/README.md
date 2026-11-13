@@ -2,7 +2,9 @@
 
 Research started Friday 13 November 2026, 22:33 Helsinki. Purpose: understand prior approaches, their successes and failures, and what they imply for a small, convincing AfterQuery environment. This is decision support; no project direction has been selected or implemented.
 
-The review covers three independent areas: agent benchmarks and long-horizon environments; planning, routing and process control; reward integrity and evaluation design. Findings will be pushed as verified sections are ready, then combined into a decision brief.
+Start with the [working decision brief](afterquery-research.md), which contains the first verified findings and Harbor compatibility notes.
+
+The review covers three independent areas: agent benchmarks and long-horizon environments; planning, routing and process control; reward integrity and evaluation design. Findings are pushed as verified sections are ready, then combined into the decision brief.
 
 Evidence standard: use primary papers, official repositories and project documentation; identify model/version and evaluation conditions when citing scores; distinguish measured findings from our proposed applications. Older benchmark failures do not prove that today's frontier models will fail. Search cutoff: 13 November 2026; this is a focused review, not a systematic or exhaustive survey.
 
