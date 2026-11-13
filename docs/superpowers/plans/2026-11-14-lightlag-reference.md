@@ -66,5 +66,5 @@ Files: `lightlag/evaluation.py`, `tests/lightlag/test_evaluation.py`, `lightlag/
   python3 -m lightlag.evaluation --seeds 0 1 2 3 4 5 6 7 8 9 --delays 0 3 --output-dir /tmp/lightlag-reference-development
   ```
 
-- [ ] Freeze the controller, then run seeds 100–109 separately. Inspect scores, failures, return rates and replay traces. Record all results with configuration, exact commands and limitations; never claim a real-agent gap from scripted policies.
+- [ ] Freeze the controller, then run seeds 200–209 separately. The planned 100–109 set was replaced before use because Manh's separate dynamic pilot used 100–139. Inspect scores, failures, return rates and replay traces. Record all results with configuration, exact commands and limitations; never claim a real-agent gap from scripted policies.
 - [ ] Complete the handoff with controller callable and artifact contracts for teammates. Update/release the claim, run `git diff --check`, fetch/integrate, push and confirm this worktree matches `origin/main`.
