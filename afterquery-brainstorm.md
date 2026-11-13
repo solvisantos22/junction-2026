@@ -6,6 +6,7 @@
 - The challenge (original text)
 - Side by side with the team's notes
 - The team's round-two ideas: our read
+- Lightlag deep dive: spec, reference, reward, fairness experiments, pilot plan
 - Related research: what worked, what didn't, award-winning precedents, connecting the dots
 - What we're aiming for
 - Ideas at a glance
@@ -118,6 +119,7 @@ Pointers on the eight ideas in the team's `afterquery-ideas-round2.md` (from Kri
 ### Idea by idea
 
 #### Lightlag (reviewer's #1): agree, pilot it first
+- **Full spec, reference, reward, ablations and pilot plan:** "Lightlag deep dive".
 - **Closest here:** Delayed-Feedback Blindness, Premature Commitment, BatchPilot.
 - **It has a textbook reference.** A delayed problem becomes an ordinary one once the commands still in transit are part of the state. The proposed reference (replay in-transit commands on a learned slip estimate) is exactly that, the same idea as a Smith predictor in process control, so control-minded judges will recognise it.
 - **Expect move and wait.** Since Ferrell's 1965 experiments, people facing a delay have fallen back on sending a small command and waiting to see it land. It is safe and slow. An agent will probably find it too, so "waiting costs battery" is not optional: without it, move-and-wait can match the reference and the gap disappears.
@@ -161,6 +163,117 @@ Pointers on the eight ideas in the team's `afterquery-ideas-round2.md` (from Kri
 - Does the judges' harness give the agent a shell? The research and the reviewer both assume so. If not, much of the gap analysis changes.
 - Lightlag: constant delay (cleaner ablation) or random delay with a published distribution (harder)?
 - Has the bare Lightlag loop with three agent runs been tried yet? It decides between Lightlag and Bazaar.
+
+## Lightlag deep dive
+
+A build-ready look at **Lightlag**, the team's round-two lead (from `afterquery-ideas-round2.md`): drive a rover through a signal delay, with wheel slip that depends on unknown terrain properties. This note covers the real-world grounding, a concrete spec, the reference, the reward, the expected failures, exploits, the experiments that prove fairness, and a first pilot. Numbers marked *starting value* are guesses to tune, not results. Background research is in "Related research"; our general read on round two is in "The team's round-two ideas: our read".
+
+### Why it's credible: real rovers already work this way
+
+- **Mars is not driven live.** One-way light time is roughly 4 to 22 minutes, so drivers plan each day's drive from the previous downlink, and the rover's own autonomy handles hazards on the way ([NASA](https://ntrs.nasa.gov/citations/20170009822), [Popular Science](https://www.popsci.com/technology/article/2012-07/mars-rover-drivers)).
+- **The Moon was driven live, through the delay.** Lunokhod 1 (1970) was driven from Earth by a five-person crew, with at least 3 seconds between a command and seeing its result, and an automatic stop if the rover tilted too far. It ran 322 days against a 90-day design ([summary](https://armaghplanet.com/lunokhod-the-first-moon-car.html)). Recent NASA lunar-vehicle studies found that remote drivers under latency drove slower and braked more ([NTRS](https://ntrs.nasa.gov/citations/20240001217)).
+- **Slip ends missions.** Spirit's wheels broke through a crust into soft sand at "Troy" in April 2009; months of Earth-side testing and extraction drives didn't free it, and it ended its mission there ([NASA/JPL](https://www.jpl.nasa.gov/news/team-runs-operational-test-to-prepare-for-extracting-spirit/)).
+- **Slip is predictable from terrain type and slope, with error.** JPL and Caltech work (Angelova et al., 2006–2008) classified terrain from images, then fitted slip against slope separately for each terrain type, reaching roughly 15–20% prediction error on Mars-analog terrain ([paper](https://robotics.jpl.nasa.gov/media/documents/Angelova06LearningSlip.pdf)).
+- **AI already plans real drives, offline.** In December 2025, JPL engineers used Claude to plan Perseverance's route from orbital imagery for two drives; engineers made minor changes and checked the commands in a digital twin before sending them ([NASA](https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-rover-completes-first-ai-planned-drive-on-mars), [Anthropic](https://www.anthropic.com/features/claude-on-mars)). *Demo line:* planning from a map works; Lightlag tests the part that is still hard, acting through the delay while the ground slips.
+
+**Framing choice:** step-by-step driving with a few steps of delay is the Moon's situation (Lunokhod), while Mars is plan-per-day. The environment can show both: a small delay with single commands (Moon), or a long delay where the agent uplinks command sequences (Mars). Pick one setting for the story; the mechanics are the same.
+
+### The control idea, in one paragraph
+
+A delay alone is a solved problem in theory. If the controller remembers the commands still in transit and replays them on a model, it can predict the present and act on that prediction: a Smith predictor (process control, 1957) or a predictive display in teleoperation. In [Sheridan's 1984 review](https://ntrs.nasa.gov/citations/19850006202), the display draws a model driven by the same commands as the remote machine, at where it will be once the commands arrive; if the operator waits one round trip, model and video coincide. With 1–3 second delays, such displays substantially shortened manipulation tasks. That waiting is "move and wait", the strategy humans fall back on. The catch: **a predictor is only as good as its model**, and Smith predictors are known to be sensitive to model mismatch ([MathWorks example](https://www.mathworks.com/help/control/ug/control-of-processes-with-long-dead-time-the-smith-predictor.html)). In Lightlag the model's weak spot is the unknown slip. That is why the round-two reviewer says slip has to carry the difficulty.
+
+### Spec (proposal)
+
+**World.** A 2D map, *starting value* 40 × 40 m, with the base in the middle. Each patch has a visible terrain type (bedrock, gravel, sand, dusty crust) and slope. Hazards are visible on the map, as on orbital imagery: crater rims and steep drops. *Starting value* 6 science targets of value 1–3, some placed near hazards or across sandy ground.
+
+**Hidden per seed, from a published family.** For each terrain type, slip as a function of slope, e.g. `slip = a + b × slope` plus per-step noise, with `a` and `b` drawn from documented ranges. Sand above a documented slope can embed the rover (Spirit at Troy). This is Public Rules, Hidden Instance: the family is in the rules, only the parameters are hidden.
+
+**Delay.** Commands arrive `k` ticks after they are sent; telemetry is `k` ticks old when it arrives. Counted in ticks, never wall-clock seconds, so the rubric's "impossible timing" can't apply. *Starting value* `k = 3`.
+
+**Battery.** Driving costs energy per metre (more on sand and slopes); sampling costs energy; **every tick costs idle energy** (heaters and electronics, as on real rovers). The idle cost is what makes move-and-wait lose. *Starting values:* battery 100, driving 1 per metre × terrain factor, sampling 3, idle 0.5 per tick, 80 ticks.
+
+**Onboard safety (recommended).** As with Lunokhod's tilt stop and modern rover autonomy, the rover halts at a hazard edge and drops its command queue. A stale-telemetry mistake then costs time and battery instead of ending the run, which keeps variance down. Embedding in sand stays a severe, mostly unrecoverable outcome.
+
+**Agent tools** (served by the simulator in a separate container, over MCP or HTTP):
+
+```text
+rules()                     -> the published rule family, delay k, energy costs
+map()                       -> terrain types, slopes, hazards, targets, base
+uplink(commands)            -> queue up to N commands, e.g. drive(heading_deg, metres), sample(), wait()
+advance(ticks=1..5)         -> time passes; returns the telemetry packets that arrived
+telemetry_log()             -> every packet received so far (free, no time passes)
+```
+
+Each telemetry packet carries: the tick it describes (k ticks ago), position from visual odometry (small noise), heading, battery, wheel-odometry distance for the last command (so slip can be measured, as real rovers do by comparing wheel and visual odometry), terrain underfoot, tilt, and events (hazard stop, embedded, sample taken). Reading tools never advance time, so thinking is free; only `advance` moves the clock.
+
+**Episode.** About 80 ticks, which fits the round-two target of 40–60 tool calls if the agent advances a few ticks per call. Several fixed-seed maps per run, scored as the mean, as the reviewer recommends.
+
+### Reward
+
+- **Raw score:** the value of targets *sampled at the target* (checked against the simulator's true position, not the agent's claims) × a survival factor: 1 if the rover ends at base, 0.5 if it ends alive elsewhere, 0 if it is embedded or its battery runs out.
+- **Normalised:** raw ÷ the reference's raw score on the same seeds. Doing nothing samples nothing, so it scores 0 by construction (Baseline-Normalized Reward); stopping early keeps only what was actually sampled.
+- **Not rewarded:** leftover battery (that would reward hoarding) and calibration driving (AfterQuery found that rewarding exploration produced exploration for show). Calibrating pays off only through better driving afterwards.
+- **For the small-model tiebreaker:** the delay `k` is a curriculum dial. At `k = 0` a small model should score sometimes; raise `k` to keep it in the 10–80% success band AfterQuery trained in.
+
+### Reference run
+
+An algorithm that sees only what the agent sees (Honest Reference Solver):
+1. **Calibrate:** drive a short leg on each terrain type near base; fit slip against slope per terrain (Angelova-style), starting from the published ranges.
+2. **Predict the present:** last telemetry + replay of every command still in transit, using the current slip estimates.
+3. **Plan:** shortest-path search over a cost map that charges for predicted slip, for uncertainty, and for distance to hazards scaled by `k` (more delay, wider berth).
+4. **Turn back** when battery minus the estimated cost of the way home, with a safety margin, reaches a threshold.
+
+A few hundred lines of code, in the repo, and reproducible on any seed.
+
+### Where the agent should fail
+
+| Expected mistake | What it looks like in the trace | Failure mode |
+|---|---|---|
+| Treating old telemetry as the present | Overshoots targets, then over-corrects back and forth | Delayed-Feedback Blindness |
+| Forgetting commands in transit | Sends "drive east 3 m" again because telemetry hasn't moved yet; doubles the move into a hazard | Delayed-Feedback Blindness, Skipping Verification |
+| Move and wait | One command, then waits a full round trip; safe, but idle drain eats the battery and few targets get sampled | Premature Commitment (to an over-cautious strategy) |
+| Assuming nominal slip | Plans a long sequence as if bedrock were everywhere; drifts on sand | Anchoring on the First Hypothesis |
+| Never calibrating, or calibrating on the wrong terrain | Slip on sand discovered only when embedded | Uninformative Experiments |
+| Losing track of position | Its own position estimate drifts from telemetry over a long episode | Long-Horizon Drift |
+| Misjudging the point of no return | Battery dies on the way home | Premature Commitment, Overconfidence and Poor Calibration |
+
+Supporting evidence: in a 2026 maze benchmark, LLMs lost track of their own position more often than they walked into walls, with position accuracy dropping from 89% to about 55% as mazes grew; handing step-by-step execution to a deterministic walker helped a lot until mazes got very large ([Lost in Aggregation](https://arxiv.org/abs/2606.22219)). And in multi-agent LLM debates, feedback that was too strong or too delayed produced oscillation, overshooting the truth in 96–100% of unstable runs ([Delayed Verification](https://arxiv.org/abs/2606.27409)); that's debate, not driving, but it's the same delay-and-gain effect.
+
+### Exploits and defences
+
+| Exploit attempt | Defence |
+|---|---|
+| Do nothing, or stop at base | Nothing sampled → 0 |
+| Claim a target in text | Only samples the simulator records at the target's true position count (Tamper-proof Grader) |
+| Read the seed or slip parameters | The simulator runs in a separate container; the agent only reaches it through the tools (the reviewer's recommendation) |
+| Sample everywhere | Sampling costs battery and only counts at targets |
+| Sit near a target to bank the 0.5 survival factor | Allowed, but it scores below a careful return; the reference returns, so it sets the bar |
+| Exploit the safety stop to probe hazards for free | Each stop drops the queue and costs ticks and battery |
+| Write the reference itself in Python | Legitimate, not an exploit. If it closes the gap, the environment is too easy: this is the first thing the pilot tests (Brute-force Escape Hatch) |
+
+### Experiments that prove the difficulty is fair
+
+1. **Delay ablation:** the same maps at `k = 0, 1, 3, 6`. At `k = 0` the agent should come close to the reference; the gap should grow with `k`. That shows the difficulty comes from the delay, not from the map or the tools.
+2. **Predictive-display ablation:** add a field with the predicted present position, computed from the commands in transit (as Sheridan's displays did). If the gap mostly closes, the agent's specific failure is not accounting for commands in transit, a clean, explainable finding for the "meaningful difficulty" score.
+3. **Known-slip ablation:** reveal the slip parameters. The gap that remains is the delay-handling part; the gap that disappears was the learning part.
+4. **Scripted baselines** next to the reference: move-and-wait, open-loop with nominal slip, and act-on-stale-telemetry. Their ordering shows the reward ranks behaviour sensibly and that careful play scores best.
+
+### First pilot (half a day)
+
+1. A bare simulator: flat map, two terrain types, `k ∈ {0, 3}`, no graphics.
+2. The reference and the three scripted baselines on 10 seeds.
+3. Three real agent runs at each `k`.
+4. **Decision rule:** if the agent at `k = 3` reaches about 85% of the reference or more, the gap is too small: tighten the battery, widen the slip ranges or raise `k`, and if that doesn't help, switch to Bazaar. If the agent is already far below the reference at `k = 0`, the difficulty isn't the delay: fix the tools or the map before going on.
+
+### Demo (10 minutes)
+
+A replay with three layers: the true rover, the "ghost" the agent last saw (k ticks behind), and its commands in transit as arrows. Show one run driving off a crater rim because it trusted the ghost, next to the reference's run on the same seed. Then the delay-ablation chart: gap against `k`.
+
+### Open choices for the team
+- Moon (short delay, single commands) or Mars (long delay, command sequences) as the story?
+- Calibration as the agent's own decision (more decision-making, our recommendation) or a fixed calibration phase before the graded drive (the reviewer's version: simpler, lower variance)?
+- Constant delay (cleaner ablation) or random delay as a harder tier? With random delays even the in-transit replay stops being exact; standard RL algorithms also struggle there ([Ramstedt et al., ICLR 2021](https://arxiv.org/abs/2010.02966)).
+- Is the onboard safety stop in, so that stale-telemetry mistakes cost time rather than ending the run?
 
 ## Related research
 
