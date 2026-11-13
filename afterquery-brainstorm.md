@@ -8,6 +8,7 @@
 - The team's round-two ideas: our read
 - Lightlag deep dive: spec, reference, reward, fairness experiments, pilot plan
 - Bazaar deep dive: evidence for and against a gap, spec, reference, reward, pilot plan
+- Brewmaster deep dive: the reactor setting, built on a published beer fermentation model
 - Related research: what worked, what didn't, award-winning precedents, connecting the dots
 - What we're aiming for
 - Ideas at a glance
@@ -78,7 +79,7 @@ The team's notes are the shortlist in `afterquery-ideas.md` and the research in 
 | Evidence | Primary papers, benchmarks and docs, with conditions and limits | Reasoning and gut scores, plus a literature search (mostly abstracts); no gap measured |
 | Harness | Harbor + OpenCode over MCP, with reference (`oracle`) and no-op (`nop`) agents and a separate verifier; the event's exact starter kit is not yet confirmed | Unknown when written |
 | Headline advice | Pilot the strongest agent first; one controlled source of difficulty; a fair reference; score outcomes and continuing obligations | Hard task, unbreakable reward; public rules, hidden instance; an honest reference; test the brute-force escape hatch first |
-| Current leaning | Experiment order: ColdChain first (cheapest to rule out), BatchPilot as the strongest technical alternative, RecoveryRoom third. Core hypothesis: can a capable agent keep important constraints when it must commit irreversibly before a later, disclosed kind of disruption? Round two (Kristján's session, not yet signed off): the reviewer's top three are Lightlag, Brewmaster and Bazaar; the recommendation is Lightlag, with Bazaar as the fallback. | We agree with round two's order (see "The team's round-two ideas: our read"). On our own list, Cipher Lab, Incident Commander and Forecasting Arena lead on paper; none has a measured gap |
+| Current leaning | Experiment order: ColdChain first (cheapest to rule out), BatchPilot as the strongest technical alternative, RecoveryRoom third. Core hypothesis: can a capable agent keep important constraints when it must commit irreversibly before a later, disclosed kind of disruption? Round two (Kristján's session, not yet signed off): a second review at 23:15 finds Lightlag, BatchPilot with test batches (= Brewmaster) and Bazaar level, and advises committing to their shared mechanic, choosing the setting by taste. "Lightlag" is saved as an editable draft on the Junction platform. | We agree with the shared mechanic and wrote deep dives for all three settings (see "The team's round-two ideas: our read"). On our own list, Cipher Lab, Incident Commander and Forecasting Arena lead on paper; none has a measured gap |
 
 ### Where they agree
 - **Code and solvers are fair game.** An agent writing its own solver or controller is legitimate, so the difficulty must survive it. (Research: "Let the agent build a controller or use a solver". Here: *Brute-force Escape Hatch*.)
@@ -113,9 +114,19 @@ Pointers on the eight ideas in the team's `afterquery-ideas-round2.md` (from Kri
 
 ### In short
 - **The round-two list converges with this brainstorm.** Its top three each match one of ours: Lightlag tests Delayed-Feedback Blindness like BatchPilot; Brewmaster is our Pilot Plant ID combination (BatchPilot × Alien Physics Lab, in "Combining ideas"); Bazaar is Sealed-Bid Negotiator with the defence ours lacked.
-- **We agree with the order: Lightlag first, Bazaar as the fallback.** Brewmaster is the strongest option if the team wants process-control credibility.
+- **We agreed with the first order (Lightlag first, Bazaar as the fallback).** After the team's second review (below) the three are level, and we agree with its new advice: commit to the shared mechanic and choose the setting by taste. Brewmaster is the strongest option if the team wants process-control credibility.
 - **The literature partly answers the reviewer's main worry**, that an agent with a shell scripts away anything computable. Code tools help with computing but not with choosing experiments, and in NewtonBench a code interpreter even made strong models stop exploring too early. So keep the difficulty in what to measure and when to commit.
 - **One red flag:** DeepMind already published a benchmark called Alchemy with the same core idea.
+
+### The second review (23:15): our response
+
+The team's reviewer then re-scored all three sources on one scale (`afterquery-ideas-round2.md`, "Second review"), and Kristján saved **"Lightlag" as an editable draft** on the Junction platform at 23:33; the project choice is still open. In short, the review finds Lightlag, BatchPilot with test batches (that is, Brewmaster) and Bazaar level, and advises committing to the mechanic they share: learn a partly unknown, delayed system with a few cheap trials, then operate it where mistakes can't be undone. It also re-scored this brainstorm's 13 ideas on its "with shell / without shell" scale, mostly lower, and put BatchPilot first among them.
+
+- **Agreed: three sessions converged.** Our Pilot Plant ID combination, the round-two Brewmaster and the reviewer's "BatchPilot plus test batches" are the same environment. Deep dives for all three settings: "Lightlag deep dive", "Bazaar deep dive", "Brewmaster deep dive".
+- **Agreed: our gap scores assumed too little.** They were gut scores written before we assumed the agent has a shell. We have kept our own numbers so the history stays readable, but the reviewer's table is the better guide to "with shell" gaps.
+- **Partly disagreed: Python doesn't remove every habit.** The review's main argument is that Python access removes older models' habits. The literature in "Related research" supports that for *computing* (fitting, searching, simulating) but not for *deciding*: NewtonBench found a code interpreter made strong models stop exploring too early, and Causal Discovery Bench found that tools help with inference while 94.5% of mistakes stay in experiment design, and more budget doesn't fix it. So "a menu of terms plus Python is a regression script" (its verdict on Alien Physics Lab) holds only if the experiments that feed the regression are good. That is the same reason the converged mechanic works: its difficulty is choosing tests and committing, not computing.
+- **The deciding question, can the agent's code call the tools?** Three answers: check in Harbor whether the simulator can be reached only through the model's tool calls; design so it matters less, by putting the difficulty in budgeted, irreversible choices a loop can't undo (Brewmaster's tests, Lightlag's calibration); and measure it, by piloting with code access allowed, as the review recommends.
+- **Its "best unwritten idea" is ours:** epidemic control with delayed interventions, from our raw ideas list. Of its new settings, **Fishery** (quotas set from old, noisy surveys; overfishing collapses the stock for good) has the strongest built-in irreversibility.
 
 ### Idea by idea
 
@@ -130,6 +141,7 @@ Pointers on the eight ideas in the team's `afterquery-ideas-round2.md` (from Kri
 - **The niche is open:** no benchmark of LLM agents under a fixed signal delay turned up; the nearest work, on live clocks, finds that time pressure hurts agents.
 
 #### Brewmaster (#2): good, and it's our Pilot Plant ID
+- **Full spec, reference, reward, ablations and pilot plan:** "Brewmaster deep dive". It builds on a published beer fermentation model with every constant printed; in our simulation of it, no constant temperature meets a sensible quality spec.
 - **The literature says the learning phase is where agents fail.** Causal Discovery Bench puts 94.5% of mistakes in experiment design, and BoxingGym and NewtonBench agree. That supports Brewmaster over plain BatchPilot.
 - **It also backs the reviewer's worry:** basic statistics tools help a lot, and a shell is one. So make the fitting easy and the choice of experiments hard. Design the test batches so they only reveal the yeast if planned well. For example, if heat release rises with temperature, a test held at one temperature can't separate the parameters; the agent has to think of stepping the temperature.
 - **Credibility:** fermentation has validated simulators (IndPenSim, an industrial penicillin process used as a control benchmark) and published baker's yeast models. Borrowing one answers the "arbitrary puzzle" risk.
@@ -401,6 +413,138 @@ Sealed-Bid Negotiator scored worst here on reward integrity because scripted opp
 - Include the reactive (tit-for-tat) merchant behaviour, or keep merchants purely time-based for a cleaner reference?
 - Public hints about each merchant (e.g. "busy stall"), weakly correlated with type through a published table, or none?
 - How many deals per run: the reviewer's 15+, or fewer to fit the tool-call budget?
+
+## Brewmaster deep dive
+
+A build-ready look at **Brewmaster**, the reactor version of the mechanic the team is converging on: *learn a partly unknown, delayed system with a few cheap trials, then operate it where mistakes can't be undone*. A lager fermenter reacts to cooling with a delay, the yeast strain's parameters are unknown, and a few cheap test batches come before three graded ones. It is the same idea as BatchPilot plus test batches and our Pilot Plant ID combination ("Combining ideas"), reached independently in two sessions. The team's second review ranks it level with Lightlag. Numbers marked *starting value* are guesses to tune. Related: "The team's round-two ideas: our read", "Lightlag deep dive", "Related research".
+
+### The model is published, so the physics doesn't have to be invented
+
+The reviewer's main build worry ("units and dynamics need validating") has a ready answer: **the de Andrés-Toro beer fermentation model** (Mathematics and Computers in Simulation, 1998). It was fitted to industrial-condition pilot-plant data, and every equation and constant is printed in [Carrillo-Ureta, Roberts and Becerra (2003)](https://skoge.folk.ntnu.no/prost/proceedings/ecc03/pdfs/331.pdf):
+- yeast split into lag, active and dead cells; sugar, ethanol, and two off-flavours, **ethyl acetate** (fruity) and **diacetyl** (buttery);
+- every rate depends on temperature through an Arrhenius law, so temperature is the control input;
+- a 160-hour batch, starting at 130 g/l sugar, in the 7–15 °C range the paper gives for lager strains.
+
+That paper also optimised the temperature profile: its optimal constant temperature (about 14.6 °C) beat the industrial profile by more than 15% on its performance index, and a gradient method improved it slightly further. That gives the reference a published result to reproduce as a sanity check.
+
+**Our own check (a short simulation of the printed equations, not a published result):**
+
+| Constant temperature | Ethanol | Ethyl acetate | Peak sugar use | Heating if uncooled, at peak |
+|---|---|---|---|---|
+| 10 °C | 47.0 g/l | 2.4 ppm | 1.6 g/l/h, at 62 h | about 0.2–0.5 °C per hour |
+| 13 °C | 56.8 g/l | 6.5 ppm | 2.0 g/l/h, at 49 h | about 0.3–0.6 °C per hour |
+| 15 °C | 60.9 g/l | 12.0 ppm | 2.4 g/l/h, at 35 h | about 0.35–0.7 °C per hour |
+
+- **The trade-off is real:** warmer means more ethanol, but up to five times the fruity ester. This matches brewing practice, where warmer fermentations make more esters and fusel alcohols, and brewers warm the beer near the end (a "diacetyl rest") so the yeast reabsorbs diacetyl ([White Labs](https://blog.whitelabs.com/fermentation-controls-temperature)).
+- **The heat is real:** the heating column uses published heat-release figures of roughly 590–1,200 kJ per kg of sugar fermented ([source 1](https://yadda.icm.edu.pl/baztech/element/bwmeta1.element.baztech-3760174a-59c6-406d-8260-1a4071658c8f/c/PTPS_2017__nr_1__s._121_127.pdf), [source 2](https://www.briggsplc.com/wp-content/uploads/technical-papers/BEA-Mar-2017-Briggs.pdf)). Several degrees per day is large compared with the 7–15 °C window, so cooling capacity and jacket delay matter at peak activity.
+- **A thermostat can't pass a sensible spec.** With the published yeast and a sample spec (ethanol ≥ 58 g/l, ethyl acetate ≤ 8 ppm, sugar left ≤ 1 g/l), **no constant temperature passes, and only 3 of 224 simple two-step profiles do.** The round-two reviewer required a plain thermostat baseline that scores well below the reference; the published model delivers that before any heat effects are added.
+
+**Industry interest:** Yokogawa and a Kyoto brewer reportedly trialled AI-planned fermentation temperatures in simulation in 2025, shortening fermentation by 28%, with the brewmaster reviewing the plan ([Control Global](https://controlglobal.com/industry-news/news/55324567/yokogawa-and-craft-bank-co-optimize-beer-fermentation-process-with-ai)). **Not the same as OperAItor:** that benchmark ([arXiv 2611.05179](https://arxiv.org/abs/2611.05179)) is about supervising fault management in a continuous chemical plant. Brewmaster is about learning an unknown batch process from a limited test budget.
+
+### The core trap: one test temperature can't identify the yeast
+
+Arrhenius rates have two unknowns each: a speed and a temperature sensitivity. A test run at a single temperature measures the speed *at that temperature* only. **Two strains can look identical in a 12 °C test and still differ at 15 °C.** For example, by the printed ester equation, two strains with the same ester rate at 12 °C but different temperature sensitivity can differ by about a third in ethyl acetate at 15 °C (our calculation). Production runs warmer than a careful test, so a lazy test design leads to a confident, wrong extrapolation.
+
+That is exactly where the literature says agents fail: Causal Discovery Bench attributes 94.5% of mistakes to experiment design, and NewtonBench found that a code interpreter made strong models stop exploring too early ("Related research"). Fitting the model is a short script; **choosing tests that make the fit possible is the decision.** This is the standard problem of model-based design of experiments for parameter precision ([Franceschini and Macchietto, 2008](https://www.bohrium.com/paper-details/model-based-design-of-experiments-for-parameter-precision-state-of-the-art/811955529734684672-3943)), which gives the reference a textbook method.
+
+### Spec (proposal)
+
+**Equipment (fully documented):** a production fermenter with a glycol jacket of limited cooling power and a delay between valve and beer temperature; a temperature sensor that lags slightly. A small pilot vessel with perfect temperature control for tests.
+
+**Yeast (hidden per seed, from a published family):** each key rate in the de Andrés-Toro model (growth, sugar use, ester formation, lag) gets a strain factor on its speed and on its temperature sensitivity, drawn from documented ranges, plus the diacetyl constants. Heat release follows from sugar use with a documented constant. This is Public Rules, Hidden Instance.
+
+**Batch-to-batch disturbance (optional, recommended by the reviewer):** starting sugar varies by a few percent, and yeast vitality drifts slightly between graded batches, so the model needs updating from production data.
+
+**Test budget:** *starting value* 3 pilot tests of up to 48 hours each. A test can follow any temperature profile, including steps; a single test with a temperature step can reveal temperature sensitivity, which is the clever move. Sugar readings come every 12 hours; ester and diacetyl lab assays are limited (*starting value* 6 in total) and return 12 hours after sampling.
+
+**Graded batches:** exactly 3, each 160 hours, final once started.
+
+**Agent tools** (served from a separate container):
+
+```text
+rules(), equipment()            -> the model family, strain ranges, jacket and sensor data, spec, budgets
+run_test(profile, hours<=48)    -> pilot test; returns sugar readings every 12 h
+assay(test_or_batch, time)      -> ester or diacetyl result, available 12 h later; counts against the budget
+start_batch(profile)            -> starts a graded batch with a temperature setpoint profile
+advance(hours)                  -> time passes; returns lagged temperature and sugar readings
+set_profile(rest_of_profile)    -> changes the remaining setpoint profile
+history()                       -> everything so far (free)
+```
+
+A batch takes about 10 calls (advance a day at a time, adjust when needed), so 3 tests plus 3 batches fit the round-two target of 40–60 tool calls. An onboard controller tracks the setpoint with the jacket; the agent chooses setpoints, which is how real brewers work and why "the agent's code runs the loop" matters less here (see below).
+
+### Reward
+
+- **Per graded batch, a continuous quality score:** an ethanol (attenuation) score rising from 0 at a minimum to 1 at the target, multiplied by a flavour factor (1 inside the ester and diacetyl limits, falling to 0 at twice the limit), multiplied by a safety factor (0 if the beer left the safe band, for example 6–17 °C, for more than an hour).
+- **Score:** the mean over the 3 graded batches, divided by the reference's mean on the same seeds.
+- **Doing nothing** starts no batches → 0. Stopping early leaves batches unfinished → low ethanol score.
+- **Test batches earn nothing directly.** They only pay through better graded batches (AfterQuery found that rewarding exploration produced exploration for show).
+- **For the small-model tiebreaker:** a continuous score per batch; the strain ranges, cooling power and spec tightness are difficulty dials.
+
+### Reference run
+
+Sees only what the agent sees (Honest Reference Solver):
+1. **Design the tests** to maximise information about the parameters that matter for the production profile. Simplest version: tests that span the production temperature range, including a step; textbook version: D-optimal design from the published prior (Fisher information).
+2. **Fit** the strain factors by nonlinear least squares to the sugar readings and assays.
+3. **Plan** an optimal temperature profile for the fitted model under the jacket's cooling limit, with margins for parameter uncertainty (as in Carrillo-Ureta et al., but with a heat balance added).
+4. **Run** each graded batch with model predictive control that anticipates the yeast's heat peak and the jacket delay, and update the fit from each batch's sugar readings.
+
+This is BatchPilot's "MPC plus estimator" reference with an identification step in front.
+
+### Where the agent should fail
+
+| Expected mistake | What it looks like in the trace | Failure mode |
+|---|---|---|
+| All tests at one temperature | A good fit at 12 °C, a confident wrong prediction at 14–15 °C; esters out of spec | Uninformative Experiments |
+| Changing several things at once | Pitch and temperature varied together, so effects can't be separated | Uninformative Experiments |
+| Skipping tests | Uses the textbook profile; fine for one strain, out of spec for others | Real-World Priors Override Evidence |
+| Reacting to the current temperature | Cools only once the beer is already too warm; with the jacket delay the heat peak overshoots | Delayed-Feedback Blindness |
+| Over-correcting to cold | Clean beer, but low ethanol by the end of the batch | Premature Commitment |
+| Trusting an uncertain fit | Plans right at the spec limits with no margin | Overconfidence and Poor Calibration |
+| Never updating between batches | Repeats batch 1's profile while vitality drifts | Anchoring on the First Hypothesis, Long-Horizon Drift |
+
+### Exploits and defences
+
+| Exploit attempt | Defence |
+|---|---|
+| Do nothing | No graded batches → 0 |
+| Run graded batches as tests | Graded batches are labelled when started and final |
+| Maximum cooling all the time | Clean but low ethanol → low score |
+| Read the strain parameters | Separate container; only the tools reach it |
+| Report quality instead of producing it | Scores come from the simulator's final state (Tamper-proof Grader) |
+| Write the reference in Python | Legitimate. The fit and the MPC are scriptable; wasted tests are not recoverable. If the agent still closes the gap, it's too easy (Brute-force Escape Hatch) |
+
+### Experiments that prove the difficulty is fair
+
+1. **Known-strain ablation:** reveal the yeast parameters. The gap that closes was identification; the gap that remains is control (heat peak, jacket delay).
+2. **Double test budget:** if the agent doesn't improve with twice the tests, its problem is test *design*, not budget, the same pattern Causal Discovery Bench reports.
+3. **Perfect-cooling ablation:** remove the jacket limit and delay. Isolates the control part.
+4. **The identifiability chart:** two strains identical in a 12 °C test, diverging at 15 °C. A one-slide explanation of the main mistake.
+5. **Scripted baselines:** a thermostat at a textbook setpoint, the published industrial profile with no tests, and a one-temperature-test fit with an optimal profile. The expected order is reference > one-temperature fit > industrial profile > thermostat > nothing.
+
+### The deciding question: can the agent's code run the loop?
+
+The team's second review asks this of every control idea: if the agent's own code can call the environment tools, it can run a controller without the model in the loop, and the gap may close. For Brewmaster this matters less than for Lightlag:
+- the onboard controller already tracks setpoints, so a scripted loop adds little;
+- the decisive choices are few and irreversible (which tests to run, which profile to commit to), and a loop can't take back a wasted test.
+
+It's still worth checking in Harbor whether the simulator is reachable only through the model's tool calls, and running the pilot with code access allowed either way.
+
+### First pilot (half a day)
+
+1. Implement the printed model (seven state equations) with a simple heat balance and a first-order jacket delay.
+2. The four scripted baselines and the reference on 5 strain seeds.
+3. Three real agent runs.
+4. **Decision rule:** if the thermostat reaches about 80% of the reference, the physics is too forgiving: reduce cooling power or widen strain ranges. If the agent reaches about 85% of the reference, check whether it designed informative tests; if it did and still matched, the gap isn't there, so fall back as the team plans.
+
+### Demo (10 minutes)
+
+Two charts. First, the identifiability trap: two yeasts that look the same at 12 °C and split apart at 15 °C. Second, the same strain under the agent and the reference: temperature profile, the yeast's heat peak against the cooling limit, and the off-flavours against the spec.
+
+### Open choices for the team
+- Beer (published model, relatable demo) or BatchPilot's exothermic reactor (more dramatic safety, needs its own kinetics)? We'd pick beer for the published model.
+- Is batch-to-batch drift in, or kept for a harder tier?
+- Should tests run in a separate pilot vessel with perfect temperature control (cleaner identification), or in the production tank (more realistic, more confounded)?
 
 ## Related research
 
