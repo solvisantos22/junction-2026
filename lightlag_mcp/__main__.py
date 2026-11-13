@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import secrets
 import signal
 import sys
 from typing import Optional, Sequence
@@ -41,6 +42,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--artifact-dir", default=os.environ.get("LIGHTLAG_ARTIFACT_DIR"),
                         help="evaluator-only directory for result.json, replay.json and transcript.jsonl")
+    parser.add_argument("--token-file", default=os.environ.get("LIGHTLAG_TOKEN_FILE"),
+                        help="write a freshly generated evaluator token here (HTTP only); used when "
+                             "LIGHTLAG_EVALUATOR_TOKEN is not set, so no secret has to be configured")
     args = parser.parse_args(argv)
     if args.seed is None:
         parser.error("a seed is required (--seed or LIGHTLAG_SEED)")
@@ -51,7 +55,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.ticks is not None:
         settings["max_ticks"] = args.ticks
     service = EpisodeService(seed=args.seed, config=Config(**settings), artifact_dir=args.artifact_dir)
-    server = build_server(service, evaluator_token=os.environ.get("LIGHTLAG_EVALUATOR_TOKEN") or None)
+    token = os.environ.get("LIGHTLAG_EVALUATOR_TOKEN") or None
+    if token is None and args.token_file and args.transport == "http":
+        # A per-process secret that exists only inside this container.
+        token = secrets.token_urlsafe(32)
+        os.makedirs(os.path.dirname(os.path.abspath(args.token_file)), exist_ok=True)
+        descriptor = os.open(args.token_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            stream.write(token)
+    server = build_server(service, evaluator_token=token)
 
     def finish() -> None:
         result = service.finish()
