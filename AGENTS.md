@@ -11,3 +11,7 @@ These instructions apply to every chat, agent and worktree working on this repos
 - The team is provisionally committed to AfterQuery. Project ideas remain provisional until the team chooses one.
 - Brainstorm before implementing the actual challenge project. Administrative tooling and repository coordination are already authorized.
 - Keep travel and logistics out of this session.
+
+## Lightweight prize evidence
+
+After a meaningful delivered increment, add or extend one entry in [docs/prize-evidence.md](docs/prize-evidence.md) when Codex or a relevant sponsor tool materially contributed. Record the actual tool/person, task or prompt summary, contribution, human decisions, verification and commit/artifact link. Bookkeeping-only edits need no entry. Keep attribution accurate across teammates and tools; do not invent model versions, time savings, usage or results, and do not copy credentials or private conversations into the repository.
