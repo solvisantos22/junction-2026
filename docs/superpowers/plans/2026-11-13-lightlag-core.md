@@ -14,7 +14,7 @@ Design: [first simulator slice](../specs/2026-11-13-lightlag-core-design.md).
 
 Files: `lightlag/__init__.py`, `lightlag/model.py`, `lightlag/environment.py`, `tests/lightlag/test_environment.py`, `.gitignore`.
 
-- [ ] Write timeline, energy, read-isolation and invalid-input tests first. Use a flat world and this public contract:
+- [x] Write timeline, energy, read-isolation and invalid-input tests first. Use a flat world and this public contract:
 
   ```python
   from lightlag import Environment, Config
@@ -27,9 +27,9 @@ Files: `lightlag/__init__.py`, `lightlag/model.py`, `lightlag/environment.py`, `
   assert env.advance(1)["packets"][-1]["tick"] == 4
   ```
 
-- [ ] Run `python3 -m unittest discover -s tests/lightlag -v`; confirm absent behavior fails.
-- [ ] Implement validated frozen configuration/world types and command decoding. Build the fixed map and seeded terrain parameters, then atomic command scheduling, tick integration, delayed packets and copy-safe reads. Keep random noise independent of read calls.
-- [ ] Run the same tests, inspect the diff, obtain code review, then commit and push this working core after fetching/integrating `origin/main`.
+- [x] Run `python3 -m unittest discover -s tests/lightlag -v`; confirm absent behavior fails.
+- [x] Implement validated frozen configuration/world types and command decoding. Build the fixed map and seeded terrain parameters, then atomic command scheduling, tick integration, delayed packets and copy-safe reads. Keep random noise independent of read calls.
+- [x] Run the same tests, inspect the diff, obtain code review, then commit and push this working core after fetching/integrating `origin/main`. Fifteen tests pass; independent review reproduced a cardinal-direction rounding issue, fixed with a four-edge regression. Existing watcher: 26 tests pass.
 
 ## 2. Mission, safety and score
 
