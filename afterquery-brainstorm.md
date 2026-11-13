@@ -1,10 +1,12 @@
 # AfterQuery RL Environment Challenge: Brainstorm
 
-*Brainstorm notes made with Claude (AI), last updated 2026-11-13. Companion to the team's shortlist (`afterquery-ideas.md`) and research (`docs/research/`). Scores are gut ratings, and no performance gap has been measured for any idea yet. To brainstorm with a chatbot, give it this whole file plus the prompt in "Prompt for a chatbot" below.*
+*Brainstorm notes made with Claude (AI), last updated 2026-11-13. Companion to the team's shortlist (`afterquery-ideas.md`), round-two ideas (`afterquery-ideas-round2.md`) and research (`docs/research/`). Scores are gut ratings, and no performance gap has been measured for any idea yet. To brainstorm with a chatbot, give it this whole file plus the prompt in "Prompt for a chatbot" below.*
 
 ## Contents
 - The challenge (original text)
 - Side by side with the team's notes
+- The team's round-two ideas: our read
+- Related research: what worked, what didn't, award-winning precedents, connecting the dots
 - What we're aiming for
 - Ideas at a glance
 - The ideas in detail
@@ -63,18 +65,18 @@ Tiebreaker: If point totals are close, we'll favor a team that shows a smaller m
 
 ## Side by side with the team's notes
 
-The team's notes are the shortlist in `afterquery-ideas.md` and the research in `docs/research/` (benchmark landscape, control and optimization, reward and evaluation). This file is the wider brainstorm. The two complement each other: the research is source-linked evidence about three ideas; this brainstorm is design reasoning across many ideas, with gut scores and no literature check. Statements below about papers and benchmarks come from the team's research and were not re-checked here.
+The team's notes are the shortlist in `afterquery-ideas.md` and the research in `docs/research/` (benchmark landscape, control and optimization, reward and evaluation). This file is the wider brainstorm. The two complement each other: the team's research is source-linked evidence about its shortlist; this brainstorm is design reasoning across many ideas, with gut scores, plus a literature search of its own ("Related research" below) on topics the team's research doesn't cover. Statements in this section about papers and benchmarks come from the team's research and were not re-checked here.
 
 ### At a glance
 
 | | Team shortlist + research | This brainstorm |
 |---|---|---|
 | Purpose | Choose between three ideas using published evidence | Generate and compare many ideas; design rewards and references |
-| Ideas covered | ColdChain, BatchPilot, RecoveryRoom | 13 written up (including BatchPilot), 10 combinations, 14 one-liners |
-| Evidence | Primary papers, benchmarks and docs, with conditions and limits | Reasoning and gut scores; no gap measured |
+| Ideas covered | ColdChain, BatchPilot, RecoveryRoom; round two adds Lightlag, Loop, Bazaar, Brewmaster, Alchemy, Firebreak, Summit, Deep Dive (`afterquery-ideas-round2.md`) | 13 written up (including BatchPilot), 10 combinations, 14 one-liners |
+| Evidence | Primary papers, benchmarks and docs, with conditions and limits | Reasoning and gut scores, plus a literature search (mostly abstracts); no gap measured |
 | Harness | Harbor + OpenCode over MCP, with reference (`oracle`) and no-op (`nop`) agents and a separate verifier; the event's exact starter kit is not yet confirmed | Unknown when written |
 | Headline advice | Pilot the strongest agent first; one controlled source of difficulty; a fair reference; score outcomes and continuing obligations | Hard task, unbreakable reward; public rules, hidden instance; an honest reference; test the brute-force escape hatch first |
-| Current leaning | Experiment order: ColdChain first (cheapest to rule out), BatchPilot as the strongest technical alternative, RecoveryRoom third. Core hypothesis: can a capable agent keep important constraints when it must commit irreversibly before a later, disclosed kind of disruption? | After re-scoring, Cipher Lab, Forecasting Arena and Incident Commander lead on paper but are untested; BatchPilot is the best fit for the team's skills |
+| Current leaning | Experiment order: ColdChain first (cheapest to rule out), BatchPilot as the strongest technical alternative, RecoveryRoom third. Core hypothesis: can a capable agent keep important constraints when it must commit irreversibly before a later, disclosed kind of disruption? Round two (Kristján's session, not yet signed off): the reviewer's top three are Lightlag, Brewmaster and Bazaar; the recommendation is Lightlag, with Bazaar as the fallback. | We agree with round two's order (see "The team's round-two ideas: our read"). On our own list, Cipher Lab, Incident Commander and Forecasting Arena lead on paper; none has a measured gap |
 
 ### Where they agree
 - **Code and solvers are fair game.** An agent writing its own solver or controller is legitimate, so the difficulty must survive it. (Research: "Let the agent build a controller or use a solver". Here: *Brute-force Escape Hatch*.)
@@ -90,7 +92,7 @@ Three ideas were re-scored because of this research; each one's section below ex
 - **Rule-Discovery Gridworld: gap 5 → 2, weighted 89 → 71.** The benchmark review reports a current language-only agent at 100% on BabyAI and BabaIsAI and concludes that a small rule puzzle may be too easy.
 - **Supply Chain Under Shocks: gap 5 → 3, weighted 81 → 69.** Vending-Bench 2, AutoVend (a current model beating its inventory-control reference) and a Beer Game study (good average performance from some agents) are reported counterevidence; perishable stock plus tools is established prior art.
 - **BatchPilot: gap 4 → 3 and build ease 4 → 3, weighted 86 → 77.** It faces reported controller-generation results (CoDyControlBench, a gas-preheater study) and OperAItor, a reactor environment from November 2026, and the review rates its build risk as higher. The design here targets what those reportedly don't cover: strict batch quality and safety limits, delayed lab results, drift between batches, and abort decisions. That matches where the control review says a gap might remain: delayed actuation, terminal quality, constraint margins, recovery. Team fit isn't in the formula and still counts in its favor.
-- **Untested ideas now rank highest.** Cipher Lab and Forecasting Arena lead partly because the research hasn't covered them. Their scores are as untested as the dropped ones were.
+- **Then our own literature check.** Cipher Lab and Forecasting Arena led partly because the team's research hadn't covered them, so they were checked against published work ("Related research" below). Forecasting Arena drops (gap 4 → 3, weighted 85 → 79) because AI forecasting has roughly caught up with superforecasters; Cipher Lab keeps its score because nothing published tests its real question (an agent with a shell and an encryption oracle).
 - **RecoveryRoom is a stronger version of Incident Commander.** Incident Commander now ranks third mainly because others dropped. The research cites AIOpsLab and ITBench as prior art for "fix the incident". RecoveryRoom's goal, restoring service while preserving every accepted job's business effect, checked against an evaluator-owned ledger, is more distinctive.
 - **Check that a failure is real before claiming it.** A low score can come from a broken task, interface or time budget (the research cites a Terminal-Bench audit). The failure modes below assume a sound task.
 
@@ -103,6 +105,148 @@ Three ideas were re-scored because of this research; each one's section below ex
 ### ColdChain
 Not written up here; its closest ideas are Dynamic Scheduler and Supply Chain Under Shocks. The research's counting argument (8 deliveries on two vehicles fit in about 362,880 candidates before pruning) is exactly the *Brute-force Escape Hatch*: an enumerator could erase the gap, so the difficulty would have to come from replanning after irreversible commitments.
 
+## The team's round-two ideas: our read
+
+Pointers on the eight ideas in the team's `afterquery-ideas-round2.md` (from Kristján's session, 13 November) and on its reviewer's verdict, checked against this brainstorm and "Related research". The reviewer's scores are theirs. Nothing here is measured.
+
+### In short
+- **The round-two list converges with this brainstorm.** Its top three each match one of ours: Lightlag tests Delayed-Feedback Blindness like BatchPilot; Brewmaster is our Pilot Plant ID combination (BatchPilot × Alien Physics Lab, in "Combining ideas"); Bazaar is Sealed-Bid Negotiator with the defence ours lacked.
+- **We agree with the order: Lightlag first, Bazaar as the fallback.** Brewmaster is the strongest option if the team wants process-control credibility.
+- **The literature partly answers the reviewer's main worry**, that an agent with a shell scripts away anything computable. Code tools help with computing but not with choosing experiments, and in NewtonBench a code interpreter even made strong models stop exploring too early. So keep the difficulty in what to measure and when to commit.
+- **One red flag:** DeepMind already published a benchmark called Alchemy with the same core idea.
+
+### Idea by idea
+
+#### Lightlag (reviewer's #1): agree, pilot it first
+- **Closest here:** Delayed-Feedback Blindness, Premature Commitment, BatchPilot.
+- **It has a textbook reference.** A delayed problem becomes an ordinary one once the commands still in transit are part of the state. The proposed reference (replay in-transit commands on a learned slip estimate) is exactly that, the same idea as a Smith predictor in process control, so control-minded judges will recognise it.
+- **Expect move and wait.** Since Ferrell's 1965 experiments, people facing a delay have fallen back on sending a small command and waiting to see it land. It is safe and slow. An agent will probably find it too, so "waiting costs battery" is not optional: without it, move-and-wait can match the reference and the gap disappears.
+- **Count the delay in steps, not seconds.** RealtimeBench shows a running clock favours faster models, which measures inference speed rather than decisions, and the rubric gives zero points for impossible timing.
+- **The ablation needs one number.** Action and observation delays are equivalent in theory, so a single delay length is enough for the "zero delay → agent matches reference" fairness proof. A random delay is harder (the in-transit trick stops being exact) but must have a published distribution.
+- **Where the gap must come from:** unknown slip per terrain, and choosing when to calibrate versus drive. Score only the graded traverse, never the calibration drive (AfterQuery's exploration lesson in "Related research").
+- **The niche is open:** no benchmark of LLM agents under a fixed signal delay turned up; the nearest work, on live clocks, finds that time pressure hurts agents.
+
+#### Brewmaster (#2): good, and it's our Pilot Plant ID
+- **The literature says the learning phase is where agents fail.** Causal Discovery Bench puts 94.5% of mistakes in experiment design, and BoxingGym and NewtonBench agree. That supports Brewmaster over plain BatchPilot.
+- **It also backs the reviewer's worry:** basic statistics tools help a lot, and a shell is one. So make the fitting easy and the choice of experiments hard. Design the test batches so they only reveal the yeast if planned well. For example, if heat release rises with temperature, a test held at one temperature can't separate the parameters; the agent has to think of stepping the temperature.
+- **Credibility:** fermentation has validated simulators (IndPenSim, an industrial penicillin process used as a control benchmark) and published baker's yeast models. Borrowing one answers the "arbitrary puzzle" risk.
+- **Score only the graded batches.**
+
+#### Bazaar (#3): solid fallback in a crowded field
+- **Best gap evidence of the eight.** 2026 benchmarks find LLM negotiators leaking their limits (2–80% of episodes across 17 open-weight models in one study) and conceding early, and jointly trained agents drifting to aggressive, welfare-reducing deals.
+- **Ready-made reference:** the Automated Negotiating Agents Competition (ANAC, annual since 2010) has a long line of classical strategies, such as conceding on a schedule while modelling the opponent. Borrowing one gives a reproducible reference nobody can call hand-tuned.
+- **Low novelty:** AgenticPay, PrefBench, TERMS-Bench, PACT and others exist, and a negotiation evaluator won its category at AgentX–AgentBeats. Pitch it as a known weakness, measured cleanly.
+- **The reviewer's fixes are right:** numeric offers only (no prompt injection), final walk-aways, 15+ deals per run, scored as a share of the available surplus.
+
+#### Alchemy: check the name first
+- **DeepMind's Alchemy** (NeurIPS 2021 Datasets and Benchmarks track): potions transform stones under a hidden causal structure, resampled every episode. Same name, same core idea, and RL judges may know it. Deep RL agents failed at it until they were given the hidden state.
+- If kept, rename it and cite DeepMind. The new part is the stock budget: experiment design under a resource limit, the third of Causal Discovery Bench's four difficulty levels.
+- Same family as Cipher Lab and Alien Physics Lab, so the reviewer's concern (hypothesis elimination is a short script) applies to all three.
+
+#### Loop: great story, too big; reuse its mechanic
+- **Learn2Play Bench** (October 2026) already measures this: hidden-rule text games, repeated attempts, scored by how much agents improve from early to late episodes. Agents do improve; full raw histories beat distilled lessons; humans still peak higher.
+- We agree it's too big for 36 hours. Its core, "early attempts are for information; only the last one counts", already lives in Lightlag's calibration drive and Brewmaster's test batches.
+
+#### Firebreak, Summit, Deep Dive: agree these are weakest
+- **Firebreak:** RL wildfire simulators exist (Firehose on Cell2Fire, JaxWildfire), none for LLM agents. With the rules known, the agent codes the lookahead; it would need hidden fuel or wind parameters.
+- **Summit:** the reviewer's integrity point decides it: climbing to camp one and back earns altitude, so stopping early pays. Baseline-Normalized Reward would fix the scoring (do nothing = 0, reference = 1), but storm luck would still decide runs.
+- **Deep Dive:** the point of no return is a shortest-path calculation; a map file closes the gap.
+
+### What this changes in our brainstorm
+- Sealed-Bid Negotiator: adopt Bazaar's numeric-only offers and final walk-aways.
+- BatchPilot: the version with a learning phase (Brewmaster / Pilot Plant ID) is the stronger one; the reviewer gave plain BatchPilot a gap of 1 out of 5 if the agent has a shell.
+- Forecasting Arena re-scored; Cipher Lab, Alien Physics Lab and Patch Under Fire checked against the literature (see their notes).
+
+### Questions for the team
+- Does the judges' harness give the agent a shell? The research and the reviewer both assume so. If not, much of the gap analysis changes.
+- Lightlag: constant delay (cleaner ablation) or random delay with a published distribution (harder)?
+- Has the bare Lightlag loop with three agent runs been tried yet? It decides between Lightlag and Bazaar.
+
+## Related research
+
+What published work and competitions say about our ideas and the team's round-two ideas: the problem each one tackled, what worked, what didn't, and what it means for us. Gathered by web search on 2026-11-13, aimed at topics the team's research (`docs/research/` in junction-2026) doesn't cover. Our read on the round-two ideas themselves is in "The team's round-two ideas: our read".
+
+**How far to trust this:** most sources were read only at abstract or search-summary level, so the numbers are as the authors report them, not reproduced. Where a number comes from a secondary site, it says so. Several 2026 preprints name models we can't check independently. Open a source before quoting it in the demo.
+
+**The short version:** the gap lives in deciding what to find out and when to commit, not in computing. Agents with code tools can compute almost anything; they still choose poor experiments, stop exploring too early and trust stale information.
+
+### Connecting the dots
+
+1. **New rules create the gap; familiar rule types don't, and gaps shrink fast.** A language agent scored 100% on BabaIsAI, a known puzzle game (BALROG, in the team's research). ARC-AGI-3's hand-made games, which come with no instructions, held frontier models under 1% at launch in March 2026 while humans solved them. Four months later ARC Prize verified 30.2% for Claude Opus 5, and harnessed systems are reportedly higher still. In Learn2Play Bench, whose games hide counterintuitive rules, people still reached higher scores than agents. *For us:* draw each seed's rules from a published family so it's fair, but make the combinations new. The gap is real for a hackathon, not forever. → Rule-Discovery Gridworld, Alien Physics Lab, Real-World Priors Override Evidence
+
+2. **Agents fail at choosing experiments more than at reading results.** Causal Discovery Bench attributes 94.5% of agent mistakes to experiment design rather than inference. BoxingGym finds GPT-4o weak at both experimental design and model discovery. NewtonBench finds discovery fragile and very sensitive to noise. DeepMind's Alchemy found deep RL agents failing until they were handed the hidden state. And in simple bandit tasks, LLMs rarely explored unless their history was summarised for them (Krishnamurthy et al.). *For us:* put the difficulty in a learning phase and score only what comes after it. → Uninformative Experiments, Anchoring on the First Hypothesis; the team's Brewmaster, Lightlag and Alchemy; Cipher Lab
+
+3. **A shell closes the computing part of the gap, not the deciding part, and can even widen it.** NewtonBench reports that a code interpreter can *hurt* capable models: they switch from exploring to exploiting too early and settle on wrong answers. Causal Discovery Bench: basic statistics tools help a lot, fancier tools add little when the agent can't design experiments, and a bigger budget doesn't fix sequential discovery. At the 2021 NetHack Challenge, hand-coded bots beat learned agents about threefold. *For us:* this explains the round-two reviewer's split between "agent has a shell" and "no shell" scores. Make the reference an algorithm, assume the agent writes one too, and keep the hard part in decisions a script can't make unless the agent knows what to look for. → Brute-force Escape Hatch, Honest Reference Solver, Premature Commitment
+
+4. **Delay is an open niche, next to evidence that time pressure hurts.** Theory: adding the commands still in transit to the state turns a delayed problem back into a normal one, and action and observation delays are interchangeable. History: since 1965, human operators facing a delay fall back on "move and wait"; predictive displays reduce it. 2026: a live clock flips rankings toward faster models (RealtimeBench), and agents degrade when thinking time turns into control delay. No benchmark of LLM agents under a fixed signal delay turned up. → the team's Lightlag, Delayed-Feedback Blindness, BatchPilot
+
+5. **Negotiation is crowded, with well-documented failures and ready-made references.** In 2026 benchmarks, LLM negotiators leak their limits, concede early, and drift to aggressive deals after joint training. The Automated Negotiating Agents Competition (ANAC) has run since 2010, so classical strategies exist to use as a reference. A negotiation evaluator won its category at AgentX–AgentBeats. → the team's Bazaar, Sealed-Bid Negotiator
+
+6. **Fresh instances deflate scores.** The K Prize's first winner solved 7.5% of freshly collected GitHub issues, while top scores on SWE-bench Verified were around 75%. → Public Rules, Hidden Instance, Held-out Evaluation, Procedural Generation with Seeds
+
+7. **"LLMs can't forecast" no longer holds.** By July 2026 the Forecasting Research Institute said top AI systems have likely reached parity with superforecasters on ForecastBench (not statistically significant, and disputed). → Forecasting Arena, re-scored
+
+8. **Agents will hack the reward if they can, and AfterQuery's own training shows what to reward.** ImpossibleBench made tests contradict the task, so any pass is a cheat; GPT-5 reportedly passed up to about 93% on one variant. A strict "stop if the tests look wrong" instruction cut that to about 1%; hiding the tests also worked but hurt normal performance. AfterQuery trained a 20B model on Terminal-Bench tasks and found that rewarding exploration directly produced exploration that was "performative rather than functional" (their words); rewarding outcomes made useful exploration emerge on its own. *For us:* never reward the learning phase; keep the verifier out of reach; and see "AfterQuery's own lessons" below for the small-model tiebreaker. → Tamper-proof Grader, Small-Model Training Loop, Multiplicative Efficiency Bonus
+
+### Award-winning precedents
+
+| Competition | What happened | Lesson for us |
+|---|---|---|
+| [NeurIPS 2021 NetHack Challenge](https://arxiv.org/abs/2203.11889) | Hand-coded (symbolic) bots took the top three places; the best one's median score was nearly three times the best neural agent's. No agent came close to winning the game. | In long games with hidden information, an algorithmic reference beats learned agents. And an agent with a shell can write that kind of bot itself. |
+| [DARPA AI Cyber Challenge final](https://www.darpa.mil/news/2025/aixcc-results) (DEF CON 33, Aug 2025) | Team Atlanta's system ATLANTIS won the $4M first prize; Trail of Bits second, Theori third; $8.5M in total. Systems found and patched vulnerabilities in real open-source code. | Automated find-and-fix is proven, so a security environment needs a sharper angle than "patch the bug". → Patch Under Fire |
+| [ARC Prize, ARC-AGI-3](https://arcprize.org/results/anthropic-claude-opus-5) (launched 25 Mar 2026) | Interactive games with no instructions. At launch, frontier models scored under 1% while humans solved them (per launch coverage). ARC Prize verified Claude Opus 5 at 30.2% on 24 July 2026; higher harnessed scores on third-party sites are unverified. | Novel rules create a big gap, and harnesses shrink it within months. A [critical review](https://www.nabu.science/paper/10.48550%2Farxiv.2603.24621) notes environments were kept if 2 of 10 humans solved them, so a human baseline is a weak reference; an algorithmic reference is easier to defend. |
+| [Konwinski Prize](https://techcrunch.com/2025/07/23/a-new-ai-coding-challenge-just-published-its-first-results-and-they-arent-pretty), round 1 (2025) | The winner solved 7.5% of GitHub issues collected after the submission deadline, for $50,000. | Unseen instances are the honest test. → Held-out Evaluation |
+| [ANAC 2025](https://arxiv.org/abs/2604.13914) (16th edition) | The main league was a tie between RUFL and SAC Agent, which is built on reinforcement learning (soft actor-critic). | A mature field: decades of classical negotiation strategies to borrow for a reference. |
+| [AgentX–AgentBeats](https://rdi.berkeley.edu/agentx-agentbeats) (Berkeley RDI, 2025–26; 1,300+ teams) | Phase 1 entries were *benchmarks* ("green agents"), not agents. A [negotiation evaluator](https://strategicreasoning.org/srg-team-is-a-winner-in-the-agentx-agentbeats-competition/) won the multi-agent evaluation category; [PETScAgent-Bench](https://www.anl.gov/mcs/article/argonne-team-wins-award-at-agentbeats-competition) placed third in coding. | The closest precedent to this challenge's format: you build the evaluation, not the agent. |
+| [OpenEnv Hackathon SF](https://siliconvalley.northeastern.edu/small-collab-leads-to-big-win-at-2026-openenv-hackathon-san-francisco/) (Meta, Hugging Face, PyTorch; March 2026) | 104 projects, $100K+ in prizes. Mercor's $10,000 theme prize went to an environment that rewards faster CUDA kernels, measured on the GPU. | Winners measured the reward from the real system, not from a judge. → Verifiable Reward |
+
+### By topic
+
+Each entry: the problem it tackled, what worked, what didn't, and what it means for us.
+
+#### Hidden rules and scientific discovery
+*Bears on Alien Physics Lab, Cipher Lab, Rule-Discovery Gridworld, the team's Alchemy and Loop, and the learning phase of Brewmaster and Lightlag.*
+
+- **[NewtonBench](https://arxiv.org/abs/2510.07172)** (ICLR 2026). *Problem:* can agents discover physical laws by running experiments, without recalling them from memory? 324 tasks in 12 physics domains, built from counterfactual versions of real laws. *Worked:* frontier models show a clear but fragile ability; an algorithmic symbolic-regression pipeline (LLM-SR) far outscored a plain agent (55.6% vs 13.9% with GPT-4.1-mini, as reported from the appendix). *Didn't:* non-thinking models scored under 10% symbolic accuracy; performance falls sharply with system complexity and observation noise; a code interpreter made capable models stop exploring too early. *For us:* nearly the same design as Alien Physics Lab: strong evidence for a gap, little novelty. Noise is a ready-made difficulty knob.
+- **[BoxingGym](https://arxiv.org/abs/2501.01540)** (2025). *Problem:* automated experimental design and model discovery. *Didn't:* GPT-4o struggled with both, and giving the agent an explicit statistical model didn't reliably help.
+- **[Causal Discovery Bench](https://arxiv.org/abs/2611.09934)** (November 2026). *Problem:* find a hidden causal structure through sequential experiments with resource limits. 13 models, 3,802 episodes. *Worked:* agents infer well from correctly curated evidence; basic statistics tools help substantially. *Didn't:* 94.5% of mistakes were in experiment design; advanced tools added little; relaxing resource limits didn't fix it. Its four difficulty levels (one experiment → sequential exploration → budgeted experiments → conflicting evidence) are a ready-made difficulty ladder.
+- **[Alchemy](https://arxiv.org/abs/2102.02926)** (DeepMind and UCL, NeurIPS 2021 Datasets and Benchmarks). *Problem:* meta-learning a hidden causal structure (potions transform stones) resampled every episode. *Didn't:* strong deep RL agents (IMPALA, V-MPO) learned single tasks but failed to meta-learn. *Worked:* giving the hidden state, or auxiliary tasks, improved them a lot. *For us:* same name and core idea as the team's Alchemy; see "The team's round-two ideas: our read".
+- **[Learn2Play Bench](https://www.alphaxiv.org/abs/2610.08215)** (October 2026). *Problem:* do agents learn from experience in unfamiliar games? 20 hand-designed text games with hidden, sometimes counterintuitive rules, played repeatedly. *Worked:* agents do improve across episodes; keeping full, unedited histories of earlier attempts beat methods that distil them into lessons (Reflexion and others). *Didn't:* humans reached higher peaks, tried more varied strategies and repeated themselves less; one agent ruled out a working combination after a single failure. *For us:* the team's Loop mechanic, already measured with "learning gain" (late minus early episodes).
+- **[Can large language models explore in-context?](https://arxiv.org/abs/2403.15371)** (Krishnamurthy et al., NeurIPS 2024). *Problem:* do LLMs explore in simple multi-armed bandits? *Didn't:* most model and prompt combinations failed to explore robustly. *Worked:* only GPT-4 with chain-of-thought and an externally summarised history. *For us:* the classic citation for "agents exploit too early".
+- **[CipherBank](https://arxiv.org/abs/2504.19093)** (ACL Findings 2025) and **[CryptanalysisBench](https://arxiv.org/abs/2607.18538)** (2026). *Problem:* can LLMs decrypt? CipherBank's 2,358 tasks (substitution, transposition and custom ciphers) found significant weaknesses in GPT-4o, DeepSeek-V3, o1 and DeepSeek-R1. CryptanalysisBench (191 tasks on real primitives) concludes models can increasingly do cryptanalysis. *For us:* neither tests an agent with a shell and an encryption oracle, which is Cipher Lab's real question.
+
+#### Control under delay
+*Bears on the team's Lightlag and Brewmaster, and on BatchPilot.*
+
+- **[Delays in Reinforcement Learning](https://arxiv.org/abs/2309.11096)** (survey) and delayed-MDP papers ([Nath et al.](https://arxiv.org/abs/2108.07555)). *Worked:* adding the last few commands sent to the state makes a delayed problem an ordinary one again; action and observation delays are equivalent and add up. *Didn't:* the state grows with the delay, and the trick stops being exact when delays are random. *For us:* the Lightlag reference ("replay in-transit commands") is the textbook answer, which makes it credible to control-minded judges. A constant delay gives a clean ablation; a random one is harder but must be documented.
+- **Ferrell, "Remote manipulation with transmission delay"** (1965), and later teleoperation research (for example [Sanner's dissertation at the University of Maryland](https://drum.lib.umd.edu/handle/1903/2064)). *Problem:* operating a remote arm or vehicle through a delay. *What people did:* most operators spontaneously adopted "move and wait": small command, wait for confirmation. *Didn't:* it is slow, and later rover studies link it to high workload and more collisions. *Worked:* predictive displays that show where the vehicle will be. *For us:* expect agents to find move-and-wait too. It only loses if waiting costs something, which is why the round-two reviewer's "waiting costs battery" is essential.
+- **[The World Won't Wait (RealtimeBench)](https://arxiv.org/abs/2610.20665)** (October 2026). *Problem:* agents in games that keep running while the model thinks; 180 tasks, six game types. *Didn't:* a stronger but slower model beat a faster one with the game paused, then fell behind with the clock running. *Worked:* a slow "teacher" studies failures between attempts and writes instructions for a fast "student", raising its score from 13.51 to 24.19 out of 100. *For us:* a wall clock measures inference speed, not decisions, and the rubric gives zero points for impossible timing, so count delay in steps.
+- **[Reflex First, Reflect Later](https://arxiv.org/abs/2506.07223)** (2025). *Didn't:* methods that did well in the base setting got worse once their thinking time became control delay.
+- **Fermentation control.** [IndPenSim](https://skoge.folk.ntnu.no/prost/proceedings/dycops-2025/DYCOPS2025_offline_program/contents/papers/0019.pdf), a validated simulation of industrial penicillin fermentation, is a standard benchmark for advanced control and RL; there are RL studies of fed-batch [baker's yeast](https://ceur-ws.org/Vol-3970/SHORT4.pdf) and of [harvest timing as optimal stopping](https://arxiv.org/abs/2101.03735). No benchmark of LLM agents controlling fermentation turned up. *For us:* borrowing a published model answers Brewmaster's "arbitrary puzzle" risk.
+
+#### Negotiation
+*Bears on the team's Bazaar and Sealed-Bid Negotiator.*
+
+- **[Faithful Delegates? (SovereignNegotiation-Bench)](https://arxiv.org/abs/2607.02814)** (2026). *Problem:* do agents protect their principal's limits? *Didn't:* across 17 open-weight models, faithful success ranged from 6% to 75%, and agents revealed the principal's reservation value in 2–80% of episodes. Its counterparty rules make leaks costly (after a leak, the counterparty offers exactly that value and holds).
+- **[Used Car Salesbots?](https://arxiv.org/abs/2605.31445)** (2026). *Problem:* honesty and credulity in bargaining with partial information. *Didn't:* training both sides together did not settle at a fair midpoint; it produced aggressive, seller-favouring deals with lower total welfare.
+- **[TERMS-Bench](https://arxiv.org/abs/2605.13909)** and **[PrefBench](https://arxiv.org/abs/2605.22855)** (2026): hidden reservation prices and hidden, falling willingness to pay; TERMS-Bench classifies failures that a plain deal rate hides. **[PACT](https://github.com/lechmazur/pact)**: 20-round buyer–seller matches with hidden values and numeric bids and asks each round, the numeric-only protocol the round-two reviewer recommends.
+- **[ANAC](https://arxiv.org/abs/2604.13914)**: see the precedents table; its supply-chain league is also relevant to Supply Chain Under Shocks.
+- *For us:* the gap evidence is strong and the field is crowded. Pitch it as a known weakness, measured cleanly.
+
+#### Forecasting
+- **[ForecastBench](https://forecastingresearch.substack.com/p/ai-models-have-likely-reached-parity)** (Forecasting Research Institute). *Problem:* LLMs vs superforecasters on questions about real future events. *Worked:* steady gains; by July 2026 the institute says top systems have likely reached parity and an AI system outranks superforecasters on market questions. *Caveat:* not statistically significant, a [May 2026 report](https://parallect.ai/reports/ai-superforecasters-forecastbench-may-2026-895525) disputes parity, and some systems may benefit from leakage in backtests. *For us:* Forecasting Arena has to rest on its synthetic world, not on "LLMs forecast badly".
+
+#### Reward hacking, and AfterQuery's own lessons
+- **[ImpossibleBench](https://arxiv.org/abs/2510.20270)** (2025). *Problem:* how often do coding agents cheat on tests? Tests are altered to contradict the task, so any pass means a cheat. *Didn't:* GPT-5 reportedly passed 54% on one variant and about 93% on another (secondary summaries). *Worked:* a strict instruction to stop when tests look wrong cut it to about 1%; hiding tests also worked but hurt normal performance. *For us:* assume the agent hacks whenever it can, during the judges' 15 minutes and in training.
+- **[AfterQuery: Improving Terminal-Bench 2.0 with Tinker and Harbor](https://www.afterquery.com/blog/how-we-improved-terminal-bench-2-with-tinker-and-harbor).** *Problem:* train a small open model (gpt-oss-20b) to be a better terminal agent. *Worked:* supervised fine-tuning on good trajectories (3.1% → 13.5%) then reinforcement learning with verifiable rewards (GRPO, group size 16) to 17.0% on 89 tasks; partial credit (80% share of tests passed, 20% efficiency bonus among successes); training only on tasks the model solved 10–80% of the time; one fresh Docker container per episode. *Didn't:* a reward for exploratory first turns, which the model satisfied without using what it found; they removed it. *For us:* (1) never reward a learning or calibration phase directly; (2) a difficulty dial (delay, noise, budget) can keep a small model in the 10–80% band, which is how to aim at the tiebreaker; (3) their 80/20 shape is our Multiplicative Efficiency Bonus. This is the judges' own playbook (Harbor + Tinker), worth echoing in the demo.
+
+#### Areas where no LLM-agent benchmark turned up
+One or two searches each, so absence is weak evidence; it may also mean less competition.
+- **Fixed signal delay** (Lightlag): only live-clock studies (above).
+- **Fermentation or batch control** (Brewmaster, BatchPilot): RL work, nothing for LLM agents.
+- **Wildfire suppression** (Firebreak): RL simulators exist ([Firehose on Cell2Fire](https://williamshen-nz.github.io/firehose/firehose-paper.pdf), [JaxWildfire](https://arxiv.org/abs/2512.06102)), none for LLM agents.
+- **Optimal stopping** (Summit, Deep Dive): classical theory (the secretary problem's 1/e rule); nothing on LLM agents turned up.
+
 ## What we're aiming for
 
 1. **Hard task, unbreakable reward.** The task must be solvable, because we have to show a stronger reference run. But frontier agents should fail at it for reasons we can explain. What must be unbreakable is the *reward*: doing nothing or stopping early scores about 0, and no trick beats actually doing the task.
@@ -114,13 +258,13 @@ Not written up here; its closest ideas are Dynamic Scheduler and Supply Chain Un
 
 ## Ideas at a glance
 
-Scores are 1–5 gut ratings, meant to be argued with. Weighted score follows the rubric: (gap×30 + difficulty×30 + integrity×25 + build ease×15) / 5, out of 100. "Build ease" stands in for craft (higher = easier to build well). Three ideas were re-scored after reading the team's research (marked *re-scored*; see "Where the research changes this brainstorm" above). The rest keep their original gut scores, untested against the literature.
+Scores are 1–5 gut ratings, meant to be argued with. Weighted score follows the rubric: (gap×30 + difficulty×30 + integrity×25 + build ease×15) / 5, out of 100. "Build ease" stands in for craft (higher = easier to build well). Four ideas were re-scored (marked *re-scored*): three after reading the team's research (see "Where the research changes this brainstorm" above) and Forecasting Arena after the literature search in "Related research". The rest keep their original gut scores.
 
 | # | Idea | Theme | In one line | Gap | Difficulty | Integrity | Build ease | Weighted |
 |---|---|---|---|---|---|---|---|---|
 | 1 | Cipher Lab | Hidden-rule discovery | Reverse-engineer a procedurally generated cipher whose key keeps changing, using a limited "encrypt" tool, then decrypt messages sent at *future* key states. | 3 | 5 | 5 | 4 | **85** |
-| 2 | Forecasting Arena | Judgment under uncertainty | A simulated world (small economy, disease spread, or sports league) with hidden dynamics. Read the data, optionally buy more, and give probability forecasts for upcoming events. | 4 | 4 | 5 | 4 | **85** |
-| 3 | Incident Commander | Investigation & diagnosis | A simulated cluster of 8–20 microservices has a hidden fault. Investigate logs, metrics and traces, fix the actual cause and name it, without wrecking healthy services. | 4 | 5 | 4 | 2 | **80** |
+| 2 | Incident Commander | Investigation & diagnosis | A simulated cluster of 8–20 microservices has a hidden fault. Investigate logs, metrics and traces, fix the actual cause and name it, without wrecking healthy services. | 4 | 5 | 4 | 2 | **80** |
+| 3 | Forecasting Arena *(re-scored)* | Judgment under uncertainty | A simulated world (small economy, disease spread, or sports league) with hidden dynamics. Read the data, optionally buy more, and give probability forecasts for upcoming events. | 3 | 4 | 5 | 4 | **79** |
 | 4 | Alien Physics Lab | Hidden-rule discovery | A procedurally generated 2D world whose physics laws are *not* Earth's. Run experiments to work out the laws, then predict or hit targets you have never seen. | 4 | 4 | 4 | 3 | **77** |
 | 5 | Synthetic Research Desk | Investigation & diagnosis | A generated wiki, email archive and changelog (~500 documents) for a fictional company. Facts change over time, documents contradict each other, some are stale or rumor. Answer 10 precise questions. | 4 | 4 | 4 | 3 | **77** |
 | 6 | BatchPilot *(team proposal, re-scored)* | Long-horizon control & planning | Produce three on-spec batches in a simulated jacketed batch reactor where heating, cooling and the reaction's own heat all act with delays. Agent vs a model predictive controller (MPC). | 3 | 5 | 4 | 3 | **77** |
@@ -189,53 +333,18 @@ Endless seeds + exact-check reward → ideal for Small-Model Training Loop.
 > - Chosen-plaintext (agent picks inputs), or only known-plaintext on the hard tier?
 > - Should the key schedule react to the agent's own queries, so careless probing costs more?
 
+#### Literature check (2026-11-13)
+- **No score change; gap stays 3.** CipherBank (ACL Findings 2025, 2,358 tasks) found GPT-4o, o1, DeepSeek-V3 and DeepSeek-R1 weak on classical and custom ciphers, and CryptanalysisBench (2026) finds models increasingly capable on real cryptographic primitives. Neither tests an agent with a shell and an encryption oracle, which is this design's real question → Brute-force Escape Hatch.
+- **Support for the query budget:** in sequential discovery, agents' main weakness is choosing experiments, not reading results (Causal Discovery Bench: 94.5% of mistakes). Choosing which plaintexts to encrypt is exactly that kind of choice.
+- **Same family as the team's Alchemy**, so the round-two reviewer's worry (eliminating hypotheses is a short script) applies here too. See "Related research" and "The team's round-two ideas: our read".
+
 #### Connections
 - **Failure modes it tests:** Anchoring on the First Hypothesis, Shallow Heuristics Break Under Shift, Uninformative Experiments, Skipping Verification, Real-World Priors Override Evidence
 - **Reward safeguards it uses:** Held-out Evaluation, Multiplicative Efficiency Bonus, Exact Match Over Partial Credit, Tamper-proof Grader
 - **Design principles:** Public Rules, Hidden Instance, Procedural Generation with Seeds, Honest Reference Solver, Brute-force Escape Hatch, Small-Model Training Loop
 - **Related ideas:** Protocol Whisperer, Alien Physics Lab, Rule-Discovery Gridworld, Patch Under Fire
 
-### 2. Forecasting Arena
-
-*Theme: Judgment under uncertainty · Gap 4 · Difficulty 4 · Integrity 5 · Build ease 4 · Small-model fit 4 · Weighted 85/100*
-
-> **Pitch**
-> A simulated world (small economy, disease spread, or sports league) with hidden dynamics. Read the data, optionally buy more, and give probability forecasts for upcoming events.
-
-#### The world
-- Hidden model per seed (e.g. a process that switches between regimes). Data feed + generated news text, some of it misleading.
-- 50–100 forecast questions per episode, so luck averages out across 3 runs.
-
-#### Agent interface
-- **Tools:** `get_data(series, range)`, `buy_data(source)` (costs), `python(code)`, `forecast(question, probability)`.
-
-#### Goal & reward
-- Mean log score relative to a base-rate forecaster → Proper Scoring Rules, Baseline-Normalized Reward. Data purchases cost → Action Costs and Collateral Damage.
-- Honest probabilities are optimal by construction, which makes this the most exploit-resistant idea here.
-
-#### Reference run
-Bayesian model of the right model family, fitted on the visible data → Honest Reference Solver.
-
-#### Why frontier agents should struggle
-- Overconfident forecasts (0.95 when 0.7 is right) → Overconfidence and Poor Calibration.
-- Swayed by dramatic news text → Source Trust Errors.
-- Sticks with the first trend after a regime change → Anchoring on the First Hypothesis.
-- Assumes real-world base rates → Real-World Priors Override Evidence.
-
-#### Exploit attempts & defenses
-- Always say 50% → at or below the base-rate forecaster → 0.
-- Extreme 0/1 answers → the log score punishes them hard (probabilities clipped to 0.01–0.99).
-
-#### Stretch: small model
-Many short, scored decisions → good fit for Small-Model Training Loop.
-
-#### Connections
-- **Failure modes it tests:** Overconfidence and Poor Calibration, Source Trust Errors, Anchoring on the First Hypothesis, Real-World Priors Override Evidence
-- **Reward safeguards it uses:** Proper Scoring Rules, Baseline-Normalized Reward, Action Costs and Collateral Damage
-- **Design principles:** Procedural Generation with Seeds, Verifiable Reward, Honest Reference Solver, Small-Model Training Loop
-- **Related ideas:** Alien Physics Lab, Supply Chain Under Shocks, Synthetic Research Desk
-
-### 3. Incident Commander
+### 2. Incident Commander
 
 *Theme: Investigation & diagnosis · Gap 4 · Difficulty 5 · Integrity 4 · Build ease 2 · Small-model fit 3 · Weighted 80/100*
 
@@ -278,6 +387,51 @@ Scripted diagnoser: walk the service dependency graph from the alerting service 
 - **Design principles:** Public Rules, Hidden Instance, Procedural Generation with Seeds, Honest Reference Solver, Verifiable Reward
 - **Related ideas:** Patch Under Fire, Protocol Whisperer, Synthetic Research Desk
 
+### 3. Forecasting Arena
+
+*Theme: Judgment under uncertainty · Gap 3 · Difficulty 4 · Integrity 5 · Build ease 4 · Small-model fit 4 · Weighted 79/100*
+
+> **Pitch**
+> A simulated world (small economy, disease spread, or sports league) with hidden dynamics. Read the data, optionally buy more, and give probability forecasts for upcoming events.
+
+#### The world
+- Hidden model per seed (e.g. a process that switches between regimes). Data feed + generated news text, some of it misleading.
+- 50–100 forecast questions per episode, so luck averages out across 3 runs.
+
+#### Agent interface
+- **Tools:** `get_data(series, range)`, `buy_data(source)` (costs), `python(code)`, `forecast(question, probability)`.
+
+#### Goal & reward
+- Mean log score relative to a base-rate forecaster → Proper Scoring Rules, Baseline-Normalized Reward. Data purchases cost → Action Costs and Collateral Damage.
+- Honest probabilities are optimal by construction, which makes this the most exploit-resistant idea here.
+
+#### Reference run
+Bayesian model of the right model family, fitted on the visible data → Honest Reference Solver.
+
+#### Why frontier agents should struggle
+- Overconfident forecasts (0.95 when 0.7 is right) → Overconfidence and Poor Calibration.
+- Swayed by dramatic news text → Source Trust Errors.
+- Sticks with the first trend after a regime change → Anchoring on the First Hypothesis.
+- Assumes real-world base rates → Real-World Priors Override Evidence.
+
+#### Exploit attempts & defenses
+- Always say 50% → at or below the base-rate forecaster → 0.
+- Extreme 0/1 answers → the log score punishes them hard (probabilities clipped to 0.01–0.99).
+
+#### Stretch: small model
+Many short, scored decisions → good fit for Small-Model Training Loop.
+
+#### Re-scored after a literature check (2026-11-13)
+- **Gap 4 → 3.** On ForecastBench, the Forecasting Research Institute said in July 2026 that top AI systems have likely reached parity with superforecasters on questions about real events (not statistically significant, and disputed). "LLMs forecast badly" is no longer a safe premise.
+- **What still holds:** the world here is synthetic with hidden dynamics, so memorised world knowledge doesn't help, and Proper Scoring Rules keep the reward honest. But an agent with a shell can fit the same model family as the reference, so the gap has to come from deciding which data to buy and when to stop buying.
+- **Weighted 85 → 79.** Details in "Related research".
+
+#### Connections
+- **Failure modes it tests:** Overconfidence and Poor Calibration, Source Trust Errors, Anchoring on the First Hypothesis, Real-World Priors Override Evidence
+- **Reward safeguards it uses:** Proper Scoring Rules, Baseline-Normalized Reward, Action Costs and Collateral Damage
+- **Design principles:** Procedural Generation with Seeds, Verifiable Reward, Honest Reference Solver, Small-Model Training Loop
+- **Related ideas:** Alien Physics Lab, Supply Chain Under Shocks, Synthetic Research Desk
+
 ### 4. Alien Physics Lab
 
 *Theme: Hidden-rule discovery · Gap 4 · Difficulty 4 · Integrity 4 · Build ease 3 · Small-model fit 4 · Weighted 77/100*
@@ -316,6 +470,12 @@ Sparse regression over the published term menu (SINDy-style symbolic regression)
 
 #### Demo appeal
 Very high: animated trajectories of the agent's prediction vs the truth make a strong 10-minute demo.
+
+#### Literature check (2026-11-13)
+- **No score change. The strongest published support for a gap of any idea here, but little novelty.** NewtonBench (ICLR 2026) does almost exactly this: 324 law-discovery tasks in 12 physics domains, built from counterfactual versions of real laws and solved by running experiments. Discovery was fragile, fell sharply with complexity and noise, and non-thinking models scored under 10%. BoxingGym and Causal Discovery Bench agree that experiment design is the weak spot.
+- **The shell may not close the gap:** NewtonBench reports that a code interpreter made capable models stop exploring too early → Premature Commitment.
+- **Reference idea:** in NewtonBench an algorithmic symbolic-regression pipeline (LLM-SR) far outscored a plain agent, so a symbolic-regression reference is credible.
+- **Pitch it as building on NewtonBench, not as new.** Observation noise is a ready-made difficulty knob. See "Related research".
 
 #### Connections
 - **Failure modes it tests:** Real-World Priors Override Evidence, Uninformative Experiments, Anchoring on the First Hypothesis, Overconfidence and Poor Calibration
@@ -445,6 +605,10 @@ Dead time · lab delay · strength of the exotherm · fouling rate · sensor noi
 - **Gap 4 → 3.** The team's control review (`docs/research/control-and-optimization.md` in junction-2026) reports that recent models generate working feedback controllers (CoDyControlBench: 94.8% design success with three feedback-guided attempts, under a criterion that allows large overshoot), and that OperAItor (November 2026) already offers a reactor environment for agents. This design targets what those reportedly don't test: strict batch quality and safety limits, delayed lab results, drift between batches, and abort decisions. But no gap has been shown.
 - **Build ease 4 → 3.** The review rates BatchPilot's build risk higher than ColdChain's: dynamics, units, integration and feasibility all need validation.
 - **Weighted 86 → 77.** Team fit (Manh's control background) is still not in the formula and still counts in its favor.
+
+#### Team round two (2026-11-13)
+- The team's round-two reviewer gave plain BatchPilot a gap of 1 out of 5 if the agent has a shell, and prefers **Brewmaster**: BatchPilot plus unknown yeast parameters and cheap test batches. That is our Pilot Plant ID combination in "Combining ideas".
+- Research on experiment design supports the learning-phase version; fermentation simulators such as IndPenSim would make the process credible. See "The team's round-two ideas: our read" and "Related research".
 
 #### Connections
 - **Failure modes it tests:** Delayed-Feedback Blindness, Shallow Heuristics Break Under Shift, Long-Horizon Drift, Skipping Verification, Premature Commitment
@@ -664,6 +828,10 @@ Team-written proper patches applied by a replay script, against a fixed attacker
 > **Biggest risk**
 > Frontier models already patch common vulnerability classes well, and this is heavy to build. Needs One-Command Reproducibility with Docker done right.
 
+#### Literature check (2026-11-13)
+- **No score change.** DARPA's AI Cyber Challenge (final at DEF CON 33, August 2025; Team Atlanta won the $4M first prize) showed automated systems finding and patching vulnerabilities in real open-source code. That is strong precedent: novelty is lower, and frontier agents may be good at this.
+- **Hide the attacker's tests.** ImpossibleBench (2025) shows coding agents will make tests pass without doing the task when they can → Tamper-proof Grader. See "Related research".
+
 #### Connections
 - **Failure modes it tests:** Symptom Fixing vs Root Cause, Shallow Heuristics Break Under Shift, Skipping Verification
 - **Reward safeguards it uses:** Held-out Evaluation, Tamper-proof Grader, Action Costs and Collateral Damage
@@ -733,6 +901,11 @@ Bayesian inference of each opponent's type + the best response to that type → 
 
 > **Biggest risk**
 > Scripted opponents are easy to exploit (e.g. accepting anything near a timeout). This has the highest hack risk of all the ideas; run the Red-Team Checklist hard. Bot logic stays outside the sandbox → Tamper-proof Grader.
+
+#### Literature check (2026-11-13)
+- **No score change.** The evidence supports a gap: in 2026 benchmarks, LLM negotiators leak their limits and concede early (details in "Related research"). Reward integrity is still the weak point.
+- **Fix to adopt from the team's Bazaar** ("The team's round-two ideas: our read"): numeric offers only, so scripted opponents can't be prompt-injected through free text; final walk-aways; scoring as a share of the available surplus over 15 or more deals.
+- **Reference to borrow:** classical strategies from the Automated Negotiating Agents Competition (ANAC), such as conceding on a schedule while modelling the opponent.
 
 #### Connections
 - **Failure modes it tests:** Real-World Priors Override Evidence, Overconfidence and Poor Calibration, Premature Commitment, Anchoring on the First Hypothesis
@@ -860,6 +1033,8 @@ Please:
 - The research points to Harbor + OpenCode over MCP. What exactly does the event's starter kit contain (task format, verifier setup, time limits)?
 - Which frontier model will the judges run, and how many credits do we get?
 - Which 2–3 ideas do we pilot first to measure a real gap? No gap is proven for any idea yet.
-- Cipher Lab and Forecasting Arena now rank highest but haven't been checked against the literature. Do they survive the same review?
+- Does the agent get a shell in the judges' harness? The team's research and the round-two reviewer both assume so; much of the gap analysis depends on it.
+- Cipher Lab still ranks first here, but nothing published tests its real question. Is it worth a quick pilot next to Lightlag?
+- Lightlag: constant delay (cleaner ablation) or random delay with a published distribution (harder)?
 - BatchPilot: which process exactly (exothermic reactor, fermentation, crystallization cooling)?
 - Should ColdChain and RecoveryRoom be written up in the same format, to compare like for like?
