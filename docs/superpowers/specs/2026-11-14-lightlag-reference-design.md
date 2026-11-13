@@ -68,3 +68,9 @@ Shared seeds preserve terrain coefficients and the temporal noise field. Because
 - The evaluator reaches the horizon even if a policy stops early. Each run starts fresh. Errors remain visible.
 - The command produces repeatable summaries and valid replay files consumable by the existing replay schema.
 - Publish measured development and separate check results, exact commands, limitations and next integration points. Do not call scripted gaps real-agent evidence.
+
+## Evaluator factory integration follow-up
+
+Manh's published dynamic-pilot cross-check currently replaces `lightlag.evaluation.Environment` temporarily. Add an optional trusted `environment_factory` to `run_episode` so integrations can construct an episode explicitly instead. It receives the evaluator's `seed` plus deep-copied `config` and `world` keywords and returns a fresh environment supporting the five public methods and evaluator-only `evaluate`/`replay`. With no factory, resolve the existing `Environment` at call time for unchanged default behavior and compatibility with existing callers.
+
+This is evaluator construction plumbing: policies still receive only the five callbacks, early returns still consume the full horizon read from public rules, and errors still propagate. A small wrapper can translate the generic factory arguments into `DynamicEnvironment(profile=...)`. Do not change the teammate's dynamic package, scoring, controllers or service in this increment. The batch API/CLI stays fixed-map; supporting varying maps would require per-run world metadata instead of implying one shared world. Providing this hook does not adopt a dynamic rule profile.

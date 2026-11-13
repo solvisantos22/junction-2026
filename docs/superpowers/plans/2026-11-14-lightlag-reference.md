@@ -60,11 +60,14 @@ Files: `lightlag/evaluation.py`, `tests/lightlag/test_evaluation.py`, `lightlag/
 
 - [x] Write failing tests for matrix coverage/order, independent seeds, aggregation, positive/zero/missing reference normalization, repeatable JSON/CSV output, no-overwrite artifact exports and invalid CLI selections. Test a small full CLI matrix through subprocesses.
 - [x] Implement `run_comparison` and a CLI accepting `--seeds` (default 0–9), `--delays` (default 0 3), `--ticks` (default 80), `--policies` (default all six), and `--output-dir` (optional new directory). Preserve raw per-run data; reference ratios are null if unavailable or denominator zero. Write summary, CSV and unchanged evaluator replay schema for viewer use. Fail visibly on policy errors. The integrated CLI also offers the six `team_` aliases and explicit reference selection; full episode returns are separate from the compact summary.
-- [ ] Run the full tests, obtain spec/quality review, and verify this concrete invocation with a fresh directory:
+- [x] Run the full tests and obtain spec/quality review: 99 core/evaluation and 25 teammate-controller tests pass, both reviews approved. A 48-episode full CLI smoke check verified every replay. Code was published as `934735e` before the full experiment.
+- [x] Freeze the controller, then run seeds 200–209 separately. The planned 100–109 set was replaced before use because Manh's separate dynamic pilot used 100–139. All 480 episodes/replays across development and check sets passed execution/artifact validation. Scores, failures, return rates and traces are recorded in [results](../../lightlag-reference-results.md), with exact commands, raw CSVs, manifest and limits. No real-agent gap or held-out map result is claimed, and no post-check tuning occurred.
+- [x] Complete the handoff with controller callable and artifact contracts for teammates. Release this broad claim in favor of the narrow factory integration below, check links/data and `git diff --check`, fetch/integrate and publish the evidence.
 
-  ```sh
-  python3 -m lightlag.evaluation --seeds 0 1 2 3 4 5 6 7 8 9 --delays 0 3 --output-dir /tmp/lightlag-reference-development
-  ```
+## Task 4 — Explicit evaluator environment factory
 
-- [ ] Freeze the controller, then run seeds 200–209 separately. The planned 100–109 set was replaced before use because Manh's separate dynamic pilot used 100–139. Inspect scores, failures, return rates and replay traces. Record all results with configuration, exact commands and limitations; never claim a real-agent gap from scripted policies.
-- [ ] Complete the handoff with controller callable and artifact contracts for teammates. Update/release the claim, run `git diff --check`, fetch/integrate, push and confirm this worktree matches `origin/main`.
+Integration follow-up from Manh's published dynamic pilot, within the shared evaluator scope. Files: `lightlag/evaluation.py`, `tests/lightlag/test_evaluation.py`, API/handoff docs and status. Leave all teammate implementation files unchanged.
+
+- [ ] Add a failing regression for default-vs-explicit factory equivalence, evaluator seed/config/world forwarding with copied inputs, full-horizon grading after early return and visible factory errors before policy execution. Exercise an actual dynamic episode through a wrapper factory and confirm it agrees with the existing pilot runner on a development seed.
+- [ ] Add optional `environment_factory=None` to `run_episode`; default resolves the existing `Environment` at call time. A trusted factory accepts `seed`, `config` and `world` keywords and returns a fresh compatible episode. Keep callbacks, transcript, grading and replay unchanged. The factory is never passed to a policy. Do not generalize the batch CLI to varying maps in this increment.
+- [ ] Run relevant suites, independent spec then quality review, update the integration example/handoff, release the claim, fetch/integrate, push and confirm synchronization.

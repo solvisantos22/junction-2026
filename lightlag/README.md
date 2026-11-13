@@ -110,6 +110,8 @@ Kristján's independently developed family is in `lightlag_controllers/`. Its `a
 
 ### Reproducible comparisons and replay exports
 
+The [recorded 480-episode comparison](../docs/lightlag-reference-results.md) includes raw CSVs, the frozen configuration, measured outcomes and limitations for both controller families.
+
 Run a small comparison through the shared evaluator:
 
 ```sh

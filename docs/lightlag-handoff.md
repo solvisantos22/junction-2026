@@ -14,6 +14,8 @@ Published increments before the runner: task claim `e8461e9`, design/plan `475f5
 
 The public-tool runner was published as `73098c6`, conservative controllers as `6e580fc`, and the shared evaluation ownership decision as `ea0c353`. Kristján's controller/adapter and Manh's dynamic-pilot findings were integrated without replacing their files.
 
+The batch CLI/API was published as `934735e`. The [shared comparison](lightlag-reference-results.md) records 480 episodes across both families, development seeds 0–9 and separate check seeds 200–209, with checked-in raw CSVs and a complete rules/map manifest. Use `team_reference` as the stronger current fixed-map denominator: it returned alive in all 40 reference episodes and averaged 3.8/3.9 on development delays 0/3, then 4/4 on the check. This selects a comparison baseline, not the final project or rules.
+
 ## Decisions to carry forward
 
 - Python 3.9+ standard library; no credentials or installation needed. [Design](superpowers/specs/2026-11-13-lightlag-core-design.md) and [completed plan](superpowers/plans/2026-11-13-lightlag-core.md) record the rationale and scope.
@@ -29,6 +31,8 @@ The public-tool runner was published as `73098c6`, conservative controllers as `
 ## Verification evidence
 
 Controller/evaluator continuation: 99 core/controller/evaluation tests pass under Python 3.9.6, including deterministic comparisons, reference-ratio edge cases, preflight validation and exclusive artifact exports. Kristján's 25 controller tests also pass. A separate CLI smoke run completed 48 full-horizon episodes across all twelve policies; every exported replay matched its score row. After integration, Manh's 12 dynamic tests and 10 dependency-free MCP service tests pass. Eight MCP transport tests were skipped in this Python environment because the optional SDK is absent; Kristján's handoff records his own SDK-backed verification.
+
+Independent specification and quality review approved the batch implementation. Its full comparison completed 480 episodes without execution errors and verified every replay's schema, seed, delay, score and 81-frame horizon. No controller or rule tuning followed the separate check.
 
 - 34 simulator/CLI tests passed with `python3 -m unittest discover -s tests/lightlag -v` under Python 3.9.6. Coverage includes delay 0/3, energy, atomic validation, hazard crossings, unseen queue cancellation, duplicate/false sampling, survival reward and malformed JSON recovery.
 - Existing Junction Watch suite: 26 tests passed; its files were not changed.
