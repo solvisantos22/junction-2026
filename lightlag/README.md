@@ -66,7 +66,7 @@ print(env.advance(1))       # Receives the drive's result, state 4 at tick 7.
 
 Use `{"action": "sample"}` to collect the nearest unsampled target within 0.75 m of the true rover position. At the fixed horizon, trusted evaluator code can call `env.evaluate()` for raw score: sampled value × 1 at base, × 0.5 alive elsewhere, or × 0 if the battery is depleted. Doing nothing scores zero. The evaluator method is not an agent tool, and it rejects early scoring.
 
-`env.replay()` is also evaluator-only and requires completion. There is no normalized score yet: a valid, nonzero reference score is required before introducing reference normalization.
+`env.replay()` is also evaluator-only and requires completion. `evaluate()` reports raw score; a comparison must use a matching positive reference score before computing a reference-normalized ratio.
 
 ### Run a policy through public tools
 
@@ -83,6 +83,29 @@ print(run["tool_calls"])  # Policy and evaluator calls are counted separately.
 
 A policy receives only `rules`, `map`, `telemetry_log`, `uplink` and `advance` callbacks. Each run starts fresh and returns the final result, existing replay format and a copied public-call transcript. When a policy returns early, the evaluator advances the remaining horizon: queued commands still execute and idle energy still drains. Policy exceptions and invalid actions propagate as execution errors, not benchmark scores. This interface is for auditable trusted controllers; it is not a Python security sandbox.
 
+### Reference and diagnostic policies
+
+```python
+from lightlag import Config
+from lightlag.controllers import POLICIES
+from lightlag.evaluation import run_episode
+
+run = run_episode(POLICIES["reference"], seed=7,
+                  config=Config(delay_ticks=3), policy_name="reference")
+print(run["result"])
+```
+
+| Registry name | Behavior |
+|---|---|
+| `reference` | Learn slip from received homogeneous-terrain drives, predict queued commands, route around hazards and reserve return energy through the full horizon |
+| `move_and_wait` | Use similar navigation but wait for each command's telemetry before making the next decision |
+| `nominal_open_loop` | Use published midpoint slip and the initial briefing; ignore later packet contents |
+| `stale_telemetry` | Treat the last received position as current while retaining energy accounting and valid command scheduling |
+| `do_nothing` | Send no commands; the evaluator still completes the horizon |
+| `stop_early` | Make the reference's decisions for the first quarter of the horizon, then return control; already queued work still executes |
+
+The reference uses public terrain/hazard geometry, a weighted slip estimate and conservative travel budgeting. It waits for actual sample confirmation before abandoning a target, and can back out of a safety margin after a stop. The planner is greedy and geometrically routes around hazards; it is not an energy-optimal tour solver. On the default development map it chooses the north and west targets and conservatively skips east, so its partial score does not demonstrate a need to learn sand. These policies are diagnostic algorithms; frontier-agent comparison still requires harness integration.
+
 ## Verification and limits
 
 ```sh
@@ -91,6 +114,6 @@ python3 -m unittest discover -s tests/lightlag -v
 
 The tests cover timing, independent seeded episodes, energy, invalid requests, copy isolation, safety, true-state scoring, CLI recovery, deterministic replay and public-tool episode execution. Tests use only the standard library.
 
-This pilot has one fixed flat map, two terrain types, constant per-terrain slip with per-drive noise, and exact visual odometry. Slopes, embedding, noisy odometry, map generation, baseline/reference controllers, HTTP/MCP, Harbor deployment and real agent evaluation remain follow-up work. The [design decisions](../docs/superpowers/specs/2026-11-13-lightlag-core-design.md) explain those choices. No project selection or benchmark difficulty claim follows from this implementation.
+This pilot has one fixed flat map, two terrain types, constant per-terrain slip with per-drive noise, and exact visual odometry. Slopes, embedding, noisy odometry, map generation, further reference optimization, HTTP/MCP, Harbor deployment and real agent evaluation remain follow-up work. The [simulator design](../docs/superpowers/specs/2026-11-13-lightlag-core-design.md) and [reference design](../docs/superpowers/specs/2026-11-14-lightlag-reference-design.md) explain those choices. No project selection or benchmark difficulty claim follows from this implementation.
 
 The in-process API and local runner do not isolate hidden state from an agent that can inspect Python, launch options or files. Benchmark deployment needs a separate simulator container, a serialized adapter and evaluator-only access to score/replay. See the team's [Harbor tool-access research](../afterquery-brainstorm.md#harbor-tool-access) and the [handoff](../docs/lightlag-handoff.md).

@@ -34,10 +34,10 @@ Files: `lightlag/controllers/__init__.py`, `lightlag/controllers/api.py`, `light
 
 Files: `lightlag/controllers/geometry.py` (public-map geometry/path routing), `lightlag/controllers/predictor.py` (slip estimates and queued-state prediction), `lightlag/controllers/reference.py` (mission policy), existing `baselines.py`/`__init__.py`, `tests/lightlag/test_controllers.py`.
 
-- [ ] Add failing tests using small public observations/maps for slip estimation, pending-command replay and safety-stop cancellation. Add integration cases for target acquisition/return at delays 0 and 3, no targets, low battery, short horizons and a visible obstacle. Verify imports/private access with a narrow API test or source audit.
-- [ ] Implement the reference described in the design. Use rules/map inputs for geometry, timing, slip bounds and costs. Weighted observed slip, latest-packet anchoring, acknowledged command replay, safe route waypoints and full-horizon return budgeting are the required behaviors. Never infer seed from noise or inspect true state.
-- [ ] Add `move_and_wait`, `nominal_open_loop`, `stale_telemetry`, and `stop_early` with behavior matching the design table. Export a policy registry with these and `reference`/`do_nothing`. A policy is a callable taking `PublicTools`; stop-early returns after the first quarter horizon while the evaluator handles the rest.
-- [ ] Run representative checks with the public runner:
+- [x] Add failing tests using small public observations/maps for slip estimation, pending-command replay and safety-stop cancellation. Add integration cases for target acquisition/return at delays 0 and 3, no targets, low battery, short horizons and a visible obstacle. Verify imports/private access with a narrow API test or source audit.
+- [x] Implement the reference described in the design. Use rules/map inputs for geometry, timing, slip bounds and costs. Weighted observed slip, latest-packet anchoring, acknowledged command replay, safe route waypoints and full-horizon return budgeting are the required behaviors. Never infer seed from noise or inspect true state.
+- [x] Add `move_and_wait`, `nominal_open_loop`, `stale_telemetry`, and `stop_early` with behavior matching the design table. Export a policy registry with these and `reference`/`do_nothing`. A policy is a callable taking `PublicTools`; stop-early returns after the first quarter horizon while the evaluator handles the rest.
+- [x] Run representative checks with the public runner:
 
   ```python
   from lightlag import Config
@@ -50,7 +50,7 @@ Files: `lightlag/controllers/geometry.py` (public-map geometry/path routing), `l
       assert run["result"]["at_base"] and run["result"]["alive"]
   ```
 
-- [ ] Execute all simulator/controller tests, spec review and quality review, then publish the working policies before batch/report work. Poor seed scores are findings to investigate, not a reason to modify physics or hide runs.
+- [x] Execute all simulator/controller tests, spec review and quality review, then publish the working policies before batch/report work. All 73 tests pass; independent reviews also checked varied energy/horizon configurations and sand/obstacle missions. Fixes cover delayed sample confirmation and safe escape from an inflated hazard margin. The conservative default reference scores 3/4 and avoids sand; its tie with nominal open-loop is documented, not hidden. Poor seed scores are findings to investigate, not a reason to modify physics or hide runs.
 
 ## Task 3 — Batch comparison, artifacts and evidence
 
