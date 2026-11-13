@@ -4,6 +4,7 @@ Update and push your claim before substantial work. Use a narrow scope and inclu
 
 | Owner | Work | Scope | Status |
 |---|---|---|---|
+| Sölvi / Codex | Share the frequent-push workflow as a repository skill | `.agents/skills/junction-team-workflow/`, `AGENTS.md`, README link | In progress: package existing team rules and verify before pushing |
 | Sölvi / Codex | Junction Watch: 15-minute event updates | `tools/junction_watch/`, watcher design/plan docs; private runtime outside repo | Active: reviews and 26 tests passed; installed timer check completed successfully Friday 22:13 Helsinki. Stops scheduling Sunday 17:00; local Mac and Codex must remain available. |
 | Sölvi / Codex | Sponsor tools and bonus-prize research | [SPONSOR_OPTIONS.md](SPONSOR_OPTIONS.md) | Complete: all 20 resource offers and 19 tech challenges inspected; recommendations remain provisional |
 | Team | Choose AfterQuery project and save tonight's draft | Idea discussion and submission text | Decision pending; target 23:45 Helsinki, Friday 13 November |
