@@ -24,7 +24,7 @@ These are fit judgments, not confirmed eligibility decisions or estimates of win
 | [Best Use of Gemini API](https://hackjunction.app/participate/45/tech-challenges/48) | 1st **€4,000 + $1,000 Google Cloud credits per member**; 2nd €2,000; 3rd €1,000 | Meaningful, innovative, technically impressive Gemini integration; explain why Gemini matters | **Conditional strong fit.** Could be an operator in the environment; confirm that our evaluation use meets their expectations. |
 | [Best Use of Gemma](https://hackjunction.app/participate/45/tech-challenges/47) | **€1,000 to each of three winning teams**, unranked | Innovative, impactful use of Gemma open models | **Good training/stretch candidate.** Hosting via Featherless, Modal or Verda is explicitly suggested. |
 | [Best Use of Nemotron](https://hackjunction.app/participate/45/tech-challenges/46) | **Two winning teams receive one RTX 5080 each** | Use **Nemotron 3.5 Super VL** in core functionality; visibly demonstrate it and explain model, role, value and improvements in submission text | **Possible, but verify endpoint first.** The minimum requirement names Super VL, while a getting-started example names a different Lightning model. Do not assume they are interchangeable for eligibility. |
-| [Best Use of Aiven](https://hackjunction.app/participate/45/tech-challenges/43) | **€1,000 / €750 / €500** | At least one Aiven service meaningfully contributes; meaningful use40%, implementation30%, impact20%, creativity10% | **Useful if needed:** PostgreSQL for episodes, ClickHouse for evaluation events, or Runtime for hosting. Avoid adding a database solely for another entry. |
+| [Best Use of Aiven](https://hackjunction.app/participate/45/tech-challenges/43) | **€1,000 / €750 / €500** | At least one Aiven service meaningfully contributes; meaningful use 40%, implementation 30%, impact 20%, creativity 10% | **Useful if needed:** PostgreSQL for episodes, ClickHouse for evaluation events, or Runtime for hosting. Avoid adding a database solely for another entry. |
 
 ## Tools and credits available tonight
 
@@ -32,7 +32,7 @@ These are fit judgments, not confirmed eligibility decisions or estimates of win
 |---|---|---|
 | [AfterQuery](https://hackjunction.app/participate/45/challenges/328) | Harbor + OpenCode harness over MCP, scoring skeleton, frontier API credits, mentors | **First dependency to obtain.** Exact starter-kit URL and model/budget need mentor confirmation. |
 | [OpenAI](https://hackjunction.app/participate/45/hackerpacks/70) | **$100 / 2,500 Codex usage credits per participant**, 30 days after redemption, one-use personal link; works on Free accounts | Development tooling. **This offer excludes API credits and a paid subscription.** Separate from the prize above. |
-| [Google DeepMind](https://hackjunction.app/participate/45/hackerpacks/68) | Gemini API credits; amount not specified. [Apply once per team](https://forms.gle/bByXvjGkW9WZuYwW9). Challenge page says up to **400 teams**, participants18+ | Apply early if Gemini is a serious option. Access instructions are supplied to eligible teams. |
+| [Google DeepMind](https://hackjunction.app/participate/45/hackerpacks/68) | Gemini API credits; amount not specified. [Apply once per team](https://forms.gle/bByXvjGkW9WZuYwW9). Challenge page says up to **400 teams**, participants 18+ | Apply early if Gemini is a serious option. Access instructions are supplied to eligible teams. |
 | [Anthropic](https://hackjunction.app/participate/45/hackerpacks/67) | **$20 Claude API credits per participant**; redemption link in the resource entry | Development evaluations or additional model comparisons, subject to AfterQuery harness rules. |
 | [Modal](https://hackjunction.app/participate/45/hackerpacks/62) | **$100 CPU/GPU credits per participant**, valid one year after redemption; Python SDK, Sandboxes, endpoints, storage/queues | Run isolated episodes, parallel evaluations, hosted models and demo endpoints. |
 | [Verda](https://hackjunction.app/participate/45/hackerpacks/71) | **€200 credits**, signup + claim form; inference API, CPU/GPU instances, clusters, containers and batch jobs | Alternative compute platform. Verda's tech brief also advertises a hosted NVIDIA Nemotron endpoint. |
@@ -55,7 +55,7 @@ These are fit judgments, not confirmed eligibility decisions or estimates of win
 
 | Challenge | Listed reward | Important condition / relevance |
 |---|---|---|
-| [CRACI](https://hackjunction.app/participate/45/tech-challenges/42) | 1st: LEGO per member; 2nd:24 Red Bulls per member; 3rd: Slush lunch invite; top5:50,000 build minutes per member and interview opportunity | CI must run on CRACI. Judging rewards technical depth and creative use of SBOMs, fixes, provenance/traces/API, not just choosing its runner. |
+| [CRACI](https://hackjunction.app/participate/45/tech-challenges/42) | 1st: LEGO per member; 2nd: 24 Red Bulls per member; 3rd: Slush lunch invite; top 5: 50,000 build minutes per member and interview opportunity | CI must run on CRACI. Judging rewards technical depth and creative use of SBOMs, fixes, provenance/traces/API, not just choosing its runner. |
 | [Context.dev](https://hackjunction.app/participate/45/tech-challenges/44) | €750 / €250 / swag | At least one API endpoint in the core flow; its data must visibly drive the demo; repo/demo and endpoint explanation. |
 | [Oxylabs](https://hackjunction.app/participate/45/tech-challenges/32) | €1,000 Apple voucher per winning team + $500 product credits per member | At least one live search/scrape call during demo, source URLs, explanation of endpoints. |
 | [Cloudinary](https://hackjunction.app/participate/45/tech-challenges/41) | $500 Amazon gift cards **per winning team member** | Meaningful use of one of the four specified hackathon tools; CDN alone insufficient. **Separate [submission form](https://cld.media/hackathon-survey) required.** |
@@ -71,8 +71,8 @@ These are fit judgments, not confirmed eligibility decisions or estimates of win
 ## Tonight's actions
 
 1. Obtain AfterQuery's actual starter kit, model credits and required evaluation settings from its mentors.
-2. If interested, have one teammate request Gemini credits promptly; places are limited to400 teams. Each teammate can inspect their personal Codex offer.
+2. If interested, have one teammate request Gemini credits promptly; places are limited to 400 teams. Each teammate can inspect their personal Codex offer.
 3. Pick one environment first, then choose Modal or Verda based on the compute we actually need. Keep a second model prize conditional.
 4. For NVIDIA, ask which hosted endpoint serves the **required Super VL model**; the example model mismatch needs clarification.
 5. Keep evidence of meaningful sponsor use and note any separate submission requirement. Do not assume checking a box guarantees eligibility.
-6. Save the preliminary project draft by23:59; target23:45 and verify it appears under Your Submissions. The organizer clarified that a draft is sufficient tonight; final submission remains Sunday10:00.
+6. Save the preliminary project draft by 23:59; target 23:45 and verify it appears under Your Submissions. The organizer clarified that a draft is sufficient tonight; final submission remains Sunday 10:00.
