@@ -2,7 +2,7 @@
 
 Research started Friday 13 November 2026, 22:33 Helsinki. Purpose: understand prior approaches, their successes and failures, and what they imply for a small, convincing AfterQuery environment. This is decision support; no project direction has been selected or implemented.
 
-Start with the [working decision brief](afterquery-research.md), which contains the first verified findings and Harbor compatibility notes.
+Start with the [decision brief](afterquery-research.md): our provisional ranking, what worked and failed, the smallest fair experiment, and explicit conditions for dropping each idea. It also maps the evidence to judging and checks Harbor compatibility.
 
 Published deep dives:
 
@@ -10,7 +10,7 @@ Published deep dives:
 - [Control, routing and optimization](control-and-optimization.md): successful solver/controller approaches, closest prior art and a proposed early falsification test.
 - [Reward integrity and evaluation](reward-and-evaluation.md): specification gaming, recovery benchmarks, fair comparisons and proposed exploit probes.
 
-The three deep dives are published. The combined recommendation and a final evidence audit are in progress.
+The three deep dives and combined recommendation are published. A final independent evidence audit is in progress.
 
 The review covers three independent areas: agent benchmarks and long-horizon environments; planning, routing and process control; reward integrity and evaluation design. Findings are pushed as verified sections are ready, then combined into the decision brief.
 
