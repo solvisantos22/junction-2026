@@ -87,4 +87,67 @@ An unknown cave, noisy sonar, samples to collect, and a surface to get back to b
 
 ## Reviewer verdict
 
-Pending.
+An independent reviewer agent scored all eleven ideas on Friday at 22:45. It did not know which ideas anyone preferred. **No idea has a demonstrated gap**: every score below is the reviewer's judgment, not a measurement. The reviewer found its sources through search snippets and did not open the papers, so treat the links at the bottom as leads to check.
+
+Scores are 1–5. Gap is shown as "agent has a shell / agent has no shell".
+
+| Idea | Gap | Difficulty | Integrity | Buildable | Fun | Verdict |
+|---|---|---|---|---|---|---|
+| **Lightlag** | 3 / 4 | 4 | 4 | 4 | 5 | Best overall, but only if waiting costs battery and slip is random |
+| **Brewmaster** | 2 / 4 | 5 | 4 | 4 | 3 | Most credible physics; with a shell, fit-then-simulate is routine for a coding agent |
+| **Bazaar** | 3 / 4 | 4 | 3 | 5 | 4 | Cheapest build, with published support, but the largest exploit surface |
+| Alchemy | 2 / 4 | 3 | 4 | 4 | 3 | Eliminating hypotheses is a short script; reads as an arbitrary puzzle |
+| Summit | 2 / 3 | 3 | 2 | 4 | 4 | Storm luck decides three runs; going to camp one and back rewards stopping early |
+| Deep Dive | 1 / 3 | 3 | 4 | 4 | 4 | A map file plus shortest-path code closes the gap |
+| Firebreak | 1 / 3 | 3 | 3 | 4 | 5 | Rules are fully known, so the agent codes the same lookahead |
+| Loop | 2 / 3 | 3 | 4 | 1 | 5 | Best story, but the world generator and long episodes do not fit 36 hours |
+| BatchPilot | 1 / 3 | 4 | 4 | 4 | 3 | Brewmaster without the hidden parameters |
+| ColdChain | 1 / 2 | 3 | 4 | 5 | 3 | Eight stops can be brute-forced in a script |
+| RecoveryRoom | 1 / 2 | 3 | 3 | 2 | 2 | Home turf for coding agents, the heaviest build, and doing nothing loses no jobs |
+
+### The reviewer's top three, with the changes that make each defensible
+
+**1. Lightlag, with Brewmaster's learning phase** (a short calibration drive before the graded traverse)
+
+- Make waiting cost battery, and make slip random per terrain type. Then "send one command and wait for it to land" does not work, and neither does a one-off script.
+- Document the rule family and hide only the parameters, so nothing is unfairly withheld.
+- Ship a delay ablation: at zero delay the agent should match the reference, and the gap should grow with the delay. That is the fairness proof.
+- Require a return to base, and score several fixed-seed maps per run to control variance.
+
+**2. Brewmaster**
+
+- Reactive control must fail for a documented physical reason: yeast heat release, jacket dead time and batch-to-batch disturbance.
+- Publish a plain thermostat baseline that scores well below the reference. If a thermostat passes, the agent will too.
+- Use a continuous quality score. Graded batches are final, exactly three, with a fixed test budget.
+- Weakness: the reviewer puts it at about even odds that an agent with a shell fits a model from the test data and closes the gap.
+
+**3. Bazaar**
+
+- Numeric offers only; free text invites prompt injection.
+- Walking away is final, and creeping up by minimum increments burns the merchant's patience.
+- Publish the merchant rule family and hide only the parameters. Run 15 or more deals per run on fixed seeds, scored as a share of the available surplus.
+
+### Points that apply to whichever idea we pick
+
+- **Assume the agent has a shell.** Harbor runs OpenCode inside the task container. Sölvi's [research note](docs/research/afterquery-research.md) reaches the same conclusion from the Harbor docs.
+- **Run the simulator in a separate container.** The seed, hidden parameters and true state must live where the agent cannot read them, and the verifier must read the reward from there.
+- **Test the gap before polishing.** Build a bare loop and run the real agent three times first.
+
+### Leads the reviewer found (not opened, not verified)
+
+- **Bargaining:** [PrefBench](https://arxiv.org/pdf/2605.22855) reportedly finds LLM sellers bargain weakly against simple heuristics; ["Used Car Salesbots?"](https://arxiv.org/pdf/2605.31445) reportedly finds agents concede. [AgenticPay](https://www.arxiv.org/pdf/2602.06008) is a similar existing benchmark, which supports Bazaar's gap and reduces its novelty.
+- **Knowing but not acting:** [STOCKTAKE](https://arxiv.org/pdf/2607.13618) reportedly compares agents with a reference that sees the same observations; a useful template for ours.
+- **Delay:** no benchmark of control under a signal delay turned up, so the Lightlag and Brewmaster gap is unproven in the literature. That also means it is less crowded.
+
+## Recommendation from Claude (Kristján's session)
+
+Kristján has not signed off on this yet; it is the agent's reading of the review and the research.
+
+**Lightlag for tonight's draft, with Bazaar as the fallback.**
+
+- **It combines the two ideas already on the table.** It has ColdChain's map and route choices and BatchPilot's delayed reactions, so Sölvi's optimization work and Manh's control background both apply.
+- **It has one controlled source of difficulty**, which is what the [benchmark research](docs/research/benchmark-landscape.md) asks for: the same maps with and without the delay.
+- **It is the most fun to demo:** a rover driving off a ridge because it trusted a stale reading, next to one that didn't.
+- **The risk is real:** the research note says agents write good controllers when they have code access. So the first job is a bare Lightlag loop and three real agent runs. If the agent closes the gap, switch to Bazaar, which is the cheapest to build and has the best published support.
+
+The draft saved tonight is preliminary, so this choice can still change after that first test.
