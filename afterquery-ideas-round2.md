@@ -87,6 +87,8 @@ An unknown cave, noisy sonar, samples to collect, and a surface to get back to b
 
 ## Reviewer verdict
 
+**Partly superseded:** the [second review](#second-review-2315-teammates-ideas-on-the-same-scale) below lowered Lightlag's gap score and raised BatchPilot's after reading the team's research.
+
 An independent reviewer agent scored all eleven ideas on Friday at 22:45. It did not know which ideas anyone preferred. **No idea has a demonstrated gap**: every score below is the reviewer's judgment, not a measurement. The reviewer found its sources through search snippets and did not open the papers, so treat the links at the bottom as leads to check.
 
 Scores are 1–5. Gap is shown as "agent has a shell / agent has no shell".
@@ -139,15 +141,75 @@ Scores are 1–5. Gap is shown as "agent has a shell / agent has no shell".
 - **Knowing but not acting:** [STOCKTAKE](https://arxiv.org/pdf/2607.13618) reportedly compares agents with a reference that sees the same observations; a useful template for ours.
 - **Delay:** no benchmark of control under a signal delay turned up, so the Lightlag and Brewmaster gap is unproven in the literature. That also means it is less crowded.
 
-## Recommendation from Claude (Kristján's session)
+## Second review, 23:15: teammates' ideas on the same scale
 
-Kristján has not signed off on this yet; it is the agent's reading of the review and the research.
+The same reviewer then read Manh's [brainstorm](afterquery-brainstorm.md) and Sölvi's finished [research](docs/research/afterquery-research.md), and was told to be especially hard on Lightlag because this session proposed it. It could not open any paper, so its source checks are search-snippet level. Still no measured gap for anything.
 
-**Lightlag for tonight's draft, with Bazaar as the fallback.**
+**Verdict: none of Manh's 13 ideas beats Lightlag, but Lightlag's lead is gone.** After re-scoring it is level with BatchPilot (Manh's spec) and Bazaar. It leads only on demo appeal and on having one clean difficulty dial.
 
-- **It combines the two ideas already on the table.** It has ColdChain's map and route choices and BatchPilot's delayed reactions, so Sölvi's optimization work and Manh's control background both apply.
-- **It has one controlled source of difficulty**, which is what the [benchmark research](docs/research/benchmark-landscape.md) asks for: the same maps with and without the delay.
-- **It is the most fun to demo:** a rover driving off a ridge because it trusted a stale reading, next to one that didn't.
-- **The risk is real:** the research note says agents write good controllers when they have code access. So the first job is a bare Lightlag loop and three real agent runs. If the agent closes the gap, switch to Bazaar, which is the cheapest to build and has the best published support.
+### Changes to the first-round scores
 
-The draft saved tonight is preliminary, so this choice can still change after that first test.
+| Idea | Change | Reason |
+|---|---|---|
+| **Lightlag** | Gap 3/4 → **2/4**, Buildable 4 → 3 | The control review reports current models producing working controllers on 94.8% of plants; a delay predictor is easier. The reviewer's own amendments added build scope. |
+| **BatchPilot** | Gap 1/3 → **2/4**, Difficulty 4 → 5, Buildable 4 → 3 | Manh's spec adds hidden parameters, drift between batches and delayed lab results. |
+| **Brewmaster** | Buildable 4 → 3 | Units and dynamics need validating; close prior art exists. |
+| **RecoveryRoom** | Integrity 3 → 4, Buildable 2 → 3 | The reward review's evaluator-owned ledger and fixed horizon fix the do-nothing leak. Gap unchanged. |
+| Bazaar, ColdChain | No change | The research does not cover negotiation; its own counting argument confirms ColdChain is brute-forceable. |
+
+### Manh's 13 ideas on the reviewer's scale
+
+Gap is "with shell / without"; Manh's own gap score is in brackets.
+
+| Idea | Gap | Diff. | Integ. | Build | Fun | Verdict |
+|---|---|---|---|---|---|---|
+| **BatchPilot** | 2/4 (3) | 5 | 4 | 3 | 3 | Best of the 13, with the most build-ready spec |
+| Sealed-Bid Negotiator | 3/4 (3) | 3 | 2 | 4 | 4 | Bazaar with more exploit surface; merge it in |
+| Alien Physics Lab | 2/4 (4) | 4 | 4 | 3 | 5 | Best demo, but a menu of terms plus Python is a regression script |
+| Forecasting Arena | 2/4 (4) | 3 | 4 | 4 | 2 | Sound reward; the agent fits the published model family |
+| Cipher Lab | 1/3 (3) | 3 | 5 | 4 | 3 | Probing textbook cipher layers is easy for a coding agent |
+| Supply Chain Under Shocks | 2/3 (3) | 3 | 3 | 3 | 3 | Crowded field and long episodes |
+| Spreadsheet Forensics | 2/3 (3) | 3 | 3 | 3 | 2 | The agent writes the same consistency auditor |
+| Protocol Whisperer | 2/3 (4) | 3 | 4 | 2 | 3 | Home turf for a coding agent |
+| Synthetic Research Desk | 2/2 (4) | 3 | 4 | 3 | 2 | Document lookup; ten questions is too coarse a score |
+| Incident Commander | 2/2 (4) | 3 | 3 | 2 | 3 | If a graph walk solves it, so does the agent |
+| Dynamic Scheduler | 1/3 (2) | 3 | 4 | 4 | 2 | The agent writes the solver |
+| Rule-Discovery Gridworld | 1/2 (2) | 3 | 4 | 3 | 4 | Agrees with Manh's downgrade |
+| Patch Under Fire | 1/1 (3) | 3 | 3 | 1 | 4 | A coding task whose reference is an answer key |
+
+The reviewer's main disagreement with Manh's gap scores: they assume habits of older models, while almost every idea hands the agent Python, which removes those habits.
+
+### Combined top five across all three sources
+
+Ranks 1–3 are within the reviewer's uncertainty; 4 and 5 are clearly behind.
+
+1. **Lightlag, with the amendments above.** Narrowly first: nothing published contradicts it, and the zero-delay comparison is the cleanest fairness proof.
+2. **BatchPilot plus test batches.** This is the same idea as Brewmaster and as Manh's "Pilot Plant ID" hybrid, reached independently in two sessions. Equal gap, better difficulty, a control expert on the team, but direct prior art.
+3. **Bazaar.** Better gap and the only idea with published support, but the weakest reward integrity, which is where judges attack.
+4. **Forecasting Arena.** Dull demo, and mistakes only show in aggregate.
+5. **Alien Physics Lab.** A matching demo with a heavier build.
+
+**The deciding design question for every control idea:** can the agent's own code call the environment tools directly? If it can, the reviewer expects the gap to close, because the agent runs its controller in a loop without the model in it.
+
+**Best unwritten idea in Manh's file:** "epidemic control where interventions act with a delay". It is Lightlag's mechanic with the simplest simulator.
+
+## Same mechanic, other settings (not reviewed)
+
+Lightlag's mechanic is "actions land late, information is old, and part of the system must be learned by trying". Kristján asked for non-Mars versions. None of these has been scored.
+
+- **Floodgate:** run a chain of dams before a storm. Released water takes hours to reach the town, and how much rain runs off has to be learned. Holding water earns power revenue, releasing it prevents a flood.
+- **Balloon:** fly a hot-air balloon to a target. The burner acts slowly and you steer only by choosing a wind layer, so the winds have to be explored.
+- **Fishery:** set yearly catch quotas from old, noisy stock surveys. Over-fishing collapses the stock for good.
+- **Harbour pilot**, **central banker**, **outbreak** and **line cook** are further variants; the first two are pure control and the most likely to be solved by a script.
+
+## Recommendation from Claude (Kristján's session), updated 23:15
+
+Kristján has not signed off on this; it is the agent's reading of both reviews and the research.
+
+**Commit tonight to the mechanic, and treat the setting as a taste choice.** All three sessions arrived at the same thing: learn a partly unknown, delayed system with a few cheap trials, then operate it where mistakes cannot be undone.
+
+- **Reactor (BatchPilot plus test batches):** Manh's spec is the most build-ready, and Manh can validate the physics.
+- **Rover, dams or balloon:** the same build with a more visual demo and less prior art.
+- **First test, whichever setting:** a bare version and three real agent runs, with the agent allowed to write code. If the gap closes, fall back to Bazaar.
+
+The draft saved tonight can be edited later, so the setting does not have to be final by 23:59.
