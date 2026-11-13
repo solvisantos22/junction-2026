@@ -6,7 +6,7 @@ Adds sample deadlines, targets discovered mid-mission, seeded maps and a time-pr
 
 ## Run
 
-From the repository root, Python 3.9+, no installation:
+From the repository root, Python 3.9+ (checked on 3.9.20, 3.10, 3.12 and 3.14, with identical results), no installation:
 
 ```sh
 python3 -m unittest discover -s tests/lightlag_dynamic -v                 # 12 tests, about 1 second
