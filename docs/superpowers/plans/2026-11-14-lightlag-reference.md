@@ -2,7 +2,7 @@
 
 > Execute with subagent-driven-development: one implementation task at a time, specification review followed by code-quality review, and a verified push before the next increment. The user authorized execution and frequent pushes to main.
 
-**Goal:** An honest reference and reproducible six-policy comparison over shared seeds and delays.
+**Goal:** Honest controllers and a reproducible comparison over shared seeds and delays, including the teammate's independently developed controller family.
 
 **Architecture:** Controllers receive five public callbacks. The evaluator alone owns episode construction, horizon completion, grading and replay. Controllers model only documented physics and update estimates from received observations.
 
@@ -53,6 +53,8 @@ Files: `lightlag/controllers/geometry.py` (public-map geometry/path routing), `l
 - [x] Execute all simulator/controller tests, spec review and quality review, then publish the working policies before batch/report work. All 73 tests pass; independent reviews also checked varied energy/horizon configurations and sand/obstacle missions. Fixes cover delayed sample confirmation and safe escape from an inflated hazard margin. The conservative default reference scores 3/4 and avoids sand; its tie with nominal open-loop is documented, not hidden. Poor seed scores are findings to investigate, not a reason to modify physics or hide runs.
 
 ## Task 3 — Batch comparison, artifacts and evidence
+
+Integration adjustment: task 2 is published as `6e580fc` after preserving Kristján's separate package. Freeze local controller development. The batch API accepts an ordered name/callable mapping and explicit reference name; the CLI adds six `team_` names via `lightlag_controllers.as_policy` and `--reference-policy`. Keep the original six local policies as CLI defaults, but publish a twelve-policy comparison normalized to `team_reference`. Do not edit the teammate's package or alter physics. See the design's integration decision for interpretation limits.
 
 Files: `lightlag/evaluation.py`, `tests/lightlag/test_evaluation.py`, `lightlag/README.md`, `docs/lightlag-reference-results.md`, `docs/lightlag-handoff.md`, README entry, this plan and `TEAM_STATUS.md`.
 

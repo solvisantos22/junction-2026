@@ -43,6 +43,14 @@ All surviving policies pay the same full-horizon idle drain. Move-and-wait there
 
 ## Evaluation and artifacts
 
+### Integration decision after the overlapping controller work landed
+
+Kristján's separately implemented controllers and `as_policy` adapter arrived while task 2 was in progress. Preserve both tested implementations; freeze further work on the conservative `lightlag/controllers/` planner. This slice owns the shared evaluator, not Kristján's controller package or pilot. Compare both families under identical default-map configurations before selecting a reference for subsequent experiments. His existing varied-map pilot is a separate study and must not be pooled with these default-map results.
+
+The batch API accepts an ordered mapping of policy names to callables and an explicit `reference_policy` name. The CLI keeps the six existing local policy names for its default selection and also offers Kristján's six strategies under `team_` prefixes through `as_policy`. `--reference-policy` selects the denominator, defaulting to `reference`. Our published comparison selects all twelve and uses `team_reference` as the candidate stronger denominator. This naming preserves reproducible local commands while avoiding an implicit replacement of a library callable. All ratios identify their denominator; a higher score does not establish optimality. Stop-early policies use different cutoffs (quarter-horizon versus tick 5), so they are distinct probes, not matched ablations across families.
+
+No rule changes are included. The pilot's suggested harder variants and the real-agent test need separate decisions and evidence after the service is available.
+
 Provide `python3 -m lightlag.evaluation` with configurable integer seeds, delays, horizon, policy selection and an optional new output directory. Default comparison uses seeds 0–9 and delays 0 and 3 at horizon 80. Reject duplicate policies/seeds/delays and invalid configurations before running. No paid APIs or model credentials are involved.
 
 Each run records policy, seed, delay, raw reward, sampled value, survival/return status and public tool-call count. Aggregate mean/min/max raw score and return/survival rates by policy and delay. If a matching positive reference score exists, report the per-seed raw-score ratio without clipping. A zero/missing reference denominator produces null with a reason, never a fabricated zero, infinity or silent omission. Keep raw results available.
