@@ -7,6 +7,7 @@
 - Side by side with the team's notes
 - The team's round-two ideas: our read
 - Lightlag deep dive: spec, reference, reward, fairness experiments, pilot plan
+- Bazaar deep dive: evidence for and against a gap, spec, reference, reward, pilot plan
 - Related research: what worked, what didn't, award-winning precedents, connecting the dots
 - What we're aiming for
 - Ideas at a glance
@@ -135,6 +136,7 @@ Pointers on the eight ideas in the team's `afterquery-ideas-round2.md` (from Kri
 - **Score only the graded batches.**
 
 #### Bazaar (#3): solid fallback in a crowded field
+- **Full spec, reference, reward, ablations and pilot plan:** "Bazaar deep dive". It also flags a name clash (Lech Mazur's BAZAAR benchmark) and counter-evidence: on that double auction, top LLMs beat an algorithmic Bayesian bidder.
 - **Best gap evidence of the eight.** 2026 benchmarks find LLM negotiators leaking their limits (2–80% of episodes across 17 open-weight models in one study) and conceding early, and jointly trained agents drifting to aggressive, welfare-reducing deals.
 - **Ready-made reference:** the Automated Negotiating Agents Competition (ANAC, annual since 2010) has a long line of classical strategies, such as conceding on a schedule while modelling the opponent. Borrowing one gives a reproducible reference nobody can call hand-tuned.
 - **Low novelty:** AgenticPay, PrefBench, TERMS-Bench, PACT and others exist, and a negotiation evaluator won its category at AgentX–AgentBeats. Pitch it as a known weakness, measured cleanly.
@@ -274,6 +276,131 @@ A replay with three layers: the true rover, the "ghost" the agent last saw (k ti
 - Calibration as the agent's own decision (more decision-making, our recommendation) or a fixed calibration phase before the graded drive (the reviewer's version: simpler, lower variance)?
 - Constant delay (cleaner ablation) or random delay as a harder tier? With random delays even the in-transit replay stops being exact; standard RL algorithms also struggle there ([Ramstedt et al., ICLR 2021](https://arxiv.org/abs/2010.02966)).
 - Is the onboard safety stop in, so that stale-telemetry mistakes cost time rather than ending the run?
+
+## Bazaar deep dive
+
+A build-ready look at **Bazaar**, the round-two fallback (from `afterquery-ideas-round2.md`): haggle with scripted merchants who each have a hidden lowest price, patience and style, and buy a shopping list with limited coins and time. This note covers the evidence, a name clash, a concrete spec, the reference, the reward, the expected failures, exploits, fairness experiments and a pilot. Numbers marked *starting value* are guesses to tune. Related: "The team's round-two ideas: our read", "Related research", "Lightlag deep dive", and our Sealed-Bid Negotiator.
+
+### Check the name first
+
+Lech Mazur (author of the PACT bargaining benchmark) already publishes **[BAZAAR](https://github.com/lechmazur/bazaar)**, a double auction where 4 LLM buyers and 4 LLM sellers with private values post sealed bids and asks for 30 rounds. Same name, same domain. Rename ours (for example *Souk*, *Market Day* or *Haggle*) and cite it. This is the second round-two name clash after DeepMind's Alchemy.
+
+### Why it matters: buying agents are already here
+
+- **Anthropic's Project Deal** (a one-week internal pilot, December 2025, reported via [secondary coverage](https://the-decoder.com/anthropic-says-stronger-ai-models-cut-better-deals-and-the-losers-dont-even-notice/)): Claude agents bought and sold real items for 69 employees and closed 186 deals. Opus 4.5 agents reportedly sold for $2.68 more and paid $2.45 less on average than Haiku 4.5 agents, and participants didn't notice which model they had. Telling agents to negotiate aggressively made no significant difference. *Point for the pitch:* users can't tell a weak buying agent from a strong one, so a reproducible test matters.
+- **Microsoft's [Magentic Marketplace](https://arxiv.org/abs/2510.25779)** (2025): in a simulated market, buying agents showed severe first-proposal bias; Microsoft reported that roughly 80–100% of agents accepted the first proposal they received, and welfare fell when there were many options. Press coverage adds that several models could be manipulated into paying the wrong party.
+- **The economics fits.** In Clifford Geertz's classic account of the bazaar economy (1978), prices aren't posted, so the main activity is *searching for information*: probing merchants and comparing alternatives. That is exactly the skill this environment tests.
+
+### Evidence on the gap: for and against
+
+**For (LLM negotiators make predictable mistakes):**
+- [PrefBench](https://arxiv.org/abs/2605.22855) (2026): LLM sellers facing hidden willingness to pay closed over 99% of deals, but the best one's profit was only slightly above a *random* baseline and far below a simple concession heuristic.
+- [Faithful Delegates?](https://arxiv.org/abs/2607.02814) (2026): agents revealed their principal's limit in 2–80% of episodes across 17 open-weight models.
+- [MIT's AI negotiation competition](https://arxiv.org/abs/2503.06416) (February 2025; over 180,000 negotiations between prompted LLM agents): warmth helped reach deals, dominance helped claim value, and a high-scoring entry used prompt injection to extract the other side's private information.
+- [NegotiationArena](https://arxiv.org/abs/2402.05863) (ICML 2024): simple behavioural tactics, such as acting desperate, shifted outcomes for the models of the time; a later replication found the effect weaker on newer models.
+
+**Against (frontier models can bargain well):**
+- On Mazur's BAZAAR double auction, the top LLMs (o3, Gemini 2.5 Pro and others) **outscored the best algorithmic baseline**, an "enhanced Bayesian" bidder, while several smaller models fell below simply bidding their true value. With a chat channel, LLM traders spontaneously colluded on prices.
+- On [PACT](https://github.com/lechmazur/pact), a 20-round buyer–seller benchmark, the strongest models reportedly lead.
+
+**What this means:** "LLMs are bad negotiators" is too broad. The gap has to come from something specific: **inferring each merchant's type from a few responses, using alternatives credibly (walking away), and spreading a tight budget across a list.** The reference must also be strong: a policy that knows the *published* merchant rule family and infers each merchant's parameters, not a generic bargaining algorithm.
+
+### Spec (proposal)
+
+**Market day.** *Starting values:* a shopping list of 5 items, each sold by 2 merchants (so every item has an alternative), 10 merchants in all. Each item has a known value to the agent. The coin budget is tight: enough to buy everything only with good haggling (about 1.15 × the sum of expected lowest prices). A fixed number of offer steps per day (*starting value* 36).
+
+**Merchants: scripted, rules published, parameters hidden per seed.** In the style of Faratin, Sierra and Jennings' negotiation decision functions (1998), each merchant has:
+- a **floor** (lowest acceptable price), drawn from a documented range relative to the item's list price;
+- an **opening ask** above list price;
+- a **style** `β` setting how its ask falls over time: `ask(t) = floor + (open − floor) × (1 − (t / P)^(1/β))`. With `β < 1` (Boulware) it holds firm until late; with `β > 1` (Conceder) it gives ground early;
+- **patience** `P`: how many exchanges it tolerates before leaving. Insulting bids (below a documented share of the current ask) and repeated minimum-step increases each cost extra patience;
+- an optional **reactive** part, matching the buyer's concessions (Faratin's behaviour-dependent tactic).
+
+A merchant accepts any bid at or above its current ask, otherwise answers with its next ask, or leaves when its patience runs out. **Leaving and walking away are final.** Every merchant is independent and deterministic given the seed, so runs reproduce exactly.
+
+**Agent tools** (numbers only; the simulator runs in a separate container):
+
+```text
+rules()                         -> the merchant rule family, patience rules, budget, item values
+market()                        -> list items, which merchants sell each, opening asks, coins, steps left
+offer({merchant: price, ...})   -> one bid to each named merchant; costs one step; returns each one's
+                                   counter-ask, "accepted" or "left"
+walk_away(merchant)             -> final
+history()                       -> every offer and answer so far (free)
+```
+
+Bids to several merchants go in one call, which keeps the episode within the round-two target of 40–60 tool calls. No free text exists in either direction, so there is nothing to prompt-inject.
+
+**Run.** *Starting value:* 2 market days on fixed seeds, 10 deals per run. The round-two reviewer asks for 15 or more deals per run to control variance; more days means more tool calls, so this is a trade-off to settle in the pilot.
+
+### Reward
+
+- **Share of available surplus:** for each list item, the available surplus is its value minus the lowest floor among its merchants. The score is the surplus the agent actually captured (value minus price paid, for items bought) divided by the total available. 100% means buying everything at the best floor, which is unreachable in practice, so the reference sets the realistic ceiling.
+- Doing nothing captures nothing → 0. Items left unbought simply contribute nothing; coins left over are not rewarded, so hoarding doesn't pay.
+- Every number comes from deals the simulator executed (Tamper-proof Grader).
+- **For the small-model tiebreaker:** many short deals with a continuous score each, the dense partial credit AfterQuery used. Style mix, patience and budget tightness are the difficulty dials.
+
+### Reference run
+
+Sees only what the agent sees (Honest Reference Solver), but uses the published rule family fully:
+1. **Probe:** open each merchant with a safe low bid, just above the insult threshold. Two or three counter-asks fit the curve and reveal `β` and an estimate of the floor (online opponent modelling, as surveyed by [Baarslag et al., 2016](https://homepages.cwi.nl/~baarslag/pub/Learning_about_the_opponent_in_automated_bilateral_negotiation-a_comprehensive_survey_of_opponent_modeling_techniques.pdf)).
+2. **Choose the seller** with the lower estimated floor for each item; the other one is a credible alternative.
+3. **Concede on a schedule**, in steps sized not to burn patience, and accept once the ask is near the estimated floor or time is short.
+4. **Plan the budget:** a small knapsack over items with estimated prices, so the last item stays affordable.
+
+A strong reference matters here more than in Lightlag, because frontier models beat a generic Bayesian bidder on BAZAAR.
+
+### Where the agent should fail
+
+| Expected mistake | What it looks like in the trace | Failure mode |
+|---|---|---|
+| Accepting the first or second ask | Pays near the opening price; deal rate high, surplus low (Magentic Marketplace, PrefBench) | Premature Commitment |
+| Splitting the difference | Bids the midpoint of its last bid and the ask, whatever the merchant's style | Shallow Heuristics Break Under Shift |
+| Anchoring on the opening ask | Treats the opening ask as the item's real price | Anchoring on the First Hypothesis |
+| Not reading the merchant's type | Treats a Boulware merchant like a Conceder and gives up early, or waits on a Conceder that would have dropped | Uninformative Experiments |
+| Never walking away | Keeps haggling with the expensive seller although the alternative is cheaper | Premature Commitment |
+| Over-aggressive bids | Insulting lowballs drive merchants away, the over-correction when told to be tough | Overconfidence and Poor Calibration |
+| Budget misallocation | Overpays early, can't afford the last list item | Long-Horizon Drift |
+
+### Exploits and defences
+
+| Exploit attempt | Defence |
+|---|---|
+| Prompt injection against the merchants (it worked in MIT's competition) | Numbers only; no text channel exists |
+| Do nothing | 0 |
+| Buy only the easy items | Share of *available* surplus counts every list item, so skipped items lower the score |
+| Binary-search a merchant's floor | Every bid costs a step and patience; insults and creeping cost extra; that's legitimate probing within limits, and the reference does a version of it |
+| Walk away, then come back | Walking away is final |
+| Read the seed or floors | Separate container; only the tools reach it |
+| Write the reference in Python | Legitimate. If it closes the gap, the environment is too easy; the pilot tests this first (Brute-force Escape Hatch) |
+
+### Experiments that prove the difficulty is fair
+
+1. **Revealed-type ablation:** show each merchant's style and patience (not its floor). The part of the gap that closes is the type-inference failure.
+2. **No-alternative ablation:** one merchant per item. Compares how much the agent uses walking away.
+3. **All-Conceder market:** if every merchant concedes early, naive strategies should do fine. The gap should appear only as the style mix gets harder, which shows the difficulty comes from merchant variety, not from the interface.
+4. **Scripted baselines** next to the reference: accept-the-first-ask, split-the-difference, and a fixed Boulware buyer with no opponent modelling. Their order shows that the reward ranks behaviour sensibly.
+
+### First pilot (half a day)
+
+1. One item type, three merchants with mixed styles, 10 seeds.
+2. The reference and the three scripted baselines.
+3. Three real agent runs.
+4. **Decision rule:** if the agent reaches about 85% of the reference's share, the gap is too small; widen the style mix and tighten patience and budget. If that still doesn't open a gap, frontier agents may simply be good at this (as BAZAAR suggests), so go back to Lightlag or Brewmaster. Also check that the spread across the three runs is small.
+
+### Demo (10 minutes)
+
+For each merchant, plot its asks over time with the hidden floor drawn in afterwards, and the agent's bids against them. Show the agent accepting a Boulware merchant's early ask while the reference walked to the cheaper alternative. Close with one chart: share of available surplus for accept-first, split-the-difference, the frontier agent and the reference.
+
+### What it changes in our brainstorm
+
+Sealed-Bid Negotiator scored worst here on reward integrity because scripted opponents can be exploited and free text invites manipulation. This design fixes both: numbers only, published rules, final walk-aways and a share-of-surplus score. If the team picks Bazaar, it supersedes that idea.
+
+### Open choices for the team
+- A new name (to avoid clashing with Mazur's BAZAAR).
+- Include the reactive (tit-for-tat) merchant behaviour, or keep merchants purely time-based for a cleaner reference?
+- Public hints about each merchant (e.g. "busy stall"), weakly correlated with type through a published table, or none?
+- How many deals per run: the reviewer's 15+, or fewer to fit the tool-call budget?
 
 ## Related research
 
