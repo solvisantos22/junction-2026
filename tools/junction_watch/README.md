@@ -82,6 +82,8 @@ JSON updates use same-directory atomic replacement. It reserves
 `last_queued_at` **before** invoking Codex, then records `queue_status`, errors,
 and `last_successful_queue_at` only after a confirmed successful dispatch.
 `last_queued_at` is a conservative reservation, not proof of delivery.
+Each reservation is strictly later than the previous completion it observed,
+even when that completion was written after the tick sampled its clock.
 
 The dedicated agent owns `run.json`. After every attempt, including partial or
 blocked attempts, it must atomically replace that file with numeric UTC epoch
@@ -104,6 +106,10 @@ queued. After one interval, the adapter attempts one clearly labelled health
 alert to `parent_thread_id`. Its alert marker is persisted before delivery;
 even a failed or uncertain health alert is not retried for that check.
 Acknowledgement releases the reservation, and normal scheduled checks resume.
+Invalid completion timestamps or unreadable/malformed `run.json` cannot release
+a pending check, but still allow its one health alert. Status reports an
+`acknowledgement_error` until the agent writes valid state. Config and scheduler
+errors continue to block dispatches.
 
 A nonzero queue exit, timeout, interrupted process, or failed-resume warning
 (even with exit code zero) leaves dispatch uncertain and pending. There is no

@@ -165,6 +165,20 @@ class WatchTests(unittest.TestCase):
         self.assertEqual(self.invoke(when=NOW + 2)[1]["state"], "waiting")
         self.assertEqual(len(self.calls), 1)
 
+    def test_previous_completion_cannot_acknowledge_new_reservation(self):
+        for finished in (NOW, NOW + 0.001):
+            with self.subTest(previous_completion=finished):
+                self.calls.clear()
+                self.write("scheduler.json", {"last_queued_at": NOW - 900})
+                self.write("run.json", {"last_finished_at": finished})
+                self.invoke()
+                self.invoke(when=NOW + 901)
+                self.assertEqual(
+                    [call[0][3] for call in self.calls],
+                    ["dedicated-thread", "parent-thread"],
+                )
+                self.assertGreater(self.read("scheduler.json")["last_queued_at"], finished)
+
     def test_nonzero_exit_stays_uncertain_without_duplicate_dispatch(self):
         self.outcome = subprocess.CompletedProcess([], 1, "", "daemon error")
         self.assertEqual(self.invoke()[0], 1)
@@ -261,11 +275,56 @@ class WatchTests(unittest.TestCase):
         self.assertTrue(self.timer.exists())
         self.assertEqual(self.calls, [])
 
-    def test_invalid_acknowledgement_does_not_release_pending_check(self):
+    def test_invalid_acknowledgement_preserves_pending_check_and_alerts_once(self):
+        for invalid in (str(NOW + 1), None, True, -1, float("nan"), float("inf"), []):
+            with self.subTest(invalid_completion=invalid):
+                self.calls.clear()
+                self.write("scheduler.json", {})
+                self.write("run.json", {})
+                self.invoke()
+                self.write("run.json", {"last_finished_at": invalid})
+                self.assertEqual(self.invoke(when=NOW + 899)[0], 1)
+                self.assertEqual(len(self.calls), 1)
+                self.invoke(when=NOW + 900)
+                self.invoke(when=NOW + 1800)
+                self.assertEqual(
+                    [call[0][3] for call in self.calls],
+                    ["dedicated-thread", "parent-thread"],
+                )
+                code, status = self.invoke("status", when=NOW + 1800)
+                self.assertEqual(code, 1)
+                self.assertTrue(status["pending"])
+                self.assertIn("acknowledgement_error", status)
+
+    def test_malformed_run_json_alerts_once_then_recovers_after_valid_ack(self):
         self.invoke()
-        self.write("run.json", {"last_finished_at": str(NOW + 1)})
-        self.assertEqual(self.invoke(when=NOW + 900)[0], 1)
-        self.assertEqual(len(self.calls), 1)
+        (self.root / "run.json").write_text("{", encoding="utf-8")
+        self.invoke(when=NOW + 900)
+        self.invoke(when=NOW + 1800)
+        self.assertEqual(
+            [call[0][3] for call in self.calls],
+            ["dedicated-thread", "parent-thread"],
+        )
+        self.write("run.json", {"last_finished_at": NOW + 1801})
+        self.assertEqual(self.invoke(when=NOW + 2700)[0], 0)
+        self.assertEqual(self.calls[-1][0][3], "dedicated-thread")
+        self.assertEqual(len(self.calls), 3)
+
+    def test_invalid_acknowledgement_without_reservation_fails_closed(self):
+        self.write("run.json", {"last_finished_at": "invalid"})
+        self.assertEqual(self.invoke()[0], 1)
+        self.assertEqual(self.calls, [])
+
+    def test_corrupt_config_or_scheduler_still_fails_closed(self):
+        for name in ("config.json", "scheduler.json"):
+            with self.subTest(corrupt_file=name):
+                self.calls.clear()
+                self.write("config.json", self.config)
+                self.write("scheduler.json", {})
+                self.invoke()
+                (self.root / name).write_text("{", encoding="utf-8")
+                self.assertEqual(self.invoke(when=NOW + 900)[0], 1)
+                self.assertEqual(len(self.calls), 1)
 
     def test_tick_waits_for_existing_file_lock(self):
         started = threading.Event()

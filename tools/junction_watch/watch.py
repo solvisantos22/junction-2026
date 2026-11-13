@@ -106,9 +106,8 @@ def remove_timer(config, config_path, scheduler, runner, now):
     return error
 
 
-def tick(config, config_path, scheduler, run, runner, now):
+def tick(config, config_path, scheduler, finished, runner, now):
     queued = epoch(scheduler.get("last_queued_at", 0))
-    finished = epoch(run.get("last_finished_at", 0))
     interval = config["interval_seconds"]
     state_path = config_path.parent / "scheduler.json"
     if queued > finished:
@@ -118,7 +117,7 @@ def tick(config, config_path, scheduler, run, runner, now):
             write_json(state_path, scheduler)
             error = queue(
                 config, config["parent_thread_id"],
-                "[Junction Watch health alert] The check queued at {} has no completion "
+                "[Junction Watch health alert] The check queued at {} has no valid completion "
                 "acknowledgement after at least {} seconds. Further checks are blocked "
                 "until the watcher writes last_finished_at in run.json. Inspect the "
                 "watcher and scheduler state; source coverage may have a gap.".format(utc(queued), interval),
@@ -131,7 +130,9 @@ def tick(config, config_path, scheduler, run, runner, now):
     if queued and now - queued < interval:
         return 0, {"state": "waiting"}
     # A crash, timeout, or CLI warning must not permit a duplicate queue.
-    scheduler.update(last_queued_at=now, queue_status="dispatching", last_queue_error=None,
+    # The agent may have finished after this tick sampled its clock.
+    reserved_at = max(now, math.nextafter(finished, math.inf))
+    scheduler.update(last_queued_at=reserved_at, queue_status="dispatching", last_queue_error=None,
                      stalled_alert_for=None, alert_status=None, last_alert_error=None)
     write_json(state_path, scheduler)
     error = queue(
@@ -141,13 +142,13 @@ def tick(config, config_path, scheduler, run, runner, now):
         "Atomically replace run.json after this attempt, including partial or blocked "
         "attempts, to acknowledge completion. The scheduler queued this check at {}. "
         "Do not edit scheduler.json or config.json.".format(
-            config["instructions_path"], config_path.parent / "run.json", now
+            config["instructions_path"], config_path.parent / "run.json", reserved_at
         ),
         runner,
     )
     scheduler.update(queue_status="uncertain" if error else "queued", last_queue_error=error)
     if not error:
-        scheduler["last_successful_queue_at"] = now
+        scheduler["last_successful_queue_at"] = reserved_at
     write_json(state_path, scheduler)
     return int(bool(error)), {"state": scheduler["queue_status"], "error": error}
 
@@ -179,11 +180,17 @@ def execute(config_path, command, runner, now):
     if command == "tick" and not config["enabled"]:
         return 0, {"state": "paused"}
     scheduler = read_json(config_path.parent / "scheduler.json")
-    run = read_json(config_path.parent / "run.json")
+    try:
+        run = read_json(config_path.parent / "run.json")
+        finished = epoch(run.get("last_finished_at", 0))
+        acknowledgement_error = None
+    except (OSError, ValueError, OverflowError):
+        # Invalid agent state cannot acknowledge work or suppress a stalled alert.
+        finished = 0
+        acknowledgement_error = "Cannot read a valid agent completion acknowledgement"
     if command == "status":
         queued = epoch(scheduler.get("last_queued_at", 0))
-        finished = epoch(run.get("last_finished_at", 0))
-        return 0, {
+        return int(bool(acknowledgement_error)), {
             "enabled": config["enabled"], "expired": expired,
             "ends_at": config["ends_at"], "interval_seconds": config["interval_seconds"],
             "pending": queued > finished, "last_queued_at": utc(queued),
@@ -193,8 +200,15 @@ def execute(config_path, command, runner, now):
             "health_alert_error": scheduler.get("last_alert_error"),
             "timer_status": scheduler.get("timer_status"),
             "timer_error": scheduler.get("last_timer_error"),
+            "acknowledgement_error": acknowledgement_error,
         }
-    return tick(config, config_path, scheduler, run, runner, now)
+    if acknowledgement_error and not scheduler.get("last_queued_at"):
+        return 1, {"state": "error", "acknowledgement_error": acknowledgement_error}
+    code, result = tick(config, config_path, scheduler, finished, runner, now)
+    if acknowledgement_error:
+        result["acknowledgement_error"] = acknowledgement_error
+        code = 1
+    return code, result
 
 
 def main(argv=None, *, runner=subprocess.run, now=None):
