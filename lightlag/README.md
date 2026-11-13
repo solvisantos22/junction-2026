@@ -2,7 +2,7 @@
 
 Provisional simulator for the team's saved Lightlag draft. No agent/reference gap has been measured. Requires Python 3.9+; no installation or dependencies.
 
-The first increment supplies the tick clock, command scheduling, seeded terrain slip, movement, battery drain, map-edge safety and delayed telemetry. Mission scoring and the local runner are the next increments in the [implementation plan](../docs/superpowers/plans/2026-11-13-lightlag-core.md).
+The simulator supplies the tick clock, command scheduling, seeded terrain slip, movement, battery drain, hazard/map-edge safety, sampling and delayed telemetry. The local runner and replay export are the next increment in the [implementation plan](../docs/superpowers/plans/2026-11-13-lightlag-core.md).
 
 From the repository root:
 
@@ -23,4 +23,6 @@ print(env.advance(1))       # Receives the drive's result, state 4 at tick 7.
 python3 -m unittest discover -s tests/lightlag -v
 ```
 
-The [design decisions](../docs/superpowers/specs/2026-11-13-lightlag-core-design.md) define the exact timing and the remaining mission contract. This in-process API does not isolate hidden state from an agent that can inspect Python or its files; benchmark deployment needs a separate simulator container and a restricted adapter.
+Use `{"action": "sample"}` to collect the nearest unsampled target within 0.75 m of the true rover position. At the fixed horizon, trusted evaluator code can call `env.evaluate()` for raw score: sampled value × 1 at base, × 0.5 alive elsewhere, or × 0 if the battery is depleted. Doing nothing scores zero. The evaluator method is not an agent tool, and it rejects early scoring.
+
+The [design decisions](../docs/superpowers/specs/2026-11-13-lightlag-core-design.md) define the exact timing and mission contract. This in-process API does not isolate hidden state from an agent that can inspect Python or its files; benchmark deployment needs a separate simulator container and a restricted adapter.

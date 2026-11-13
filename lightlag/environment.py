@@ -37,7 +37,8 @@ class Environment:
         return {
             "version": "lightlag-core-v1",
             **asdict(self._config),
-            "supported_actions": ["drive", "wait"],
+            "supported_actions": ["drive", "sample", "wait"],
+            "scripting_allowed": True,
             "first_execution_tick": "sent_tick + delay_ticks + 1; FIFO, one command per tick",
             "telemetry_arrival_tick": "state_tick + delay_ticks; tick 0 is the initial briefing",
             "max_commands_per_uplink": MAX_BATCH,
@@ -47,7 +48,11 @@ class Environment:
             "slip_noise": [-NOISE, NOISE],
             "terrain_drive_multipliers": dict(TERRAIN_COSTS),
             "energy_order": "idle drain, then command; drive costs per wheel metre",
-            "map_edge_safety": "stop at last safe position and clear queued commands; reservations remain",
+            "safety_stop": "at a hazard or map edge, stop at last safe position and clear queued commands; reservations remain",
+            "sampling": "pay sampling cost; collect nearest unsampled target within target_radius",
+            "reward": "sampled value times 1 at base, 0.5 alive elsewhere, or 0 if dead; scored at the horizon",
+            "drive_integration_metres": SEGMENT_METRES,
+            "slip_model": "clip(terrain coefficient + per-drive noise, 0, 0.9); noise is fixed by seed and execution tick",
             "heading": "0 degrees east, 90 north",
             "visual_odometry": "exact in this prototype",
         }
@@ -91,6 +96,20 @@ class Environment:
                 "episode_complete": self._tick == self._config.max_ticks,
                 "packets": deepcopy(arrived)}
 
+    def evaluate(self):
+        """Trusted evaluator API. Never expose this as an agent tool."""
+        if self._tick != self._config.max_ticks:
+            raise ValueError("evaluation requires the fixed episode horizon")
+        alive = self._battery > 0
+        at_base = math.hypot(self._x - self._world.base[0],
+                             self._y - self._world.base[1]) <= self._config.base_radius
+        value = sum(target.value for target in self._world.targets if target.id in self._sampled)
+        factor = (1.0 if at_base else 0.5) if alive else 0.0
+        return {"tick": self._tick, "sampled_targets": sorted(self._sampled),
+                "sampled_value": value, "survival_factor": factor,
+                "raw_score": value * factor, "alive": alive, "at_base": at_base,
+                "max_available_value": sum(target.value for target in self._world.targets)}
+
     def _step(self):
         self._tick += 1
         events = []
@@ -103,6 +122,8 @@ class Environment:
             events.append({"type": "command_executed", "command_id": queued["command_id"]})
             if command["action"] == "drive":
                 wheel, visual = self._drive(command, events)
+            elif command["action"] == "sample":
+                self._sample(events)
         if self._battery == 0:
             self._commands.clear()
             if was_alive:
@@ -136,12 +157,32 @@ class Environment:
                 events.append({"type": "safety_stop", "reason": "map_boundary"})
                 self._commands.clear()
                 break
+            if any(region.intersects_segment(self._x, self._y, next_x, next_y)
+                   for region in self._world.hazards):
+                events.append({"type": "safety_stop", "reason": "hazard"})
+                self._commands.clear()
+                break
             self._x, self._y = next_x, next_y
             self._spend(segment * cost)
             wheel += segment
             visual += distance
             remaining -= segment
         return wheel, visual
+
+    def _sample(self, events):
+        enough_energy = self._battery >= self._config.sample_cost
+        self._spend(self._config.sample_cost)
+        if not enough_energy:
+            events.append({"type": "sample_failed", "reason": "insufficient_energy"})
+            return
+        candidates = [(math.hypot(target.x - self._x, target.y - self._y), target.id)
+                      for target in self._world.targets if target.id not in self._sampled]
+        distance, target_id = min(candidates, default=(math.inf, ""))
+        if distance <= self._config.target_radius:
+            self._sampled.add(target_id)
+            events.append({"type": "sample_taken", "target_id": target_id})
+        else:
+            events.append({"type": "sample_failed", "reason": "no_unsampled_target_in_range"})
 
     def _snapshot(self, wheel, visual, events):
         return {

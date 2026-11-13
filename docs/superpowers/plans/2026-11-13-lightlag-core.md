@@ -35,10 +35,10 @@ Files: `lightlag/__init__.py`, `lightlag/model.py`, `lightlag/environment.py`, `
 
 Files: `lightlag/model.py`, `lightlag/environment.py`, `tests/lightlag/test_mission.py`.
 
-- [ ] Add failing behavior tests using tiny explicit maps: sampling succeeds only near a target and never twice; final score applies base/alive/dead multipliers; a thin hazard blocks a drive and drops queued work; battery death does not leak through early public termination or acknowledgements.
-- [ ] Run `python3 -m unittest discover -s tests/lightlag -v` and confirm the new failures.
-- [ ] Implement segment/rectangle collision checks, sampling events and trusted `evaluate()`. Only evaluate after the horizon. Preserve the reserved command schedule when safety drops the actual queue.
-- [ ] Verify the mission with a stationary target fixture:
+- [x] Add failing behavior tests using tiny explicit maps: sampling succeeds only near a target and never twice; final score applies base/alive/dead multipliers; a thin hazard blocks a drive and drops queued work; battery death does not leak through early public termination or acknowledgements.
+- [x] Run `python3 -m unittest discover -s tests/lightlag -v` and confirm the new failures.
+- [x] Implement segment/rectangle collision checks, sampling events and trusted `evaluate()`. Only evaluate after the horizon. Preserve the reserved command schedule when safety drops the actual queue.
+- [x] Verify the mission with a stationary target fixture:
 
   ```python
   from lightlag import Environment, Config, World, Target
@@ -49,7 +49,7 @@ Files: `lightlag/model.py`, `lightlag/environment.py`, `tests/lightlag/test_miss
   assert env.evaluate()["raw_score"] == 2
   ```
 
-- [ ] Run the full simulator suite, review and push this increment before starting the runner.
+- [x] Run the full simulator suite, review and push this increment before starting the runner. All 26 tests pass; independent review also checked diagonal/tangent hazard intersections, copied score output and unchanged reservations after battery death.
 
 ## 3. Runner, replay and handoff
 

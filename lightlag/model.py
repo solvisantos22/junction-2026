@@ -63,6 +63,21 @@ class Rect:
     def contains(self, x, y):
         return self.x1 <= x <= self.x2 and self.y1 <= y <= self.y2
 
+    def intersects_segment(self, x, y, next_x, next_y):
+        """Closed slab intersection: even a thin obstacle blocks the full segment."""
+        enter, leave = 0.0, 1.0
+        for origin, delta, low, high in ((x, next_x - x, self.x1, self.x2),
+                                        (y, next_y - y, self.y1, self.y2)):
+            if delta == 0:
+                if not low <= origin <= high:
+                    return False
+                continue
+            near, far = sorted(((low - origin) / delta, (high - origin) / delta))
+            enter, leave = max(enter, near), min(leave, far)
+            if enter > leave:
+                return False
+        return True
+
 
 @dataclass(frozen=True)
 class Target:
@@ -86,7 +101,7 @@ class World:
     height: float = 40.0
     base: tuple = (20.0, 20.0)
     sand: tuple = (Rect(23, 0, 40, 40),)
-    hazards: tuple = ()
+    hazards: tuple = (Rect(18, 30, 22, 32),)
     targets: tuple = (Target("east", 26, 20), Target("west", 14, 20),
                       Target("north", 20, 28, 2))
 
@@ -136,10 +151,10 @@ def decode_command(command):
     if not isinstance(command, dict):
         raise ValueError("each command must be an object")
     action = command.get("action")
-    if action == "wait" and set(command) == {"action"}:
+    if action in ("wait", "sample") and set(command) == {"action"}:
         return {"action": action}
     if action != "drive" or set(command) != {"action", "heading_deg", "metres"}:
-        raise ValueError("expected drive(heading_deg, metres) or wait with no extra fields")
+        raise ValueError("expected drive(heading_deg, metres), sample or wait with no extra fields")
     heading = finite_number(command["heading_deg"], "heading_deg")
     metres = finite_number(command["metres"], "metres")
     if not 0 < metres <= MAX_METRES:
