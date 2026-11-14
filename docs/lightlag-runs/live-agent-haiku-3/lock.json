@@ -1,0 +1,41 @@
+{
+    "schema_version": 2,
+    "task": {
+        "name": "lightlag-live",
+        "version": "0.1.2",
+        "type": "local",
+        "digest": "sha256:b868b7fac6b58353e4fe322a0a7b09d0373ddc815161d5e6522c5f733681358c",
+        "path": "harbor/lightlag-live"
+    },
+    "install_only": false,
+    "timeout_multiplier": 1.0,
+    "agent": {
+        "name": "opencode",
+        "model_name": "anthropic/claude-haiku-5-5",
+        "skip_model_parsing": false,
+        "skills": [],
+        "resume_trajectory": false,
+        "extra_allowed_hosts": [],
+        "kwargs": {
+            "version": "1.19.5"
+        },
+        "mcp_servers": []
+    },
+    "bridge_inputs": {},
+    "skills": [],
+    "environment": {
+        "type": "docker",
+        "force_build": false,
+        "delete": true,
+        "stream": false,
+        "cpu_enforcement_policy": "auto",
+        "memory_enforcement_policy": "auto",
+        "extra_docker_compose": [],
+        "kwargs": {},
+        "extra_allowed_hosts": []
+    },
+    "verifier": {
+        "disable": false,
+        "environment_mode": "separate"
+    }
+}

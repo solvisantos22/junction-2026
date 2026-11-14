@@ -1,0 +1,12 @@
+{
+ "kind": "claude",
+ "label": "Opus 5.5 · agent 2",
+ "model": "Claude Opus 5.5",
+ "how": "OpenCode agent",
+ "source": "harbor run -p harbor/lightlag-live -a opencode -m anthropic/claude-opus-5-5 --ak version=1.19.5 (Harbor 0.25.0), on the real clock",
+ "cost_usd": 1.0817496,
+ "harbor_exception": "NonZeroAgentExitCodeError",
+ "task_version": "0.1.1",
+ "note": "Wrote a 489-line autopilot (it installed numpy for it), tested it against a mock of its own, started the campaign six minutes in and played all six missions, then wrote a closing report. It started its program in the form task 0.1.1 suggested, behind a `cd`, and its shell tool killed the program 120 seconds into the campaign, in mission 3 (docs/lightlag-live.md, \"The launch trap\"; fixed in 0.1.2). The agent restarted it 9.7 seconds later. uninterrupted/ is the program replayed by lightlag_live.sandbox without the interruption: the same score, mission for mission, so the interruption cost this run nothing. OpenCode exited with code 1 afterwards, which Harbor records as an exception; the campaign and its grade are unaffected. program/ holds the autopilot and the mock as copied out of the agent's container during the campaign.",
+ "uninterrupted_reward": 0.609722
+}

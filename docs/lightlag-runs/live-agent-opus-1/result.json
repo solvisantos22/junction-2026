@@ -1,0 +1,137 @@
+{
+    "id": "7c8f92cd-75b2-4401-ace2-d90331bf4541",
+    "task_name": "neural-network-november/lightlag-live",
+    "trial_name": "lightlag-live__LhoTbC5",
+    "trial_uri": "file://<jobs-dir>/live-opus-1/lightlag-live__LhoTbC5",
+    "task_id": {
+        "path": "harbor/lightlag-live"
+    },
+    "source": null,
+    "task_checksum": "a41fd3b418bc1829150a1addf36bcd477b83569e1b6e30d81b67da9778c77f34",
+    "config": {
+        "task": {
+            "path": "harbor/lightlag-live",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": null
+        },
+        "trial_name": "lightlag-live__LhoTbC5",
+        "trials_dir": "<jobs-dir>/live-opus-1",
+        "install_only": false,
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "opencode",
+            "import_path": null,
+            "model_name": "anthropic/claude-opus-5-5",
+            "base_url": null,
+            "model_api_key_name": null,
+            "model_api_format": null,
+            "skip_model_parsing": false,
+            "n_concurrent": null,
+            "concurrency_group": null,
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "resume_trajectory": false,
+            "load_trajectory": null,
+            "extra_allowed_hosts": [],
+            "kwargs": {
+                "version": "1.19.5"
+            },
+            "mcp_servers": []
+        },
+        "user_agent": null,
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "stream": false,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "override_tpu": null,
+            "mounts": null,
+            "extra_docker_compose": [],
+            "kwargs": {},
+            "extra_allowed_hosts": []
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "disable": false
+        },
+        "artifacts": [],
+        "extra_instruction_paths": [],
+        "extra_instructions": [],
+        "job_id": "5383a449-2432-49ca-a0b3-2570847a3577",
+        "source_trial": null
+    },
+    "agent_info": {
+        "name": "opencode",
+        "version": "1.19.5",
+        "model_info": {
+            "name": "claude-opus-5-5",
+            "provider": "anthropic"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 5472786,
+        "n_cache_tokens": 5472658,
+        "n_output_tokens": 30663,
+        "cost_usd": 3.1250835999999995,
+        "model_usage": {
+            "anthropic/claude-opus-5-5": {
+                "n_input_tokens": 5472786,
+                "n_cache_tokens": 5472658,
+                "n_output_tokens": 30663,
+                "cost_usd": 3.1250835999999995
+            }
+        },
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": {
+        "rewards": {
+            "reward": 0.089236
+        }
+    },
+    "verifier_environment_mode": "separate",
+    "exception_info": {
+        "exception_type": "AgentTimeoutError",
+        "exception_message": "Agent execution timed out after 1800.0 seconds",
+        "exception_traceback": "Traceback (most recent call last):\n  File \"/opt/homebrew/Cellar/python@3.12/3.12.10/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py\", line 520, in wait_for\n    return await fut\n           ^^^^^^^^^\n  File \"/Users/krissi/.cache/uv/archive-v0/ZyiYS77CtEwJf-1eI7564/lib/python3.12/site-packages/harbor/agents/installed/base.py\", line 194, in wrapper\n    return await fn(self, instruction, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/krissi/.cache/uv/archive-v0/ZyiYS77CtEwJf-1eI7564/lib/python3.12/site-packages/harbor/agents/installed/opencode.py\", line 908, in run\n    await self.exec_as_agent(\n  File \"/Users/krissi/.cache/uv/archive-v0/ZyiYS77CtEwJf-1eI7564/lib/python3.12/site-packages/harbor/agents/installed/base.py\", line 1081, in exec_as_agent\n    return await self._exec(\n           ^^^^^^^^^^^^^^^^^\n  File \"/Users/krissi/.cache/uv/archive-v0/ZyiYS77CtEwJf-1eI7564/lib/python3.12/site-packages/harbor/agents/installed/base.py\", line 1032, in _exec\n    result = await environment.exec(\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/krissi/.cache/uv/archive-v0/ZyiYS77CtEwJf-1eI7564/lib/python3.12/site-packages/harbor/environments/docker/docker.py\", line 1363, in exec\n    return await self._compose_exec(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/krissi/.cache/uv/archive-v0/ZyiYS77CtEwJf-1eI7564/lib/python3.12/site-packages/harbor/environments/docker/docker.py\", line 1440, in _compose_exec\n    return await self._run_docker_compose_command(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/krissi/.cache/uv/archive-v0/ZyiYS77CtEwJf-1eI7564/lib/python3.12/site-packages/harbor/environments/docker/docker.py\", line 758, in _run_docker_compose_command\n    result = await self._collect_buffered_output(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/krissi/.cache/uv/archive-v0/ZyiYS77CtEwJf-1eI7564/lib/python3.12/site-packages/harbor/environments/docker/docker.py\", line 788, in _collect_buffered_output\n    stdout_bytes, stderr_bytes = await process.communicate(input=stdin_data)\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.12/3.12.10/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/subprocess.py\", line 201, in communicate\n    stdin, stdout, stderr = await tasks.gather(stdin, stdout, stderr)\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.12/3.12.10/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/subprocess.py\", line 181, in _read_stream\n    output = await stream.read()\n             ^^^^^^^^^^^^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.12/3.12.10/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/streams.py\", line 706, in read\n    block = await self.read(self._limit)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.12/3.12.10/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/streams.py\", line 713, in read\n    await self._wait_for_data('read')\n  File \"/opt/homebrew/Cellar/python@3.12/3.12.10/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/streams.py\", line 545, in _wait_for_data\n    await self._waiter\nasyncio.exceptions.CancelledError\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/krissi/.cache/uv/archive-v0/ZyiYS77CtEwJf-1eI7564/lib/python3.12/site-packages/harbor/trial/trial.py\", line 769, in _run_agent_phase\n    await asyncio.wait_for(\n  File \"/opt/homebrew/Cellar/python@3.12/3.12.10/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py\", line 519, in wait_for\n    async with timeouts.timeout(timeout):\n               ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.12/3.12.10/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/timeouts.py\", line 115, in __aexit__\n    raise TimeoutError from exc_val\nTimeoutError\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/krissi/.cache/uv/archive-v0/ZyiYS77CtEwJf-1eI7564/lib/python3.12/site-packages/harbor/trial/single_step.py\", line 76, in _run_agent\n    await self._run_agent_phase(\n  File \"/Users/krissi/.cache/uv/archive-v0/ZyiYS77CtEwJf-1eI7564/lib/python3.12/site-packages/harbor/trial/trial.py\", line 778, in _run_agent_phase\n    raise AgentTimeoutError(\nharbor.trial.errors.AgentTimeoutError: Agent execution timed out after 1800.0 seconds\n",
+        "occurred_at": "2026-11-14T11:48:22.964468Z"
+    },
+    "started_at": "2026-11-14T11:15:14.926714Z",
+    "finished_at": "2026-11-14T11:48:37.432887Z",
+    "environment_setup": {
+        "started_at": "2026-11-14T11:15:14.992670Z",
+        "finished_at": "2026-11-14T11:15:24.801127Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-11-14T11:15:24.801463Z",
+        "finished_at": "2026-11-14T11:18:22.891756Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-11-14T11:18:22.895043Z",
+        "finished_at": "2026-11-14T11:48:22.917883Z"
+    },
+    "verifier": {
+        "started_at": "2026-11-14T11:48:30.396190Z",
+        "finished_at": "2026-11-14T11:48:37.432434Z"
+    },
+    "step_results": null
+}

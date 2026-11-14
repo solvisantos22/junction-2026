@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lightlag Live</title>
+<!--DEV-->
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{"imports": {"three": "../mars/vendor/three.module.js"}}</script>
+<script type="module">
+  window.LIGHTLAG_GHOSTS = await (await fetch("data.json")).json();
+  await import("./app.js");
+</script>
+<!--/DEV-->
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="ui">
+  <header id="bar">
+    <div id="brand"><b>LIGHTLAG</b><span class="brand2">LIVE</span></div>
+    <nav id="missions"></nav>
+    <button id="play" title="Play / pause (space)">▶</button>
+    <div class="timeline"><canvas id="marks"></canvas><input id="scrub" type="range" min="0" max="300" step="0.01" value="0" aria-label="Time"></div>
+    <div id="clock"><b>00</b><span></span></div>
+    <button id="speed" title="Playback speed (- and =)">4×</button>
+  </header>
+  <main id="stage">
+    <div id="tag"></div>
+    <div id="legend"></div>
+    <div id="banner"></div>
+  </main>
+  <aside id="board"></aside>
+</div>
+<div id="title">
+  <div class="in">
+    <h1>LIGHTLAG <span class="brand2">LIVE</span></h1>
+    <p class="tag" id="pitch"></p>
+    <ul id="cast"></ul>
+    <p class="help">Enter start · Space pause · ← → step · 1–6 mission · Tab or click a name to follow it · - = speed · F full screen</p>
+    <p class="src">Recorded runs, not a simulation in this page. Every path is what that rover really drove.</p>
+  </div>
+</div>
+</body>
+</html>
