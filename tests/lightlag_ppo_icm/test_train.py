@@ -121,6 +121,11 @@ class TrainingTests(unittest.TestCase):
         self.assertEqual(len(saved["rows"]), 12)
         with self.assertRaises(ValueError):
             check.player("teleport", None, "max")
+        with self.assertRaises(ValueError):          # refused before any episode is played
+            check.main(["--policy", os.path.join(self.out, "policy.npz"), "--seeds", "300004", "--players",
+                        "ppo_icm,teleport", "--workers", "1"])
+        self.assertEqual(sorted(check.scripted("traverse_max")),
+                         ["greedy", "manh_max", "manh_max_fast", "nothing", "pilot", "pilot_fast", "straight"])
 
 
 if __name__ == "__main__":

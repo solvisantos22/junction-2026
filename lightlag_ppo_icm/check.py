@@ -11,7 +11,9 @@ otherwise. Players: ppo_icm (greedy), ppo_icm_sampled (actions drawn as in train
 (a hand-written rule on the same observation), random (the same adapter with random actions),
 nothing, and the scripted players of the environment:
 max_navigator, fused, c37, kf_mpc, blind on the max env; kf_mpc, blind, reference, leg_and_wait on
-a profile or biome; pilot, pilot_fast, greedy, straight on the traverse.
+a profile or biome; pilot, pilot_fast, greedy, straight on the traverse, and manh_max,
+manh_max_fast besides on its MAX map (the full-search pilot and manh_max are slow, so they play
+only when named).
 
 Prints each player's mean share of the available value, deaths and returns home, and its paired
 difference to the first player with a 95% bootstrap interval over the seeds.
@@ -90,14 +92,17 @@ def main(argv=None):
     extra = load_player(args.policy).extra
     spec = args.env or extra["env"]
     delay = extra["delay"] if args.delay is None else args.delay
+    builtin = ["ppo_icm", "plain", "random", "nothing"]
     names = (args.players.split(",") if args.players
-             else ["ppo_icm", "plain", "random", "nothing"] + [n for n in scripted(spec) if n != "pilot"])
+             else builtin + [n for n in scripted(spec) if n not in builtin + ["pilot", "manh_max"]])
     entries = [(name, name, args.policy) for name in names]
     for extra_policy in args.also:
         label, _, path = extra_policy.partition("=")
         if not label or not path or label in names:
             raise ValueError("--also takes NAME=POLICY with a name no other player has")
         entries.insert(1, (label, "ppo_icm", path))
+    for _, name, path in entries:
+        player(name, path, spec)     # an unknown player is an error here, not forty crashed episodes
     jobs = [(label, name, path, spec, seed, delay) for label, name, path in entries for seed in seed_range(args.seeds)]
     with Pool(args.workers) as pool:
         rows = pool.map(episode, jobs, chunksize=1)

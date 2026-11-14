@@ -1,10 +1,10 @@
 # PPO + ICM baseline tester
 
-A generic reinforcement-learning agent that plays the Lightlag environments through the five public tools, as a learned baseline beside the scripted players. It is PPO (a standard policy-gradient method) with an Intrinsic Curiosity Module (a second reward for reaching states the agent cannot yet predict), written in NumPy with no other dependency. Built for the max env (`lightlag_dynamic/biomes/maxenv.py`); it also runs on every `lightlag_dynamic` profile and biome and on Lightlag Traverse.
+A generic reinforcement-learning agent that plays the Lightlag environments through the five public tools, as a learned baseline beside the scripted players. It is PPO (a standard policy-gradient method) with an Intrinsic Curiosity Module (a second reward for reaching states the agent cannot yet predict), written in NumPy with no other dependency. Built for the max env (`lightlag_dynamic/biomes/maxenv.py`); it also runs on every `lightlag_dynamic` profile and biome, and on Lightlag Traverse and its MAX map, where nothing has been trained yet.
 
 **A sandbox baseline, not a rules or reference decision.** No model or API call is involved. On 40 fresh missions of the max env the trained agent scores 11.0% of the available value: level with three of the scripted players, above the frozen `kf_mpc` (6.2%), below a hand rule of a few lines on its own observation (15.3%) and well below `max_navigator` (28.2%). The curiosity module made no measurable difference. The agent's main fault is that it spends its energy by mid-mission and never comes home.
 
-It sits beside Sölvi's `lightlag_rl/`, which is a different experiment: a 256-weight scorer trained with REINFORCE that picks the next target for Kristján's Traverse pilot, which does the driving. Here the agent chooses every command itself.
+It sits beside the team's learning work on the traverse, which is a different experiment in different files: Sölvi's `lightlag_rl/` (a 256-weight scorer trained with REINFORCE that picks the next target for Kristján's pilot, which does the driving) and its follow-ups. Here the agent chooses every command itself. It reads the frozen traverse and changes none of it.
 
 ## Run
 
@@ -18,7 +18,7 @@ python3 -m lightlag_ppo_icm.train --env max --out lightlag_ppo_icm/runs/max     
 python3 -m lightlag_ppo_icm.train --env max --int-coef 0 --out lightlag_ppo_icm/runs/max-alone   # PPO without curiosity
 ```
 
-`--env` takes `max`, `max_rocks`, a profile (`rush`, `rush_noisy`, `noisy`, ...), a profile in a biome (`rush_noisy@troy_crust+relay_pass`), `traverse`, or `traverse_max` once `lightlag_traverse_max/` is in the checkout. A run writes `log.jsonl` (one line per update), `best.npz` (the full agent at its best development score) and `policy.npz` (its actor alone, the file a player needs). `runs/` is ignored by git; the policies kept in the repository are in `policies/`.
+`--env` takes `max`, `max_rocks`, a profile (`rush`, `rush_noisy`, `noisy`, ...), a profile in a biome (`rush_noisy@troy_crust+relay_pass`), `traverse` or `traverse_max`. A run writes `log.jsonl` (one line per update), `best.npz` (the full agent at its best development score) and `policy.npz` (its actor alone, the file a player needs). `runs/` is ignored by git; the policies kept in the repository are in `policies/`.
 
 A trained policy is a player like any other, a callable that gets the five tools:
 
@@ -125,7 +125,7 @@ Things that went wrong on the way. Each says something about the environment as 
 2. **Curiosity found a hazard to bump.** The first curious agent parked against a hazard and sent drive after drive into it. Each one was stopped at once and cost almost nothing, and the observation's "previous command" entries kept changing, which the curiosity module took for novelty. The module now sees only the entries that say where the rover is and what is around it, not the echo of the agent's own last action. A test holds that.
 3. **Curiosity and energy pull in opposite directions.** The curiosity reward grows with how much the observation changes, so it favours long drives; before the guard that meant an earlier death.
 4. **The shortest drive has to fit inside the sampling disc.** With a quarter, a half and a full drive, `rush` (drives up to 5 m, a disc 1.5 m across) reached 4.2% on the development seeds after 1.2 million decisions (`policies/rush-quarter-half-full.log.jsonl`). With 0.5, 1 and 2 m, the lengths the max env's 2 m limit gives anyway, the same learner passed 25% within 0.6 million. Drive lengths are now set from the sampling radius by default (`--metres auto`).
-5. **Energy has no price until it is gone.** Nothing in the score charges for a drive, so the agent drives at every turn, and the cost arrives twenty decisions later as a rover that cannot move. That gap is too long for this learner to bridge in three million decisions, with or without the pull toward home. A guard that also keeps the energy for the way home in hand would make coming home possible; it is not built.
+5. **Energy has no price until it is gone.** Nothing in the score charges for a drive, so the agent drives at every turn, and the cost arrives twenty decisions later as a rover that cannot move. That gap is too long for this learner to bridge in three million decisions, with or without the pull toward home. A guard that also keeps the energy for the way home in hand would make coming home possible; it is not built. The team's learning work on the traverse met the same fault: Sölvi's persistence study found that every rover that ended away from base had under 10 battery left, and Kristján's charging-aware follow-up reports that a visit-and-return feasibility check took returns home from 28 of 48 to 48 of 48 (their rows in `TEAM_STATUS.md`).
 
 ## Limits
 
@@ -133,7 +133,7 @@ Things that went wrong on the way. Each says something about the environment as 
 - The belief, the scheduling and the guard are hand-written. This is a learned policy on a hand-written adapter, and the `plain` row shows how much the adapter alone is worth.
 - The guard is cautious: on the max env it leaves about 19 of the 100 battery units unspent, because up to a dozen commands can be unconfirmed and each is priced at the dearest rate.
 - The belief does not use the beacons or the gyroscope, and one gain cannot hold both bedrock and sand slip.
-- On the traverse the adapter is tested to run (417 decisions, bounded observations, rewards adding up to the score); no policy was trained there. `traverse_max` was tried once against the unfinished `lightlag_traverse_max/` files in the biomes worktree and ran; it needs a new check when that package lands.
+- On the traverse and its MAX map the adapter is tested to run (417 decisions, one per slot, bounded observations, rewards adding up to the score, the MAX map's relay passes, wheel scale and wild fixes read from its rules). No policy was trained there: a mission is 420 ticks and takes about a second to play, some twenty times a max env mission.
 - The check seeds are fresh for these policies. The scripted players were tuned on other seeds (0-59, 1100-1299) and measured on 2600-2639.
 
 ## Seeds

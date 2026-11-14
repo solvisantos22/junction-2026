@@ -397,28 +397,36 @@ class EnvironmentTests(unittest.TestCase):
         self.assertEqual(make_env("rush", 1, delay=5).rules()["delay_ticks"], 5)
         self.assertEqual(make_env("rush_noisy@troy_crust", 1).biome_ids, ("troy_crust",))
         self.assertEqual(make_env("traverse", 1).rules()["version"], "lightlag-traverse-v1")
+        self.assertEqual(make_env("traverse_max", 1).rules()["map_option"], "max")
+        with self.assertRaises(ValueError):
+            make_env("traverse", 1, delay=5)       # the traverse fixes its own delay
         for bad in ("moon", "rush@atlantis"):
             with self.assertRaises(ValueError):
                 make_env(bad, 1)
 
-    def test_the_traverse_plays_through_the_same_adapter(self):
-        env = make_env("traverse", 300031)
-        task = RoverTask(FiveTools(env), CONFIG)
-        rng = np.random.default_rng(1)
-        seen = []
+    def test_the_traverse_and_its_max_map_play_through_the_same_adapter(self):
+        for spec in ("traverse", "traverse_max"):
+            env = make_env(spec, 300031)
+            task = RoverTask(FiveTools(env), CONFIG)
+            rng = np.random.default_rng(1)
+            seen = []
 
-        def choose(obs):
-            seen.append(obs)
-            return int(rng.integers(CONFIG.n_actions)) if obs[0] < 0.12 else WAIT
+            def choose(obs):
+                seen.append(obs)
+                return int(rng.integers(CONFIG.n_actions)) if obs[0] < 0.12 else WAIT
 
-        task.play(choose)
-        result = finish(env)
-        obs = np.array(seen)
-        self.assertEqual(obs.shape, (417, CONFIG.obs_dim))
-        self.assertTrue(np.isfinite(obs).all())
-        self.assertLessEqual(float(np.abs(obs).max()), 1.0 + 1e-9)
-        self.assertAlmostEqual(float(task.rewards(result).sum()), share(result), places=9)
-        self.assertGreater(obs[:, GLOBAL + 7].max(), 0.0)    # a target is listed (BASE is 7 wide)
+            task.play(choose)
+            result = finish(env)
+            obs = np.array(seen)
+            self.assertEqual(obs.shape, (417, CONFIG.obs_dim), spec)
+            self.assertTrue(np.isfinite(obs).all(), spec)
+            self.assertLessEqual(float(np.abs(obs).max()), 1.0 + 1e-9, spec)
+            self.assertAlmostEqual(float(task.rewards(result).sum()), share(result), places=9)
+            self.assertGreater(obs[:, GLOBAL + 7].max(), 0.0)    # a target is listed (BASE is 7 wide)
+            self.assertEqual([slot for slot, _ in task.decisions], list(range(4, 421)), spec)
+        self.assertEqual(task.passes, (8, 4))          # the MAX map's relay passes are read
+        self.assertAlmostEqual(task.scale_error, 0.2)  # and its wheels of a hidden size
+        self.assertIsNotNone(task.gate)                # and its wild fixes
 
 
 if __name__ == "__main__":
