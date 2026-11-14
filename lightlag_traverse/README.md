@@ -17,23 +17,25 @@ Kristján asked for an environment that is closer to real Mars driving, harder f
 
 Nobody can reach every target, so which ones, in what order and by which way over the ground is the task. Everything needed is published: `rules()` gives every formula and number, `map()` the grid, and the agent's container holds the ground model as code (`/app/lightlag_surface.py`).
 
-## Where it stands (Saturday 14 November, about 18:05 Helsinki)
+## Where it stands (Saturday 14 November, about 18:30 Helsinki)
 
-All numbers are scores from 0 to 1 on one mission. Development worlds are seeds 1 to 24; the task's world is seed 2026.
+All numbers are scores from 0 to 1 on one mission. Development worlds are seeds 1 to 24; the task's world is seed 2026, fixed before anything had played it.
 
 | Controller | Development worlds | The task's world |
 |---|---|---|
-| Reference pilot (`pilot.py`) | 0.48 mean over 24, never lost or stranded | 0.45 to 0.48 depending on search budget |
+| **Reference pilot** (`pilot.py`) | **0.505** mean over 24, never lost or stranded | **0.565** through Harbor |
 | The pilot without route optimisation | 0.31 mean over 12, stranded on 6 | |
 | A straight-line driver that ignores the ground | 0.15 mean over 12, stranded on 8 | |
-| Claude Opus 5.5, one request, one program | 0.34 mean over 24; the pilot is higher on 23 | |
-| Claude Sonnet 5.5, one request | 0.11 mean over 4 | |
-| Claude Haiku 5.5, one request | 0.04 mean over 4 | |
-| Claude Opus 5.5 as an agent (OpenCode in Harbor) | its first program replayed: 0.35 mean over 8 | 0.216 and 0.515 |
-| Claude Sonnet 5.5 as an agent | | 0.528 |
+| Claude Sonnet 5.5 as an agent (OpenCode in Harbor) | | 0.528 |
+| Claude Opus 5.5 as an agent | its first program replayed: 0.35 mean over 8, stranded on 2 | 0.515 and 0.216 |
+| Claude Opus 5.5, one request, one program | 0.34 mean over 24; the pilot is higher on all 24 | 0.237 |
+| Claude Haiku 5.5, one request | 0.04 mean over 4 | 0.091 |
+| Claude Sonnet 5.5, one request | 0.11 mean over 4 | 0.060 |
 | Claude Haiku 5.5 as an agent | | 0.000 |
 
-**The reference does not yet beat the best agent runs on the task's world.** Two of four agent runs scored above it there. On the development worlds it is ahead of every Claude program so far, but one Opus agent wrote in four minutes a program that collects nearly as much as the pilot when it gets home. The pilot's route search and its handling of low battery are being improved; this table will change.
+The reference is above every Claude run so far, on the task's world and on every development world replayed. **The margin over the two best agent runs is small: 0.565 against 0.528 and 0.515.** Those agents wrote, in seven and twelve minutes, programs that plan almost as well as the pilot. The margin over everything else is wide.
+
+What it took to get the pilot there is the useful part for the write-up: its first route search settled for days spent among cheap targets near the lander, and two agent runs beat it. A beam search that builds routes forward in time, and so finds the far clusters worth a long drive, moved it from 0.48 to 0.505 on the development worlds and from 0.45 to 0.565 on the task's.
 
 ## Run
 

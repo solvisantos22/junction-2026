@@ -482,7 +482,7 @@ function lay(mesh, x, y, reach) {
 // Stand a body on the drawn ground at a map point, facing `heading` (radians, east 0, north a quarter turn) and tilted with the slope.
 const BASIS = new THREE.Matrix4(), AHEAD = new THREE.Vector3(), ABOVE = new THREE.Vector3(), ASIDE = new THREE.Vector3();
 function seat(body, x, y, heading, scale) {
-  const c = Math.cos(heading), s = Math.sin(heading), a = 1.1 * scale, b = 0.6 * scale;
+  const c = Math.cos(heading), s = Math.sin(heading), a = Math.max(1.1 * scale, 2.2), b = Math.max(0.6 * scale, 1.4);   // never less than a stride, or a life-size rover twitches over every facet
   const front = drawnHeight(x + c * a, y + s * a), back = drawnHeight(x - c * a, y - s * a), left = drawnHeight(x - s * b, y + c * b), right = drawnHeight(x + s * b, y - c * b);
   AHEAD.set(c * 2 * a, (front - back) * EXAG, -s * 2 * a).normalize();
   ASIDE.set(s * 2 * b, (right - left) * EXAG, c * 2 * b).normalize();        // to the body's right
@@ -495,6 +495,7 @@ const [BX, BY] = WORLD.base;
 lay(new THREE.Mesh(new THREE.RingGeometry(CFG.base_radius * 0.8, CFG.base_radius, 40).rotateX(-Math.PI / 2), flatMark(INK, 0.9)), BX, BY, CFG.base_radius);
 const lander = makeLander(); scene.add(lander);
 const baseLabel = new Label(30).set('BASE'); scene.add(baseLabel.sprite);
+baseLabel.sprite.position.copy(P(BX, BY)); baseLabel.sprite.center.set(0.5, 1.9);      // under the ring on screen, clear of the names of rovers standing at base
 
 // Each target is a survey flag: its value over it, a bar that runs down to its deadline, and a dot per rover that sampled it.
 const CLOSE = Math.max(5, Math.round(T * 0.06)), FRESH = Math.max(6, Math.round(T * 0.035));
@@ -650,7 +651,6 @@ function apply(t, wall, S, chase) {
     for (const mark of actor.marks) { mark.sprite.visible = t >= mark.t - 1e-6; mark.sprite.userData.px = role === 'shade' ? 13 : 18; }
   }
   seat(lander, BX, BY + 4.2 * S, 2.4, S);                              // beside the base point, where the rovers start and must return to
-  baseLabel.sprite.position.copy(lander.position).y += 4.3 * S;
   for (const target of TARGETS) {
     const known = t >= target.appear - 1e-6;
     target.zone.visible = target.staff.visible = target.label.sprite.visible = known;
@@ -721,6 +721,7 @@ function overview(aspect) {
 }
 const mapEye = new THREE.Vector3(), mapLook = new THREE.Vector3(), chaseEye = new THREE.Vector3(), chaseLook = new THREE.Vector3();
 function aim(aspect, wall, t, dt) {
+  if (aspect !== view.aspect) { view.aspect = aspect; view.snap = true; }   // a resized window is framed afresh at once
   const { distance, shift } = overview(aspect), sway = Math.sin(wall * 0.09) * SWAY;
   mapEye.set(Math.sin(sway) * Math.cos(TILT) * distance, Math.sin(TILT) * distance, shift + Math.cos(sway) * Math.cos(TILT) * distance); mapLook.set(0, 0, shift);
   // the chase camera rides behind and above the rover being followed, looking where it is heading

@@ -290,6 +290,36 @@ class RouteProblem:
             b = min(sun.capacity, b + gain)
             t += 4
 
+    def visit(self, t: int, b: float, last: int, site: int):
+        """Go from `last` (-1: where the rover is) to `site` and sample it.
+
+        Returns (tick after the sample, battery, value credited), or None if it cannot be done.
+        """
+        if last < 0:
+            dt, de = self.start_t[site], self.start_e[site]
+        else:
+            dt, de = self.t[last][site], self.e[last][site]
+        moved = self._leg(t, b, dt, de)
+        if moved is None:
+            return None
+        end, after = moved
+        done = end + self.stop
+        if done > self.limit:
+            return None
+        sun = self.sun
+        b = after + sun.total[done] - sun.total[end] - sun.idle * self.stop - self.sample_cost
+        if b < self.floor * 0.5:
+            return None
+        return done, b, (self.values[site] if done <= self.deadlines[site] else self.late[site])
+
+    def home(self, t: int, b: float, last: int):
+        """The tick the rover is back at the lander if it leaves for it now, or None if it cannot make it."""
+        dt, de = self.start_home if last < 0 else (self.home_t[last], self.home_e[last])
+        if not dt:
+            return t
+        moved = self._leg(t, b, dt, de)
+        return None if moved is None else moved[0]
+
     def score(self, order: Sequence[int]) -> Tuple[float, float]:
         """(value earned, finish tick) of visiting `order` then going home; value -1 if it cannot be done."""
         sun = self.sun
@@ -324,6 +354,34 @@ class RouteProblem:
                 return -1.0, INF
             t = moved[0]
         return value, float(t)
+
+
+def repair_route(problem: RouteProblem, order: Optional[Sequence[int]]) -> List[int]:
+    """A route that no longer fits, made to fit by dropping as little value as possible.
+
+    A plan made a few ticks ago can stop fitting for a small reason: the rover is a tick behind,
+    or a terrain turned out to slip a little more. Throwing the whole plan away then, and
+    rebuilding it with a replan's small budget, loses far more than the stop or two that have
+    to go.
+    """
+    seen: set = set()
+    route = []
+    for site in order or []:
+        if 0 <= site < problem.count and site not in seen:
+            seen.add(site)
+            route.append(site)
+    while route and problem.score(route)[0] < 0:
+        best = None
+        for index in range(len(route)):
+            trial = route[:index] + route[index + 1:]
+            value, _ = problem.score(trial)
+            if value >= 0 and (best is None or value > best[0]):
+                best = (value, trial)
+        if best is not None:
+            return best[1]
+        drop = min(range(len(route)), key=lambda i: (problem.values[route[i]], -i))
+        route = route[:drop] + route[drop + 1:]
+    return route
 
 
 def rebuild_route(problem: RouteProblem, steps: int = 100000, start: Optional[Sequence[int]] = None,
@@ -418,11 +476,8 @@ def rebuild_route(problem: RouteProblem, steps: int = 100000, start: Optional[Se
                     break
         return order, value, finish
 
-    seed = [site for site in (start or []) if 0 <= site < count]
+    seed = repair_route(problem, start)
     value, finish = look(seed)
-    if value < 0:
-        seed = []
-        value, finish = look(seed)
     order, value, finish = rebuild(list(seed), value, finish, 0.0)
     order, value, finish = tidy(order, value, finish)
     best, best_value, best_finish = list(order), value, finish
@@ -503,9 +558,7 @@ def anneal_route(problem: RouteProblem, steps: int = 100000, start: Optional[Seq
             order, current, finish = best[1], best[2], best[3]
         return order
 
-    seed = [site for site in (start or []) if 0 <= site < count]
-    if seed and rate(seed) < 0:
-        seed = []
+    seed = repair_route(problem, start)
     if seed:
         best = fill(seed)
         heat *= 0.25
@@ -567,11 +620,66 @@ def anneal_route(problem: RouteProblem, steps: int = 100000, start: Optional[Seq
     return best, max(0.0, score(best)[0])
 
 
+def beam_route(problem: RouteProblem, width: int = 600, per_site: int = 30,
+               rates: Sequence[float] = (0.08, 0.12, 0.16, 0.22)) -> List[int]:
+    """Build routes forward in time, many at once, and return the best complete one.
+
+    Local search starts from one route and changes it a little at a time, so it can sit for ever
+    on a day spent among cheap targets near the lander. A beam keeps hundreds of partial routes
+    alive at each step, including ones that have so far only driven a long way toward something
+    valuable. Partial routes of different lengths are compared by value minus a price per tick
+    used; nobody knows the right price, so several are tried.
+
+    Every route it considers leaves time to get home. Deterministic.
+    """
+    count = problem.count
+    best_order: Tuple[int, ...] = ()
+    best_value, best_finish = 0.0, float(problem.now)
+    for rate in rates:
+        frontier = [(0.0, problem.now, problem.battery, -1, 0, ())]
+        for _ in range(count):
+            seen: Dict[Tuple[int, int], Tuple[float, float, int, float, int, int, Tuple[int, ...]]] = {}
+            for value, t, b, last, mask, order in frontier:
+                for site in range(count):
+                    bit = 1 << site
+                    if mask & bit:
+                        continue
+                    moved = problem.visit(t, b, last, site)
+                    if moved is None:
+                        continue
+                    t2, b2, gain = moved
+                    finish = problem.home(t2, b2, site)
+                    if finish is None:
+                        continue
+                    value2 = value + gain
+                    if value2 > best_value + 1e-9 or (abs(value2 - best_value) <= 1e-9 and finish < best_finish):
+                        best_value, best_finish, best_order = value2, finish, order + (site,)
+                    key = (mask | bit, site)
+                    kept = seen.get(key)
+                    if kept is None or (value2, -t2) > (kept[1], -kept[2]):
+                        seen[key] = (value2 - rate * (t2 - problem.now), value2, t2, b2, site, mask | bit, order + (site,))
+            if not seen:
+                break
+            ranked = sorted(seen.values(), key=lambda state: (-state[0], state[2], state[6]))
+            frontier, used = [], {}
+            for state in ranked:
+                site = state[4]
+                if used.get(site, 0) >= per_site:
+                    continue
+                used[site] = used.get(site, 0) + 1
+                frontier.append(state[1:])
+                if len(frontier) >= width:
+                    break
+    return list(best_order)
+
+
 def plan_route(problem: RouteProblem, steps: int = 100000, start: Optional[Sequence[int]] = None,
-               rng: Optional[random.Random] = None, heat: float = 1.5) -> Tuple[List[int], float]:
+               rng: Optional[random.Random] = None, heat: float = 1.5, beam: int = 0) -> Tuple[List[int], float]:
     """A good order of sites to visit before going home, and its expected value.
 
-    Two searches that get stuck in different places, each started from the other's best: the
+    With `beam`, first a beam search of that width, which builds routes forward and so finds the
+    far clusters worth a long drive. Then two local searches that get stuck in different places,
+    each started from the other's best: the
     rebuild search finds which clusters are worth the trip, annealing then reorders and swaps
     within the route, and a last rebuild pass fills what that freed. The budget is counted in
     route evaluations, so the same inputs give the same route on any machine. `start` is a route
@@ -583,9 +691,11 @@ def plan_route(problem: RouteProblem, steps: int = 100000, start: Optional[Seque
         value, finish = problem.score(order)
         return value - 1e-4 * finish if value >= 0 else -1.0
 
-    best = [site for site in (start or []) if 0 <= site < problem.count]
-    if worth(best) < 0:
-        best = []
+    best = repair_route(problem, start)
+    if beam:
+        built = beam_route(problem, beam)
+        if worth(built) > worth(best):
+            best = built
     for search, share in ((rebuild_route, 0.45), (anneal_route, 0.35), (rebuild_route, 0.20)):
         found, _ = search(problem, max(200, int(steps * share)), best, rng, heat)
         if worth(found) > worth(best):
