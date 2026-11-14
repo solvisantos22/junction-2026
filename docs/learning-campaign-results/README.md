@@ -1,6 +1,6 @@
 # Contextual learning campaign: live handoff
 
-The six-job Modal pilot was submitted on **14 November 2026, 18:02 UTC**. Three scratch PPO runs are running and three Rainbow-inspired replay runs are queued behind them. No production result or learning success is claimed yet.
+The six-job Modal pilot was submitted on **14 November 2026, 18:02 UTC**. At the first live snapshot, three scratch PPO runs were running and three Rainbow-inspired replay runs were queued behind them. Training and reused validation are underway; final-check generalization is still untested.
 
 - [Frozen protocol](../learning-campaign.md), [campaign manifest](campaign.json), [source/runtime freeze](freeze.json), [pilot call IDs and receipt](pilot-receipt.json).
 - [Live Modal app](https://modal.com/apps/solvisantos22/main/ap-rogIzhog6ZpkrAeb474Z11).
@@ -37,3 +37,32 @@ The stop marker is durable and prevents further stage launches. Do not relaunch 
 `tools.learning_campaign.manage` monitors only this campaign. Without `--follow` it performs one remote read-only poll. With `--follow` it may launch only the frozen expanded/extended stages for entire qualifying methods, checks the unchanged frozen source, and stops on any ambiguous receipt, remote exception or corrupt download. It downloads report/policy/validation artifacts only after every stage function has returned and committed its volume. It does not open final-check maps.
 
 After training has settled, `tools.learning_campaign.evaluate --freeze ... --runs ...` creates a self-contained final manifest without constructing any environments. Publish that manifest before `--run`; audit the resulting complete physics replays with `--audit`. Include all six run identities, initial/last completed policies, matched2048 policies, greedy and beam. Never select the best initialization.
+
+## First validation checkpoint and interpretation
+
+[Immutable512-mission PPO validation summaries](early-validation.json): all three training seeds improve; mean initial score0.087395 →0.344024. All96 initial and all96 checkpoint validation outcomes return alive/home, with zero invalid calls. These are reusable validation maps, not the final check, and do not trigger continuation before the2048-mission pilot completes.
+
+[Matched validation controls](validation-controls/report.json), independently checked through all64 physics replays/grades and greedy choices ([verification](validation-controls/verification.json)):
+
+| Policy | Mean official reward | Alive/home |
+|---|---:|---:|
+| PPO after512, average of3 training seeds | 0.344024 | 96/96 |
+| Charge-aware greedy | 0.380555 | 32/32 |
+| Unchanged original beam | 0.514345 | 32/32 |
+
+The early learning gain is real in these recorded validation scores; it has not reached either control. Keep training under the declared gates. The controls were measured as context after validation had opened, with no tuning or change to staging thresholds. They establish neither a final learned-policy win nor a language-model failure.
+
+## Active process and next handoff
+
+The bounded continuation supervisor is running from its own fixed checkout **`/tmp/junction-learning-supervisor` at `06979e7`**, using the original training checkout at `e8a8acb`. PID at launch: **54377**. Its heartbeat, receipts, downloaded stage artifacts, decisions and append-only events are under **`/tmp/junction-learning-monitor`**; read `state.json` for current status. An idle-sleep guard watches this process and exits with it. Current cloud jobs keep running independently of the local supervisor.
+
+All **61 tests pass**. Smoke updates/actions reproduce exactly; full control physics audits pass. Work remains: collect completed pilot artifacts, let the fixed all-seed gate decide continued training, then publish the final policy/evaluation freeze and run/audit the40 untouched final maps. The supervisor stops at `ready_for_final_evaluation`; it never silently opens those maps or pushes new results. The next agent should publish stage receipts/decisions and update this handoff before interpreting final results.
+
+To inspect local progress: `cat /tmp/junction-learning-monitor/state.json`. To resume a stopped local supervisor without duplicating submitted jobs, use the exact fixed code and existing output directory:
+
+```sh
+cd /tmp/junction-learning-supervisor
+MODAL_PROFILE=solvi-junction /tmp/junction-learning-venv/bin/python -m tools.learning_campaign.manage --freeze /tmp/junction-learning-frozen/docs/learning-campaign-results/freeze.json --pilot-receipt /tmp/junction-learning-supervisor/docs/learning-campaign-results/pilot-receipt.json --source-root /tmp/junction-learning-frozen --output /tmp/junction-learning-monitor --follow
+```
+
+If state is `error`, inspect its operation and retained artifacts; it intentionally does not retry an ambiguous launch or corrupt terminal download. Stopping the local PID prevents future local continuation decisions but does not cancel active cloud jobs; use the durable cloud stop command above to stop the campaign.
