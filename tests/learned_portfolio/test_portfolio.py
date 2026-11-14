@@ -1,5 +1,6 @@
 import ast
 from pathlib import Path
+import pickle
 import unittest
 
 import numpy as np
@@ -55,6 +56,25 @@ class PortfolioTests(unittest.TestCase):
 
     def test_incomplete_counterfactual_matrix_is_rejected(self):
         with self.assertRaises(ValueError):matrix([],TRAIN,'train')
+
+
+class ModelTests(unittest.TestCase):
+    def test_all_three_fits_learn_and_survive_checkpoint_roundtrip(self):
+        from lightlag_learned_portfolio.model import ALGORITHMS, fit
+        rng=np.random.default_rng(17)
+        x=rng.normal(size=(64,4))
+        y=np.column_stack([.03*(i+1)/11*x[:,0]+.01*x[:,1] for i in range(11)])
+        data={"x":x.tolist(),"y":y.tolist(),"feature_names":["a","b","c","d"]}
+        for algorithm in ALGORITHMS:
+            with self.subTest(algorithm=algorithm):
+                result=fit(algorithm,data)
+                model=pickle.loads(result["weights"])
+                prediction=model.predict(x)
+                self.assertTrue(np.isfinite(prediction).all())
+                np.testing.assert_allclose(prediction,result["train_predictions"],rtol=0,atol=0)
+                self.assertLess(result["train_mse"],float(np.mean(y*y)))
+                name,_=choose(model,dict(zip(data["feature_names"],x[0])),0.)
+                self.assertIn(name,PROFILE_NAMES)
 
 
 if __name__=='__main__':unittest.main()

@@ -846,9 +846,13 @@ Kristján explicitly requested parallel Modal training, prioritizing speed using
 his remaining credits, to try to beat the reference with a learned model. Codex
 built an isolated public-state strategy selector, counterfactual rollout dataset
 and three classical model fits; the existing reference remains the team's work.
-Six focused tests pass. All 12 initial Modal smoke missions finish home/alive;
-common prefixes/features agree and the baseline replay matches the local run
-exactly. A Modal SDK cleanup warning after completion is retained and will be
-fixed before production. Training and fresh results are pending. No canonical
-reference change or new LLM-performance claim. [Protocol](learned-portfolio.md),
-[evidence](learned-portfolio-results/README.md).
+Seven focused tests pass, including all three fits and checkpoint round trips.
+All 12 initial Modal smoke missions finish home/alive; common prefixes/features
+agree and the baseline controller exactly matches the local trajectory. All 12
+physics replays, 4,874 commands and 5,052 states independently verify. The original
+SDK cleanup warning is retained; `eb4f9e2` fixed it before production and disabled
+implicit source upload. Modal data app `ap-tctysvmd3CxtowroSpSlM0` is running the
+frozen 2,880 missions, with 97 concurrent workers observed. Training and fresh
+results are pending. No canonical reference change or new LLM-performance claim.
+Initial implementation `570c7e5`, production launch source `78cfb5d`.
+[Protocol](learned-portfolio.md), [evidence](learned-portfolio-results/README.md).
