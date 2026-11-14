@@ -37,7 +37,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* the scene */
 #stage { position: relative; min-width: 0; min-height: 0; touch-action: none; cursor: grab; }   /* the 3D view: drag, scroll and pinch move the camera */
 #stage.dragging { cursor: grabbing; }
-#stage.held { cursor: default; }                                      /* story mode is showing a moment: the camera is its */
+#stage.held { cursor: pointer; }                                      /* story mode is showing a moment: the camera is its, a click skips it */
+#moment .skip { margin-left: calc(14px * var(--s)); padding: calc(3px * var(--s)) calc(10px * var(--s)) calc(1px * var(--s)); border: 1px solid var(--faint); color: var(--dim); font-size: calc(14px * var(--s)); letter-spacing: .14em; text-transform: uppercase; pointer-events: auto; cursor: pointer; }
+#moment .skip:hover { color: var(--ink); border-color: var(--dim); }
+#moment:not(.on) .skip { pointer-events: none; }
 #tag { position: absolute; left: calc(16px * var(--s)); top: calc(12px * var(--s)); line-height: 1; text-shadow: 0 2px 0 #000, 0 0 14px rgba(0, 0, 0, .55); }
 #tag b { display: block; font-size: calc(34px * var(--s)); letter-spacing: .16em; }
 #tag span { font-size: calc(16px * var(--s)); letter-spacing: .08em; color: var(--dim); }
