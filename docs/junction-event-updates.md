@@ -2,22 +2,38 @@
 
 Shared event and AfterQuery notices for the team. All times are **Helsinki (UTC+2)**. Each entry distinguishes official guidance from unanswered participant questions. Junction Watch publishes new actionable information here on its 30-minute checks, through Sunday 15 November at 17:00; checks with no changes stay in its private log.
 
-## Current actions — checked Sunday 15 November, 00:36
+## Current actions — presentation guidance checked Sunday 15 November, 00:54
+
+**[Sunday presentation plan](sunday-presentation-plan.md)** collects the confirmed formats, team roles and schedule. The latest full watcher check was at 00:36; the 00:54 follow-up was a targeted organizer/AfterQuery/guide presentation search, not a fresh submission-state check.
 
 - **Submit FINAL by 10:00 today.** Drafts are not reviewed. At the 00:36 check, the saved **Lightlag** entry still showed **Draft**, with demo/source/video/other links and presentation fields empty. This is the platform snapshot, not a statement that the team has not produced those artifacts. Add the chosen artifacts and verify the saved final entry. Final entries remain editable until 10:00, as Samu / Info Team reconfirmed at 00:30; this confirms the existing guide. [Support confirmation](https://discord.com/channels/1268184974784336004/1434816271190458398/threads/1571290592900546631). The public video must be **at most two minutes**. [Guide](https://hackjunction.app/participate/45/guide) · [Saved submissions](https://hackjunction.app/participate/45/submissions).
 - **Select the team's peer-review table again in Teams.** Organizers reset existing selections on Saturday at 22:36. Use the number on the replacement **A4 sign**, not the old small paper. This watcher has not checked or changed our table selection. [Dashboard](https://hackjunction.app/participate/45) · [Announcements](https://discord.com/channels/1268184974784336004/1562402388017418350).
 - **Be at the selected table by 10:30**, with a working demo, five-minute pitch and a reviewing device. Head over at 10:15. Rounds begin **10:45 and 11:45**; each has **five cycles**. Pitches stop at five minutes. Each following five-minute transition covers both submitting the review and reaching the next table. Allow about ten minutes to swap roles; aim to finish by 12:45 and stay available until 13:00. Reviews are individual, so teammates can receive different assignments. [Guide](https://hackjunction.app/participate/45/guide).
+- **Stay together for our pitching round; choose who speaks.** Samu / Info Team clarified this at 00:46 Sunday, edited 00:47. Reviewing is individual and teammates are assigned different tables. This resolves earlier tentative replies about splitting the team between permanent pitching/reviewing roles. [Direct organizer answer](https://discord.com/channels/1268184974784336004/1571287474703966398).
+- **Prepare both the public video (≤2 minutes) and PDF deck.** They are separate submission requirements. The five-minute live table pitch is also required for peer review. If selected as one of the **five overall finalists**, the stage format is **3 minutes + 3 minutes Q&A**; prepare that shorter cut beforehand. Final ceremony 14:00–16:05, with finalist pitches 14:15–15:10 and challenge winners 15:10–15:50. [Guide](https://hackjunction.app/participate/45/guide) · [Required artifacts clarification](https://discord.com/channels/1268184974784336004/1571227811568423045).
 - **Prioritize the public demo video.** Ved says it is a large part of AfterQuery judging. Harbor format and OpenCode are expected; judging models are undisclosed. Record the tested model/configuration and timeout in the final package without assuming judges will use that same model. [Verified mentor details](afterquery-judging-clarifications-2026-11-14.md).
 
 The five-minute general peer-review format does **not** resolve the brief's separate ten-minute AfterQuery demo: its slot/location, eligibility and inclusion of Q&A remain unconfirmed. Ved referred these questions to organizers. The older guide body still mentions a 14:00 end; the newer specific peer-review section and organizer announcement say to remain available until 13:00.
 
-## Latest check — Sunday 15 November, 00:36
+## Latest targeted follow-up — Sunday 15 November, 00:54
+
+The parent chat searched presentation/slides/judging discussions, read relevant #ask-organizers threads including the new 00:46–00:47 replies, checked AfterQuery through 00:43 and reread the guide's relevant sections. Newly confirmed: the team pitches together; reviews are individual; submission materials support both peer and partner review; the main final has a separate three-minute pitch plus three-minute Q&A. AfterQuery's ten-minute demo logistics remain unresolved. The saved submission and team table were not inspected in this follow-up. [Complete Sunday checklist and source links](sunday-presentation-plan.md).
+
+## Latest full watcher check — Sunday 15 November, 00:36
 
 All nine monitored sources were checked, with no outstanding coverage gap. **No new official AfterQuery requirement, credit offer or resource link** appeared. The latest mentor guidance remained Ved's Saturday 16:54 reply. Participant questions about mentor availability (Saturday 23:54) and frontier-model credits (Sunday 00:06) were unanswered; they do not reinstate AfterQuery's withdrawn inference-credit offer. [AfterQuery channel](https://discord.com/channels/1268184974784336004/1564622313893404883).
 
 Coverage includes announcements, AfterQuery, the tech-support activity index, dashboard, full brief, guide, new-entry form, saved submissions and discovery of newly linked official resources. The new final-submission support thread was read in full; unchanged thread bodies and previously checked upstream resources were not re-read. This authenticated source check ran from 00:33 to 00:36. Samu's new reply confirms existing final-editability guidance; no deadline or requirement changed.
 
 ## Official update history
+
+### Sunday 15 November, 00:46–00:47 — team pitch and individual peer-review roles
+
+Samu / Info Team explicitly confirmed that the team stays together for the pitch and chooses the presenter; only reviewing is individual, with teammates assigned different tables. Use this latest clarification over earlier tentative replies about dividing teammates between pitching and reviewing. [Direct thread](https://discord.com/channels/1268184974784336004/1571287474703966398).
+
+Aaron (verified Discord role: **Volunteer**) also clarified at 00:47 that peers review projects live from 10:30 to 13:00 and may consult the submitted materials. His 23:48 Saturday reply says the video, demo/source links and PDF serve both partner judging and peer review. These materials do not replace the live pitch. [Deliverables thread](https://discord.com/channels/1268184974784336004/1571277706782576692).
+
+The guide recheck independently confirms: public video ≤2 minutes plus PDF deck by 10:00; five-minute table pitch; only the five overall finalists give a three-minute stage pitch plus three-minute Q&A. These are different formats, not competing versions of the same time limit. The separate AfterQuery ten-minute slot remains unconfirmed. [Sunday plan](sunday-presentation-plan.md).
 
 ### Sunday 15 November, 00:30 — final submissions remain editable
 
@@ -50,5 +66,7 @@ Ilmari confirmed the route: save the first draft, then use Project Submission or
 Info Team acknowledged the reported fifth-floor issue, could not promise a fix because of traffic, and suggested phone tethering if affected. No later confirmed resolution or Lightlag impact was observed. [Official support reply](https://discord.com/channels/1268184974784336004/1434816271190458398/threads/1571165895706021898).
 
 ## Monitoring and publication
+
+The regular source set now also includes the **#ask-organizers activity index and relevant presentation/judging follow-up threads**, bringing routine coverage to ten sources. The parent verified the monitor resumed at the unchanged 30-minute cadence after the targeted presentation search; the Sunday 17:00 end is unchanged.
 
 The local monitor requires the Mac, Codex and authenticated app sessions to remain available. Failed access is recorded as a gap, not as no updates. New actionable notices are pushed to `main` and linked in the parent-chat alert; publication failures are reported explicitly and retried. Credentials, private runtime files and raw conversations stay outside Git. [Monitor controls](../tools/junction_watch/README.md) · [Publication workflow](../tools/junction_watch/PUBLISHING.md).
