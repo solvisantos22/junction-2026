@@ -434,6 +434,22 @@ These are recommended evidence choices, not newly asserted official entry requir
   with two inspections after repairing comparator limits. No further paid pilot
   or final project/rules selection is claimed.
 
+### R15 — 14 November — Six regions with two inspections
+
+- Human direction: Sölvi approved repairing the reference's inspection scheduling
+  and expanding to six science regions, retaining the strong-model requirement.
+- Codex implemented a separate fourteen-target survey generator and environment
+  with six independent regional qualities and the same two-inspection budget.
+  Physical sampling remains informative; existing rover physics and all frozen
+  experiments are unchanged. A development/check protocol precedes policy outcomes.
+- Verification: 22 environment/generator tests, including 100 geometry seeds,
+  six-region hidden-state isolation, delayed learning, atomic reservations,
+  constant-36 scoring and physical equivalence without inspections.
+- [Contract and developing evidence](lightlag-survey-experiment.md),
+  [predeclared gate](lightlag-survey-gate.md), [package](../lightlag_survey/).
+  Comparator and free policy checks are next. No model gap, paid call, task
+  promotion or final project choice is claimed by this first increment.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
