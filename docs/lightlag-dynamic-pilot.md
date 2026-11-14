@@ -1,6 +1,6 @@
 # Lightlag dynamic-rules pilot: deadlines, discoveries, time pressure and noisy sensing
 
-14 November 2026. First increment about 01:45 Helsinki, second increment (noisy sensing, Kalman filter + MPC) about 02:20. Owner: Manh / Claude Code. Code: [`lightlag_dynamic/`](../lightlag_dynamic/README.md), tests: `tests/lightlag_dynamic/`. Runs on Sölvi's simulator in [`lightlag/`](../lightlag/README.md) and changes nothing in it, nor in `lightlag_controllers/` or `lightlag_mcp/`.
+14 November 2026. First increment about 01:45 Helsinki, second increment (noisy sensing, Kalman filter + MPC) about 02:20, third increment (Manh controllers and swarm testing) about 03:30. Owner: Manh / Claude Code. Code: [`lightlag_dynamic/`](../lightlag_dynamic/README.md), tests: `tests/lightlag_dynamic/`. Runs on Sölvi's simulator in [`lightlag/`](../lightlag/README.md) and changes nothing in it, nor in `lightlag_controllers/` or `lightlag_mcp/`.
 
 **No real agent has been run.** Everything below compares scripted controllers. It shows how the environment behaves under different rules, not whether a frontier agent struggles.
 
@@ -9,6 +9,31 @@
 AfterQuery's 14 November update ([summary](afterquery-update-2026-11-14.md)): every environment must be a [Harbor](https://github.com/harbor-framework/harbor) task (the `laude-institute/harbor` link redirects there), played with the OpenCode harness, writing one reward between 0 and 1 to `/logs/verifier/reward.txt`, with at least one Harbor run log of a real model and a short README. AfterQuery provides no inference credits.
 
 For this pilot, that means nothing here reaches the submission except through Kristján's Harbor task ([`harbor/lightlag/`](../harbor/lightlag/), [notes](lightlag-harbor.md)). `python3 -m lightlag_dynamic.serve` is a drop-in for that task's simulator command: it accepts the same settings, including `LIGHTLAG_TOKEN_FILE`, answers `/healthz`, and was graded by `python -m lightlag_mcp.finish` over HTTP in a local test (`rush_noisy`, seed 7; result and replay written). Switching the task to a dynamic profile is a team rules decision and the task owner's change; nothing under `harbor/` is edited here.
+
+## Third increment: Manh controllers and swarm testing
+
+[`lightlag_dynamic/manh_controllers/`](../lightlag_dynamic/manh_controllers/README.md) collects every meaningful controller combination built so far, named `<METHODS>_manh_controller_<N>`. Each entry records what the controller is, why it was built and what it showed. It also contains privileged-information bounds, candidate rule factors, a per-episode failure logger and a parallel swarm runner, so new controllers can be ranked on the same seeds.
+
+About 90,000 scripted episodes were run on development seeds 0–19 at delays 0, 3 and 5, in three suites: the four profiles; one noise dial at a time; one candidate rule factor at a time. The scores are the share of the maximum, averaged over each suite.
+
+- **Honest bounds.** A bound needs margins matched to its information. The first exact-information oracle used the stock planner (2.0 energy reserve, aiming at target centres) and scored below the Kalman filter. With a reserve of 0.5 and aiming at the disc it reaches 90.4% on the profiles, and 95.9% without delay, against 85.0% for `kf_mpc`.
+  - Delay alone costs about 5.5 points even with perfect information.
+- **Best real controller so far:** `CKF_aimdisc_turncost_window_MPC_manh_controller_20`. It averages 77.5% over the three suites, against 75.3% for `kf_mpc` (controller 1), and gets home in 97% of episodes. It combines:
+  - a cubature Kalman filter;
+  - legs aimed at the target disc;
+  - turn energy in the budget;
+  - decisions taken only inside uplink windows.
+- **The estimator matters less than the planner.** On the plain profiles the EKF, particle filter, cubature filter and iterated smoother are within about 1 point of each other.
+  - The particle and cubature filters pull ahead only at large position noise or noise level 3: 84% and 68% against 72% and 50% at delay 5.
+  - Smoothing halves the error on past states but cannot improve the prediction a delayed command acts on.
+- **The team references fall behind as noise rises.** Averaged over the noise suite, Sölvi's reference scores 47%, the blind plan 47% and Kristján's 21%; every Manh controller scores 74–77%.
+  - Heading bias is the dial that best separates feedback from open-loop control: at a 20° bias the blind plan scores 6–9%.
+- **Rule factors that break everything we have:**
+  - **Hidden sand patches:** on `noisy`, Sölvi's worst-case budgets beat every Manh controller (68% vs at most 56% at delay 3).
+  - **Uplink windows of 4 ticks in 16 on `rush_noisy`:** at delays 3 and 5 the blind plan, which sends everything at tick 0, wins (54–55% vs at most 45%).
+  - **Turn cost:** at 0.03 per degree on `noisy`, delay 3, all three team references score 0%. Controllers 14 and 19–21, which budget turn energy, keep 75%.
+
+These are scripted results on development seeds. Confirm the winner on untouched seeds before relying on it.
 
 ## Second increment: noisy sensing and a Kalman filter + MPC reference
 
