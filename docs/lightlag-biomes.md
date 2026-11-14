@@ -77,84 +77,132 @@ Two things did not go as planned, and both are stated here rather than hidden:
 
 **Setup:**
 - Seeds 2000–2039, which nobody had used; `rush` and `rush_noisy`; delays 0, 3 and 5.
-- Every registered Manh controller (1–34), bound 16, and the team's `solvi_reference`, `kristjan_reference`, `blind` (a fixed plan) and `cautious` (leg-and-wait), all unchanged: 31 players, 52,080 episodes.
+- Every registered Manh controller (1–36), bound 16, and the team's `solvi_reference`, `kristjan_reference`, `blind` (a fixed plan) and `cautious` (leg-and-wait), all unchanged: 33 players, 55,440 episodes.
 - Share = score / maximum available. A biome's number is the mean over both profiles, the three delays and the 40 seeds (240 episodes). "Overall" weighs every biome equally.
-- Full tables per biome, profile and delay: [trial report](lightlag-biomes/trial-report.md). Numbers per controller: [trial summary](lightlag-biomes/trial-summary.json). Result rows are not committed; the command above reproduces them in about 15 minutes on 10 workers.
-- Controller 34 landed on `main` while the trial ran. Main Mars was played again on the final code; all 7,200 episodes of the other controllers came out identical.
+- Full tables per biome, profile and delay: [trial report](lightlag-biomes/trial-report.md). Numbers per controller: [trial summary](lightlag-biomes/trial-summary.json). Result rows are not committed; the command above reproduces them in about 20 minutes on 10 workers.
+- **Run in two parts.** Controllers 1–34 were played on Saturday about 12:40 Helsinki; 35 and 36 were registered afterwards and were played on the same seeds about 14:00. The whole trial was then replayed on the final code (`0854b48`): all 55,440 episodes came out identical.
 
-### Best overall: controller 33, by a margin that is mostly noise
+### Best overall: controller 36, narrowly ahead of 33
 
 | Rank | Controller | All biomes | Main Mars | Relay Pass | Hidden Valley | Bagnold Dunes | Troy Crust | Gale Rock Field | Meridiani |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | **33** (24 + slip-check layer + executive) | **74.9%** | 78.7% | 74.1% | 77.4% | 76.0% | 71.8% | 72.0% | 74.1% |
-| 2 | 31 (24 + slip-check layer) | 74.8% | 78.7% | 74.1% | 76.7% | 76.0% | 71.8% | 72.0% | 74.1% |
-| 3 | 34 (27, guard only when a probe is free) | 74.7% | 78.6% | 74.1% | 75.4% | 76.4% | 72.1% | 72.3% | 74.1% |
-| 4 | 26 (24 + Bayesian sand pricing) | 74.7% | 78.6% | 74.1% | 75.4% | 76.0% | 72.3% | 72.1% | 74.0% |
-| 5–9 | 22, 24, 25, 19, 23 | 74.6% | 78.7% | 74.1% | 75.6% | 76.0% | 71.6–71.8% | 72.0% | 74.1% |
-| 10 | 20 (cubature filter) | 74.5% | 78.7% | 74.2% | 75.6% | 76.0% | 71.2% | 72.0% | 73.7% |
-| 16 | 27 (guarded moves always) | 73.2% | 77.0% | 72.5% | 74.0% | 74.9% | 70.7% | 70.2% | 72.8% |
-| 20 | 1, `kf_mpc`, the frozen reference | 73.0% | 77.3% | 69.0% | 74.5% | 74.4% | 71.2% | 70.9% | 73.8% |
-| 27 | `blind`, fixed plan | 55.0% | 59.4% | 59.4% | 57.2% | 55.1% | 53.0% | 43.8% | 56.7% |
-| 28 | `cautious`, leg-and-wait | 42.0% | 46.0% | 44.8% | 44.0% | 45.5% | 42.7% | 42.5% | 28.8% |
-| 29 | `solvi_reference` | 41.0% | 43.8% | 37.6% | 42.3% | 43.7% | 41.9% | 40.7% | 37.0% |
-| 30 | `kristjan_reference` | 41.0% | 44.8% | 43.9% | 43.2% | 43.7% | 41.1% | 41.2% | 28.8% |
+| 1 | **36** (everything that worked, in one controller) | **75.2%** | 78.9% | 74.4% | 77.6% | 76.7% | 71.9% | 72.8% | 74.3% |
+| 2 | 33 (24 + slip-check layer + executive) | 74.9% | 78.7% | 74.1% | 77.4% | 76.0% | 71.8% | 72.0% | 74.1% |
+| 3 | 31 (24 + slip-check layer) | 74.8% | 78.7% | 74.1% | 76.7% | 76.0% | 71.8% | 72.0% | 74.1% |
+| 4 | 34 (27, guard only when a probe is free) | 74.7% | 78.6% | 74.1% | 75.4% | 76.4% | 72.1% | 72.3% | 74.1% |
+| 5 | 26 (24 + Bayesian sand pricing) | 74.7% | 78.6% | 74.1% | 75.4% | 76.0% | 72.3% | 72.1% | 74.0% |
+| 6–11 | 22, 24, 25, 19, 23, 35 | 74.6% | 78.7% | 74.1% | 75.6% | 76.0–76.1% | 71.5–71.8% | 72.0% | 74.1% |
+| 12 | 20 (cubature filter) | 74.5% | 78.7% | 74.2% | 75.6% | 76.0% | 71.2% | 72.0% | 73.7% |
+| 18 | 27 (guarded moves always) | 73.2% | 77.0% | 72.5% | 74.0% | 74.9% | 70.7% | 70.2% | 72.8% |
+| 22 | 1, `kf_mpc`, the frozen reference | 73.0% | 77.3% | 69.0% | 74.5% | 74.4% | 71.2% | 70.9% | 73.8% |
+| 29 | `blind`, fixed plan | 55.0% | 59.4% | 59.4% | 57.2% | 55.1% | 53.0% | 43.8% | 56.7% |
+| 30 | `cautious`, leg-and-wait | 42.0% | 46.0% | 44.8% | 44.0% | 45.5% | 42.7% | 42.5% | 28.8% |
+| 31 | `solvi_reference` | 41.0% | 43.8% | 37.6% | 42.3% | 43.7% | 41.9% | 40.7% | 37.0% |
+| 32 | `kristjan_reference` | 41.0% | 44.8% | 43.9% | 43.2% | 43.7% | 41.1% | 41.2% | 28.8% |
 
 Paired by episode, in points of share, with a 95% bootstrap over seeds:
 
 | Comparison, all biomes | Difference |
 |---|---|
-| 33 against `kf_mpc` | **+1.9 (+1.0 to +2.8)** |
-| 24 against `kf_mpc` | +1.6 (+0.9 to +2.3) |
+| 36 against `kf_mpc` | **+2.2 (+1.4 to +3.2)** |
+| 36 against 33 | +0.4 (+0.1 to +0.7) |
+| 36 against 24 | +0.6 (+0.1 to +1.2) |
 | 33 against 24 | +0.3 (−0.1 to +0.7) |
+| 35 against 24 | 0.0 (−0.1 to 0.0) |
 | 34 against 24 | +0.1 (−0.1 to +0.3) |
-| 27 against 24 | −1.5 (−2.1 to −0.7) |
+| 27 against 24 | −1.4 (−2.1 to −0.7) |
+| 24 against `kf_mpc` | +1.6 (+0.9 to +2.3) |
 
-- **Controller 33 is the best overall, and it is controller 24 everywhere except Hidden Valley.** It is 24 with the slip-check layer and the executive from `mars.py`, which do nothing when the rules publish no slip check. Its whole lead over 24 comes from Hidden Valley: +1.8 points there (−0.6 to +5.1), with half as many slip stops (0.3 per episode against 0.6 at delay 3) and 99% of rovers home against 94%.
-- **The honest reading is "the 24 family".** Controllers 19, 22–26, 31, 33 and 34 lie within 0.3 points of each other. With 40 seeds, differences under about one point are noise.
-- **The lead over the frozen reference is real: +1.9 points.** By biome it is +5.1 on Relay Pass (+3.5 to +6.7), +3.0 on Hidden Valley, +1.6 on Bagnold Dunes, +1.3 on Main Mars, +1.1 on Gale Rock Field, +0.5 on Troy Crust and +0.3 on Meridiani; the last two intervals include zero.
+- **Controller 36 is the best overall.** It is 34 (guarded moves only when a probe is free) on the real-time-aware base of 29, under the slip-check layer and executive of 33, with the rules read once and a smaller energy reserve until the battery shows unmapped sand. It is first or level with the first in every biome but Troy Crust, where 26 is 0.4 points ahead.
+- **Its lead over 33 is small but not noise:** +0.4 points over all biomes (+0.1 to +0.7). It comes from Gale Rock Field (+0.8, +0.3 to +1.5) and Bagnold Dunes (+0.7, +0.1 to +1.3); in the other five biomes the two are within noise.
+- **33 was the best of controllers 1–34**, and is controller 24 everywhere except Hidden Valley. The 24 family (19, 22–26, 31, 33–35) lies within 0.3 points of each other.
+- **The lead over the frozen reference is real: +2.2 points.** By biome it is +5.4 on Relay Pass (+3.8 to +7.2), +3.1 on Hidden Valley (+0.8 to +6.2), +2.3 on Bagnold Dunes, +2.0 on Gale Rock Field, +1.6 on Main Mars, +0.7 on Troy Crust and +0.5 on Meridiani; the last two intervals include zero.
 - **`kf_mpc` is not aware of relay passes.** That is the whole Relay Pass gap: it plans as if an uplink left at once. It never stopped with an error at 8/4, though; only `solvi_reference` did, in 4 episodes.
-- **27's guarded moves cost 1.5 points here too**, as on the plain profiles. 34 removes that cost.
+- **In Hidden Valley the slip-check layer shows:** at delay 3, 36 and 33 are stopped 0.3 times per episode and always get home; 24 is stopped 0.6 times and gets home in 92% of episodes.
+- **27's guarded moves cost 1.4 points here too**, as on the plain profiles. 34 and 36 remove that cost.
+- **35 equals 24 here.** Its additions answer lost packets and outlier fixes, which no biome has.
 
 ### Best controller in each biome
 
-| Biome | Best | Its share | 33 | `kf_mpc` | Fixed plan | Leg-and-wait |
+| Biome | Best | Its share | 36 | `kf_mpc` | Fixed plan | Leg-and-wait |
 |---|---|---|---|---|---|---|
-| Main Mars | 20 (18–25, 31 and 33 tie) | 78.7% | 78.7% | 77.3% | 59.4% | 46.0% |
-| Relay Pass Schedule | 20 | 74.2% | 74.1% | 69.0% | 59.4% | 44.8% |
-| Hidden Valley | **33** | 77.4% | 77.4% | 74.5% | 57.2% | 44.0% |
-| Bagnold Dunes | 34 | 76.4% | 76.0% | 74.4% | 55.1% | 45.5% |
-| Troy Crust | 26 | 72.3% | 71.8% | 71.2% | 53.0% | 42.7% |
-| Gale Rock Field | 34 | 72.3% | 72.0% | 70.9% | 43.8% | 42.5% |
-| Meridiani Ripple Plains | 10 | 74.3% | 74.1% | 73.8% | 56.7% | 28.8% |
-
-Controller 33 is within half a point of the best in every biome. Only in Hidden Valley is the winner clearly set apart.
+| Main Mars | **36** | 78.9% | 78.9% | 77.3% | 59.4% | 46.0% |
+| Relay Pass Schedule | **36** | 74.4% | 74.4% | 69.0% | 59.4% | 44.8% |
+| Hidden Valley | **36** | 77.6% | 77.6% | 74.5% | 57.2% | 44.0% |
+| Bagnold Dunes | **36** | 76.7% | 76.7% | 74.4% | 55.1% | 45.5% |
+| Troy Crust | 26 | 72.3% | 71.9% | 71.2% | 53.0% | 42.7% |
+| Gale Rock Field | **36** | 72.8% | 72.8% | 70.9% | 43.8% | 42.5% |
+| Meridiani Ripple Plains | **36** (10 and 21 tie) | 74.3% | 74.3% | 73.8% | 56.7% | 28.8% |
 
 ### What each biome costs, and whether the cost grows with the delay
 
-Controller 33's share by delay, and the difference from Main Mars at the same delay:
+Controller 36's share by delay, and the difference from Main Mars at the same delay:
 
 | Biome | Delay 0 | Delay 3 | Delay 5 |
 |---|---|---|---|
-| Main Mars | 88.8% | 79.3% | 67.9% |
-| Relay Pass Schedule | 87.4% (−1.4) | 73.2% (−6.1) | 61.6% (−6.3) |
-| Hidden Valley | 88.8% (0.0) | 78.4% (−0.9) | 65.2% (−2.7) |
-| Bagnold Dunes | 87.4% (−1.4) | 75.5% (−3.8) | 65.1% (−2.8) |
-| Troy Crust | 83.9% (−4.9) | 70.5% (−8.8) | 60.9% (−7.0) |
-| Gale Rock Field | 85.1% (−3.7) | 70.5% (−8.8) | 60.4% (−7.5) |
+| Main Mars | 89.4% | 79.2% | 68.1% |
+| Relay Pass Schedule | 88.2% (−1.2) | 73.2% (−6.0) | 61.9% (−6.1) |
+| Hidden Valley | 89.6% (+0.2) | 78.1% (−1.1) | 65.1% (−3.0) |
+| Bagnold Dunes | 87.6% (−1.8) | 76.5% (−2.7) | 66.0% (−2.1) |
+| Troy Crust | 83.7% (−5.8) | 71.4% (−7.8) | 60.6% (−7.4) |
+| Gale Rock Field | 86.7% (−2.8) | 71.4% (−7.8) | 60.5% (−7.6) |
 
 - **Every biome costs more at delay 3 than at delay 0.** That is the pattern the brainstorm asked for: the difficulty should come from the delay, not from the terrain alone. It is shown here for a scripted controller only; the same test with a model has not been run.
 - **Fixed plans pay most on rough ground.** `blind` loses 15.6 points in Gale Rock Field, where spins throw a plan off that never reads telemetry, and gets home in 64% of episodes. It loses 6.4 in Troy Crust and nothing in Relay Pass, since its whole plan leaves at tick 0, inside a pass.
 - **Leg-and-wait pays most under relay passes, once there is a delay:** 43.1% against 50.2% on Main Mars at delay 3, and 25.8% against 34.3% at delay 5.
-- **Meridiani Ripple Plains is, in practice, `rush_noisy`.** It switches the sensing noise on for `rush`, so both profiles become the same episode, and its row in the tables above reflects that noise. Against Main Mars on `rush_noisy` alone, controller 33 scores 86.9 / 73.2 / 62.4% against 87.1 / 73.2 / 61.9%: the noisier odometry on sand changes less than half a point. As a biome it is nearly inert with today's controllers.
+- **Meridiani Ripple Plains is, in practice, `rush_noisy`.** It switches the sensing noise on for `rush`, so both profiles become the same episode, and its row in the tables above reflects that noise. Against Main Mars on `rush_noisy` alone, controller 36 scores 88.2 / 72.6 / 61.9% against 88.2 / 73.4 / 61.9%: the noisier odometry on sand changes less than a point. As a biome it is nearly inert with today's controllers.
+
+## Are the biomes hard enough? Not at the default settings
+
+*Added Saturday about 14:30 Helsinki, after Manh's remark that the results look too easy.*
+
+**The remark is right, and the reason is the keep rule above.** It kept a setting only if controllers that never read the biome's rule still scored at least 85% of their Main Mars score. So at the defaults a player can ignore the biome and lose 2 to 7 points. A biome like that cannot be what breaks a capable agent: the agent plays Main Mars with a small tax.
+
+**And on most maps the biome is not even in play.** At delay 3, on 80 maps per biome (40 seeds on each of the two profiles), from the trial above:
+
+| Biome | Maps where `kf_mpc` scores as on Main Mars (within 0.02) | Maps where it loses 0.25 or more | Maps where 36 beats it by 0.25 or more |
+|---|---|---|---|
+| Relay Pass Schedule | 23 | 8 | 4 |
+| Hidden Valley | 73 | 6 | 3 |
+| Bagnold Dunes | 66 | 7 | 4 |
+| Troy Crust | 59 | 10 | 5 |
+| Gale Rock Field | 29 | 10 | 2 |
+| Meridiani Ripple Plains | 53 | 6 | 0 |
+
+- **The small averages hide two different things.** On most maps the rover never meets the biome's area and nothing changes. On a few the biome decides the mission: in Hidden Valley on `rush` seed 2000, controller 36 scores 0.59 more than `kf_mpc`; in Troy Crust on `rush_noisy` seed 2024, 0.64 more.
+- **So there are two roads to a hard task, not one.** Turn the dial up, which is the probe below. Or keep the dial and choose maps on which the biome is in play, as the main demo's missions were chosen for their maps and as `manh_controllers/seeds.py` already does for the plain profiles. The second road needs no new controller.
+
+**What a hard setting has to do.** By the brainstorm's own rule, a biome earns its place when play that ignores the published rule loses a lot, while a controller that models the rule keeps its score. That needs a rule-aware reference, and today only one biome has one: Hidden Valley, through the slip-check layer and executive in controllers 33 and 36.
+
+**Probe** on unused seeds 2100–2139, delay 3, 40 seeds per cell; share, and rovers home:
+
+| Hidden Valley on `noisy` (80 ticks) | Main Mars | Slip limit 0.40 | 0.35 | 0.30 |
+|---|---|---|---|---|
+| 36, models the rule | 93.1%, 100% | 88.8%, 100% | 80.6%, 100% | 79.4%, 100% |
+| 33, models the rule | 91.9%, 100% | 87.5%, 100% | 79.4%, 98% | 78.8%, 100% |
+| 24, ignores it | 91.9%, 100% | 75.9%, 82% | 58.8%, 65% | 33.8%, 35% |
+| `kf_mpc`, ignores it | 90.6%, 100% | 75.9%, 82% | 58.1%, 65% | 33.1%, 35% |
+| `blind`, fixed plan | 67.2%, 78% | 60.9%, 72% | 42.8%, 52% | 17.5%, 22% |
+| `solvi_reference`, never drives on sand | 75.0%, 100% | 75.0%, 100% | 75.0%, 100% | 75.0%, 100% |
+
+- **On the 80-tick map the dial works.** At a slip limit of 0.30 the controllers that model the rule keep about 79% and always get home. `kf_mpc` and 24 fall from about 91% to 33%, stopped 7.5 times per episode. That is a 46-point gap between reading the rule and ignoring it, and the rule is one published line.
+- **It punishes ignoring the rule, not a lack of cleverness.** A plan that simply never drives on sand scores 75%, four points below the best. An agent that reads the rule and keeps off the sand loses little.
+- **The frozen reference would have to change.** `kf_mpc` is one of the players that collapses, so a graded Hidden Valley would need 33 or 36 as its reference.
+- **On the 50-tick rush maps the same dial does almost nothing.** At 0.30, 36 scores 67.0% and 24 scores 64.3%, against about 74% on Main Mars: sand is rarely on the way, and a stop leaves no time to recover.
+- **Putting sand on the way does not fix that.** A dune field across the routes together with the slip check brings everyone down together: with one field and a limit of 0.40, 36 scores 43%, 24 scores 39% and `kf_mpc` 37%. That lowers what any player can reach; it does not separate reading the rule from ignoring it. No controller models the dune slope yet.
+
+**So a hard tier exists today for one biome on one profile** (Hidden Valley, `noisy`, slip limit 0.30 to 0.35), and it is a proposal, not a setting: nothing in the catalog has changed. For the other biomes the dials are there (the sweep above shows what breaks), but each needs a controller that models its rule before a hard setting can be called fair.
+
+**What this still does not show:** how a model plays any of it. The team's own model runs point at energy and command-queue bookkeeping under delay as where Claude loses points. Events that drop or cut the queue (a slip stop, a closed link, a worn wheel) press on exactly that, so the hard settings may cost an agent more than they cost a scripted controller. Only a model run can say.
 
 ## Limits
 
 - **No model has played a biome.** Whether a biome opens a gap between an agent and a reference is unknown.
 - **No controller reads the new published areas.** Crust regions, rock fields and dune slopes are in `map()`, but every controller here only reacts to them through telemetry. The trial shows which existing controller is most robust, not how well a biome can be played. A controller that prices crust at its published rate, counts wheel wear, or fits the slope line should do better; none is built.
-- **Bound 16 is not a bound in the biomes.** Its planner ignores their rules. On Relay Pass at delay 0 it scores below controller 33.
+- **Bound 16 is not a bound in the biomes.** Its planner ignores their rules. On Relay Pass at delay 0 it scores below controller 36.
 - **40 seeds, one draw each.** Differences under about one point are noise.
 - **Mixed biomes** work and have one test; they were not part of the trial.
-- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial, now used.
+- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting probe. All now used.
 
 ## Suggested next steps (not done)
 
@@ -168,7 +216,7 @@ Controller 33's share by delay, and the difference from Main Mars at the same de
 **`viewer/biomes-demo.html`**: the 3D Mars demo with a row of biomes on its title screen. Open it by double-click, like the main demo. ← → choose a biome; the rest of the keys are the main demo's.
 
 - **Main Mars** holds the main demo's own three missions (Deadlines, Sand, Rocks), with Claude's attempts and the reference, taken from `build_mars.gather()` unchanged.
-- **Every other biome has one mission**, played when the page is built by four scripted controllers on the same map: controller 33 (best overall above), the frozen reference `kf_mpc`, the fixed plan and leg-and-wait. Keys 1–4 switch between them and M shows all four.
+- **Every other biome has one mission**, played when the page is built by four scripted controllers on the same map: controller 36 (best overall above), the frozen reference `kf_mpc`, the fixed plan and leg-and-wait. Keys 1–4 switch between them and M shows all four.
 - **Drawn on top of the main demo's scenes:** crust regions and, on Mars and the map only, the soft cells the Earth picture cannot know; sharp-rock fields and their rough cells; dune faces shaded by slope, with the steep ones labelled; relay passes as a strip under the timeline; one line of biome status in the top right of each screen.
 - **A slightly different Mars per biome.** Each biome shifts the main demo's own ground, sand, rocks, light, haze and sun a little, after the place it is modelled on, so the screen says which biome is playing: Relay Pass is late in the sol, cooler and dimmer; Hidden Valley a deeper rust; Bagnold Dunes has dark basalt sand; Troy Crust pale, bright soil; Gale Rock Field grey-purple ground and dark rock; Meridiani darker plains under a pale sky. Main Mars is left exactly as it is. A test keeps every shift small.
 - **The seed of each mission** is the first of the trial's seeds (2000 upward) on which the biome's own mechanic actually happens, for example the reference standing on a soft cell. It is picked to show the mechanic, not as a typical result; the tables above are the typical result.

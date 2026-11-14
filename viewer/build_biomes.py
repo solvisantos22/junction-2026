@@ -48,7 +48,8 @@ SEEDS = range(2000, 2040)   # the early test's seeds; a mission takes the first 
 
 # Shown side by side in every biome mission. The first is the controller with the best mean
 # share over all biomes in the early test (docs/lightlag-biomes.md); the rest are fixed.
-BEST = "EKF_executive_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_33"
+BEST = ("EKF_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_aimdisc_turncost_window_MPC"
+        "_manh_controller_36")
 PLAYERS = [
     ("best", BEST, "Best overall", "Best overall"),
     ("reference", "EKF_MPC_manh_controller_1", "Reference controller", "Reference"),
