@@ -84,6 +84,10 @@ The [completed audit](contextual/audit.json) reconstructs all 600 imitation epoc
 replay. All **340 teacher/evaluation controllers** re-execute, including their
 candidate features, held goals, choices and commands. Training choices replay
 from recorded features; training feature extraction remains source-pinned.
+The [main-push watcher publication check](publication-verification.json) also
+independently verifies artifact hashes, matrices, paired statistics and all 724
+physics replays. It preserves the original freezes and does not claim another
+optimizer reconstruction or new training run.
 
 This is one fixed, small pilot: a 1,984-parameter selector, sixteen demonstration
 worlds, and eight RL updates per initialization. Neural policies sample from
