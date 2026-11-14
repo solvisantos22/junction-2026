@@ -8,7 +8,9 @@
 //     fields and their rough cells, dune faces), and what only Mars knows (soft cells), which
 //     is hidden on the delayed Earth picture;
 //   * one line of biome status in the top right of each screen, and the relay passes under
-//     the timeline.
+//     the timeline;
+//   * a slightly different Mars per biome: the same ground, sand, rocks, haze and sun as the
+//     main demo, shifted a little after the place the biome is modelled on.
 // A mission without biome data (every Main Mars mission) gets none of this.
 import * as THREE from 'three';
 
@@ -120,11 +122,56 @@ function label(text, color, px = 30) {
 }
 const hash = (x, y) => { const h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return h - Math.floor(h); };
 
+// ---------------------------------------------------------------- a slightly different Mars per biome
+// Each biome shifts the main demo's own colours a little, after the place it is modelled on, so
+// the screen says which biome is playing. It is still Mars; Main Mars is left exactly as it is.
+//   ground, sand, rocks   multipliers on the main demo's colours (1 = unchanged)
+//   light                 a multiplier on the colour of the sun and the sky light
+//   haze                  a colour laid over the sky and into the distance, and how strongly
+//   sun                   the sun's brightness against the main demo's
+const PALETTES = {
+  relay_pass:        { ground: [0.82, 0.86, 1.02], sand: [0.86, 0.88, 1.00], rocks: [0.84, 0.86, 1.00], light: [0.82, 0.86, 1.00], haze: [0x8892be, 0.38], sun: 0.76 },   // late in the sol, waiting for the orbiter: cooler and dimmer
+  hidden_valley:     { ground: [1.08, 0.88, 0.76], sand: [1.06, 0.90, 0.76], rocks: [1.00, 0.88, 0.80], light: [1.00, 0.90, 0.80], haze: [0xd9814f, 0.26], sun: 0.96 },   // a valley floor: deeper rust
+  bagnold_dunes:     { ground: [0.84, 0.83, 0.88], sand: [0.50, 0.48, 0.54], rocks: [0.80, 0.80, 0.86], light: [0.97, 0.97, 1.00], haze: [0xc2a898, 0.22], sun: 1.00 },   // the Bagnold sand is dark basalt
+  troy_crust:        { ground: [1.20, 1.18, 1.04], sand: [1.10, 1.10, 1.04], rocks: [1.08, 1.06, 1.00], light: [1.00, 1.00, 0.96], haze: [0xf8e6c6, 0.36], sun: 1.10 },   // the pale, bright soil Spirit churned up
+  gale_rock_field:   { ground: [0.80, 0.76, 0.90], sand: [0.86, 0.84, 0.92], rocks: [0.60, 0.58, 0.76], light: [0.95, 0.93, 1.00], haze: [0xb89a9e, 0.28], sun: 0.97 },   // grey-purple mudstone and dark rock
+  meridiani_ripples: { ground: [0.72, 0.64, 0.64], sand: [0.70, 0.58, 0.52], rocks: [0.72, 0.66, 0.66], light: [1.00, 0.98, 0.96], haze: [0xf9e8c8, 0.38], sun: 1.06 },   // dark plains under a pale, dusty sky
+};
+const HORIZON = [0.925, 0.735, 0.545];   // the main demo's haze, as its sky and fog write it
+const shaded = new Map();                // biome id -> the main demo's materials, copied once and shifted
+function recolour(ms, id) {
+  const palette = PALETTES[id];
+  if (!palette) return;
+  const scene = ms.scene, shared = ms.shared;
+  if (!shaded.has(id)) shaded.set(id, {});
+  const copies = shaded.get(id);
+  const shift = (mesh, part) => {
+    if (!mesh) return;
+    if (!copies[part]) { const [r, g, b] = palette[part]; copies[part] = mesh.material.clone(); copies[part].color.multiply(new THREE.Color().setRGB(r, g, b)); }
+    mesh.material = copies[part];
+  };
+  shift(scene.children.find(o => o.isMesh && o.geometry === shared.ground), 'ground');
+  for (const mesh of scene.children.filter(o => o.isMesh && shared.sands.some(sheet => sheet.geometry === o.geometry))) shift(mesh, 'sand');
+  shift(scene.children.find(o => o.isInstancedMesh && o.geometry === shared.rockGeometry && o.count === shared.rocks.length), 'rocks');
+  // The haze: a thin veil inside the sky dome, and the same mix as the fog colour, so the horizon still meets the ground.
+  const [tint, strength] = palette.haze, channel = shift8 => ((tint >> shift8) & 255) / 255;
+  const mix = [16, 8, 0].map((shift8, i) => HORIZON[i] * (1 - strength) + channel(shift8) * strength);
+  const haze = new THREE.Color().setRGB(mix[0], mix[1], mix[2], THREE.SRGBColorSpace);
+  if (scene.fog) scene.fog.color.copy(haze);
+  scene.background = haze;
+  const veil = new THREE.Mesh(new THREE.SphereGeometry(880, 24, 12), new THREE.MeshBasicMaterial({ color: tint, transparent: true, opacity: strength, side: THREE.BackSide, depthWrite: false, fog: false }));
+  veil.renderOrder = -1; scene.add(veil);
+  const light = new THREE.Color().setRGB(...palette.light), sky = scene.children.find(o => o.isHemisphereLight);
+  if (sky) sky.color.multiply(light);
+  if (ms.sun) { ms.sun.color.multiply(light); ms.sun.intensity *= palette.sun; }
+}
+
 // ---------------------------------------------------------------- one scene's biome features
 function decorate(ms) {
   const biome = ms.run.replay.biome;
   ms.biomeAddon = { truth: [] };
   if (!biome) return;
+  recolour(ms, biome.ids[0]);
   const scene = ms.scene, truth = ms.biomeAddon.truth, has = id => biome.ids.includes(id);
   // a text label in both the map and the 3D views, placed for each
   const tag = (text, color, r, px) => {
@@ -269,5 +316,5 @@ function frame() {
   requestAnimationFrame(frame);
 }
 if (BIOMES.length > 1) showBiome(biomeOf(L.state.mission), true);
-window.LIGHTLAG_BIOMES = { showBiome, BIOMES, shown: () => shown };   // for checks from the browser console
+window.LIGHTLAG_BIOMES = { showBiome, BIOMES, PALETTES, shown: () => shown };   // for checks from the browser console
 requestAnimationFrame(frame);
