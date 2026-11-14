@@ -94,3 +94,23 @@ The figure should clearly label the training checkpoints as development validati
 4. A campaign showcase comes only after policies are frozen: fresh pilot for each mission, stop at `campaign_complete`, and score `sum(raw)/sum(max)`. A single-mission learning improvement does not establish a campaign win or Claude failure. The task owner's real-agent evidence retains its EPIPE exits and length-censored attempt.
 
 The canonical Traverse rules, reference, Harbor task and teammates' training packages are unchanged by this experiment.
+
+### Completion-pass readiness check
+
+The delayed error wake-up was reconciled again at **21:17 UTC on 14 November**: all six original call IDs still matched the fit receipt and were running, with no new job error, stop marker, pause or launch intent. All **46 frozen source hashes** matched and the fixed checkout was clean. This was the already-repaired 21:00 monitoring interruption; no recovery was repeated or new job launched. The second completion watcher remains responsible for the terminal-state wake-up.
+
+The frozen evaluator covers every initialization's initial, matched-2048 and latest completed declared policy, plus greedy and beam on the same 40 worlds. Normally this is **20 arms / 800 missions**; a policy serving both matched-2048 and latest roles is evaluated once, so the total can be smaller. Do not freeze from a live `report.json`: wait for returned calls and terminal downloads, then supply exactly one directory per identity as described above. If a wrapper deadline leaves a report marked `running`, the freeze will reject it. Reconcile it with the terminal receipt and preserve the original evidence; do not relaunch training or silently rewrite its status.
+
+Run from `/tmp/junction-learning-final-frozen` with `/tmp/junction-learning-venv/bin/python`, preserving Python 3.12.16, NumPy 2.3.4 and Torch 2.9.1. Evaluation accepts `--workers 6`; **the audit is serial and does not use that worker setting**. Limit numerical-library threads for the audit. After the policy freeze has reached `main` and the final evaluation has completed, the audit invocation is:
+
+```sh
+cd /tmp/junction-learning-final-frozen
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  /tmp/junction-learning-venv/bin/python -m tools.learning_final.evaluate \
+  --audit /Users/solvisantos/.codex/worktrees/6974/Junction/docs/learning-final-results/evaluation/report.json \
+  --output /Users/solvisantos/.codex/worktrees/6974/Junction/docs/learning-final-results/evaluation/audit.json
+```
+
+The audit reconstructs physics, grades and learned/greedy choices on saved observations, and recomputes the summaries. Observation reconstruction, choice-to-command linkage and beam decision logic remain source-pinned; optimizer learning is outside this audit. Retain those limits in the final write-up. **No final manifest or final-world evaluation has been created during this readiness check.**
+
+Allow roughly **20–40 minutes for the final run and serial audit**, plus download, publication and figure time. This is a planning estimate based on the earlier 112-case compatibility workload, not a measurement on final worlds. All evaluation output paths must be new; the frozen runner has no resume option.
