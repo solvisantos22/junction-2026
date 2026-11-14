@@ -35,6 +35,16 @@ MODAL_PROFILE=solvi-junction /tmp/junction-learning-venv/bin/python -m tools.lea
 
 Do not relaunch `fit`, clear cloud reservations or resume the old supervisor. If this new local monitor stops unexpectedly, inspect `state.json` and any launch intent before restarting the same command recorded in `/tmp/junction-learning-final-monitor/process.json`. Use the existing output directory and unchanged fixed checkout; a saved error/pause requires deliberate reconciliation.
 
+## Continue this chat when training settles
+
+Sölvi asked for continued work after training. A separate one-time watcher is now active, PID **73408**, with idle-sleep guard **73409**. It polls the local monitor every 30 seconds and uses the installed `codex queue --thread … --message … --resume` command to resume this same chat when the monitor reaches final evaluation, reports an error/deadline, or has a heartbeat stale for 15 minutes. A final fallback fires at **03:40 UTC**, ten minutes after the training cutoff.
+
+The queued instruction directs Codex to reconcile all runs, publish the all-seed policy freeze before opening final maps, evaluate and audit the learned policies beside greedy/beam, then publish findings and the handoff. It preserves the reference and original training freeze. An error wake-up requires diagnosis before new spend; it does not authorize repeating training. No cloud job is launched by this watcher.
+
+Runtime code, configuration, state and logs are under `/Users/solvisantos/.codex/junction-learning-final-wake-20261114/`. The private code copy is hash-bound and unaffected by later main commits. `state.json` reports `waiting`, `queued`, `uncertain` or `disabled`. Dispatch is reserved durably before the CLI call; an interrupted or ambiguous attempt is never automatically repeated. A `queued` state means the CLI reported acceptance, not that the follow-up work finished.
+
+A training pause/stop suppresses the wake-up. To disable only this watcher, create `/tmp/junction-learning-final-monitor/wake-stop`; current training continues. A disabled watcher requires deliberate rearming. The Mac and Codex must remain available, and Codex usage limits can interrupt the resumed work. Thirteen synthetic tests cover dispatch, pauses, interruption, identity changes and duplicate prevention; a real local poll verified `waiting`. No test follow-up message was sent to the chat.
+
 ## Next handoff
 
 1. Collect and publish the completed fit decision and, if launched, extend receipt. Keep every seed and failure. Full training batches, replay buffers and optimizer checkpoints stay on the unique Modal volume; download them for a separate optimizer/physics audit before making stronger reproducibility claims.
