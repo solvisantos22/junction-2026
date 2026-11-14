@@ -1,0 +1,177 @@
+{
+  "counts": {
+    "infrastructure": {},
+    "outcome": {
+      "NOTHING_SAMPLED": 1
+    },
+    "reasoning": {
+      "STOPPED_EARLY": 1
+    }
+  },
+  "decisions": [],
+  "decomposition": {
+    "adds_up": true,
+    "decisions_raw": 0,
+    "stop_loss_raw": 4.0
+  },
+  "delay_ticks": 3,
+  "infrastructure": [],
+  "main_mistakes": [
+    {
+      "agent_words": null,
+      "findings": [
+        {
+          "evidence": {
+            "reference_plan": {
+              "alive": true,
+              "at_base": true,
+              "first_uplink": {
+                "commands": [
+                  {
+                    "action": "drive",
+                    "heading_deg": 0.0,
+                    "metres": 5.0
+                  }
+                ],
+                "tick": 0
+              },
+              "raw_score": 4.0,
+              "samples": [
+                {
+                  "on_time": true,
+                  "target_id": "east",
+                  "tick": 12
+                },
+                {
+                  "on_time": true,
+                  "target_id": "north",
+                  "tick": 20
+                },
+                {
+                  "on_time": true,
+                  "target_id": "west",
+                  "tick": 24
+                }
+              ],
+              "tick": 0
+            },
+            "stop_tick": 0
+          },
+          "kind": "reasoning",
+          "n": null,
+          "summary": "stopped at tick 0; the reference would have scored 4 from there, not 0",
+          "tag": "STOPPED_EARLY"
+        }
+      ],
+      "kind": "stop",
+      "n": null,
+      "points_lost": 4.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 0.0,
+              "metres": 5.0
+            }
+          ],
+          "tick": 0
+        },
+        "raw_score": 4.0,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "east",
+            "tick": 12
+          },
+          {
+            "on_time": true,
+            "target_id": "north",
+            "tick": 20
+          },
+          {
+            "on_time": true,
+            "target_id": "west",
+            "tick": 24
+          }
+        ],
+        "tick": 0
+      },
+      "reward_lost": 1.0,
+      "tick": 0,
+      "tool": "stop"
+    }
+  ],
+  "max_ticks": 80,
+  "model": null,
+  "outcome": [
+    {
+      "evidence": {},
+      "kind": "outcome",
+      "n": null,
+      "summary": "no sample was collected",
+      "tag": "NOTHING_SAMPLED"
+    },
+    {
+      "evidence": {
+        "reference_plan": {
+          "alive": true,
+          "at_base": true,
+          "first_uplink": {
+            "commands": [
+              {
+                "action": "drive",
+                "heading_deg": 0.0,
+                "metres": 5.0
+              }
+            ],
+            "tick": 0
+          },
+          "raw_score": 4.0,
+          "samples": [
+            {
+              "on_time": true,
+              "target_id": "east",
+              "tick": 12
+            },
+            {
+              "on_time": true,
+              "target_id": "north",
+              "tick": 20
+            },
+            {
+              "on_time": true,
+              "target_id": "west",
+              "tick": 24
+            }
+          ],
+          "tick": 0
+        },
+        "stop_tick": 0
+      },
+      "kind": "reasoning",
+      "n": null,
+      "summary": "stopped at tick 0; the reference would have scored 4 from there, not 0",
+      "tag": "STOPPED_EARLY"
+    }
+  ],
+  "profile": "core",
+  "reference": "team",
+  "replay_matches": true,
+  "run": "do-nothing-seed7-delay3",
+  "run_findings": [],
+  "score": {
+    "agent_raw": 0.0,
+    "agent_reward": 0.0,
+    "gap_raw": 4.0,
+    "gap_reward": 1.0,
+    "max_available_value": 4.0,
+    "reference_raw": 4.0,
+    "reference_reward": 1.0,
+    "reward_txt": 0.0
+  },
+  "seed": 7,
+  "stop_tick": 0
+}
