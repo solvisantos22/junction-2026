@@ -9,7 +9,7 @@ Adds sample deadlines, targets discovered mid-mission, seeded maps, a time-press
 From the repository root, Python 3.9+ (checked on 3.9.20, 3.10, 3.12 and 3.14, with identical results), no installation:
 
 ```sh
-python3 -m unittest discover -s tests/lightlag_dynamic -v                 # 50 tests, under 20 seconds (12 need numpy)
+python3 -m unittest discover -s tests/lightlag_dynamic -v                 # 54 tests, under 20 seconds (12 need numpy)
 python3 -m lightlag_dynamic.compare --delays 0 3 5 --seeds 400-419        # the three team references side by side; a few minutes
 python3 -m lightlag_dynamic.compare --profiles rush_noisy --noise-level 1.5 --bumpiness 0.1
 python3 -m lightlag_dynamic.pilot --profiles rush --delays 0 3 5 --seeds 100-139
@@ -58,6 +58,7 @@ Physics, timing, energy, safety stops, the five public methods and the 1 / 0.5 /
 | `tools.py` | `PublicTools` (five methods) and an evaluator-owned `run_episode` |
 | `controllers.py` | Scripted controllers using only the public tools: `reference`, `leg_and_wait`, `open_loop`, `stale_telemetry`, `window_blind`, `do_nothing`, and the `kf_mpc` entry |
 | `kf_mpc.py` | Kalman filter + receding-horizon controller with chance constraints (details below) |
+| `kf_mpc_rt.py` | Optional extra, not adopted: `kf_mpc` for the real-time clock. It measures its own lag and decides that much earlier; identical to `kf_mpc` without lag. [What it is, results, how to adopt or decline](../docs/lightlag-dynamic-pilot.md#real-time-aware-reference-optional-extra-awaiting-team-decision) |
 | `compare.py` | Sölvi's, Kristján's and the KF + MPC reference, plus baselines, on the same seeds and profiles |
 | `serve.py` | `DynamicEpisodeService` and an MCP entry point: Kristján's `lightlag_mcp` server playing a dynamic profile |
 | `realtime.py` | `RealTimeEpisodeService` and its MCP entry point: the same episode on a wall clock, with the tool texts describing it |

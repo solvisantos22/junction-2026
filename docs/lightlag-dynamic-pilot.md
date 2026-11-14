@@ -34,22 +34,61 @@ Tested with a fake clock (9 tests) and live over HTTP with a 0.5 s tick, includi
 
 **Calibration with scripted controllers.** `rush_noisy`, delay 3, development seeds 0–19. Each tool call first spends a simulated thinking time, given in ticks:
 
-| Thinking time per call | 0 (= turn-based) | 0.1 | 0.25 | 0.5 | 1.0 |
-|---|---|---|---|---|---|
-| `kf_mpc`, share of maximum (calls) | 0.707 (63) | 0.707 | 0.739 | **0.204** (53) | 0.111 (33) |
-| Blind plan, sends everything first | 0.539 (16) | 0.539 | 0.539 | 0.537 | 0.508 |
-| Whole leg, then wait | 0.418 (60) | 0.418 | 0.418 | 0.300 | 0.283 |
+| Thinking time per call (ticks) | 0 (= turn-based) | 0.25 | 0.5 | 0.75 | 1.0 | 1.5 |
+|---|---|---|---|---|---|---|
+| `kf_mpc`, share of maximum | 0.707 | 0.739 | 0.692 | 0.633 | 0.486 | 0.420 |
+| Blind plan, sends everything first | 0.539 | 0.539 | 0.537 | 0.522 | 0.508 | 0.499 |
+| Whole leg, then wait | 0.418 | 0.418 | 0.307 | 0.371 | 0.224 | 0.207 |
+
+*Correction.* The first version of this table, pushed in 2a07048, was measured with an early build whose `advance` dropped the packets that arrived while the controller was thinking. That bug was fixed before the push, but the table was not re-measured. It showed `kf_mpc` collapsing to 0.204 at 0.5 ticks per call. The numbers above are re-measured with the published build.
 
 - **A controller that answers instantly loses nothing.** On the same seed its commands and score are identical to turn-based (tested). So the scripted reference keeps its score under real time, and the gap to an agent then includes the agent's thinking time.
-- **Reactive control without latency compensation collapses between 0.25 and 0.5 ticks of thinking per call.** `kf_mpc` decides from the tick it last saw, so its commands land late; near the horizon its uplinks are rejected. Batch planning (the blind plan) barely notices.
-- **Choosing the tick length.** Opus spent 3–4 s per game call, about 30 calls per mission. That is about 0.35 ticks per call at 10 s per tick, and 0.7 at 5 s per tick. At 2.5 s per tick the whole mission lasts 125 s, about Opus's current total time. A pilot at **10 s per tick** (8.3-minute mission) and **5 s per tick** (4.2 minutes) brackets the region where thinking starts to cost. Both fit Harbor's 1,800 s agent timeout.
+- **`kf_mpc` degrades gracefully up to 0.75 ticks of thinking per call (0.707 to 0.633) and drops at 1 tick per call (0.486).** The earlier claim that it collapses between 0.25 and 0.5 was wrong. It decides from the tick it last saw, so with long thinking its commands land late and the rover idles. Batch planning (the blind plan) barely notices. Whole-leg-then-wait crashes on late uplinks near the horizon at 1 tick per call and more.
+- **Choosing the tick length.** Opus spent 3–4 s per game call, about 30 calls per mission. At **3.5–5 s per tick** that is 0.7–1 tick of thinking per call, the region where thinking costs. At 10 s per tick (about 0.35 ticks per call) it costs almost nothing. A 50-tick mission lasts 175 s at 3.5 s per tick and 250 s at 5 s, both well inside Harbor's 1,800 s agent timeout.
 - **Caveat: scores now depend on API latency and provider load, not only on reasoning.** Report `wall_seconds` and the model's per-call latency with every real-time score, and run each paired reference in the same task.
 
 **What switching an experiment needs (team decisions; nothing changed here):**
 1. Sölvi's `prepare.py` would copy `realtime.py`, start `python -m lightlag_dynamic.realtime` and set `LIGHTLAG_SECONDS_PER_TICK`.
 2. The task's `instruction.md` says `advance` "is the only tool that moves the clock". Replace that with, for example: "The clock runs in real time: one tick every S seconds from your first tool call, whether or not you call tools. `advance(n)` waits until n more ticks have passed."
 3. The decision auditor replays `advance` arguments, so on a real-time transcript it would report a rebuild mismatch rather than a wrong audit. It needs to step the clock by `clock` records.
-4. A real-time-aware reference would make a fairer bound for an agent with thinking time: one that stamps its plan for the tick its command will arrive. `kf_mpc` still answers instantly, so it is a valid instant reference.
+4. Optionally, a real-time-aware reference as the matched bound for an agent that needs time to think: see [Real-time-aware reference](#real-time-aware-reference-optional-extra-awaiting-team-decision) below. `kf_mpc` still answers instantly, so it remains a valid instant reference.
+
+### Real-time-aware reference (optional extra, awaiting team decision)
+
+**Status for agents and teammates: proposal by Manh; do not switch any reference to it without team agreement.** Nothing imports it. `kf_mpc` stays the reference everywhere it is used today.
+
+**What.** [`lightlag_dynamic/kf_mpc_rt.py`](../lightlag_dynamic/kf_mpc_rt.py), policy `kf_mpc_rt`. Registry entry `EKF_latencyaware_MPC_manh_controller_29` in `manh_controllers` follows in a separate commit. It is `kf_mpc` with three changes:
+- It measures its lag: the ticks between the tick it decided on and its uplink's `sent_tick`, as the median of its last five uplinks.
+- It decides that much earlier, so its next commands arrive just as the queue empties and the rover does not idle while it thinks. The plan itself is `kf_mpc`'s.
+- Commands that no longer fit before the horizon are dropped instead of crashing the controller.
+
+Turn-based, or when it answers instantly, it sends exactly `kf_mpc`'s commands, so it only differs on the real-time clock.
+
+**Design evidence, development seeds 0–39.** Two alternatives did worse than `kf_mpc` at small lags: also moving the planning slot by the lag, and planning with the largest recent lag. While a controller thinks, the rover usually stands still, so a late plan is still geometrically right; what costs score is the idle queue, and deciding early fixes that.
+
+**Held-out check, fresh seeds 600–639.** `rush` and `rush_noisy`, delay 3, paired by episode against `kf_mpc` (95% interval from a bootstrap over seeds). Share of maximum by thinking time per call:
+
+| Profile | Controller | 0 | 0.25 | 0.5 | 0.75 | 1.0 | 1.5 |
+|---|---|---|---|---|---|---|---|
+| `rush_noisy` | `kf_mpc` | 0.724 | 0.701 | 0.701 | 0.692 | 0.551 | 0.506 |
+| `rush_noisy` | `kf_mpc_rt` | 0.724 | 0.701 | 0.701 | 0.692 | **0.590** | **0.522** |
+| `rush` | `kf_mpc` | 0.819 | 0.815 | 0.793 | 0.782 | 0.599 | 0.506 |
+| `rush` | `kf_mpc_rt` | 0.819 | 0.815 | 0.793 | **0.792** | **0.688** | **0.519** |
+
+- **At 1 tick per call:** +4.0 points on `rush_noisy` (+1.4 to +6.8) and +8.9 on `rush` (+5.3 to +13.0).
+- **Pooled over all thinking times above zero:** +1.1 (+0.5 to +1.8) and +2.2 (+1.4 to +3.2).
+- **Never worse.** At zero thinking it sends identical commands on every seed.
+- **Baselines on the same seeds, `rush_noisy`, from no thinking to 1.5 ticks per call:** the blind plan falls from 0.597 to 0.545, and whole-leg-then-wait from 0.444 to 0.227.
+
+Re-run: the comparison scripts were scratch and are not in the repository. `tests/lightlag_dynamic/test_kf_mpc_rt.py` holds the same harness: `RealTimeEpisodeService` on a fake clock, plus a `Thinking` wrapper that spends a fixed time before every tool call. Looping it over seeds 600–639, both profiles and the six thinking times rebuilds the table.
+
+**How to adopt (team decision).** These are teammates' files, so the steps are described here, not made:
+1. Sölvi's `tools/lightlag_experiments/prepare.py` copies `lightlag_dynamic/kf_mpc_rt.py` into the task's `solution/lightlag_dynamic/`, next to `kf_mpc.py`.
+2. `tools/lightlag_experiments/play_policy.py` accepts `"kf_mpc_rt"` (`from lightlag_dynamic.kf_mpc_rt import kf_mpc_rt`).
+3. The generated `solution/solve.sh` passes `--policy kf_mpc_rt`.
+4. Use it as the matched reference **only in real-time runs** (`python -m lightlag_dynamic.realtime`). Turn-based it is identical to `kf_mpc`.
+
+**How to decline.** Do nothing: nothing imports it. Optionally delete `lightlag_dynamic/kf_mpc_rt.py`, `tests/lightlag_dynamic/test_kf_mpc_rt.py` and registry entry 29.
 
 ## Harbor reward check: what the model is graded on
 
