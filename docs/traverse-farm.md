@@ -38,6 +38,8 @@ modal run tools/traverse_farm/modal_app.py::search --out docs/traverse-farm/sear
 
 ## Checked so far
 
-- 23 tests pass (1 skipped without the `modal` package; it passes with it).
-- Local run of the pilot at commit `f90cb6b` on fresh worlds 600–601: pilot 0.523, greedy 0.296, straight 0.213, nothing 0.000; about 35 s per pilot mission with eight in parallel on this laptop.
+- 23 tests pass (1 skipped without the `modal` package; it passes with it), on `main` with the beam-search pilot (`f90cb6b`, merged into `main` at 18:30).
+- Local run of that pilot on fresh worlds 600–601: pilot 0.523, greedy 0.296, straight 0.213, nothing 0.000; about 35 s per pilot mission with eight in parallel on this laptop.
 - Not yet run on Modal: it needs the account owner's login.
+
+A note on history: the farm's files were committed inside merge commit `b9180ca` ("Merge remote-tracking branch 'origin/main'"), because another session completed a merge in the shared checkout while they were staged. Their content is exactly what was written here; the claim is `e166ff7`.
