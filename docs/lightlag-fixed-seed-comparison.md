@@ -3,6 +3,12 @@
 14 November 2026. Sölvi / Codex orchestration of the team's delivered simulator,
 Harbor task, KF + MPC reference and decision auditor.
 
+**All eight attempts completed: three model wins, two ties and three deficits
+against the frozen reference.** Two battery-exhaustion failures and one
+queue-management deficit are supported by exact replay audits; no infrastructure
+faults were found. Mean reward favors the reference in both profiles, although
+it does not consistently beat Claude. Reported API usage: **$3.3513574**.
+
 ## Predeclared protocol
 
 The user approved the next comparison after Claude solved both seed-500 pilots.
@@ -119,12 +125,12 @@ folder with `python3 -m lightlag_audit <run-folder> --out <separate-audit-dir>`.
 The auditor's index contains the supplied runs only, so this comparison uses
 its own directory and retains the team's existing audit index.
 
-## Model results (in progress)
+## Complete model results
 
-**6 of 8** predeclared attempts complete; the final pair, seed 504, is running.
-Reported API cost so far: **$2.6180796**. Each completed run used the pinned
-agent/model, one attempt, no retries, and the same task digest and manifest as
-its matched reference.
+**8 of 8** predeclared attempts complete, with no retries, replaced seeds,
+unrun cells or execution exceptions. Each used the pinned agent/model and the
+same task digest and manifest as its matched reference. All eight sessions are
+distinct and fresh. The reported-cost launch guard was never reached.
 
 | Seed | Profile | Claude reward | Reference reward | Reference − Claude | Rover calls | Reported USD | Audit |
 |---|---|---:|---:|---:|---:|---:|---|
@@ -134,10 +140,22 @@ its matched reference.
 | 502 | `rush_noisy` | [0.634615](lightlag-runs/rush-noisy-seed502-delay3-opus-5-5/) | 0.769231 | +0.134615 | 23 | 0.3621726 | [Report](lightlag-audits/fixed-seeds501-504/rush-noisy-seed502-delay3-opus-5-5/audit.md) |
 | 503 | `rush` | [0.750000](lightlag-runs/rush-seed503-delay3-opus-5-5/) | 0.750000 | +0.000000 | 28 | 0.3497882 | [Report](lightlag-audits/fixed-seeds501-504/rush-seed503-delay3-opus-5-5/audit.md) |
 | 503 | `rush_noisy` | [0.750000](lightlag-runs/rush-noisy-seed503-delay3-opus-5-5/) | 0.625000 | -0.125000 | 31 | 0.4802570 | [Report](lightlag-audits/fixed-seeds501-504/rush-noisy-seed503-delay3-opus-5-5/audit.md) |
+| 504 | `rush` | [0.700000](lightlag-runs/rush-seed504-delay3-opus-5-5/) | 0.700000 | +0.000000 | 29 | 0.3154634 | [Report](lightlag-audits/fixed-seeds501-504/rush-seed504-delay3-opus-5-5/audit.md) |
+| 504 | `rush_noisy` | [0.000000](lightlag-runs/rush-noisy-seed504-delay3-opus-5-5/) | 0.700000 | +0.700000 | 27 | 0.4178144 | [Report](lightlag-audits/fixed-seeds501-504/rush-noisy-seed504-delay3-opus-5-5/audit.md) |
 
-Positive gaps favor the reference; negative gaps favor Claude. Costs are the
-agent's reported usage, not independently checked invoices or credit balances.
-The summary JSON lists all unrun cells explicitly. No failed attempt is replaced.
+Positive gaps favor the reference; negative gaps favor Claude. Means below use
+unrounded raw score / maximum, with equal weight per map. Each profile has four
+maps and one fresh model attempt per map; there are no repeated model trials.
+
+| Profile | Attempts | Mean Claude | Mean reference | Mean reference − Claude | Model wins / ties / deficits | Perfect model runs |
+|---|---:|---:|---:|---:|---|---:|
+| `rush` | 4 | 0.554808 | 0.724679 | +0.169872 | 1 / 2 / 1 | 0 |
+| `rush_noisy` | 4 | 0.544071 | 0.690224 | +0.146154 | 2 / 0 / 2 | 0 |
+
+Reported API cost for these eight attempts is **$3.3513574**. Including the two
+previous seed-500 pilots (**$0.946363**), this chat's ten recorded model attempts
+report **$4.2977204**. These are saved agent usage reports, not independently
+checked invoices or credit balances; Kristján's earlier seed-7 run is separate.
 
 ## Decision-audit observations
 
@@ -181,14 +199,58 @@ On **seed 503**, Claude scores **6/8** in both profiles, alive at home. This
 matches the rush reference and exceeds the noisy reference's **5/8**. Neither
 audit assigns main mistakes relative to its reference.
 
-All six audits reconstruct the saved runs exactly, have zero infrastructure
+On **rush seed 504**, Claude scores **7/10**, tying the reference and surviving
+at home. On **rush_noisy seed 504**, it earns 9 sample points but exhausts its
+battery at tick **47**, away from base, for reward **0.0** against **7/10**.
+The dominant reference-relative loss is **call 21 at tick 25**: an extra 8.1 m
+of driving plus a sample, adding 11.1 energy expenditure. The existing queue
+would already bring the rover home at tick 27. A [post-hoc stop check](lightlag-audits/fixed-seeds501-504/rush-noisy-seed504-delay3-opus-5-5/stop-check.json)
+replays through call 20 and sends no further commands: it finishes alive at
+home with **6/10** and battery **9.33**. Including call 21 instead causes the
+observed exhaustion. The new discovery is sampled on time at tick 31, but that
+extra value is lost through the zero survival multiplier. Earlier decisions
+account for the remaining one-point net gap; individual positive and negative
+attributions are retained in the audit rather than summed selectively.
+
+All eight audits reconstruct the saved runs exactly, have zero infrastructure
 findings, and their per-decision losses sum to the reference/model gap. Optional
 `superlog` labels are unavailable because numpy is absent in this local audit
 interpreter; the core replay checks and decision audit completed normally.
 
-## Current interpretation and handoff
+## Decision and handoff
 
-The first three pairs include three model wins, one tie, an energy-budget
-failure and a queue-management deficit. Preserve all six. Finish the final
-predeclared pair before a cross-seed conclusion; keep the original reference and rules fixed. Final
-mission/profile selection remains a team decision.
+There are now **concrete model failures under unchanged rules**, and they are
+explained by available task information: full-horizon energy budgeting,
+in-transit commands and keeping the queue supplied. The reference has higher
+mean reward on this fixed set. It also loses three comparisons and ties two;
+its continuation-based audit is not an optimality proof. The two zero-reward
+battery failures have a large effect on the means.
+
+Keep this completed set intact. No rule, controller or canonical Harbor-task
+change was made. The new real-time-clock and real-time-aware reference modules
+landed during these runs and remain separate proposals; all source/auditor
+hashes used here stayed fixed. Lightlag and final mission/profile choice remain
+team decisions.
+
+Recommended next work:
+
+1. Check **repeatability** on the two energy-failure cases and the queue case,
+   with a fixed number of fresh attempts and a declared budget before running.
+   Retain recoveries as well as repeat failures. This comparison stops after
+   its eight predeclared attempts; no additional paid runs were started.
+2. Compare the team's newer capable reference on the same seeds as a separately
+   labelled reference study. Do not rewrite this frozen reference or its scores.
+3. Build the demo around an auditable decision: the seed-501 homeward drive
+   versus staying alive away from base, or seed-504's extra excursion versus
+   keeping the already queued return. Show the published rule, delayed packet,
+   pending commands, energy forecast and final reward, including the limits of
+   the counterfactual. The noisy seed-502 queue wait provides another example.
+
+This is a small fixed-set comparison, not a general reliability estimate or a
+controlled causal estimate of noise effects. If its cases influence future
+rules or controller tuning, they become development data; use fresh predeclared
+confirmation data for later claims. All eight complete traces and every success,
+tie and failure remain available to the team and judges. Independent Codex
+reviews approved the reference increment, every model batch and the complete
+comparison, including the final aggregate and counterfactual checks. No blocking
+findings remain.

@@ -1432,6 +1432,32 @@
       "seed": 504
     }
   ],
+  "execution_checks": {
+    "all_replays_match": true,
+    "distinct_model_trial_ids": 8,
+    "infrastructure_findings": 0,
+    "launch_checks": [
+      {
+        "reported_cost_usd_before": 0,
+        "seed": 501
+      },
+      {
+        "reported_cost_usd_before": 1.1291271999999997,
+        "seed": 502
+      },
+      {
+        "reported_cost_usd_before": 1.7880343999999995,
+        "seed": 503
+      },
+      {
+        "reported_cost_usd_before": 2.6180795999999993,
+        "seed": 504
+      }
+    ],
+    "max_observed_concurrent_trials": 2,
+    "model_trials": 8,
+    "reference_trials": 8
+  },
   "horizon": 50,
   "launch_guard_reported_usd": 6.0,
   "max_concurrent": 2,
@@ -1905,34 +1931,182 @@
       "tool_calls": 31,
       "trial_duration_seconds": 279.499803,
       "trial_name": "rush_noisy-503__U3axe89"
+    },
+    {
+      "agent": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "agent_metrics": {
+        "total_cached_tokens": 483657,
+        "total_completion_tokens": 2624,
+        "total_cost_usd": 0.3154634,
+        "total_prompt_tokens": 483705,
+        "total_steps": 24
+      },
+      "alive": true,
+      "at_base": true,
+      "audit": {
+        "decomposition_adds_up": true,
+        "evidence": "fixed-seeds501-504/rush-seed504-delay3-opus-5-5",
+        "infrastructure_findings": 0,
+        "optional_superlog_available": false,
+        "reference_minus_model": 0.0,
+        "replay_matches": true
+      },
+      "evidence": "rush-seed504-delay3-opus-5-5",
+      "exception": null,
+      "kind": "opus",
+      "maximum": 10,
+      "profile": "rush",
+      "raw_score": 7.0,
+      "reported_cost_usd": 0.3154634,
+      "reward": 0.7,
+      "samples": [
+        {
+          "credited_value": 1,
+          "on_time": true,
+          "target_id": "t1",
+          "tick": 22
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t2",
+          "tick": 6
+        },
+        {
+          "credited_value": 1,
+          "on_time": true,
+          "target_id": "t3",
+          "tick": 13
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t4",
+          "tick": 9
+        },
+        {
+          "credited_value": 1,
+          "on_time": true,
+          "target_id": "t5",
+          "tick": 16
+        }
+      ],
+      "seed": 504,
+      "source_commit": "02e4f7062ec3feaca14d9cc2eeb953af870ba769",
+      "task_digest": "sha256:d110b31c632ff2f6bc2af77eeffb621b19108114f4c5d1bb1f1cbc77a12667e8",
+      "tick": 50,
+      "tool_calls": 29,
+      "trial_duration_seconds": 355.672463,
+      "trial_name": "rush-504__hphnGeK"
+    },
+    {
+      "agent": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "agent_metrics": {
+        "total_cached_tokens": 430757,
+        "total_completion_tokens": 2469,
+        "total_cost_usd": 0.4178143999999999,
+        "total_prompt_tokens": 430799,
+        "total_steps": 21
+      },
+      "alive": false,
+      "at_base": false,
+      "audit": {
+        "decomposition_adds_up": true,
+        "evidence": "fixed-seeds501-504/rush-noisy-seed504-delay3-opus-5-5",
+        "infrastructure_findings": 0,
+        "optional_superlog_available": false,
+        "reference_minus_model": 0.7,
+        "replay_matches": true
+      },
+      "evidence": "rush-noisy-seed504-delay3-opus-5-5",
+      "exception": null,
+      "kind": "opus",
+      "maximum": 10,
+      "profile": "rush_noisy",
+      "raw_score": 0.0,
+      "reported_cost_usd": 0.4178143999999999,
+      "reward": 0.0,
+      "samples": [
+        {
+          "credited_value": 1,
+          "on_time": true,
+          "target_id": "t1",
+          "tick": 25
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t2",
+          "tick": 6
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t4",
+          "tick": 9
+        },
+        {
+          "credited_value": 1,
+          "on_time": true,
+          "target_id": "t5",
+          "tick": 22
+        },
+        {
+          "credited_value": 3,
+          "on_time": true,
+          "target_id": "d1",
+          "tick": 31
+        }
+      ],
+      "seed": 504,
+      "source_commit": "02e4f7062ec3feaca14d9cc2eeb953af870ba769",
+      "task_digest": "sha256:c960c90023db5762665d899102baeeb17cf4e302a1e81c9cb76951c164fcc181",
+      "tick": 50,
+      "tool_calls": 27,
+      "trial_duration_seconds": 447.692564,
+      "trial_name": "rush_noisy-504__J3KDEJM"
     }
   ],
   "noise_level": 1.0,
   "paired_aggregates": [
     {
-      "mean_matched_reference_reward": 0.732905982905983,
-      "mean_model_reward": 0.5064102564102564,
-      "mean_reference_minus_model": 0.2264957264957265,
+      "mean_matched_reference_reward": 0.7246794871794872,
+      "mean_model_reward": 0.5548076923076923,
+      "mean_reference_minus_model": 0.16987179487179488,
       "model_wins": 1,
-      "n_completed": 3,
+      "n_completed": 4,
       "n_planned": 4,
       "perfect_model_runs": 0,
       "profile": "rush",
       "reference_wins": 1,
-      "reported_cost_usd": 1.0650708,
-      "ties": 1
+      "reported_cost_usd": 1.3805342,
+      "ties": 2
     },
     {
-      "mean_matched_reference_reward": 0.6869658119658121,
-      "mean_model_reward": 0.7254273504273504,
-      "mean_reference_minus_model": -0.038461538461538436,
+      "mean_matched_reference_reward": 0.690224358974359,
+      "mean_model_reward": 0.5440705128205128,
+      "mean_reference_minus_model": 0.14615384615384616,
       "model_wins": 2,
-      "n_completed": 3,
+      "n_completed": 4,
       "n_planned": 4,
       "perfect_model_runs": 0,
       "profile": "rush_noisy",
-      "reference_wins": 1,
-      "reported_cost_usd": 1.5530087999999997,
+      "reference_wins": 2,
+      "reported_cost_usd": 1.9708231999999997,
       "ties": 0
     }
   ],
@@ -2335,7 +2509,7 @@
       "trial_name": "rush_noisy-504__wKT9dTT"
     }
   ],
-  "reported_cost_usd": 2.6180795999999997,
+  "reported_cost_usd": 3.3513573999999995,
   "schema_version": 1,
   "seeds": [
     501,
@@ -2343,14 +2517,5 @@
     503,
     504
   ],
-  "unrun_model_cells": [
-    {
-      "profile": "rush",
-      "seed": 504
-    },
-    {
-      "profile": "rush_noisy",
-      "seed": 504
-    }
-  ]
+  "unrun_model_cells": []
 }

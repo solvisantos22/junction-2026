@@ -90,40 +90,39 @@ These are recommended evidence choices, not newly asserted official entry requir
   handoff recommends additional predeclared seeds and decision auditing before
   choosing final rules. No Modal/Gemini use or additional-prize entry is implied.
 
-### R03 — 14 November — Fixed seed comparison beyond the pilots
+### R03 — 14 November — Eight fixed-seed model attempts and decision audits
 
-- The user approved a fixed additional seed comparison. Sölvi / Codex published
-  claim/protocol `02e4f70` before outcomes: seeds 501–504, both `rush` profiles,
-  unchanged rules and original KF + MPC, eight planned fresh Claude attempts.
-- Codex froze eight isolated Harbor tasks, checked all source hashes against
-  the earlier pilots, ran eight matched Harbor references and 32 direct
-  public-tool controls, and checked exported scores/manifests/credential absence.
-- Reference increment `5925236`: all eight Harbor runs match direct scores,
-  range **0.615385–0.833333**, alive at base, no exceptions. Independent Codex
-  review reproduced all 32 direct controls and approved the evidence.
-- First model batch, **2/8 attempts**: OpenCode **1.19.5** / Anthropic Claude
-  Opus **5.5** on seed 501 scored **0.0** on rush (reference **0.833333**) and
-  **0.791667** on noisy (reference **0.666667**), reported cost **$1.1291272**.
-  Manh's auditor reconstructs both exactly, with zero infrastructure findings.
-  Codex connected the rush failure to full-horizon battery budgeting, checked
-  the explanation against the protected replay, and preserved the model win
-  on noisy. Independent evidence review approved both runs and a post-hoc
-  check showing that foregoing the homeward drive could still salvage 5.25/12.
-- Second model batch, **4/8 attempts cumulative**: seed 502 rush **0.769231** vs
-  reference **0.615385**, noisy **0.634615** vs **0.769231**. The noisy audit
-  identifies a queue-running-dry wait (2.25 raw points lost, 0.5 recovered by the
-  next action). Both replay exactly with no infrastructure findings. Cumulative
-  reported API cost **$1.7880344**; remaining four attempts pending. Two model
-  wins and two deficits across the first four attempts; no general gap claim.
-- Third batch, **6/8 attempts cumulative**: seed 503 Claude **0.75** in both
-  profiles, tying rush KF + MPC and beating noisy KF + MPC's **0.625**. Both
-  audits replay exactly with no infrastructure findings. Cumulative reported
-  API cost **$2.6180796**; final seed 504 pair running. Three model wins, one
-  tie, two deficits across the six completed attempts.
-- [Predeclared protocol, results and limitations](lightlag-fixed-seed-comparison.md),
-  [machine-readable evidence](lightlag-runs/fixed-seeds501-504-summary.json).
-- Team components retain their original authorship; Codex's contribution is
-  experiment orchestration and verification. No Modal/Gemini use or prize entry.
+- The user approved the additional comparison. Sölvi / Codex published protocol
+  `02e4f70` before outcomes: seeds 501–504 on both profiles, unchanged rules,
+  original KF + MPC, one fresh attempt per cell, no retries. Codex orchestrated
+  **OpenCode 1.19.5 / Anthropic Claude Opus 5.5**; this does not attribute the
+  playing model's decisions to Codex or Claude Code.
+- Codex froze eight tasks, verified eight Harbor references against 32 direct
+  public-tool controls, exported all eight model attempts, and ran Manh's
+  delivered decision auditor. All source/task/auditor hashes stayed fixed while
+  teammates' other updates were integrated. Each model/reference task pairs
+  exactly; every audit replays exactly with zero infrastructure findings.
+- Complete outcome: **3 model wins, 2 ties, 3 deficits**. Mean Claude/reference
+  reward: rush **0.554808 / 0.724679**, noisy **0.544071 / 0.690224**. No general
+  reliability or noise-causality claim: four maps per profile, one attempt each.
+- Codex connected two battery deaths and one queue-timing loss to the protected
+  traces and published rules. Independent review prompted a check of the
+  reference continuation's limits: after call 11 in seed 501, foregoing the
+  later return could still salvage 5.25/12. Two explicit post-hoc continuation checks are
+  saved; reference-relative attribution is kept separate from optimality.
+- Reported API usage **$3.3513574** for the eight attempts; R01–R03 together
+  report **$4.2977204** for ten attempts. These are agent usage reports, not
+  verified invoices, grant sources or balances. No Modal or Gemini usage.
+- Evidence: [complete protocol, per-run table, analysis and handoff](lightlag-fixed-seed-comparison.md),
+  [summary](lightlag-runs/fixed-seeds501-504-summary.json),
+  [all eight decision audits](lightlag-audits/fixed-seeds501-504/README.md).
+  Reference increment `5925236`, seed-501 evidence `ddd650a`, seed-502 `ed1c4fd`,
+  seed-503 `8535225`. Independent reviews approved every increment and the complete comparison,
+  including the final aggregates, execution checks and both counterfactuals. Credential/path scans, exact task
+  pairing, reward/cost checks and local links passed.
+- Team components keep their original authorship. Codex's contribution is the
+  experiment, verification, interpretation and repo handoff. All mixed outcomes
+  are retained; final rules/project choice and prize entry remain team decisions.
 
 ## Keep recording with minimal overhead
 

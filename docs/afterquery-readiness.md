@@ -6,15 +6,13 @@ Updated 14 November against Kristján's delivered Harbor/model evidence
 requirements still come from the team's [record of Ved's 01:35 announcement](afterquery-update-2026-11-14.md).
 This update does not claim a fresh read of logged-in Discord or prize pages.
 
-**The basic submission path is demonstrated: Harbor, a real model run and a
-valid reward are recorded. The fixed seed comparison now has specific model
-failures and model wins; a broad gap is not established.** Claude matched the
-reference at 1.0 on the original task and both seed-500 profiles. In the first
-six [predeclared additional attempts](lightlag-fixed-seed-comparison.md), it
-beats the reference three times, ties once and trails twice. The deficits involve full-horizon
-energy budgeting and delayed command queues; all six replay audits are exact
-with no infrastructure findings. Finish seed 504 before interpreting the
-whole set. Lightlag and final rules remain provisional.
+**The basic submission path is demonstrated, and the fixed comparison now has
+three auditable model deficits alongside three model wins and two ties.** All
+[eight predeclared additional attempts](lightlag-fixed-seed-comparison.md) are
+complete. The reference has higher mean reward in both profiles; two battery
+failures strongly affect those means. Each run replays exactly with no
+infrastructure findings. The next priority is repeatability, reference strength
+and a clear decision-focused demo. Lightlag and final rules remain provisional.
 
 ## What is now demonstrated
 
@@ -41,12 +39,13 @@ whole set. Lightlag and final rules remain provisional.
   attempts together report **$0.946363**. The noisy waiting baseline scored
   0.267857 and the blind plan 0.571429; neither predicts this model's result.
 - [Fixed seeds 501–504](lightlag-fixed-seed-comparison.md): eight matched Harbor
-  references verified, 32 direct controls retained; **6/8 model runs complete**.
-  Seed 501 rush/noisy: Claude **0.0 / 0.791667**, reference **0.833333 / 0.666667**.
-  Seed 502: Claude **0.769231 / 0.634615**, reference **0.615385 / 0.769231**.
-  Seed 503: Claude **0.75 / 0.75**, reference **0.75 / 0.625**.
-  Six exact decision audits, no infrastructure findings; reported API usage
-  **$2.6180796** for this set so far, in addition to **$0.946363** for seed 500.
+  references, 32 direct controls and **8/8 model attempts** retained. Mean
+  Claude/reference reward: rush **0.554808 / 0.724679**, noisy
+  **0.544071 / 0.690224**. Three model wins, two ties, three deficits. All eight
+  audits reproduce exactly with no infrastructure findings. Two energy-budget
+  failures and a command-queue deficit have packet/rule pointers and explicit
+  continuation checks. Reported API usage **$3.3513574** for this set;
+  **$4.2977204** including this chat's two seed-500 pilots.
 - A [replay viewer](../viewer/README.md) for the original runs is delivered;
   adapting its presentation to a future dynamic model result remains separate.
 
@@ -54,9 +53,9 @@ whole set. Lightlag and final rules remain provisional.
 
 | Priority | Gap | Concrete completion evidence |
 |---|---|---|
-| 1 | **Meaningful model difficulty.** Six additional attempts show two model deficits versus the reference, three model wins and one tie; the final two attempts are running. | Complete the predeclared set under unchanged rules and matched references. Preserve successes as well as failures; use the decision auditor to explain any actual gap. Do not tune difficulty solely to defeat one saved trace. |
+| 1 | **Repeatability and reference strength.** The completed set contains three deficits, three model wins and two ties; two battery deaths strongly affect the average. | Repeat the identified failure cases with a fixed fresh-attempt budget and retain recoveries. Compare the team's newer reference separately on the same seeds; preserve the frozen comparison. Do not tune rules solely to defeat saved traces. |
 | 1 | **API budget tracking.** The user-supplied Claude key worked for the real run. User reports individual credits obtained and team Gemini application submitted; grant source and remaining balances are not independently verified. | Record reported cost per run and keep credentials local. Gemini application is not confirmation of an available balance. Modal's confirmed compute grant is separate. AfterQuery supplies no inference credits. |
-| 2 | **Evidence for a general reasoning/control gap.** Specific energy/queue failures are now audited, but the model also beats the frozen reference and the fixed set is incomplete. | Use matched rules and capable baselines, additional predeclared seeds and delay-0 controls where useful. Keep infrastructure errors separate from poor decisions and retain negative findings. The new one-log minimum does not cancel earlier judging-rerun requirements. |
+| 2 | **Evidence for a general reasoning/control gap.** Specific energy/queue failures are audited, but there are only four maps per profile and one model attempt per map. | Use capable baselines and fresh predeclared confirmation data after any tuning. Keep infrastructure errors separate from poor decisions and retain negative findings. The new one-log minimum does not cancel earlier judging-rerun requirements. |
 | 2 | **Final mission and demo.** The canonical task still uses the original profile; the generated experiment intentionally does not replace it. | Choose/version a profile after model evidence. Coordinate any canonical-task update with its owner, sync generated copies, and show the objective, decisive actions and reward in a playthrough. Exact judging model/budget remain unresolved. |
 | 2 | **Submission and license.** The platform entry remains the recorded editable draft; prize selections/forms and a repository license are not confirmed. | Check final track/prize entries and any separate forms. The public Junction FAQ says submissions are open-sourced under MIT; confirm the team's terms/license treatment before finalizing. |
 
@@ -78,14 +77,15 @@ accompanying any main track. [Junction schedule and FAQ](https://2026.hackjuncti
 
 ## Coordination and next steps
 
-1. Finish the [fixed seed comparison](lightlag-fixed-seed-comparison.md) and
-   retain the mixed findings. Source/task hashes are frozen and all generated
-   tasks live outside the checkout; the canonical task and teammate code remain
-   owned by their existing authors.
+1. Use the completed [fixed seed comparison and handoff](lightlag-fixed-seed-comparison.md)
+   for a fixed-budget repeatability check and a decision-focused demo. Source/task
+   hashes and mixed outcomes are preserved; canonical-task changes remain
+   coordinated with the existing owner.
 2. Keep the task's source commit/file hashes fixed during comparisons. Manh's
    newly delivered controller collection must not silently replace this reference.
-3. Let real model evidence guide the next difficulty experiment. Scripting stays
-   available; additional physics or optional training are not prerequisites.
+3. Keep the current rules for the repeatability check. Manh's new real-time
+   clock/controller remains a separate proposal, not part of this evidence.
+   Scripting stays available; further physics or training is not a prerequisite.
 4. Keep [prize evidence](prize-evidence.md) alongside delivered work, with accurate
    Claude Code/Codex/provider attribution. Credit redemption is not a prize entry.
 
