@@ -1,0 +1,293 @@
+{
+  "blind_control": "blind_probe matches always_probe cost and signal-delivery waiting, then uses the prior and ignores the signal value",
+  "contexts": {
+    "costly_probe": {
+      "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. At most one probe and one commitment; probe must precede commitment in accepted order. Commitment is immutable on acceptance.",
+      "command_schema": [
+        {
+          "action": "probe"
+        },
+        {
+          "action": "commit",
+          "route": "shortcut|detour"
+        },
+        {
+          "action": "wait"
+        }
+      ],
+      "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+      "context": {
+        "id": "costly_probe",
+        "prior_firm": 0.5,
+        "probe_energy": 3
+      },
+      "delay": 1,
+      "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+      "horizon": 30,
+      "initial_energy": 10,
+      "max_advance_ticks": 5,
+      "max_batch_size": 5,
+      "normalization": 10,
+      "penalty_per_tick": 0.25,
+      "probe": "Spend probe_energy at execution and produce the fixed episode signal. Signal equals terrain with signal_accuracy. Repeated log reads add no evidence.",
+      "routes": {
+        "detour": {
+          "duration": 6,
+          "energy": {
+            "firm": 8,
+            "soft": 8
+          },
+          "target_value": 6
+        },
+        "shortcut": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        }
+      },
+      "signal_accuracy": 0.9,
+      "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+      "trip": "A completed route includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+    },
+    "likely_firm": {
+      "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. At most one probe and one commitment; probe must precede commitment in accepted order. Commitment is immutable on acceptance.",
+      "command_schema": [
+        {
+          "action": "probe"
+        },
+        {
+          "action": "commit",
+          "route": "shortcut|detour"
+        },
+        {
+          "action": "wait"
+        }
+      ],
+      "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+      "context": {
+        "id": "likely_firm",
+        "prior_firm": 0.95,
+        "probe_energy": 1
+      },
+      "delay": 1,
+      "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+      "horizon": 30,
+      "initial_energy": 10,
+      "max_advance_ticks": 5,
+      "max_batch_size": 5,
+      "normalization": 10,
+      "penalty_per_tick": 0.25,
+      "probe": "Spend probe_energy at execution and produce the fixed episode signal. Signal equals terrain with signal_accuracy. Repeated log reads add no evidence.",
+      "routes": {
+        "detour": {
+          "duration": 6,
+          "energy": {
+            "firm": 8,
+            "soft": 8
+          },
+          "target_value": 6
+        },
+        "shortcut": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        }
+      },
+      "signal_accuracy": 0.9,
+      "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+      "trip": "A completed route includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+    },
+    "likely_soft": {
+      "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. At most one probe and one commitment; probe must precede commitment in accepted order. Commitment is immutable on acceptance.",
+      "command_schema": [
+        {
+          "action": "probe"
+        },
+        {
+          "action": "commit",
+          "route": "shortcut|detour"
+        },
+        {
+          "action": "wait"
+        }
+      ],
+      "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+      "context": {
+        "id": "likely_soft",
+        "prior_firm": 0.05,
+        "probe_energy": 1
+      },
+      "delay": 1,
+      "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+      "horizon": 30,
+      "initial_energy": 10,
+      "max_advance_ticks": 5,
+      "max_batch_size": 5,
+      "normalization": 10,
+      "penalty_per_tick": 0.25,
+      "probe": "Spend probe_energy at execution and produce the fixed episode signal. Signal equals terrain with signal_accuracy. Repeated log reads add no evidence.",
+      "routes": {
+        "detour": {
+          "duration": 6,
+          "energy": {
+            "firm": 8,
+            "soft": 8
+          },
+          "target_value": 6
+        },
+        "shortcut": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        }
+      },
+      "signal_accuracy": 0.9,
+      "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+      "trip": "A completed route includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+    },
+    "uncertain": {
+      "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. At most one probe and one commitment; probe must precede commitment in accepted order. Commitment is immutable on acceptance.",
+      "command_schema": [
+        {
+          "action": "probe"
+        },
+        {
+          "action": "commit",
+          "route": "shortcut|detour"
+        },
+        {
+          "action": "wait"
+        }
+      ],
+      "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+      "context": {
+        "id": "uncertain",
+        "prior_firm": 0.5,
+        "probe_energy": 1
+      },
+      "delay": 1,
+      "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+      "horizon": 30,
+      "initial_energy": 10,
+      "max_advance_ticks": 5,
+      "max_batch_size": 5,
+      "normalization": 10,
+      "penalty_per_tick": 0.25,
+      "probe": "Spend probe_energy at execution and produce the fixed episode signal. Signal equals terrain with signal_accuracy. Repeated log reads add no evidence.",
+      "routes": {
+        "detour": {
+          "duration": 6,
+          "energy": {
+            "firm": 8,
+            "soft": 8
+          },
+          "target_value": 6
+        },
+        "shortcut": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        }
+      },
+      "signal_accuracy": 0.9,
+      "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+      "trip": "A completed route includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+    }
+  },
+  "exact_enumeration": {
+    "aggregate": "Equal mean over four declared contexts; probability weighting within each context",
+    "rows": 64,
+    "signals": [
+      "firm",
+      "soft"
+    ],
+    "terrains": [
+      "firm",
+      "soft"
+    ],
+    "weight": "P(terrain) * P(signal | terrain)"
+  },
+  "gate": "Exact selective aggregate strictly exceeds both always_probe and never_probe; selective chooses each behavior in at least one context; analytical and realized branch means match",
+  "next_step": "Only if the mechanism gate passes: separately freeze a protected Harbor model pilot with clear instructions and scripting; no automatic expansion",
+  "paid_provider_calls": 0,
+  "policies": [
+    "never_probe",
+    "always_probe",
+    "selective",
+    "blind_probe"
+  ],
+  "policy_ties": "selective skips probing on an equal value; route ties use lexical order (detour first)",
+  "replay": "Evaluator-only terrain, signal and transcript retained for every exact and seeded row",
+  "schema_version": 1,
+  "scope": "Scripted structural check of a route-decision abstraction, not the continuous rover or a model benchmark.",
+  "seeded_smoke": {
+    "interpretation": "Separate deterministic smoke matrix in this independent environment; not a hidden holdout or population estimate",
+    "rows": 640,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ]
+  },
+  "source_hashes": {
+    "docs/superpowers/plans/2026-11-14-lightlag-information-choice.md": "47facb1f6ab8620e8337607de7ac896e9ac80145a462738b82969bcf68dc3c20",
+    "docs/superpowers/specs/2026-11-14-lightlag-information-choice-design.md": "e3b963528b0f3c88741d8591ac6f8f79d9ba67f39ee4aafb0165184af18466f3",
+    "lightlag_information/__init__.py": "52a83f71ca90e76706066d0c8d1709c48cc0be75511b9fb2c02b8f99f8e0d89d",
+    "lightlag_information/environment.py": "f6df1ffa970d9411995d42feff3d380047f4efdac69bbceeb923a31ff4f8aa28",
+    "lightlag_information/model.py": "58984d5c40085a6e42de67451524ed9da2130861b494eeeccc7efd5de9aac0eb",
+    "lightlag_information/policies.py": "6a9e4bb912b95bd1a55e996404b1e7c7168435146808d0fe36cecf8d8577ec03",
+    "lightlag_information/study.py": "404b5f58a74b552ab78b9e39daf686ab0c79ffafdce7e330a0ff464cd2eca9a5",
+    "tests/lightlag_information/test_environment.py": "8fc8c4c3dd53ea9fe0c9c5f378a6ac14464e0cf99b1bbef80db11763f23b5b12",
+    "tests/lightlag_information/test_policies.py": "dfa0e917a803e0e304925980da1647e8d3945d18e74282651a83da3a8e635755"
+  },
+  "study_id": "information-choice-v1"
+}

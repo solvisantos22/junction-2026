@@ -332,6 +332,21 @@ These are recommended evidence choices, not newly asserted official entry requir
   reports because the missing launch records cannot be reconstructed from
   these four trials. No prize entry or population-reliability claim.
 
+### R11 — 14 November — Selective-information mechanism prototype
+
+- Human direction: Sölvi chose learning before commitment, informed by actual
+  Claude failures, and requested evaluation before expansion.
+- Codex implemented an isolated delayed probe/route-choice environment and
+  public-only Bayesian reference policies, including a matched control that
+  ignores the acquired signal. Independent review checked information exposure,
+  atomic commitments, timing, realized grading and probability weighting.
+- Verification: 29 tests; 64 weighted outcome branches and 640 seeded episodes;
+  root reconstructed all 704 saved replays and checked nine source hashes.
+  Selective exact mean 0.5596875 versus never 0.53875 and always 0.51375.
+- [Code](../lightlag_information/) and [results/limits](lightlag-information-choice.md).
+  Four hand-designed development contexts; no Claude run, sponsor API use,
+  continuous-rover improvement, final task choice or prize entry is claimed.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.

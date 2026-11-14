@@ -1,0 +1,121 @@
+{
+  "exact": {
+    "aggregate": {
+      "always_probe": 0.5137499999999999,
+      "blind_probe": 0.48343749999999996,
+      "never_probe": 0.5387500000000001,
+      "selective": 0.5596875
+    },
+    "analytical": {
+      "costly_probe": {
+        "always_probe": 0.4125,
+        "blind_probe": 0.4125,
+        "never_probe": 0.45,
+        "selective": 0.45
+      },
+      "likely_firm": {
+        "always_probe": 0.78375,
+        "blind_probe": 0.78375,
+        "never_probe": 0.855,
+        "selective": 0.855
+      },
+      "likely_soft": {
+        "always_probe": 0.325,
+        "blind_probe": 0.32499999999999996,
+        "never_probe": 0.4,
+        "selective": 0.4
+      },
+      "uncertain": {
+        "always_probe": 0.53375,
+        "blind_probe": 0.4125,
+        "never_probe": 0.45,
+        "selective": 0.53375
+      }
+    },
+    "contexts": {
+      "costly_probe": {
+        "always_probe": 0.4125,
+        "blind_probe": 0.4125,
+        "never_probe": 0.45,
+        "selective": 0.45
+      },
+      "likely_firm": {
+        "always_probe": 0.78375,
+        "blind_probe": 0.78375,
+        "never_probe": 0.855,
+        "selective": 0.855
+      },
+      "likely_soft": {
+        "always_probe": 0.32499999999999996,
+        "blind_probe": 0.32499999999999996,
+        "never_probe": 0.4,
+        "selective": 0.4
+      },
+      "uncertain": {
+        "always_probe": 0.53375,
+        "blind_probe": 0.4125,
+        "never_probe": 0.45,
+        "selective": 0.53375
+      }
+    },
+    "rows": 64,
+    "selective_choices": {
+      "costly_probe": "no_probe",
+      "likely_firm": "no_probe",
+      "likely_soft": "no_probe",
+      "uncertain": "probe"
+    }
+  },
+  "gate": {
+    "analytical_matches_realized": true,
+    "beats_always_probe": true,
+    "beats_never_probe": true,
+    "passed": true,
+    "source_unchanged": true,
+    "uses_both_behaviors": true
+  },
+  "limitations": [
+    "Four hand-designed development contexts, not a population benchmark or hidden holdout.",
+    "Scripted success is not evidence of Claude difficulty or any model failure.",
+    "This finite route-choice reference does not establish continuous-rover performance.",
+    "Always probing loses expected reward in likely_firm, likely_soft and costly_probe.",
+    "No paid provider calls or protected model pilot were run."
+  ],
+  "schema_version": 1,
+  "scope": "Scripted structural check of a route-decision abstraction, not the continuous rover or a model benchmark.",
+  "seeded_smoke": {
+    "aggregate": {
+      "always_probe": 0.4724999999999999,
+      "blind_probe": 0.43187499999999995,
+      "never_probe": 0.48250000000000004,
+      "selective": 0.51515625
+    },
+    "contexts": {
+      "costly_probe": {
+        "always_probe": 0.350625,
+        "blind_probe": 0.350625,
+        "never_probe": 0.38250000000000006,
+        "selective": 0.38250000000000006
+      },
+      "likely_firm": {
+        "always_probe": 0.70125,
+        "blind_probe": 0.70125,
+        "never_probe": 0.7649999999999998,
+        "selective": 0.7649999999999998
+      },
+      "likely_soft": {
+        "always_probe": 0.3249999999999998,
+        "blind_probe": 0.3249999999999998,
+        "never_probe": 0.4000000000000002,
+        "selective": 0.4000000000000002
+      },
+      "uncertain": {
+        "always_probe": 0.5131249999999998,
+        "blind_probe": 0.350625,
+        "never_probe": 0.38250000000000006,
+        "selective": 0.5131249999999998
+      }
+    },
+    "rows": 640
+  }
+}
