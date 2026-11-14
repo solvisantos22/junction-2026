@@ -43,10 +43,11 @@ class PublicTools:
 
 
 def run_episode(policy, seed, delay=3, profile="dynamic", horizon=None, policy_name=None,
-                keep_replay=False, config_overrides=None):
+                keep_replay=False, config_overrides=None, noise_level=1.0, bumpiness=0.0):
     horizon = PROFILES[profile][4] if horizon is None else horizon
     config = Config(delay_ticks=delay, max_ticks=horizon, **(config_overrides or {}))
-    env = DynamicEnvironment(seed=seed, config=config, profile=profile)
+    env = DynamicEnvironment(seed=seed, config=config, profile=profile, noise_level=noise_level,
+                             bumpiness=bumpiness)
     tools = PublicTools(env)
     policy(tools)  # policy errors propagate: they must not turn into a low score
     while not env.advance(5)["episode_complete"]:

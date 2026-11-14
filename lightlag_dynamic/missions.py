@@ -4,7 +4,7 @@ A mission is the physical World the team's simulator already understands, plus a
 schedule saying when each target appears and until which tick it is worth full value.
 """
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import math
 import random
 
@@ -19,11 +19,37 @@ PROFILES = {
     "random": (True, False, False, "standard", 80),   # a seeded map, no deadlines or discoveries
     "dynamic": (True, True, True, "standard", 80),    # seeded map, deadlines, mid-mission discoveries
     "rush": (True, True, True, "rush", 50),           # shorter mission, more, closer targets, tighter windows
+    "noisy": (False, False, False, None, 80),         # the team's map with noisy sensing and heading drift
+    "rush_noisy": (True, True, True, "rush", 50),     # rush with noisy sensing and heading drift
+}
+
+# Profiles whose telemetry is noisy and whose drives drift (see SENSING). Same maps as their
+# noiseless twins for the same seed: "noisy" is "static", "rush_noisy" is "rush".
+NOISY_PROFILES = ("noisy", "rush_noisy")
+
+# Published sensing and drift model. All of it is listed in rules(); the seed fixes the draws.
+SENSING = {
+    "position_noise_m": 0.3,         # std dev, per axis, of every reported position fix
+    "visual_odometry_noise": 0.05,   # std dev of the relative error of reported visual odometry
+    "heading_bias_deg": 5.0,         # each episode starts with a hidden bias, uniform in +-5 degrees
+    "heading_bias_walk_deg": 0.5,    # the bias then drifts: a random-walk step per executed drive
+    "heading_noise_deg": 1.5,        # plus independent heading noise on every executed drive
 }
 
 # Deadlines for the "windows" profile on the team's fixed map: the last tick at which a
 # sample command can execute and still earn full value. This is a difficulty dial.
 FIXED_DEADLINES = {"north": 10, "west": 16, "east": 26}
+
+# Experimental and off by default: bumpy ground. The map is split into 1 m cells; a seeded
+# share of them (`bumpiness`) is rough and listed in map(). Entering a rough cell during a drive
+# can make the wheels spin in place (wheel metres and energy spent, no progress) and gives the
+# rover a small sideways jolt. Not part of any profile until the team decides.
+ROUGHNESS = {
+    "cell_m": 1.0,
+    "spin_chance": 0.4,            # chance that entering a rough cell spins the wheels
+    "spin_wheel_m": [0.3, 1.2],    # wheel metres lost to one spin, uniform in this range
+    "jolt_m": 0.1,                 # std dev of the sideways jolt on entering a rough cell
+}
 
 # Published generator ranges for random maps. The seed only picks values inside them.
 GENERATORS = {
@@ -63,6 +89,18 @@ class Mission:
     world: World
     plans: tuple
     late_fraction: float = LATE_FRACTION
+    noise_level: float = 1.0   # multiplies every SENSING value on the noisy profiles
+    bumpiness: float = 0.0     # experimental: share of rough 1 m cells (see ROUGHNESS); 0 = off
+
+    @property
+    def sensing(self):
+        if self.profile not in NOISY_PROFILES:
+            return None
+        return {name: value * self.noise_level for name, value in SENSING.items()}
+
+    @property
+    def roughness(self):
+        return {**ROUGHNESS, "rough_fraction": self.bumpiness} if self.bumpiness > 0 else None
 
     def public_rules(self):
         random_map, windows, discoveries, generator, horizon = PROFILES[self.profile]
@@ -73,14 +111,25 @@ class Mission:
             "discoveries_enabled": discoveries,
             "map_generator": GENERATORS[generator] if generator else None,
             "profile_default_horizon": horizon,
+            "sensing": self.sensing,
+            "noise_level": self.noise_level if self.profile in NOISY_PROFILES else None,
+            "roughness": self.roughness,
         }
 
     def to_dict(self):
         return {"profile": self.profile, "late_fraction": self.late_fraction,
+                "noise_level": self.noise_level, "bumpiness": self.bumpiness,
                 "targets": [asdict(plan) for plan in self.plans]}
 
 
-def make_mission(profile, seed, horizon=80):
+def make_mission(profile, seed, horizon=80, noise_level=1.0, bumpiness=0.0):
+    mission = _make_mission(profile, seed, horizon)
+    if not (0 <= noise_level <= 10 and 0 <= bumpiness <= 1):
+        raise ValueError("noise_level must be in 0..10 and bumpiness in 0..1")
+    return replace(mission, noise_level=float(noise_level), bumpiness=float(bumpiness))
+
+
+def _make_mission(profile, seed, horizon=80):
     if profile not in PROFILES:
         raise ValueError(f"unknown profile {profile!r}; use one of {', '.join(PROFILES)}")
     if type(seed) is not int:

@@ -7,8 +7,8 @@ Runs, on the same seeds:
   * this pilot's controllers (reference, leg_and_wait, open_loop, stale_telemetry, window_blind)
   * the team's controllers from lightlag_controllers/ (team_reference, team_move_and_wait,
     team_open_loop, team_stale), unchanged, through their own drive() loop
-and checks that the team's evaluator, lightlag.evaluation.run_episode, gives the same score
-for a dynamic episode as this pilot's runner.
+and checks that the team's evaluator, lightlag.evaluation.run_episode (through its
+environment_factory hook), gives the same score for a dynamic episode as this pilot's runner.
 
 "--hard" applies the rule variant the team pilot recommends (docs/lightlag-pilot.md):
 sampling radius 0.4 m, slip noise +-0.08, sand slip 0.15-0.60, via the team's own
@@ -39,33 +39,25 @@ OURS = ["reference", "leg_and_wait", "open_loop", "stale_telemetry", "window_bli
 HARD = {"radius": 0.4, "noise": 0.08, "sand_slip": (0.15, 0.60)}
 
 
-@contextlib.contextmanager
-def team_evaluator_with(profile):
-    """Let lightlag.evaluation.run_episode build a DynamicEnvironment for one block."""
-    original = team_evaluation.Environment
-
-    def build(seed=0, config=None, world=None):
+def dynamic_factory(profile):
+    """An environment_factory for lightlag.evaluation.run_episode that builds a profile's episode."""
+    def build(*, seed, config, world):
         return DynamicEnvironment(seed=seed, config=config, profile=profile)
-
-    team_evaluation.Environment = build
-    try:
-        yield
-    finally:
-        team_evaluation.Environment = original
+    return build
 
 
 def evaluator_agreement(profile, seeds, delay, overrides):
     """Same policy, same seed: this pilot's runner and the team evaluator must agree."""
     horizon = PROFILES[profile][4]
     mismatches = []
-    with team_evaluator_with(profile):
-        for seed in seeds:
-            ours = run_episode(POLICIES["reference"], seed, delay, profile, config_overrides=overrides)
-            theirs = team_evaluation.run_episode(
-                POLICIES["reference"], seed=seed,
-                config=Config(delay_ticks=delay, max_ticks=horizon, **overrides))
-            if abs(ours["result"]["raw_score"] - theirs["result"]["raw_score"]) > 1e-9:
-                mismatches.append(seed)
+    for seed in seeds:
+        ours = run_episode(POLICIES["reference"], seed, delay, profile, config_overrides=overrides)
+        theirs = team_evaluation.run_episode(
+            POLICIES["reference"], seed=seed,
+            config=Config(delay_ticks=delay, max_ticks=horizon, **overrides),
+            environment_factory=dynamic_factory(profile))
+        if abs(ours["result"]["raw_score"] - theirs["result"]["raw_score"]) > 1e-9:
+            mismatches.append(seed)
     return mismatches
 
 

@@ -26,6 +26,10 @@ def main(argv=None):
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--delay", type=int, default=3)
     parser.add_argument("--ticks", type=int, default=None, help="horizon; default: the profile's own")
+    parser.add_argument("--noise-level", type=float, default=1.0,
+                        help="multiplies the sensing noise and drift of the noisy profiles")
+    parser.add_argument("--bumpiness", type=float, default=0.0,
+                        help="experimental: share of rough cells that can spin the wheels (0 = off)")
     parser.add_argument("--result", type=Path, help="write the final score to a new JSON file")
     parser.add_argument("--replay", type=Path, help="write the evaluator replay to a new JSON file")
     args = parser.parse_args(argv)
@@ -34,7 +38,8 @@ def main(argv=None):
             parser.error("output files must be new and their parent directories must exist")
     ticks = PROFILES[args.profile][4] if args.ticks is None else args.ticks
     env = DynamicEnvironment(seed=args.seed, config=Config(delay_ticks=args.delay, max_ticks=ticks),
-                             profile=args.profile)
+                             profile=args.profile, noise_level=args.noise_level,
+                             bumpiness=args.bumpiness)
     for line in sys.stdin:
         if not line.strip():
             continue

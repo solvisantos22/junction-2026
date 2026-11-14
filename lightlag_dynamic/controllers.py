@@ -10,6 +10,7 @@ boundary as the team's planned PublicTools, and import nothing from the simulato
   open_loop        plans once from the briefing with mid-range slip, sends everything, never reads
                    telemetry (the "blind plan" a script could write; the team pilot's key baseline)
   do_nothing       sends nothing
+  kf_mpc           Kalman filter + receding-horizon planning with chance constraints (kf_mpc.py)
 
 This reference is a local stand-in for the team's reference controller, which is being
 built separately. It is not optimal; it is an honest algorithm using public information.
@@ -275,6 +276,14 @@ class Controller:
         return (self.mode not in ("stale_telemetry", "leg_and_wait", "open_loop")
                 and leg.uncertainty > self.radius - AIM_MARGIN)
 
+    def home_slack(self):
+        # Ticks kept free after the planned arrival home, for a last correction.
+        return 0
+
+    def confirmation_ticks(self, leg):
+        # Stop, wait for the last drive's telemetry (k), then the next command needs k + 1.
+        return 2 * self.k + 1
+
     def wait_per_leg(self):
         # leg_and_wait plans honestly for its own waiting: telemetry back (k), new command out (k).
         return 2 * self.k if self.mode == "leg_and_wait" else 0
@@ -313,7 +322,7 @@ class Controller:
                         tick += self.wait_per_leg()
                     tick += len(hop.commands)
                     if self.needs_confirmation(hop):
-                        tick += 2 * self.k + 1
+                        tick += self.confirmation_ticks(hop)
                     value += self.value_at(target, tick)
                     tick += 1
                     expected += hop.energy + self.sample_cost
@@ -325,10 +334,11 @@ class Controller:
                 else:
                     home = leg(here, "base")
                     end = tick + self.wait_per_leg() + len(home.commands) - 1
-                    if end > self.horizon or expected + home.energy > budget:
+                    if end > self.horizon - self.home_slack() or expected + home.energy > budget:
                         continue
                     if value > best[0] + 1e-9 or (abs(value - best[0]) <= 1e-9 and end < best[1]):
                         best = (value, end, sequence)
+        self.plan_end, self.plan = best[1], best[2]  # subclasses read the time pressure from these
         return best[2]
 
     # ---- acting -------------------------------------------------------------------------
@@ -429,6 +439,12 @@ def do_nothing(tools):
     return None
 
 
+def kf_mpc(tools):
+    """Kalman filter + receding-horizon controller (lightlag_dynamic/kf_mpc.py)."""
+    from .kf_mpc import KalmanMPCController  # imported here: kf_mpc builds on this module
+    KalmanMPCController(tools).run()
+
+
 POLICIES = {"reference": _policy("reference"), "leg_and_wait": _policy("leg_and_wait"),
             "stale_telemetry": _policy("stale_telemetry"), "window_blind": _policy("window_blind"),
-            "open_loop": _policy("open_loop"), "do_nothing": do_nothing}
+            "open_loop": _policy("open_loop"), "do_nothing": do_nothing, "kf_mpc": kf_mpc}
