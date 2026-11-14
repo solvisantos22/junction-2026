@@ -2,8 +2,12 @@
 
 A Python 3.9+ standard-library CLI for macOS that queues one dedicated Codex
 check every 30 minutes. It does not read Discord or websites itself; the
-dedicated agent follows the configured instructions and reports actionable
-updates to the parent chat.
+dedicated agent follows the configured instructions, publishes actionable
+updates in the [shared event note](../../docs/junction-event-updates.md), and
+reports them with the commit link to the parent chat. The
+[publication workflow](PUBLISHING.md) limits writes to that note and the
+watcher's own status row in a dedicated worktree. Routine checks with no
+changes stay in private logs; publication failures are reported and retried.
 
 ## Configuration and installation
 

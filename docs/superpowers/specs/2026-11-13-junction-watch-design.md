@@ -1,6 +1,6 @@
 # Junction Watch design
 
-Approved scope: the user selected checks every 15 minutes for Discord announcements, AfterQuery and tech-support discussions, plus the challenge/submission pages; actionable changes are relayed to the current chat. Stop Sunday 15 November 2026 at 17:00 Europe/Helsinki.
+Approved scope: checks every 30 minutes (changed by the user on 14 November) for Discord announcements, AfterQuery and tech-support discussions, plus the challenge/submission pages. Actionable changes are relayed to the current chat and, as requested on 15 November, pushed to the shared [event note](../../junction-event-updates.md) under the [publication workflow](../../../tools/junction_watch/PUBLISHING.md). Stop Sunday 15 November 2026 at 17:00 Europe/Helsinki.
 
 ## Approach
 
@@ -21,11 +21,11 @@ The watcher uses connected tools when suitable, otherwise the documented CUA API
 
 Private runtime directory: `/Users/solvisantos/.codex/junction-watch-2026`.
 
-`config.json` contains enabled, thread_id, parent_thread_id, codex_path, working_directory, interval_seconds=900, ends_at (ISO timestamp with offset), instructions_path, launch_agent_path, and launch_agent_label.
+`config.json` contains enabled, thread_id, parent_thread_id, codex_path, working_directory, interval_seconds=1800, ends_at (ISO timestamp with offset), instructions_path, launch_agent_path, and launch_agent_label.
 
 `scheduler.json` is owned by the timer and records queue times/errors and the pending check already alerted about. `run.json` is owned by the agent and contains numeric UTC epoch last_started_at and last_finished_at, status, and per-source results. The agent writes both timestamps after a complete attempt, including partial/blocked attempts. Separate files avoid overwriting each other's state.
 
-The timer queues at most one outstanding check. If the last queued check has no completion acknowledgement by the next 15-minute tick, relay one health alert and refrain from adding more checks until it finishes. A queue warning about failed resume is an error, even if the CLI exits zero. Expiry disables checks and unloads/removes this watcher's LaunchAgent. Pausing disables dispatch; stopping also removes its timer.
+The timer queues at most one outstanding check. If the last queued check has no completion acknowledgement by the next 30-minute tick, relay one health alert and refrain from adding more checks until it finishes. A queue warning about failed resume is an error, even if the CLI exits zero. Expiry disables checks and unloads/removes this watcher's LaunchAgent. Pausing disables dispatch; stopping also removes its timer.
 
 ## Limits and validation
 
