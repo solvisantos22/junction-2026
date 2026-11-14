@@ -735,12 +735,15 @@ function aim(aspect, wall, t, dt) {
   for (const f of [0.2, 0.4, 0.6, 0.8]) high = Math.max(high, (groundHeight(lerp(ex, pose.x, f), lerp(ey, pose.y, f)) * EXAG + 1.2 - chest * f) / (1 - f));
   chaseEye.set(ex - WIDTH / 2, high, DEPTH / 2 - ey);
   chaseLook.set(pose.x + cx * ahead - WIDTH / 2, chest, DEPTH / 2 - (pose.y + cy * ahead));
-  const k = smooth(0, 1, view.k), pull = view.snap ? 1 : 1 - Math.exp(-dt * lerp(5, 8, k));
-  view.eye.lerp(mapEye.lerp(chaseEye, k), pull); view.look.lerp(mapLook.lerp(chaseLook, k), pull);
+  const k = smooth(0, 1, view.k), w = story.frame ? smooth(0, 1, story.weight) : 0;
+  const pull = view.snap ? 1 : w > 1e-3 ? 1 - Math.exp(-dt * 2.4) : 1 - Math.exp(-dt * lerp(5, 8, k));
+  const eye = mapEye.lerp(chaseEye, k), look = mapLook.lerp(chaseLook, k);
+  if (w > 1e-3) { eye.lerp(story.frame.eye, w); look.lerp(story.frame.look, w); }   // story mode: the moment's own frame
+  view.eye.lerp(eye, pull); view.look.lerp(look, pull);
   view.snap = false;
-  camera.fov = lerp(MAP_FOV, CHASE_FOV, k); camera.near = lerp(4, 0.8, k); camera.aspect = aspect;
+  camera.fov = lerp(lerp(MAP_FOV, CHASE_FOV, k), MAP_FOV, w); camera.near = lerp(lerp(4, 0.8, k), 1, w); camera.aspect = aspect;
   camera.position.copy(view.eye); camera.lookAt(view.look); camera.updateProjectionMatrix();
-  scene.fog.density = lerp(0.00022, 0.0011, k);
+  scene.fog.density = lerp(lerp(0.00022, 0.0011, k), 0.0005, w);
   SKY.position.copy(camera.position);
 }
 
@@ -759,6 +762,11 @@ function buildBoard() {
   $('#src').textContent = `Recorded runs, not a simulation in this page: every path is what that rover really drove. Heights are drawn ${EXAG} times too tall so the relief reads; the ground beyond the map's edge line is scenery.`;
   $('#cast').innerHTML = RUNS.map(run => `<li class="${run.ref ? 'ref' : ''}"><span>${esc(short(run))}${kind(run)}</span><small>${esc(run.how || run.who)}</small></li>`).join('');
   $('#cast').classList.toggle('many', RUNS.length > 8);    // a long cast drops the small print so the card still fits
+  if (MOMENTS.length) {
+    $('#storybtn').hidden = false;
+    $('#storybtn').onclick = event => { event.stopPropagation(); startStory(); };
+    $('#title .help').textContent += ' · S story mode · N next moment';
+  }
   if (DATA.sites) {                                         // a campaign: one page per site, all in this file
     $('#sites').innerHTML = DATA.sites.map(site => `<a href="?site=${site.n}" class="${site.n === DATA.site ? 'on' : ''}">${esc(site.label)}<small>${esc(site.note)}</small></a>`).join('');
     $('#sites').onclick = event => event.stopPropagation();  // choosing a site is not starting the replay
@@ -797,6 +805,12 @@ function drawMarks() {
     g.fillStyle = css(RED); for (const wall of state.follow.track.walls) g.fillRect(x(wall.t) - 1.5, mid + 9, 3, 3);
   }
   g.fillStyle = css(RED); for (const run of RUNS) if (run.track.deadTick !== null) g.fillRect(x(run.track.deadTick) - 1.5, mid - 11, 3, 22);
+  for (const m of MOMENTS) {                                          // story mode's moments: small diamonds above the line
+    const cx = x(m.t), on = m === story.active;
+    g.fillStyle = tone(m) === 'gold' ? css(GOLD) : tone(m) === 'warn' ? '#ffd27a' : css(RED); g.globalAlpha = on ? 1 : 0.75;
+    g.beginPath(); g.moveTo(cx, 1); g.lineTo(cx + (on ? 5 : 3.5), mid - 13); g.lineTo(cx, mid - 9); g.lineTo(cx - (on ? 5 : 3.5), mid - 13); g.closePath(); g.fill();
+  }
+  g.globalAlpha = 1;
   g.fillStyle = css(INK); g.fillRect(0, mid - 1.5, x(state.t), 3);
   g.fillRect(x(state.t) - 1.5, mid - 10, 3, 20);
 }
@@ -857,6 +871,109 @@ const LINGER = Math.max(12, T * 0.1);
 function updateFeed(t) {
   const lines = FEED.filter(e => e.t <= t + 1e-6 && t - e.t < LINGER).slice(-4).reverse();
   setHtml(feed, lines.map(e => `<div style="opacity:${(Math.ceil(clamp(1.3 - (t - e.t) / LINGER, 0, 1) * 8) / 8).toFixed(2)}"><b class="${e.run.ref ? 'ref' : e.run === state.follow ? 'on' : ''}">${esc(short(e.run))}</b> <u>${e.text}</u><span>T${e.t}</span></div>`).join(''));
+}
+// ---------------------------------------------------------------- story mode
+// The page plays itself and stops at the moments that decided the scores (viewer/traverse_story.py computes them
+// from the replays): what a rover did, and what would have saved it or what the reference did instead.
+const MOMENTS = (DATA.moments || []).map(m => ({ ...m, run: RUNS.find(r => r.id === m.run) })).filter(m => m.run);
+const KIND = { lost: 'BATTERY FLAT', no_return: 'POINT OF NO RETURN', away: 'STRANDED', close: 'CLOSE CALL', steep: 'TOO STEEP',
+  misses: 'MISSED SAMPLE', ref_wait: 'THE REFERENCE PACES ITSELF', ref_home: 'THE REFERENCE HEADS HOME' };
+const HOLD = { lost: 7, no_return: 7, away: 5.5, close: 4.5, steep: 5, misses: 4.5, ref_wait: 6, ref_home: 5 };   // seconds on screen
+const NEAR = 14;                                                       // ticks before a moment at which the story slows and turns to it
+const story = { on: false, i: 0, hold: 0, active: null, weight: 0, frame: null, end: 0 };
+const DOTS = 700, dotSpacing = 2.4;
+const dots = new THREE.InstancedMesh(new THREE.CircleGeometry(0.5, 14).rotateX(-Math.PI / 2), flatMark(LIME, 0.95), DOTS);
+dots.material.depthTest = false; dots.renderOrder = 11; dots.count = 0; dots.frustumCulled = false; scene.add(dots);
+const wayLabel = new Label(36, 720); wayLabel.sprite.visible = false; scene.add(wayLabel.sprite);
+const pulse = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.25, 40).rotateX(-Math.PI / 2), flatMark(RED, 0.9));
+pulse.material.depthTest = false; pulse.renderOrder = 11; pulse.visible = false; scene.add(pulse);
+const card = document.createElement('div'); card.id = 'moment'; $('#stage').append(card);
+function dotted(path) {                                                // points every couple of metres along a path of grid steps
+  const out = [];
+  for (let i = 0; i < path.length - 1; i++) {
+    const [ax, ay] = path[i], [bx, by] = path[i + 1], n = Math.max(1, Math.round(Math.hypot(bx - ax, by - ay) / dotSpacing));
+    for (let k = 0; k < n; k++) out.push([lerp(ax, bx, k / n), lerp(ay, by, k / n)]);
+  }
+  out.push(path[path.length - 1]);
+  return out.slice(0, DOTS);
+}
+for (const m of MOMENTS) if (m.path) m.dots = dotted(m.path);
+const nextMoment = () => MOMENTS[story.i] || null;
+const tone = m => m.kind.startsWith('ref') ? 'gold' : m.kind === 'close' ? 'warn' : 'bad';
+function showCard(m) {
+  card.className = 'on ' + tone(m);
+  card.innerHTML = `<i>${KIND[m.kind]}<span>TICK ${m.t}</span></i><b class="${m.run.ref ? 'ref' : 'on'}">${esc(short(m.run))}</b><p>${esc(m.did)}</p>`
+    + (m.better ? `<p class="better"><u>${esc(m.better_title)}</u>${esc(m.better)}</p>` : '');
+}
+function hideCard() { card.className = card.className.replace(/\bon\b/, '').trim(); }
+// a frame for the camera that holds the rover and, when there is one, its way home
+function frameFor(m) {
+  const points = [m.focus, ...(m.path || [])];
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const [x, y] of points) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, radius = Math.max(30, Math.hypot(x1 - x0, y1 - y0) / 2 + 14);
+  const distance = radius / Math.tan(rad(MAP_FOV) / 2) * 1.1, look = P(cx, cy), lean = rad(50);
+  return { distance, look, eye: new THREE.Vector3(look.x, look.y + Math.sin(lean) * distance, look.z + Math.cos(lean) * distance) };
+}
+function startStory() {
+  story.on = true; story.active = null; story.end = 0;
+  story.i = MOMENTS.findIndex(m => m.t >= state.t - 1e-6); if (story.i < 0) story.i = MOMENTS.length;
+  if (state.t >= T) { seek(0); story.i = 0; }
+  showTitle(false); setCam('map'); setPlaying(true);
+}
+function stopStory() { story.on = false; story.active = null; hideCard(); }
+// before time moves: hold on a moment, or slow down and turn toward the next one
+function storyTick(dt) {
+  if (!story.on) return;
+  if (story.active) {
+    story.hold -= dt;
+    if (story.hold <= 0) { story.active = null; hideCard(); story.i++; setPlaying(true); }
+    return;
+  }
+  const m = nextMoment();
+  if (!m) {
+    setSpeed(4);
+    if (state.t >= T) {                                                // the result, then the next site of a campaign
+      story.end += dt;
+      if (story.end > 7 && DATA.sites && DATA.site < DATA.sites.length) location.href = `?site=${DATA.site + 1}#story`;
+    }
+    return;
+  }
+  const ahead = m.t - state.t;
+  if (ahead <= 1e-6) {
+    seek(m.t); setPlaying(false); story.active = m; story.hold = HOLD[m.kind] || 5; story.frame = frameFor(m);
+    if (!m.run.ref) state.follow = m.run;
+    showCard(m);
+    return;
+  }
+  if (!state.playing) setPlaying(true);
+  setSpeed(ahead < 4 ? 1 : ahead < NEAR ? 2 : 4);
+  if (ahead < NEAR) { story.frame = frameFor(m); if (!m.run.ref) state.follow = m.run; }
+}
+// the way home drawing itself while a moment holds, and a ring where it happened
+function drawStory(t, S, wall) {
+  const m = story.active, held = m ? (HOLD[m.kind] || 5) - story.hold : 0;
+  const show = m && m.dots ? m.dots.length : 0, drawn = Math.min(show, Math.ceil(show * smooth(0.2, 1.8, held)));
+  dots.count = drawn;
+  if (drawn) {
+    dots.material.color.setHex(m.open ? LIME : RED);
+    const matrix = new THREE.Matrix4(), size = new THREE.Vector3(S * 0.85, 1, S * 0.85), turn = new THREE.Quaternion();
+    for (let k = 0; k < drawn; k++) { const [x, y] = m.dots[k]; matrix.compose(P(x, y, 0.6), turn, size); dots.setMatrixAt(k, matrix); }
+    dots.instanceMatrix.needsUpdate = true;
+  }
+  wayLabel.sprite.visible = !!(m && m.dots && held > 1.2);
+  if (wayLabel.sprite.visible) {
+    const metres = Math.round(Math.hypot(m.focus[0] - BX, m.focus[1] - BY));
+    wayLabel.set(`WAY HOME ${m.open ? 'OPEN' : 'CLOSED'} · ${metres} M`, css(m.open ? LIME : RED));
+    const [mx, my] = m.dots[Math.floor(m.dots.length * 0.55)];
+    wayLabel.sprite.position.copy(P(mx, my, 2.5 * S));
+  }
+  pulse.visible = !!m;
+  if (m) {
+    const pose = m.run.track.at(t), beat = (wall * 1.4) % 1;
+    pulse.position.copy(P(pose.x, pose.y, 0.5)); pulse.scale.setScalar(S * lerp(1.2, 3.4, beat));
+    pulse.material.color.setHex(tone(m) === 'gold' ? GOLD : tone(m) === 'warn' ? GOLD : RED); pulse.material.opacity = 0.9 * (1 - beat);
+  }
 }
 const START_CARD = Math.max(6, T * 0.028);
 // The end card: the reference's score against the best other run's, and why that run's score is what it is.
@@ -939,8 +1056,15 @@ window.addEventListener('keydown', event => {
   if (event.metaKey || event.ctrlKey || event.altKey) return;
   const key = event.key, step = event.shiftKey ? 10 : 1;
   if (DATA.sites && DATA.sites.some(site => String(site.n) === key) && +key !== DATA.site) { location.search = `?site=${key}`; return; }
+  if ((key === 's' || key === 'S') && MOMENTS.length) { if (story.on) stopStory(); else startStory(); return; }
   if (!title.classList.contains('gone')) { if (key === 'Enter' || key === ' ') { event.preventDefault(); showTitle(false); setPlaying(true); } else if (key === 'f' || key === 'F') toggleFull(); return; }
-  if (key === ' ' || key === 'Enter') { event.preventDefault(); if (state.t >= T) seek(0); setPlaying(!state.playing); }
+  if (key === 'n' || key === 'N') {
+    if (story.on && story.active) { story.hold = 0; return; }
+    const m = MOMENTS.find(item => item.t > state.t + 1e-6);
+    if (m) { seek(Math.max(0, m.t - NEAR)); if (story.on) story.i = MOMENTS.indexOf(m); }
+    return;
+  }
+  if (key === ' ' || key === 'Enter') { event.preventDefault(); if (story.on) { stopStory(); setPlaying(false); return; } if (state.t >= T) seek(0); setPlaying(!state.playing); }
   else if (key === 'ArrowRight') { event.preventDefault(); setPlaying(false); seek(Math.floor(state.t + 1e-6) + step); }
   else if (key === 'ArrowLeft') { event.preventDefault(); setPlaying(false); seek(Math.ceil(state.t - 1e-6) - step); }
   else if (key === '-' || key === '_') setSpeed(state.speed - 1);
@@ -955,17 +1079,24 @@ window.addEventListener('resize', fitUi);
 let last = performance.now(), shown = -1;
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000), wall = now / 1000; last = now;
+  storyTick(dt);
   if (state.playing) {
     let next = state.t + dt * SPEEDS[state.speed];
+    const coming = story.on && !story.active ? nextMoment() : null;
+    if (coming && next > coming.t) next = coming.t;
     if (next >= T) { next = T; setPlaying(false); }
     state.t = next;
   }
+  const near = story.on && (story.active || (nextMoment() && nextMoment().t - state.t < NEAR));
+  story.weight = clamp(story.weight + (near ? dt / 1.1 : -dt / 1.4), 0, 1);
   const t = state.t, want = state.cam === 'chase' ? 1 : 0;
   if (Math.abs(t - shown) > 3) view.snap = true;                        // a jump in time: the camera cuts instead of flying
   shown = t;
   view.k = clamp(view.k + Math.sign(want - view.k) * dt / 1.1, Math.min(view.k, want), Math.max(view.k, want));
-  const chase = smooth(0, 1, view.k), S = lerp(S_MAP, S_CHASE, chase);
-  setDaylight(t); apply(t, wall, S, chase);
+  const chase = smooth(0, 1, view.k);
+  let S = lerp(S_MAP, S_CHASE, chase);
+  if (story.frame && story.weight > 0) S = lerp(S, Math.max(S_CHASE, S_MAP * story.frame.distance / overview(view.aspect || 1.6).distance), smooth(0, 1, story.weight));
+  setDaylight(t); apply(t, wall, S, chase); drawStory(t, S, wall);
   // viewport: everything left of the standings and under the top strip
   const s = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--s')) || 1;
   const W = window.innerWidth, Hh = window.innerHeight, barH = Math.round(42 * s), boardW = Math.round(340 * s);
@@ -996,6 +1127,7 @@ function readHash() {
   if (words.includes('map')) { setCam('map'); view.k = 0; view.snap = true; }
   if (value('t') !== null) { showTitle(false); setPlaying(false); seek(parseFloat(value('t')) || 0); }
   if (words.includes('auto')) { showTitle(false); setPlaying(true); }
+  if (words.includes('story') && MOMENTS.length) startStory();
 }
 window.addEventListener('hashchange', readHash);
 fitUi(); buildBoard();

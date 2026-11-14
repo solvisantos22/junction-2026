@@ -28,8 +28,17 @@ Nothing is simulated in the page: every path is what that rover really drove in 
 | - = | slower, faster (1× is one tick a second; it opens at the speed that plays the mission in about 70 seconds) |
 | F | full screen |
 | Esc | back to the opening card |
+| S | story mode on or off |
+| N | the next moment |
+| 1 2 3 | another site of a campaign (`viewer/traverse-campaign.html`) |
 
-Adding `#auto` to the address starts it by itself. `#t=137` opens it paused at tick 137, so a moment can be linked; `#t=137&chase` opens it in the chase camera and `&follow=<run folder or label>` picks the run to follow.
+Adding `#auto` to the address starts it by itself. `#t=137` opens it paused at tick 137, so a moment can be linked; `#t=137&chase` opens it in the chase camera and `&follow=<run folder or label>` picks the run to follow. `#story` starts story mode.
+
+## Story mode
+
+The page plays itself and stops at the moments that decided the scores. It slows down as one comes, flies the camera to it, and holds a card for a few seconds: what the rover did, and what would have saved it or what the reference did instead. Where a battery ran flat or the way home closed, the cheapest way home is drawn on the ground, green while it was still open, red once it was not. On a campaign page it goes on to the next site by itself, so `traverse-campaign.html?site=1#story` plays all three.
+
+The moments come from the evaluator's replays, the hidden truth included (`viewer/traverse_story.py`): a battery run flat, the point of no return (the last tick from which the lander was still in reach, waiting for the sun when short, as `tools/traverse_farm/analysis.py` asks it), a rover that ended away from the lander, a battery under 3%, three or more stops on steep ground, three or more missed samples, and two of the reference's own choices: waiting for the sun, and turning for home. The check of the way home is generous to the rover: it ignores the command delay, so "the way home was open" means physically possible, not what the rover's program could have known.
 
 ## Rebuild
 
