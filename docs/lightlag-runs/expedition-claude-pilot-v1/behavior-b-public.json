@@ -1,0 +1,705 @@
+{
+  "assignment_id": "b-public",
+  "delivered_events": [
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t2",
+        "type": "sample_taken"
+      },
+      "packet_tick": 5,
+      "public_call_n": 7,
+      "received_by_tick": 8
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r1",
+        "target_id": "t2",
+        "type": "region_quality"
+      },
+      "packet_tick": 5,
+      "public_call_n": 7,
+      "received_by_tick": 8
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t1",
+        "type": "sample_taken"
+      },
+      "packet_tick": 7,
+      "public_call_n": 9,
+      "received_by_tick": 10
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r1",
+        "target_id": "t1",
+        "type": "region_quality"
+      },
+      "packet_tick": 7,
+      "public_call_n": 9,
+      "received_by_tick": 10
+    },
+    {
+      "event": {
+        "target": {
+          "appear_tick": 10,
+          "base_value": 3,
+          "deadline_tick": 26,
+          "id": "d1",
+          "late_value": 0.75,
+          "region": "r2",
+          "value": 3,
+          "x": 29.62,
+          "y": 21.71
+        },
+        "type": "target_discovered"
+      },
+      "packet_tick": 10,
+      "public_call_n": 11,
+      "received_by_tick": 13
+    },
+    {
+      "event": {
+        "reason": "no_unsampled_target_in_range",
+        "type": "sample_failed"
+      },
+      "packet_tick": 15,
+      "public_call_n": 16,
+      "received_by_tick": 20
+    },
+    {
+      "event": {
+        "reason": "no_unsampled_target_in_range",
+        "type": "sample_failed"
+      },
+      "packet_tick": 18,
+      "public_call_n": 18,
+      "received_by_tick": 23
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "d1",
+        "type": "sample_taken"
+      },
+      "packet_tick": 22,
+      "public_call_n": 19,
+      "received_by_tick": 28
+    },
+    {
+      "event": {
+        "quality": "poor",
+        "region": "r2",
+        "target_id": "d1",
+        "type": "region_quality"
+      },
+      "packet_tick": 22,
+      "public_call_n": 19,
+      "received_by_tick": 28
+    },
+    {
+      "event": {
+        "target": {
+          "appear_tick": 22,
+          "base_value": 3,
+          "deadline_tick": 44,
+          "id": "d2",
+          "late_value": 0.75,
+          "region": "r3",
+          "value": 3,
+          "x": 12.54,
+          "y": 23.38
+        },
+        "type": "target_discovered"
+      },
+      "packet_tick": 22,
+      "public_call_n": 19,
+      "received_by_tick": 28
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t4",
+        "type": "sample_taken"
+      },
+      "packet_tick": 24,
+      "public_call_n": 19,
+      "received_by_tick": 28
+    },
+    {
+      "event": {
+        "quality": "poor",
+        "region": "r2",
+        "target_id": "t4",
+        "type": "region_quality"
+      },
+      "packet_tick": 24,
+      "public_call_n": 19,
+      "received_by_tick": 28
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t3",
+        "type": "sample_taken"
+      },
+      "packet_tick": 26,
+      "public_call_n": 20,
+      "received_by_tick": 30
+    },
+    {
+      "event": {
+        "quality": "poor",
+        "region": "r2",
+        "target_id": "t3",
+        "type": "region_quality"
+      },
+      "packet_tick": 26,
+      "public_call_n": 20,
+      "received_by_tick": 30
+    }
+  ],
+  "energy_accounting": {
+    "drive_energy_from_balance": 48.35,
+    "failed_sample_energy": 6.0,
+    "horizon_battery": 0.65,
+    "idle_energy": 30.0,
+    "initial_battery": 100.0,
+    "inspection_energy": 0.0,
+    "last_delivered_packet": {
+      "alive": true,
+      "battery": 2.15,
+      "events": [],
+      "heading_deg": 128.7,
+      "position": [
+        20.1661882299,
+        19.6321585129
+      ],
+      "received_tick": 60,
+      "sampled_targets": [
+        "d1",
+        "t1",
+        "t2",
+        "t3",
+        "t4"
+      ],
+      "terrain": "bedrock",
+      "tick": 57,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    "reference_horizon_battery": 3.004709,
+    "sample_attempt_energy": 21.0
+  },
+  "interpretation": "A small physical-control/resource outcome in a disclosed-quality mission. Two sampling misses and a tight final energy margin are observed, but the lone0.02 deficit is not evidence of an information-allocation weakness or a robust strong-model difficulty gap.",
+  "limits": [
+    "One frozen assignment; no general model capability or unseen-map claim.",
+    "Scripted references are bounded heuristics, not optimal bounds.",
+    "No task, simulator, reference, model or prompt changed after these results."
+  ],
+  "matched_reference_comparison": {
+    "model_minus_reference_normalized": -0.02,
+    "model_minus_reference_raw": -0.4,
+    "per_target_credited_value_difference": {
+      "t5": -0.4
+    },
+    "reference_normalized_score": 0.30999999999999994,
+    "reference_raw_score": 6.199999999999999,
+    "reference_samples": [
+      {
+        "base_credited_value": 2,
+        "base_value": 2,
+        "credited_value": 2.0,
+        "on_time": true,
+        "quality": "rich",
+        "quality_multiplier": 1.0,
+        "region": "r1",
+        "target_id": "t1",
+        "tick": 6
+      },
+      {
+        "base_credited_value": 2,
+        "base_value": 2,
+        "credited_value": 2.0,
+        "on_time": true,
+        "quality": "rich",
+        "quality_multiplier": 1.0,
+        "region": "r1",
+        "target_id": "t2",
+        "tick": 8
+      },
+      {
+        "base_credited_value": 3,
+        "base_value": 3,
+        "credited_value": 0.6000000000000001,
+        "on_time": true,
+        "quality": "poor",
+        "quality_multiplier": 0.2,
+        "region": "r2",
+        "target_id": "t3",
+        "tick": 22
+      },
+      {
+        "base_credited_value": 3,
+        "base_value": 3,
+        "credited_value": 0.6000000000000001,
+        "on_time": true,
+        "quality": "poor",
+        "quality_multiplier": 0.2,
+        "region": "r2",
+        "target_id": "t4",
+        "tick": 26
+      },
+      {
+        "base_credited_value": 2,
+        "base_value": 2,
+        "credited_value": 0.4,
+        "on_time": true,
+        "quality": "poor",
+        "quality_multiplier": 0.2,
+        "region": "r3",
+        "target_id": "t5",
+        "tick": 18
+      },
+      {
+        "base_credited_value": 3,
+        "base_value": 3,
+        "credited_value": 0.6000000000000001,
+        "on_time": true,
+        "quality": "poor",
+        "quality_multiplier": 0.2,
+        "region": "r2",
+        "target_id": "d1",
+        "tick": 24
+      }
+    ]
+  },
+  "observations": [
+    {
+      "claim": "All qualities were disclosed at the start: r1 rich, r2 and r3 poor. The model made no inspections. Any shortfall here cannot be attributed to failing to acquire the hidden region qualities.",
+      "evidence": {
+        "inspection_commands": 0,
+        "public_call_n": 1
+      }
+    },
+    {
+      "claim": "The initial batch sampled t2 and t1 successfully at ticks5 and7. The successful subsequent sequence was d1,t4,t3 at ticks22,24,26, all before their published deadlines.",
+      "evidence": {
+        "late_successful_samples": 0,
+        "successful_sample_sequence": [
+          "t2",
+          "t1",
+          "d1",
+          "t4",
+          "t3"
+        ],
+        "successful_sample_ticks": [
+          5,
+          7,
+          22,
+          24,
+          26
+        ]
+      }
+    },
+    {
+      "claim": "Two sample attempts at ticks15 and18 failed with no_unsampled_target_in_range. Their failure packets were received by ticks20 and23. Both charged the published3energy sampling cost.",
+      "evidence": {
+        "failed_sample_energy": 6,
+        "failure_packet_ticks": [
+          15,
+          18
+        ],
+        "failure_public_call_ns": [
+          16,
+          18
+        ]
+      }
+    },
+    {
+      "claim": "Public drive packets at ticks12 and14 reported sand terrain, visual-odometry distances3.9252469941 and2.073773092 for5.0 and2.7 wheel metres, and corresponding drive costs9.0 and5.4 from consecutive battery packets after removing idle. These are observable progress/cost differences, not a claim about what the model reasoned.",
+      "evidence": {
+        "commanded_wheel_metres": [
+          5.0,
+          2.7
+        ],
+        "drive_energy": [
+          9.0,
+          5.4
+        ],
+        "drive_ticks": [
+          12,
+          14
+        ],
+        "reported_visual_odometry_metres": [
+          3.9252469941,
+          2.073773092
+        ]
+      }
+    },
+    {
+      "claim": "Return commands executed at ticks34,44 and54; the model survived and returned to base with0.65energy. Idle30, seven sample attempts21 and driving48.35 account for99.35energy.",
+      "evidence": {
+        "horizon_battery": 0.65,
+        "return_command_execute_ticks": [
+          34,
+          44,
+          54
+        ],
+        "return_command_metres": [
+          5.0,
+          3.4,
+          0.7
+        ]
+      }
+    },
+    {
+      "claim": "The exact score deficit is the reference's additional on-time t5 sample worth0.4raw (.02normalized). The five shared targets have identical credited values. No successful model sample was late; no safety stop or death reduced the score. This does not prove that either failed sample caused the omitted target.",
+      "evidence": {
+        "model_minus_reference_normalized": -0.02,
+        "reference_extra_sample_tick": 18,
+        "reference_extra_target": "t5",
+        "t5_credited_value": 0.4,
+        "t5_deadline_tick": 27
+      }
+    },
+    {
+      "claim": "Both normalized scores are low partly because this disclosed world contains only7.2 full-on-time science before route/resource constraints, while the fixed public denominator is20. The observed gap is0.4raw, not a large failure inferred from the model's0.29 score alone.",
+      "evidence": {
+        "model_raw_score": 5.8,
+        "realized_science_upper_total": 7.2,
+        "reference_raw_score": 6.2
+      }
+    },
+    {
+      "claim": "All exported action calls were direct expedition MCP calls; no script, shell, or code-execution tool call is observed.",
+      "evidence": {
+        "completed_responses": 19,
+        "public_tool_calls": 29
+      }
+    }
+  ],
+  "outcome": {
+    "alive": true,
+    "at_base": true,
+    "censored_reason": null,
+    "completed_responses": 19,
+    "harbor_exception": null,
+    "model": {
+      "model_name": "anthropic/claude-opus-5-5",
+      "name": "opencode",
+      "version": "1.19.5"
+    },
+    "normalized_score": 0.2899999999999999,
+    "raw_score": 5.799999999999999,
+    "reported_cost_usd": 0.45561
+  },
+  "protected_samples": [
+    {
+      "base_credited_value": 2,
+      "base_value": 2,
+      "credited_value": 2.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r1",
+      "target_id": "t1",
+      "tick": 7
+    },
+    {
+      "base_credited_value": 2,
+      "base_value": 2,
+      "credited_value": 2.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r1",
+      "target_id": "t2",
+      "tick": 5
+    },
+    {
+      "base_credited_value": 3,
+      "base_value": 3,
+      "credited_value": 0.6000000000000001,
+      "on_time": true,
+      "quality": "poor",
+      "quality_multiplier": 0.2,
+      "region": "r2",
+      "target_id": "t3",
+      "tick": 26
+    },
+    {
+      "base_credited_value": 3,
+      "base_value": 3,
+      "credited_value": 0.6000000000000001,
+      "on_time": true,
+      "quality": "poor",
+      "quality_multiplier": 0.2,
+      "region": "r2",
+      "target_id": "t4",
+      "tick": 24
+    },
+    {
+      "base_credited_value": 3,
+      "base_value": 3,
+      "credited_value": 0.6000000000000001,
+      "on_time": true,
+      "quality": "poor",
+      "quality_multiplier": 0.2,
+      "region": "r2",
+      "target_id": "d1",
+      "tick": 22
+    }
+  ],
+  "public_actions": {
+    "acknowledged_commands": [
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 237.27,
+          "metres": 4.29
+        },
+        "command_id": 1,
+        "execute_tick": 4,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 2,
+        "execute_tick": 5,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 292.1,
+          "metres": 2.47
+        },
+        "command_id": 3,
+        "execute_tick": 6,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 4,
+        "execute_tick": 7,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 59.1,
+          "metres": 5
+        },
+        "command_id": 5,
+        "execute_tick": 9,
+        "sent_tick": 5
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 0,
+          "metres": 5
+        },
+        "command_id": 6,
+        "execute_tick": 12,
+        "sent_tick": 8
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 2,
+          "metres": 2.7
+        },
+        "command_id": 7,
+        "execute_tick": 14,
+        "sent_tick": 10
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 8,
+        "execute_tick": 15,
+        "sent_tick": 10
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 71.1,
+          "metres": 3.09
+        },
+        "command_id": 9,
+        "execute_tick": 17,
+        "sent_tick": 13
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 10,
+        "execute_tick": 18,
+        "sent_tick": 13
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 47,
+          "metres": 2
+        },
+        "command_id": 11,
+        "execute_tick": 21,
+        "sent_tick": 17
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 12,
+        "execute_tick": 22,
+        "sent_tick": 17
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 151.8,
+          "metres": 2.49
+        },
+        "command_id": 13,
+        "execute_tick": 23,
+        "sent_tick": 17
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 14,
+        "execute_tick": 24,
+        "sent_tick": 17
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 289,
+          "metres": 4.41
+        },
+        "command_id": 15,
+        "execute_tick": 25,
+        "sent_tick": 20
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 16,
+        "execute_tick": 26,
+        "sent_tick": 20
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 179,
+          "metres": 5
+        },
+        "command_id": 17,
+        "execute_tick": 34,
+        "sent_tick": 30
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 178.6,
+          "metres": 3.4
+        },
+        "command_id": 18,
+        "execute_tick": 44,
+        "sent_tick": 40
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 128.7,
+          "metres": 0.7
+        },
+        "command_id": 19,
+        "execute_tick": 54,
+        "sent_tick": 50
+      }
+    ],
+    "command_count": 19,
+    "command_counts": {
+      "drive": 12,
+      "sample": 7
+    },
+    "commanded_drive_metres": 40.55,
+    "initial_public_qualities": {
+      "r1": "rich",
+      "r2": "poor",
+      "r3": "poor"
+    },
+    "public_tool_errors": 0,
+    "script_or_terminal_calls_observed": false,
+    "tool_call_count": 29,
+    "tool_counts": {
+      "advance": 16,
+      "map": 1,
+      "rules": 1,
+      "telemetry_log": 1,
+      "uplink": 10
+    },
+    "trajectory_tool_names": [
+      "expedition_advance",
+      "expedition_map",
+      "expedition_rules",
+      "expedition_telemetry_log",
+      "expedition_uplink"
+    ]
+  },
+  "realized_science_upper_total": {
+    "definition": "Sum of all eight revealed targets at their disclosed quality and full on-time value, before route/time/energy constraints; not a demonstrated achievable optimum.",
+    "model_fraction_of_this_upper_total": 0.8055555555555555,
+    "public_normalization_denominator": 20,
+    "reference_fraction_of_this_upper_total": 0.861111111111111,
+    "value": 7.2
+  },
+  "sample_failures": [
+    {
+      "event": {
+        "reason": "no_unsampled_target_in_range",
+        "type": "sample_failed"
+      },
+      "packet_tick": 15,
+      "public_call_n": 16,
+      "received_by_tick": 20
+    },
+    {
+      "event": {
+        "reason": "no_unsampled_target_in_range",
+        "type": "sample_failed"
+      },
+      "packet_tick": 18,
+      "public_call_n": 18,
+      "received_by_tick": 23
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Observed public actions/telemetry, protected grading and measured usage; no private messages or inferred internal reasoning.",
+  "source_sha256": {
+    "runs/matched-reference-b-public/artifacts/evaluator/replay.json": "dc856e0447451d68c773a68e373579e2988809cdbee0d085263e03e08e03d7ca",
+    "runs/matched-reference-b-public/artifacts/evaluator/result.json": "5a7b97b62ae33ad4debe019ebdd3ba742370a7b930c71cef5dc54dcfa9e780d8",
+    "runs/model-b-public/agent/trajectory-public.json": "0e96475774649accaf568d9d89c184e6d235e358f9ae7c08f0a772f202e7426f",
+    "runs/model-b-public/artifacts/evaluator/replay.json": "810750f19bf3021230012405511e64c0a95c81d7dca2a84d792cb88a6b1a3c22",
+    "runs/model-b-public/artifacts/evaluator/result.json": "198de2a9ead436828721f66d52a4329701e9fb709662df306836d12041bfa393",
+    "runs/model-b-public/artifacts/evaluator/transcript.jsonl": "5608a977159ec2207acc62b2faf20408e7b54fb2592c725abe3d5b00d01ab4a7",
+    "runs/model-b-public/monitor-b-public.json": "66131555c77df678f91ce44ac6b1edc011e0ba1406cf8072dfb0f75e2e47df74",
+    "runs/model-b-public/result.json": "305518bccb9c71c71a87508ced2e019c7bc46d8f479222e1a45990ac195c1d31"
+  }
+}

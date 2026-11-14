@@ -1,0 +1,676 @@
+{
+  "assignment_id": "a-public",
+  "delivered_events": [
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t1",
+        "type": "sample_taken"
+      },
+      "packet_tick": 5,
+      "public_call_n": 5,
+      "received_by_tick": 8
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r1",
+        "target_id": "t1",
+        "type": "region_quality"
+      },
+      "packet_tick": 5,
+      "public_call_n": 5,
+      "received_by_tick": 8
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t2",
+        "type": "sample_taken"
+      },
+      "packet_tick": 7,
+      "public_call_n": 7,
+      "received_by_tick": 10
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r1",
+        "target_id": "t2",
+        "type": "region_quality"
+      },
+      "packet_tick": 7,
+      "public_call_n": 7,
+      "received_by_tick": 10
+    },
+    {
+      "event": {
+        "target": {
+          "appear_tick": 10,
+          "base_value": 3,
+          "deadline_tick": 26,
+          "id": "d1",
+          "late_value": 0.75,
+          "region": "r2",
+          "value": 3,
+          "x": 25.02,
+          "y": 26.22
+        },
+        "type": "target_discovered"
+      },
+      "packet_tick": 10,
+      "public_call_n": 10,
+      "received_by_tick": 15
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t5",
+        "type": "sample_taken"
+      },
+      "packet_tick": 17,
+      "public_call_n": 12,
+      "received_by_tick": 20
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r3",
+        "target_id": "t5",
+        "type": "region_quality"
+      },
+      "packet_tick": 17,
+      "public_call_n": 12,
+      "received_by_tick": 20
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t6",
+        "type": "sample_taken"
+      },
+      "packet_tick": 20,
+      "public_call_n": 13,
+      "received_by_tick": 23
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r3",
+        "target_id": "t6",
+        "type": "region_quality"
+      },
+      "packet_tick": 20,
+      "public_call_n": 13,
+      "received_by_tick": 23
+    },
+    {
+      "event": {
+        "target": {
+          "appear_tick": 22,
+          "base_value": 3,
+          "deadline_tick": 44,
+          "id": "d2",
+          "late_value": 0.75,
+          "region": "r3",
+          "value": 3,
+          "x": 11.98,
+          "y": 18.91
+        },
+        "type": "target_discovered"
+      },
+      "packet_tick": 22,
+      "public_call_n": 14,
+      "received_by_tick": 25
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "d2",
+        "type": "sample_taken"
+      },
+      "packet_tick": 30,
+      "public_call_n": 17,
+      "received_by_tick": 33
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r3",
+        "target_id": "d2",
+        "type": "region_quality"
+      },
+      "packet_tick": 30,
+      "public_call_n": 17,
+      "received_by_tick": 33
+    },
+    {
+      "event": {
+        "on_time": false,
+        "target_id": "t4",
+        "type": "sample_taken"
+      },
+      "packet_tick": 40,
+      "public_call_n": 20,
+      "received_by_tick": 43
+    },
+    {
+      "event": {
+        "quality": "poor",
+        "region": "r2",
+        "target_id": "t4",
+        "type": "region_quality"
+      },
+      "packet_tick": 40,
+      "public_call_n": 20,
+      "received_by_tick": 43
+    }
+  ],
+  "energy_accounting": {
+    "drive_energy_from_balance": 45.8,
+    "failed_sample_energy": 0.0,
+    "horizon_battery": 6.2,
+    "idle_energy": 30.0,
+    "initial_battery": 100.0,
+    "inspection_energy": 0.0,
+    "last_delivered_packet": {
+      "alive": true,
+      "battery": 8.08,
+      "events": [],
+      "heading_deg": 253.7,
+      "position": [
+        20.242938926,
+        19.9404031942
+      ],
+      "received_tick": 60,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5",
+        "t6"
+      ],
+      "terrain": "bedrock",
+      "tick": 57,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    "reference_horizon_battery": 5.913053,
+    "sample_attempt_energy": 18.0
+  },
+  "interpretation": "The model outperformed the fixed reference again. There was one observed deadline miss, but the episode does not establish a strong-model difficulty gap.",
+  "limits": [
+    "One frozen assignment; no general model capability or unseen-map claim.",
+    "Scripted references are bounded heuristics, not optimal bounds.",
+    "No task, simulator, reference, model or prompt changed after these results."
+  ],
+  "matched_reference_comparison": {
+    "model_minus_reference_normalized": 0.0975,
+    "model_minus_reference_raw": 1.95,
+    "per_target_credited_value_difference": {
+      "d2": 3.0,
+      "t3": -0.6,
+      "t4": -0.45
+    },
+    "reference_normalized_score": 0.45999999999999996,
+    "reference_raw_score": 9.2,
+    "reference_samples": [
+      {
+        "base_credited_value": 2,
+        "base_value": 2,
+        "credited_value": 2.0,
+        "on_time": true,
+        "quality": "rich",
+        "quality_multiplier": 1.0,
+        "region": "r1",
+        "target_id": "t1",
+        "tick": 8
+      },
+      {
+        "base_credited_value": 2,
+        "base_value": 2,
+        "credited_value": 2.0,
+        "on_time": true,
+        "quality": "rich",
+        "quality_multiplier": 1.0,
+        "region": "r1",
+        "target_id": "t2",
+        "tick": 6
+      },
+      {
+        "base_credited_value": 3,
+        "base_value": 3,
+        "credited_value": 0.6000000000000001,
+        "on_time": true,
+        "quality": "poor",
+        "quality_multiplier": 0.2,
+        "region": "r2",
+        "target_id": "t3",
+        "tick": 13
+      },
+      {
+        "base_credited_value": 3,
+        "base_value": 3,
+        "credited_value": 0.6000000000000001,
+        "on_time": true,
+        "quality": "poor",
+        "quality_multiplier": 0.2,
+        "region": "r2",
+        "target_id": "t4",
+        "tick": 11
+      },
+      {
+        "base_credited_value": 2,
+        "base_value": 2,
+        "credited_value": 2.0,
+        "on_time": true,
+        "quality": "rich",
+        "quality_multiplier": 1.0,
+        "region": "r3",
+        "target_id": "t5",
+        "tick": 19
+      },
+      {
+        "base_credited_value": 2,
+        "base_value": 2,
+        "credited_value": 2.0,
+        "on_time": true,
+        "quality": "rich",
+        "quality_multiplier": 1.0,
+        "region": "r3",
+        "target_id": "t6",
+        "tick": 16
+      }
+    ]
+  },
+  "observations": [
+    {
+      "claim": "Qualities were disclosed as r1 rich, r2 poor, r3 rich; no inspections were used. Initial sampling succeeded on t1 at5 and t2 at7.",
+      "evidence": {
+        "inspection_commands": 0,
+        "sample_ticks": [
+          5,
+          7
+        ]
+      }
+    },
+    {
+      "claim": "The model collected the rich r3 targets t5,t6,d2 at ticks17,20,30, all on time. d2 appeared in a public discovery packet at22, was seen by25, and was sampled after the next uplink.",
+      "evidence": {
+        "d2_discovery_public_call_n": 14,
+        "d2_uplink_public_call_n": 15,
+        "r3_sample_ticks": [
+          17,
+          20,
+          30
+        ]
+      }
+    },
+    {
+      "claim": "It then sampled poor-region t4 at tick40, one tick after its public deadline39, earning0.15 rather than its full on-time0.6. The remaining five samples were on time and no samples failed. This reports lateness without inferring whether it was intentional.",
+      "evidence": {
+        "credited_value": 0.15,
+        "deadline_tick": 39,
+        "failed_samples": 0,
+        "late_target": "t4",
+        "sample_tick": 40
+      }
+    },
+    {
+      "claim": "It returned alive/home with6.2energy: idle30 +six samples18 +driving45.8 =93.8 spent. A final small drive executed at59 after the most recent packet ultimately delivered by the horizon, and the protected grade confirms the result.",
+      "evidence": {
+        "horizon_battery": 6.2,
+        "last_command_execute_tick": 59,
+        "last_command_metres": 0.38
+      }
+    },
+    {
+      "claim": "Compared with a-hidden, it collected the same five rich targets plus late t4, adding0.15raw/.0075normalized. This single paired outcome is not a causal estimate of the benefit of disclosure; timings, routes and inspection actions also differ.",
+      "evidence": {
+        "a_hidden_raw_score": 11.0,
+        "a_hidden_reward": 0.55,
+        "a_public_raw_score": 11.15,
+        "a_public_reward": 0.5575
+      }
+    },
+    {
+      "claim": "It exceeds the fixed public reference9.2raw/.46 by1.95raw/.0975. Exact differences are +3 for d2, -0.6 for omitted t3, and -0.45 for t4's late credit.",
+      "evidence": {
+        "d2": 3.0,
+        "t3": -0.6,
+        "t4": -0.45
+      }
+    },
+    {
+      "claim": "All exported action calls were direct expedition MCP tools; no scripting was observed.",
+      "evidence": {
+        "completed_responses": 18,
+        "public_tool_calls": 26
+      }
+    }
+  ],
+  "outcome": {
+    "alive": true,
+    "at_base": true,
+    "censored_reason": null,
+    "completed_responses": 18,
+    "harbor_exception": null,
+    "model": {
+      "model_name": "anthropic/claude-opus-5-5",
+      "name": "opencode",
+      "version": "1.19.5"
+    },
+    "normalized_score": 0.5575,
+    "raw_score": 11.15,
+    "reported_cost_usd": 0.49371660000000006
+  },
+  "protected_samples": [
+    {
+      "base_credited_value": 2,
+      "base_value": 2,
+      "credited_value": 2.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r1",
+      "target_id": "t1",
+      "tick": 5
+    },
+    {
+      "base_credited_value": 2,
+      "base_value": 2,
+      "credited_value": 2.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r1",
+      "target_id": "t2",
+      "tick": 7
+    },
+    {
+      "base_credited_value": 0.75,
+      "base_value": 3,
+      "credited_value": 0.15000000000000002,
+      "on_time": false,
+      "quality": "poor",
+      "quality_multiplier": 0.2,
+      "region": "r2",
+      "target_id": "t4",
+      "tick": 40
+    },
+    {
+      "base_credited_value": 2,
+      "base_value": 2,
+      "credited_value": 2.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r3",
+      "target_id": "t5",
+      "tick": 17
+    },
+    {
+      "base_credited_value": 2,
+      "base_value": 2,
+      "credited_value": 2.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r3",
+      "target_id": "t6",
+      "tick": 20
+    },
+    {
+      "base_credited_value": 3,
+      "base_value": 3,
+      "credited_value": 3.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r3",
+      "target_id": "d2",
+      "tick": 30
+    }
+  ],
+  "public_actions": {
+    "acknowledged_commands": [
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 316.2,
+          "metres": 4.24
+        },
+        "command_id": 1,
+        "execute_tick": 4,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 2,
+        "execute_tick": 5,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 310.6,
+          "metres": 2.91
+        },
+        "command_id": 3,
+        "execute_tick": 6,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 4,
+        "execute_tick": 7,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 160,
+          "metres": 5
+        },
+        "command_id": 5,
+        "execute_tick": 14,
+        "sent_tick": 10
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 189.7,
+          "metres": 5
+        },
+        "command_id": 6,
+        "execute_tick": 15,
+        "sent_tick": 10
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 189.7,
+          "metres": 0.78
+        },
+        "command_id": 7,
+        "execute_tick": 16,
+        "sent_tick": 10
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 8,
+        "execute_tick": 17,
+        "sent_tick": 10
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 97.5,
+          "metres": 5
+        },
+        "command_id": 9,
+        "execute_tick": 18,
+        "sent_tick": 10
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 97.5,
+          "metres": 0.32
+        },
+        "command_id": 10,
+        "execute_tick": 19,
+        "sent_tick": 10
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 11,
+        "execute_tick": 20,
+        "sent_tick": 10
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 223.8,
+          "metres": 2.77
+        },
+        "command_id": 12,
+        "execute_tick": 29,
+        "sent_tick": 25
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 13,
+        "execute_tick": 30,
+        "sent_tick": 25
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 36.5,
+          "metres": 5
+        },
+        "command_id": 14,
+        "execute_tick": 37,
+        "sent_tick": 33
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 36.5,
+          "metres": 5
+        },
+        "command_id": 15,
+        "execute_tick": 38,
+        "sent_tick": 33
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 36.5,
+          "metres": 2.7
+        },
+        "command_id": 16,
+        "execute_tick": 39,
+        "sent_tick": 33
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 17,
+        "execute_tick": 40,
+        "sent_tick": 33
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 253.7,
+          "metres": 5
+        },
+        "command_id": 18,
+        "execute_tick": 47,
+        "sent_tick": 43
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 253.7,
+          "metres": 1.7
+        },
+        "command_id": 19,
+        "execute_tick": 48,
+        "sent_tick": 43
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 135,
+          "metres": 0.38
+        },
+        "command_id": 20,
+        "execute_tick": 59,
+        "sent_tick": 55
+      }
+    ],
+    "command_count": 20,
+    "command_counts": {
+      "drive": 14,
+      "sample": 6
+    },
+    "commanded_drive_metres": 45.8,
+    "initial_public_qualities": {
+      "r1": "rich",
+      "r2": "poor",
+      "r3": "rich"
+    },
+    "public_tool_errors": 0,
+    "script_or_terminal_calls_observed": false,
+    "tool_call_count": 26,
+    "tool_counts": {
+      "advance": 16,
+      "map": 1,
+      "rules": 1,
+      "telemetry_log": 1,
+      "uplink": 7
+    },
+    "trajectory_tool_names": [
+      "expedition_advance",
+      "expedition_map",
+      "expedition_rules",
+      "expedition_telemetry_log",
+      "expedition_uplink"
+    ]
+  },
+  "realized_science_upper_total": {
+    "definition": "Sum of all eight revealed targets at their disclosed quality and full on-time value, before route/time/energy constraints; not a demonstrated achievable optimum.",
+    "model_fraction_of_this_upper_total": 0.8710937500000001,
+    "public_normalization_denominator": 20,
+    "reference_fraction_of_this_upper_total": 0.71875,
+    "value": 12.8
+  },
+  "sample_failures": [],
+  "schema_version": 1,
+  "scope": "Observed public actions/telemetry, protected grading and measured usage; no private messages or inferred internal reasoning.",
+  "source_sha256": {
+    "runs/matched-reference-a-public/artifacts/evaluator/replay.json": "763cba5c961e084a4432e0d9c033e4382e7ea5b6b04fab0bfa4def36ed650bfb",
+    "runs/matched-reference-a-public/artifacts/evaluator/result.json": "afb0d9d42960d93809aca99f1592a6be578e943267bd6863e8c26aa896770922",
+    "runs/model-a-public/agent/trajectory-public.json": "44e94cd4763ee30f84441da43342ad42c5cd8fdf1b6aeb9cded1c1cefffb71b9",
+    "runs/model-a-public/artifacts/evaluator/replay.json": "c78de48d5572a9257f1ceb96a7ea5dab1a77fac7ca4ab15b129045d1f66e4ba8",
+    "runs/model-a-public/artifacts/evaluator/result.json": "d4eba4ac1405aad1dcbaba0e3ea66f59796c6b7178fbe6d24343a982c78d0b63",
+    "runs/model-a-public/artifacts/evaluator/transcript.jsonl": "0a4a04c83307fa6ff6e70822041ed1f36ec88941a0c062e6dcbe835f10230a42",
+    "runs/model-a-public/monitor-a-public.json": "1062741e9ba3ab283f38dc992f4bb9728e9d04557a156f7761e992ecea690191",
+    "runs/model-a-public/result.json": "90f16f85acf80d08069ed7ac847e1466d24489e23dde8ed0387fffa8e139ace6"
+  }
+}

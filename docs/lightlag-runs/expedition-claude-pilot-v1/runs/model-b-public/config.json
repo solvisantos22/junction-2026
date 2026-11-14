@@ -1,0 +1,34 @@
+{
+    "task": {
+        "path": "/private<pilot-runtime>/tasks/b-public"
+    },
+    "trial_name": "b-public__5x6uTJY",
+    "trials_dir": "/private<pilot-runtime>/jobs/model-b-public",
+    "agent": {
+        "name": "opencode",
+        "model_name": "anthropic/claude-opus-5-5",
+        "kwargs": {
+            "version": "1.19.5",
+            "opencode_config": {
+                "agent": {
+                    "build": {
+                        "steps": 64
+                    }
+                },
+                "provider": {
+                    "anthropic": {
+                        "models": {
+                            "claude-opus-5-5": {
+                                "limit": {
+                                    "context": 200000,
+                                    "output": 8192
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "job_id": "619aab38-1d30-412a-8e90-bd8a14020ff9"
+}

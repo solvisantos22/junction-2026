@@ -413,14 +413,26 @@ These are recommended evidence choices, not newly asserted official entry requir
   [package](../lightlag_expedition/). This first increment establishes mechanics,
   not a model gap. The next increment adds a public-only Bayesian KF/MPC
   reference and five controls, isolated MCP/Harbor packaging, full transcripts
-  and reported-usage launch guards. All 57 package and ten packaging/runner
+  and reported-usage launch guards. All 57 package and 21 packaging/runner
   tests pass; independent review found and fixed nonfinite-input evidence loss.
   Free development comparisons retain all 1,536 episodes: weighted reference
   .453166 vs no inspection .412250, leader inspection .398719 and entropy .447593;
   every episode alive/home. The disclosed-quality heuristic scores .425028, so
   it is demonstrably not an upper bound. Actual isolated Harbor no-op and reference
   pass; an instruction-cache provenance caveat is retained in the design page.
-  No canonical task or teammate physics changed. No paid expedition calls yet.
+  No canonical task or teammate physics changed.
+- Actual strong-model pilot: three Opus 5.5/OpenCode 1.19.5 sessions score
+  .55/.5575/.29 against .46/.46/.31 protected references. All alive/home, no
+  invalid calls or observed truncation. The fourth planned assignment is unrun
+  because **$1.5588192 reported usage** crossed the $1.50 new-launch guard.
+  Seven protected replay/grade audits, four no-inspection controls and all four
+  commitments verify. Initial live-spend monitoring limitation is retained.
+- [Frozen protocol and results](lightlag-runs/expedition-claude-pilot-v1/summary.json),
+  [interpretation and next decision](lightlag-expedition-handoff.md). The model
+  beats both controls twice and trails by .02 once; this is not a convincing
+  strong-model gap. Codex preserved the negative finding and proposes six regions
+  with two inspections after repairing comparator limits. No further paid pilot
+  or final project/rules selection is claimed.
 
 ## Keep recording with minimal overhead
 

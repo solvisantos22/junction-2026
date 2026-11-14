@@ -1,0 +1,34 @@
+{
+    "task": {
+        "path": "/private<pilot-runtime>/tasks/a-hidden"
+    },
+    "trial_name": "a-hidden__xKPAJZJ",
+    "trials_dir": "/private<pilot-runtime>/jobs/model-a-hidden",
+    "agent": {
+        "name": "opencode",
+        "model_name": "anthropic/claude-opus-5-5",
+        "kwargs": {
+            "version": "1.19.5",
+            "opencode_config": {
+                "agent": {
+                    "build": {
+                        "steps": 64
+                    }
+                },
+                "provider": {
+                    "anthropic": {
+                        "models": {
+                            "claude-opus-5-5": {
+                                "limit": {
+                                    "context": 200000,
+                                    "output": 8192
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "job_id": "d444bae6-4fe2-4a06-adaa-40cf7e544cfb"
+}

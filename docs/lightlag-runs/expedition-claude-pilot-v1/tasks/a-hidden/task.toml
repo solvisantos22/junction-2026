@@ -1,0 +1,39 @@
+schema_version = "1.4"
+artifacts = [{ source = "/evaluator", service = "expedition" }]
+
+[task]
+name = "neural-network-november/lightlag-expedition-pilot"
+version = "0.1.0"
+description = "Allocate scarce science observations and control a delayed rover through a multi-target mission."
+authors = []
+keywords = ["partial-observability", "information-acquisition", "control", "mcp"]
+
+[metadata]
+
+[verifier]
+timeout_sec = 120.0
+environment_mode = "separate"
+
+[[verifier.collect]]
+service = "expedition"
+command = "python /srv/finish.py --url http://127.0.0.1:8000 --token-file /run/expedition/token"
+timeout_sec = 60.0
+
+[verifier.env]
+
+[agent]
+timeout_sec = 1800.0
+
+[environment]
+network_mode = "public"
+build_timeout_sec = 900.0
+os = "linux"
+
+[[environment.mcp_servers]]
+name = "expedition"
+transport = "streamable-http"
+url = "http://expedition:8000/mcp"
+
+[environment.env]
+
+[solution.env]

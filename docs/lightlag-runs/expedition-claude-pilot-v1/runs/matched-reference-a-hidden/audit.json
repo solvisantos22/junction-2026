@@ -1,0 +1,77 @@
+{
+  "checks": {
+    "frozen_source_import_isolation": true,
+    "frozen_task_and_copied_source_hashes": true,
+    "full_hidden_replay": true,
+    "harbor_task_digest": true,
+    "horizon_score_and_normalization": true,
+    "public_calls_and_errors": true,
+    "verifier_details_and_harbor_reward": true
+  },
+  "evidence_sha256": {
+    "evaluator/replay.json": "636e8789c7d43aaef006de30467359782887e151f1c5d54f8db4d2464593622e",
+    "evaluator/result.json": "dfa758b734672842acd99a38cbd702ae67a207683180704edab40d03525a6a9e",
+    "evaluator/transcript.jsonl": "d86ac055d9b823374cc9fbc9768304cd01234765604526259f34e47600fde866",
+    "harbor/lock.json": "628b44b4ece51a61a2fa8436161a6885da8708e03bca0ed7deed097639a8d44c",
+    "harbor/result.json": "aab0efa47b8029404553cee0d053b3a170a9bdfa593065ee8a68cfb6d8fd6f50",
+    "harbor/verifier/expedition-details.json": "dfa758b734672842acd99a38cbd702ae67a207683180704edab40d03525a6a9e",
+    "harbor/verifier/reward.txt": "add21d56098584c94db12bdb081205390b8e90cfd4823449e4b0a5218dea9d42"
+  },
+  "harbor": {
+    "agent_info": {
+      "model_info": null,
+      "name": "oracle",
+      "version": "1.0.0"
+    },
+    "agent_result": {
+      "cost_usd": null,
+      "metadata": null,
+      "model_usage": null,
+      "n_cache_tokens": null,
+      "n_input_tokens": null,
+      "n_output_tokens": null,
+      "rollout_details": null
+    },
+    "exception_info": null,
+    "finished_at": "2026-11-14T13:04:17.312196Z",
+    "started_at": "2026-11-14T13:03:59.550469Z"
+  },
+  "issues": [],
+  "limits": [
+    "Reproducibility and evidence consistency only; not policy optimality or model capability.",
+    "Reported usage is harness evidence, not provider billing reconciliation.",
+    "The task preparer's declared hash has no retained source bytes in this task format; copied runtime, reference and verifier source bytes are checked."
+  ],
+  "passed": true,
+  "provenance": {
+    "copied_source_files_verified": 23,
+    "experiment_manifest_sha256": "b92aa352138b5a6b804233af5d5166e5626fbc4df6b1160f968ec1a34fc06fab",
+    "source_commit": "c9ceb52a56e196beb9c744240fdfd7c62e778019",
+    "source_dirty": false,
+    "source_hashes_declared_without_retained_bytes": [
+      "tools/expedition_experiments/prepare.py"
+    ],
+    "task_digest": "sha256:6655dea661d8395cd26d4e735f134afad5631ad55d3b2be5c566664b9b271445",
+    "task_files_verified": 33
+  },
+  "reconstruction": {
+    "graded_call_count": 76,
+    "max_available_value": 20,
+    "post_closure_calls": 0,
+    "public_tool_calls": 76,
+    "raw_score": 9.2,
+    "reproduced_tool_errors": 0,
+    "reward": 0.45999999999999996,
+    "rounded_reward": "0.460000"
+  },
+  "reported_cost_usd": null,
+  "schema_version": 1,
+  "settings": {
+    "delay": 3,
+    "horizon": 60,
+    "mission_seed": 10000,
+    "policy": "reference",
+    "seed": 1543257102,
+    "visibility": "hidden"
+  }
+}

@@ -142,3 +142,66 @@ use the old text, and the oracle preparer hash reflects an on-disk edit after
 its Python module was imported. Simulator/reference/grader sources match; the
 manifest records the actual task bytes. Model tasks will be generated in a
 fresh process after the final source commit, with the common aid included.
+
+## Strong-model pilot outcome and decision
+
+[Protocol, all four assignments and usage](lightlag-runs/expedition-claude-pilot-v1/summary.json)
+retain three completed `anthropic/claude-opus-5-5` / OpenCode 1.19.5 sessions and
+one unrun assignment. Consumed task sources match commit `c9ceb52`; protocol
+`3bff0ec` froze the tasks, common accounting aid, model settings and salted seed
+commitments before model outcomes. All task source bytes are retained, regardless
+of the manifest's directory-wide dirty flag during evidence preparation.
+
+| Assignment | Opus score | Protected reference | No inspection |
+|---|---:|---:|---:|
+| A, hidden | .5500 | .4600 | .4600 |
+| A, public quality | .5575 | .4600 | .4600 |
+| B, public quality | .2900 | .3100 | .3100 |
+| B, hidden | **Unrun** | .2700 | .3100 |
+
+Every attempted model session finished normally, alive at base: no retries,
+invalid calls, provider errors or observed output/step truncation. Reported cost
+is **$1.5588192** (.6094926 + .4937166 + .4556100). That crosses the predeclared
+$1.50 new-launch guard, so B hidden was never started; it is not a model failure.
+The $2.25 in-flight guard did not fire. Historical coordinator usage plus this
+pilot is $12.3948396; with the possibly shared Rocks usage, known total is
+$13.882161. Neither amount is a verified live balance or provider invoice.
+
+The runner copies logs after completion, which prevented its initial host-only
+monitor from seeing live usage. A scalar-only container monitor covered the
+first run from response six onward; subsequent runs used that approach from
+startup. [The monitoring amendment](lightlag-runs/expedition-claude-pilot-v1/monitor-amendment.json)
+records this blind interval and the unchanged model-facing experiment. Every
+completed response's reported usage is retained; no spend threshold was crossed
+in flight and no attempt was restarted or omitted.
+
+Seven protected runs (three models, four references) reconstruct exactly from
+frozen task sources; all four no-inspection controls also reconstruct. All four
+seed commitments verify. The three model sessions used 58 completed responses
+and 79 public tool calls. Full task inventories, public actions, evaluator replays,
+grades and usage are retained; private provider messages/state are not published.
+
+**This still does not establish a convincing strong-model gap.** Opus wins both
+A conditions. It pipelines two inspections with useful movement and sampling,
+then collects a valuable discovery; the reference waits before driving and
+forecasts neither future discoveries nor sample-information branches. Those
+are comparator limitations. Two inspections plus an initial sample also provide
+evidence about all three regions early, weakening the intended acquisition
+bottleneck. Inspection signals remain imperfect; observing every region does
+not disclose every quality with certainty.
+
+B public has a small observed .02 normalized shortfall: one omitted poor target
+worth .4 raw science. Two failed samples consume six energy, and the rover
+finishes with only .65 battery. The model collects 5.8 of that world's 7.2
+all-on-time science upper total; the reference collects 6.2. These totals are not
+proven achievable optima. This is physical control/resource evidence, not an
+information-selection failure. With one incomplete pair, do not infer a
+population failure rate or a causal effect of hiding quality.
+
+[Decision and handoff](lightlag-expedition-handoff.md): improve the reference's
+inspection/travel overlap in a separate version, then develop **six regions with
+two inspections** and require a free advantage over fixed-two, entropy and
+no-inspection controls. Keep the same strong model. More regions or a lower score
+from a larger denominator alone will not count as success. Weak-GPS fusion remains
+a separate teammate direction. No follow-up implementation, new paid pilot or
+canonical-task promotion is claimed here.

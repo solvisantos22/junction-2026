@@ -1,0 +1,141 @@
+{
+  "all_completed_models_alive_and_home": true,
+  "checks": {
+    "all_costs_and_control_comparisons_preserved": true,
+    "all_export_hashes_match": true,
+    "all_four_no_probe_policies_regenerated_from_frozen_sources": true,
+    "all_four_planned_assignments_accounted_for": true,
+    "all_four_seed_commitments_match_reveal": true,
+    "all_frozen_source_snapshots_match": true,
+    "all_protocol_task_hashes_and_instructions_match": true,
+    "censoring_and_provider_error_classification_match_evidence": true,
+    "fourth_assignment_unrun_due_predeclared_launch_guard": true,
+    "model_harness_and_config_match_protocol": true,
+    "protected_public_calls_full_replays_and_grades_reconstructed": true,
+    "scalar_usage_matches_trial_and_trajectory_metadata": true,
+    "visibility_pairs_share_mission_and_episode_seeds": true
+  },
+  "complete_four_session_model_pilot": false,
+  "completed_model_control_comparisons": [
+    {
+      "assignment_id": "a-hidden",
+      "model_score": 0.55,
+      "no_probe_difference": 0.09000000000000008,
+      "no_probe_score": 0.45999999999999996,
+      "reference_difference": 0.09000000000000008,
+      "reference_score": 0.45999999999999996
+    },
+    {
+      "assignment_id": "a-public",
+      "model_score": 0.5575,
+      "no_probe_difference": 0.09750000000000003,
+      "no_probe_score": 0.45999999999999996,
+      "reference_difference": 0.09750000000000003,
+      "reference_score": 0.45999999999999996
+    },
+    {
+      "assignment_id": "b-public",
+      "model_score": 0.2899999999999999,
+      "no_probe_difference": -0.020000000000000018,
+      "no_probe_score": 0.30999999999999994,
+      "reference_difference": -0.020000000000000018,
+      "reference_score": 0.30999999999999994
+    }
+  ],
+  "counts": {
+    "additional_control_runner_snapshot": 1,
+    "censored_model_sessions": 0,
+    "completed_model_sessions": 3,
+    "matched_reference_sessions": 4,
+    "model_public_calls": 79,
+    "no_probe_controls_regenerated": 4,
+    "no_probe_public_calls_regenerated": 302,
+    "planned_model_sessions": 4,
+    "protected_public_calls_reconstructed": 382,
+    "protected_runs_reconstructed": 7,
+    "protocol_source_snapshots": 24,
+    "reference_public_calls": 303,
+    "unrun_model_sessions": 1,
+    "verified_export_files": 80
+  },
+  "exact_decimal_reported_model_cost_usd": "1.5588192",
+  "input_sha256": {
+    "assignments-reveal.json": "23af298cf6b5d78e3a791d5fd11bb33decd59c99af1f4167fd985e86845d2201",
+    "monitor-amendment.json": "2545fcb70a88497fddb1d4679678c0b47b81e1908eb8d063eed67b93456d7e6b",
+    "no-probe-controls.json.gz": "98245db861491ce78d2429637c14db342786f456fbb3732c26490e66c3962e68",
+    "protocol.json": "65bc0206747283b0d88411ce6ec9d6267de6e4ea6d9f25ccc10ea32556519770",
+    "stop-launches.json": "a64328acd4b55e1a5af2e02ab8ea02e1f96fd7b0ad0a812b3c0b75af336a2efa",
+    "summary.json": "7b4fd576ca9f55b06950b45b39112cb7a8e17f4de0cfd2258098a9e3429690dc"
+  },
+  "interpretation": "No useful strong-model deficit is established. The model exceeds the matched reference by 0.09 and 0.0975 on pair a and trails by 0.02 on b-public. The b-hidden model assignment remains unrun; it is not a failure and cannot supply a second paired information comparison.",
+  "issues": [],
+  "limits": [
+    "Exploratory three completed sessions on two geometry seeds, with only one complete hidden/public pair; no population failure-rate inference.",
+    "Reference and no-probe controllers are bounded heuristics, not optimal bounds; all model and control wins are retained.",
+    "First-run live spending supervision had a documented blind interval; all completed-response usage is reconciled, and no in-flight guard or model-output limit censored a run.",
+    "Costs are harness-reported usage, not live billing/balance verification.",
+    "Commitments and frozen hashes establish internal consistency; this review does not independently prove external publication timestamps.",
+    "Raw provider text stays private; only scalar event counts/costs/reasons and stream hashes are retained here."
+  ],
+  "passed": true,
+  "reported_model_cost_usd": 1.5588192,
+  "reviewed_at_utc": "2026-11-14T13:29:31.437419+00:00",
+  "scalar_usage_checks": [
+    {
+      "assignment_id": "a-hidden",
+      "completed_responses": 21,
+      "exact_decimal_cost": "0.6094926",
+      "last_finish_reason": "stop",
+      "provider_errors": 0,
+      "reported_cost_usd": 0.6094926,
+      "source_stream_sha256": "43a22245eb128464a5d3033818068a4ad6732c9c4ff15b10c135f2480096238f"
+    },
+    {
+      "assignment_id": "a-public",
+      "completed_responses": 18,
+      "exact_decimal_cost": "0.4937166",
+      "last_finish_reason": "stop",
+      "provider_errors": 0,
+      "reported_cost_usd": 0.4937166,
+      "source_stream_sha256": "32cacd5a099dd91987d6ad4454bfca432a2355129d3ea8ffaa36f028fcc9aee4"
+    },
+    {
+      "assignment_id": "b-public",
+      "completed_responses": 19,
+      "exact_decimal_cost": "0.4556100",
+      "last_finish_reason": "stop",
+      "provider_errors": 0,
+      "reported_cost_usd": 0.45561,
+      "source_stream_sha256": "cef555cde04839cab987937430d4e48c885d73370fefd5e05df5f9c912be38a0"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Independent final evidence/accounting review; no paid calls, credentials, Git actions or private summary execution.",
+  "source_snapshot_sha256": {
+    "harbor/lightlag/environment/Dockerfile": "9658faac0af8ae2d8fe8709bb25adc55c0b35fa410f85266515745c7097caa02",
+    "harbor/lightlag/tests/Dockerfile": "4358c282ebc65a7b3102394fe3ca17ad2783929ed1376a984ad931db4df9d176",
+    "harbor/lightlag/tests/grade.py": "e7b4a5f050862e11cff2b33b0f2c339feb7099e9d6e45a5c5f9ae1fcd1a1a4df",
+    "lightlag/__init__.py": "c8ec30fc8723d8f6d7ffa8fbd9d4ef7cf0ef480a777829722ce82f98f9201d06",
+    "lightlag/environment.py": "a6f4d56ea7d218276bdcc700fe94e061c929fb9267f8b735bbfb0cec36689a01",
+    "lightlag/model.py": "d7800c912a48a056a224baaee58f263831128d0916527938e4e0463a9c976c1a",
+    "lightlag_dynamic/__init__.py": "fc159c8af26f6b4e6198365cf0ce2914b870328a3f453679db86946240cb6f14",
+    "lightlag_dynamic/controllers.py": "00ececad4b3e55a3917ef83a7a3b15054dc072734dfb6e807d338fad0cdaf567",
+    "lightlag_dynamic/environment.py": "91623eb0e6a78f52bd5ab58a793104da97e04fc5ff50b6df62b9587f59432ffb",
+    "lightlag_dynamic/kf_mpc.py": "f970f847f88c86e1b5ffb1ba6e45cab9582200336d6118ec09883900d581e1d8",
+    "lightlag_dynamic/missions.py": "ea12fbeff21d66b8db1444f8ad31f5405a333a1ec7fb6dd4b9d735d916ee35e8",
+    "lightlag_dynamic/tools.py": "c97161583e6f4fb0a0e536a829969fcd2814a11603bd25adc12d241ed19651eb",
+    "lightlag_expedition/__init__.py": "aec2bd2b3f342fcc6069c1c6f0991f7113212ca4566adaee30257cd426095bc7",
+    "lightlag_expedition/environment.py": "aa3d34b9bde55812a12e66e9573a7484e31255577afa7b2e2ce2422964a7271c",
+    "lightlag_expedition/missions.py": "d9dc2dd303e9c47f1c5c7b76f18a56c6f742ae5796898c166e7e458c3c6737ab",
+    "lightlag_expedition/model.py": "590a0745b9e42927933dfb6c969a8e79c5ce1f3ebbb3c10e2e11fa342c9422b5",
+    "lightlag_expedition/reference.py": "fa3a964b0b77dc23b8d457740e53c189523353ce99be6173d9bf364afc817d5e",
+    "lightlag_expedition/serve.py": "3f26ac9881e89a601876e8cd5509828ac53138fb9ccd0d331f6eedd7ac91f4cd",
+    "lightlag_expedition/server.py": "6eae2d5d9740c7467c936b9a6b1b2b8d7af29b7cf6d2ad5b8daefbb2908b1b63",
+    "lightlag_expedition/service.py": "fbd241322d49dd6c4d988a37bf7bea12f2dab4a0bb76f62dabe196fdedf7e391",
+    "lightlag_expedition/study.py": "31c0bdb5e1428a149dc4e2d104e5d45bbd1ea3c696982251875d4de72491df2d",
+    "lightlag_mcp/client.py": "66bdeb5c9a0337138beb2e6a6e397e4aef5f0cffbe069ee95624d75fdd8e4278",
+    "lightlag_mcp/finish.py": "97e3e75fa4a8cb3475d66ae175380c1d06a6b7313eccf08086af046292b7ed87",
+    "tools/expedition_experiments/play_policy.py": "fa9d659b704624f1bd5002312f01b26cb608ae4e3ce07e7bf2d14147390805af",
+    "tools/expedition_experiments/prepare.py": "02c450cfea931938dd2d5772471f80ae473f59ecbcdf8ee39a206709c503ba43"
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "checks": {
+    "frozen_source_import_isolation": true,
+    "frozen_task_and_copied_source_hashes": true,
+    "full_hidden_replay": true,
+    "harbor_task_digest": true,
+    "horizon_score_and_normalization": true,
+    "public_calls_and_errors": true,
+    "verifier_details_and_harbor_reward": true
+  },
+  "evidence_sha256": {
+    "evaluator/replay.json": "c78de48d5572a9257f1ceb96a7ea5dab1a77fac7ca4ab15b129045d1f66e4ba8",
+    "evaluator/result.json": "d4eba4ac1405aad1dcbaba0e3ea66f59796c6b7178fbe6d24343a982c78d0b63",
+    "evaluator/transcript.jsonl": "0a4a04c83307fa6ff6e70822041ed1f36ec88941a0c062e6dcbe835f10230a42",
+    "harbor/lock.json": "5be6808beb05286dea01edc18ac93123ffa46bb13ec369ddc72ce309510a4149",
+    "harbor/result.json": "90f16f85acf80d08069ed7ac847e1466d24489e23dde8ed0387fffa8e139ace6",
+    "harbor/verifier/expedition-details.json": "d4eba4ac1405aad1dcbaba0e3ea66f59796c6b7178fbe6d24343a982c78d0b63",
+    "harbor/verifier/reward.txt": "78939d3437df0205a9e2ae86ee088c72f6f3546dc8a7b0e0ce4fcb84313ec145"
+  },
+  "harbor": {
+    "agent_info": {
+      "model_info": {
+        "name": "claude-opus-5-5",
+        "provider": "anthropic"
+      },
+      "name": "opencode",
+      "version": "1.19.5"
+    },
+    "agent_result": {
+      "cost_usd": 0.49371660000000006,
+      "metadata": null,
+      "model_usage": {
+        "anthropic/claude-opus-5-5": {
+          "cost_usd": 0.49371660000000006,
+          "n_cache_tokens": 437623,
+          "n_input_tokens": 437661,
+          "n_output_tokens": 2395
+        }
+      },
+      "n_cache_tokens": 437623,
+      "n_input_tokens": 437661,
+      "n_output_tokens": 2395,
+      "rollout_details": null
+    },
+    "exception_info": null,
+    "finished_at": "2026-11-14T13:17:15.971398Z",
+    "started_at": "2026-11-14T13:11:45.256534Z"
+  },
+  "issues": [],
+  "limits": [
+    "Reproducibility and evidence consistency only; not policy optimality or model capability.",
+    "Reported usage is harness evidence, not provider billing reconciliation.",
+    "The task preparer's declared hash has no retained source bytes in this task format; copied runtime, reference and verifier source bytes are checked."
+  ],
+  "passed": true,
+  "provenance": {
+    "copied_source_files_verified": 23,
+    "experiment_manifest_sha256": "439727e8a0e50f472f68fd7ffbf352e87906b61514f3d9bee074a6ad49bcfb01",
+    "source_commit": "c9ceb52a56e196beb9c744240fdfd7c62e778019",
+    "source_dirty": false,
+    "source_hashes_declared_without_retained_bytes": [
+      "tools/expedition_experiments/prepare.py"
+    ],
+    "task_digest": "sha256:381731217316ac24218ad8d932acff4635a793cfc3dc7431ad2e9cdf1f98507c",
+    "task_files_verified": 33
+  },
+  "reconstruction": {
+    "graded_call_count": 26,
+    "max_available_value": 20,
+    "post_closure_calls": 0,
+    "public_tool_calls": 26,
+    "raw_score": 11.15,
+    "reproduced_tool_errors": 0,
+    "reward": 0.5575,
+    "rounded_reward": "0.557500"
+  },
+  "reported_cost_usd": 0.49371660000000006,
+  "schema_version": 1,
+  "settings": {
+    "delay": 3,
+    "horizon": 60,
+    "mission_seed": 10000,
+    "policy": "reference",
+    "seed": 1543257102,
+    "visibility": "public"
+  }
+}

@@ -1,0 +1,708 @@
+{
+  "assignment_id": "a-hidden",
+  "delivered_events": [
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t1",
+        "type": "sample_taken"
+      },
+      "packet_tick": 5,
+      "public_call_n": 7,
+      "received_by_tick": 10
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r1",
+        "target_id": "t1",
+        "type": "region_quality"
+      },
+      "packet_tick": 5,
+      "public_call_n": 7,
+      "received_by_tick": 10
+    },
+    {
+      "event": {
+        "region": "r2",
+        "signal": "poor",
+        "type": "inspection_result"
+      },
+      "packet_tick": 6,
+      "public_call_n": 7,
+      "received_by_tick": 10
+    },
+    {
+      "event": {
+        "region": "r3",
+        "signal": "rich",
+        "type": "inspection_result"
+      },
+      "packet_tick": 7,
+      "public_call_n": 7,
+      "received_by_tick": 10
+    },
+    {
+      "event": {
+        "target": {
+          "appear_tick": 10,
+          "base_value": 3,
+          "deadline_tick": 26,
+          "id": "d1",
+          "late_value": 0.75,
+          "region": "r2",
+          "value": 3,
+          "x": 25.02,
+          "y": 26.22
+        },
+        "type": "target_discovered"
+      },
+      "packet_tick": 10,
+      "public_call_n": 9,
+      "received_by_tick": 15
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t2",
+        "type": "sample_taken"
+      },
+      "packet_tick": 12,
+      "public_call_n": 9,
+      "received_by_tick": 15
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r1",
+        "target_id": "t2",
+        "type": "region_quality"
+      },
+      "packet_tick": 12,
+      "public_call_n": 9,
+      "received_by_tick": 15
+    },
+    {
+      "event": {
+        "target": {
+          "appear_tick": 22,
+          "base_value": 3,
+          "deadline_tick": 44,
+          "id": "d2",
+          "late_value": 0.75,
+          "region": "r3",
+          "value": 3,
+          "x": 11.98,
+          "y": 18.91
+        },
+        "type": "target_discovered"
+      },
+      "packet_tick": 22,
+      "public_call_n": 13,
+      "received_by_tick": 26
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t5",
+        "type": "sample_taken"
+      },
+      "packet_tick": 23,
+      "public_call_n": 13,
+      "received_by_tick": 26
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r3",
+        "target_id": "t5",
+        "type": "region_quality"
+      },
+      "packet_tick": 23,
+      "public_call_n": 13,
+      "received_by_tick": 26
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "t6",
+        "type": "sample_taken"
+      },
+      "packet_tick": 26,
+      "public_call_n": 15,
+      "received_by_tick": 29
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r3",
+        "target_id": "t6",
+        "type": "region_quality"
+      },
+      "packet_tick": 26,
+      "public_call_n": 15,
+      "received_by_tick": 29
+    },
+    {
+      "event": {
+        "reason": "no_unsampled_target_in_range",
+        "type": "sample_failed"
+      },
+      "packet_tick": 31,
+      "public_call_n": 17,
+      "received_by_tick": 34
+    },
+    {
+      "event": {
+        "on_time": true,
+        "target_id": "d2",
+        "type": "sample_taken"
+      },
+      "packet_tick": 33,
+      "public_call_n": 18,
+      "received_by_tick": 36
+    },
+    {
+      "event": {
+        "quality": "rich",
+        "region": "r3",
+        "target_id": "d2",
+        "type": "region_quality"
+      },
+      "packet_tick": 33,
+      "public_call_n": 18,
+      "received_by_tick": 36
+    }
+  ],
+  "limits": [
+    "One frozen assignment; no general model capability or unseen-map claim.",
+    "The model exceeds the fixed reference here; this episode does not demonstrate an agent difficulty gap.",
+    "Reference and no-probe controls both score0.46 on this assignment; the reference is a bounded heuristic, not an optimal bound.",
+    "No task, model, simulator, planner or prompt was changed in response to this result."
+  ],
+  "matched_reference_comparison": {
+    "interpretation": "The exact grade difference is the 3-point d2 sample versus 1.2 points from the two poor r2 targets. The routes, number/timing of inspections and command timings differ; this is not a controlled causal estimate of inspection value.",
+    "model_minus_reference_normalized": 0.09,
+    "model_minus_reference_raw": 1.8,
+    "model_only_credited_value": 3.0,
+    "model_only_sample_targets": [
+      "d2"
+    ],
+    "reference_normalized_score": 0.45999999999999996,
+    "reference_only_credited_value": 1.2,
+    "reference_only_sample_targets": [
+      "t3",
+      "t4"
+    ],
+    "reference_raw_score": 9.2,
+    "reference_samples": [
+      {
+        "base_credited_value": 2,
+        "base_value": 2,
+        "credited_value": 2.0,
+        "on_time": true,
+        "quality": "rich",
+        "quality_multiplier": 1.0,
+        "region": "r1",
+        "target_id": "t1",
+        "tick": 15
+      },
+      {
+        "base_credited_value": 2,
+        "base_value": 2,
+        "credited_value": 2.0,
+        "on_time": true,
+        "quality": "rich",
+        "quality_multiplier": 1.0,
+        "region": "r1",
+        "target_id": "t2",
+        "tick": 13
+      },
+      {
+        "base_credited_value": 3,
+        "base_value": 3,
+        "credited_value": 0.6000000000000001,
+        "on_time": true,
+        "quality": "poor",
+        "quality_multiplier": 0.2,
+        "region": "r2",
+        "target_id": "t3",
+        "tick": 24
+      },
+      {
+        "base_credited_value": 3,
+        "base_value": 3,
+        "credited_value": 0.6000000000000001,
+        "on_time": true,
+        "quality": "poor",
+        "quality_multiplier": 0.2,
+        "region": "r2",
+        "target_id": "t4",
+        "tick": 26
+      },
+      {
+        "base_credited_value": 2,
+        "base_value": 2,
+        "credited_value": 2.0,
+        "on_time": true,
+        "quality": "rich",
+        "quality_multiplier": 1.0,
+        "region": "r3",
+        "target_id": "t5",
+        "tick": 18
+      },
+      {
+        "base_credited_value": 2,
+        "base_value": 2,
+        "credited_value": 2.0,
+        "on_time": true,
+        "quality": "rich",
+        "quality_multiplier": 1.0,
+        "region": "r3",
+        "target_id": "t6",
+        "tick": 21
+      }
+    ],
+    "shared_sample_targets": [
+      "t1",
+      "t2",
+      "t5",
+      "t6"
+    ]
+  },
+  "observations": [
+    {
+      "claim": "The first batch combined a drive and physical sample with inspections of r2 and r3; the inspection budget was used immediately without waiting at base for signals.",
+      "evidence": {
+        "execute_ticks": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "public_call_n": 3,
+        "sent_tick": 0
+      }
+    },
+    {
+      "claim": "The second r1 drive/sample batch was sent at tick7 before the first sample and inspection results were received. The next advance returned exact r1 rich, r2 poor signal and r3 rich signal by tick10.",
+      "evidence": {
+        "observation_packet_ticks": [
+          5,
+          6,
+          7
+        ],
+        "public_call_ns": [
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "claim": "After receiving those signals, the executed sampling sequence was t1,t2,t5,t6,d2. No r2 target was sampled. This describes behavior, not the model's reasoning or a causal proof about why it chose that route.",
+      "evidence": {
+        "successful_sample_targets": [
+          "t1",
+          "t2",
+          "t5",
+          "t6",
+          "d2"
+        ],
+        "successful_sample_ticks": [
+          5,
+          12,
+          23,
+          26,
+          33
+        ]
+      }
+    },
+    {
+      "claim": "The new r3 target d2 arrived in discovery telemetry by tick26 and was included in the next command batch, then sampled successfully at tick33. No second map call was needed because the discovery event contained its target fields.",
+      "evidence": {
+        "discovery_public_call_n": 13,
+        "sample_packet_tick": 33,
+        "sample_received_by_tick": 36,
+        "uplink_public_call_n": 14
+      }
+    },
+    {
+      "claim": "One sample at tick31 failed with no_unsampled_target_in_range. That sample was queued at tick26, before the existing t6 success from tick26 arrived at tick29. No private intent is inferred for the failed attempt.",
+      "evidence": {
+        "failed_sample_public_call_n": 17,
+        "queued_public_call_n": 14,
+        "t6_confirmation_public_call_n": 15
+      }
+    },
+    {
+      "claim": "The final two return drives were sent at tick29 for execution at ticks34 and35, before d2 success telemetry arrived. All later calls advanced time; the protected horizon grade confirms survival and return home.",
+      "evidence": {
+        "execute_ticks": [
+          34,
+          35
+        ],
+        "horizon_tick": 60,
+        "last_command_execute_tick": 35,
+        "return_uplink_public_call_n": 16
+      }
+    },
+    {
+      "claim": "Every exported action call was a direct expedition MCP tool call. No script, shell, or code-execution tool call appears in the exported trajectory.",
+      "evidence": {
+        "agent_response_steps": 21,
+        "trajectory_steps": 22
+      }
+    }
+  ],
+  "outcome": {
+    "alive": true,
+    "all_successful_samples_on_time": true,
+    "at_base": true,
+    "censored_reason": null,
+    "completed_responses": 21,
+    "harbor_exception": null,
+    "model": {
+      "model_name": "anthropic/claude-opus-5-5",
+      "name": "opencode",
+      "version": "1.19.5"
+    },
+    "normalized_score": 0.55,
+    "raw_score": 11.0,
+    "reported_cost_usd": 0.6094926
+  },
+  "protected_sample_breakdown": [
+    {
+      "base_credited_value": 2,
+      "base_value": 2,
+      "credited_value": 2.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r1",
+      "target_id": "t1",
+      "tick": 5
+    },
+    {
+      "base_credited_value": 2,
+      "base_value": 2,
+      "credited_value": 2.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r1",
+      "target_id": "t2",
+      "tick": 12
+    },
+    {
+      "base_credited_value": 2,
+      "base_value": 2,
+      "credited_value": 2.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r3",
+      "target_id": "t5",
+      "tick": 23
+    },
+    {
+      "base_credited_value": 2,
+      "base_value": 2,
+      "credited_value": 2.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r3",
+      "target_id": "t6",
+      "tick": 26
+    },
+    {
+      "base_credited_value": 3,
+      "base_value": 3,
+      "credited_value": 3.0,
+      "on_time": true,
+      "quality": "rich",
+      "quality_multiplier": 1.0,
+      "region": "r3",
+      "target_id": "d2",
+      "tick": 33
+    }
+  ],
+  "public_actions": {
+    "acknowledged_commands": [
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 316.2,
+          "metres": 4.23
+        },
+        "command_id": 1,
+        "execute_tick": 4,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 2,
+        "execute_tick": 5,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "inspect",
+          "region": "r2"
+        },
+        "command_id": 3,
+        "execute_tick": 6,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "inspect",
+          "region": "r3"
+        },
+        "command_id": 4,
+        "execute_tick": 7,
+        "sent_tick": 0
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 312,
+          "metres": 3
+        },
+        "command_id": 5,
+        "execute_tick": 11,
+        "sent_tick": 7
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 6,
+        "execute_tick": 12,
+        "sent_tick": 7
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 163.5,
+          "metres": 5
+        },
+        "command_id": 7,
+        "execute_tick": 14,
+        "sent_tick": 10
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 163.5,
+          "metres": 2.2
+        },
+        "command_id": 8,
+        "execute_tick": 15,
+        "sent_tick": 10
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 188.3,
+          "metres": 4.2
+        },
+        "command_id": 9,
+        "execute_tick": 22,
+        "sent_tick": 18
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 10,
+        "execute_tick": 23,
+        "sent_tick": 18
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 94.5,
+          "metres": 2.7
+        },
+        "command_id": 11,
+        "execute_tick": 24,
+        "sent_tick": 18
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 94.5,
+          "metres": 2.7
+        },
+        "command_id": 12,
+        "execute_tick": 25,
+        "sent_tick": 18
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 13,
+        "execute_tick": 26,
+        "sent_tick": 18
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 245.6,
+          "metres": 0.66
+        },
+        "command_id": 14,
+        "execute_tick": 30,
+        "sent_tick": 26
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 15,
+        "execute_tick": 31,
+        "sent_tick": 26
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 229.4,
+          "metres": 2.78
+        },
+        "command_id": 16,
+        "execute_tick": 32,
+        "sent_tick": 26
+      },
+      {
+        "command": {
+          "action": "sample"
+        },
+        "command_id": 17,
+        "execute_tick": 33,
+        "sent_tick": 26
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 9.1,
+          "metres": 5
+        },
+        "command_id": 18,
+        "execute_tick": 34,
+        "sent_tick": 29
+      },
+      {
+        "command": {
+          "action": "drive",
+          "heading_deg": 9.1,
+          "metres": 3.55
+        },
+        "command_id": 19,
+        "execute_tick": 35,
+        "sent_tick": 29
+      }
+    ],
+    "command_count": 19,
+    "command_counts": {
+      "drive": 11,
+      "inspect": 2,
+      "sample": 6
+    },
+    "commanded_drive_metres": 36.02,
+    "first_uplink": {
+      "arguments": {
+        "commands": [
+          {
+            "action": "drive",
+            "heading_deg": 316.2,
+            "metres": 4.23
+          },
+          {
+            "action": "sample"
+          },
+          {
+            "action": "inspect",
+            "region": "r2"
+          },
+          {
+            "action": "inspect",
+            "region": "r3"
+          }
+        ]
+      },
+      "n": 3,
+      "ok": true,
+      "result": [
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 316.2,
+            "metres": 4.23
+          },
+          "command_id": 1,
+          "execute_tick": 4,
+          "sent_tick": 0
+        },
+        {
+          "command": {
+            "action": "sample"
+          },
+          "command_id": 2,
+          "execute_tick": 5,
+          "sent_tick": 0
+        },
+        {
+          "command": {
+            "action": "inspect",
+            "region": "r2"
+          },
+          "command_id": 3,
+          "execute_tick": 6,
+          "sent_tick": 0
+        },
+        {
+          "command": {
+            "action": "inspect",
+            "region": "r3"
+          },
+          "command_id": 4,
+          "execute_tick": 7,
+          "sent_tick": 0
+        }
+      ],
+      "tick_after": 0,
+      "tick_before": 0,
+      "tool": "uplink"
+    },
+    "public_tool_errors": 0,
+    "script_or_terminal_calls_observed": false,
+    "tool_call_count": 24,
+    "tool_counts": {
+      "advance": 16,
+      "map": 1,
+      "rules": 1,
+      "uplink": 6
+    },
+    "trajectory_tool_names": [
+      "expedition_advance",
+      "expedition_map",
+      "expedition_rules",
+      "expedition_uplink"
+    ]
+  },
+  "schema_version": 1,
+  "scope": "Observed exported public tool calls and telemetry, plus protected grading and measured usage; no private messages or inferred internal reasoning.",
+  "source_sha256": {
+    "runs/matched-reference-a-hidden/artifacts/evaluator/result.json": "dfa758b734672842acd99a38cbd702ae67a207683180704edab40d03525a6a9e",
+    "runs/matched-reference-a-hidden/artifacts/evaluator/transcript.jsonl": "d86ac055d9b823374cc9fbc9768304cd01234765604526259f34e47600fde866",
+    "runs/model-a-hidden/agent/trajectory-public.json": "5058ee00b66bdd8585aa638151218748b5c27b666d73a39d1df0faf10feed5eb",
+    "runs/model-a-hidden/artifacts/evaluator/result.json": "0be969afd14ea914254c7091f424202233156e4eea7276dc1ae3c85c75af0b61",
+    "runs/model-a-hidden/artifacts/evaluator/transcript.jsonl": "ecf9207d93f559240435309fb6ebb2603003cbb110196228870d9f88b09db78a",
+    "runs/model-a-hidden/monitor-a-hidden.json": "55d7adafe92f962f66681a30172641297207bcc66f4a63a843f4a278d83c5c01",
+    "runs/model-a-hidden/result.json": "21216c2a8babed6aed57308d7f1bb3a69bfa1b9148c4e7c705ab319fbb5207c4"
+  }
+}

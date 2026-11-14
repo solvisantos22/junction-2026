@@ -1,0 +1,87 @@
+{
+  "checks": {
+    "frozen_source_import_isolation": true,
+    "frozen_task_and_copied_source_hashes": true,
+    "full_hidden_replay": true,
+    "harbor_task_digest": true,
+    "horizon_score_and_normalization": true,
+    "public_calls_and_errors": true,
+    "verifier_details_and_harbor_reward": true
+  },
+  "evidence_sha256": {
+    "evaluator/replay.json": "a0905210f032f637e61aac4ceb01aa23cfb828894ca01cb0a23d79a15fd6f239",
+    "evaluator/result.json": "0be969afd14ea914254c7091f424202233156e4eea7276dc1ae3c85c75af0b61",
+    "evaluator/transcript.jsonl": "ecf9207d93f559240435309fb6ebb2603003cbb110196228870d9f88b09db78a",
+    "harbor/lock.json": "cdedff123bc528ebeb759c5105e934ba1ab31b4f2d59c886aa1dc8a42ba6209d",
+    "harbor/result.json": "21216c2a8babed6aed57308d7f1bb3a69bfa1b9148c4e7c705ab319fbb5207c4",
+    "harbor/verifier/expedition-details.json": "0be969afd14ea914254c7091f424202233156e4eea7276dc1ae3c85c75af0b61",
+    "harbor/verifier/reward.txt": "27e5f238184bd527cc4c9394163f62b980c8a7c18b84a5e8cc4d114ea784baf5"
+  },
+  "harbor": {
+    "agent_info": {
+      "model_info": {
+        "name": "claude-opus-5-5",
+        "provider": "anthropic"
+      },
+      "name": "opencode",
+      "version": "1.19.5"
+    },
+    "agent_result": {
+      "cost_usd": 0.6094926,
+      "metadata": null,
+      "model_usage": {
+        "anthropic/claude-opus-5-5": {
+          "cost_usd": 0.6094926,
+          "n_cache_tokens": 551108,
+          "n_input_tokens": 551152,
+          "n_output_tokens": 2191
+        }
+      },
+      "n_cache_tokens": 551108,
+      "n_input_tokens": 551152,
+      "n_output_tokens": 2191,
+      "rollout_details": null
+    },
+    "exception_info": null,
+    "finished_at": "2026-11-14T13:08:59.566689Z",
+    "started_at": "2026-11-14T13:02:15.055169Z"
+  },
+  "issues": [],
+  "limits": [
+    "Reproducibility and evidence consistency only; not policy optimality or model capability.",
+    "Reported usage is harness evidence, not provider billing reconciliation.",
+    "The task preparer's declared hash has no retained source bytes in this task format; copied runtime, reference and verifier source bytes are checked."
+  ],
+  "passed": true,
+  "provenance": {
+    "copied_source_files_verified": 23,
+    "experiment_manifest_sha256": "b92aa352138b5a6b804233af5d5166e5626fbc4df6b1160f968ec1a34fc06fab",
+    "source_commit": "c9ceb52a56e196beb9c744240fdfd7c62e778019",
+    "source_dirty": false,
+    "source_hashes_declared_without_retained_bytes": [
+      "tools/expedition_experiments/prepare.py"
+    ],
+    "task_digest": "sha256:6655dea661d8395cd26d4e735f134afad5631ad55d3b2be5c566664b9b271445",
+    "task_files_verified": 33
+  },
+  "reconstruction": {
+    "graded_call_count": 24,
+    "max_available_value": 20,
+    "post_closure_calls": 0,
+    "public_tool_calls": 24,
+    "raw_score": 11.0,
+    "reproduced_tool_errors": 0,
+    "reward": 0.55,
+    "rounded_reward": "0.550000"
+  },
+  "reported_cost_usd": 0.6094926,
+  "schema_version": 1,
+  "settings": {
+    "delay": 3,
+    "horizon": 60,
+    "mission_seed": 10000,
+    "policy": "reference",
+    "seed": 1543257102,
+    "visibility": "hidden"
+  }
+}

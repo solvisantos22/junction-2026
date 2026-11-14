@@ -1,0 +1,22 @@
+services:
+  main:
+    depends_on:
+      expedition:
+        condition: service_healthy
+  expedition:
+    build:
+      context: ./simulator
+    expose:
+      - "8000"
+    environment:
+      EXPEDITION_SEED: "927279388"
+      EXPEDITION_MISSION_SEED: "10001"
+      EXPEDITION_VISIBILITY: "hidden"
+      EXPEDITION_ARTIFACT_DIR: /evaluator
+      EXPEDITION_TOKEN_FILE: /run/expedition/token
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 3s

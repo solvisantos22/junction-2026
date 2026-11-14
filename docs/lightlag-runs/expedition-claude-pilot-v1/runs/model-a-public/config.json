@@ -1,0 +1,34 @@
+{
+    "task": {
+        "path": "/private<pilot-runtime>/tasks/a-public"
+    },
+    "trial_name": "a-public__FSCodMF",
+    "trials_dir": "/private<pilot-runtime>/jobs/model-a-public",
+    "agent": {
+        "name": "opencode",
+        "model_name": "anthropic/claude-opus-5-5",
+        "kwargs": {
+            "version": "1.19.5",
+            "opencode_config": {
+                "agent": {
+                    "build": {
+                        "steps": 64
+                    }
+                },
+                "provider": {
+                    "anthropic": {
+                        "models": {
+                            "claude-opus-5-5": {
+                                "limit": {
+                                    "context": 200000,
+                                    "output": 8192
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "job_id": "8b91b67c-ce29-412a-9d4f-af256301b7e6"
+}
