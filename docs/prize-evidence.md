@@ -553,6 +553,8 @@ These are recommended evidence choices, not newly asserted official entry requir
 - **Preparation verification:** 22 focused tests pass, including finite-difference gradient checks and isolated cloud-launch tests. Eight real smoke episodes on used maps 1/2 complete; their low batch rewards are not claimed as learning improvement. No full training or cloud job claimed yet.
 - **Artifacts and limits:** [protocol](lightlag-rl.md), [results/handoff](lightlag-rl-results/README.md), [learning code](../lightlag_rl/), [Modal launcher](../tools/lightlag_rl/modal_job.py). The learned part selects goals; hand-written navigation/safety remains fixed. No final task selection, environment modification or prize submission.
 
+- **Actual Modal launch:** one CPU training job, [ap-e9VDJ99Y3AAjaY30NcNemX](https://modal.com/apps/solvisantos22/main/ap-e9VDJ99Y3AAjaY30NcNemX), using Sölvi’s configured profile and the published source/resource freeze. No GPU or external model API. 28 tests pass; the evaluator independently reconstructs 12 used-map smoke episodes and 428 choices. Training results and any improvement remain pending; no cost is represented as a verified invoice.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
