@@ -54,7 +54,7 @@ def reported_usage(path, final=False):
             unknown = True
             continue
         identity = (event.get("sessionID"), part.get("id"))
-        if identity[1] is None:
+        if not all(isinstance(value, str) for value in identity):
             unknown = True
             continue
         if identity in seen:
@@ -145,8 +145,12 @@ def run(runtime, assignment_id, env_file, harbor):
             time.sleep(2)
         code = process.wait()
     paths = list((runtime / "jobs" / ("model-" + assignment_id)).glob("*/agent/opencode.txt"))
+    usage = {"cost_usd": 0.0, "finished_steps": 0, "unknown": True}
     if len(paths) == 1:
-        usage = reported_usage(paths[0], final=True)
+        try:
+            usage = reported_usage(paths[0], final=True)
+        except Exception:
+            pass
     if not usage or usage.get("unknown") or not usage.get("finished_steps"):
         reason = reason or "unknown_final_usage"
     report = {"assignment_id": assignment_id, "harbor_returncode": code,

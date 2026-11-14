@@ -23,7 +23,8 @@ class SpendGuardTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             path = Path(root) / 'stream'
             for invalid in (b'not-json\n', b'null\n', b'[]\n',
-                            b'{"type":"step_finish","part":[]}\n'):
+                            b'{"type":"step_finish","part":[]}\n',
+                            b'{"type":"step_finish","sessionID":[],"part":{"id":[]}}\n'):
                 path.write_bytes(invalid)
                 self.assertTrue(reported_usage(path)['unknown'])
             path.write_bytes(b'{"type":"text","value":"\xe2')
