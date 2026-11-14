@@ -1,7 +1,7 @@
 # Junction Watch timer adapter
 
 A Python 3.9+ standard-library CLI for macOS that queues one dedicated Codex
-check every 15 minutes. It does not read Discord or websites itself; the
+check every 30 minutes. It does not read Discord or websites itself; the
 dedicated agent follows the configured instructions and reports actionable
 updates to the parent chat.
 
@@ -21,7 +21,7 @@ All config fields are required; use absolute paths and real task IDs:
   "parent_thread_id": "PARENT_TASK_ID",
   "codex_path": "/absolute/path/to/codex",
   "working_directory": "/Users/solvisantos/Desktop/Junction",
-  "interval_seconds": 900,
+  "interval_seconds": 1800,
   "ends_at": "2026-11-15T17:00:00+02:00",
   "instructions_path": "/Users/solvisantos/.codex/junction-watch-2026/INSTRUCTIONS.md",
   "launch_agent_path": "/Users/solvisantos/Library/LaunchAgents/com.solvisantos.junction-watch-2026.plist",
@@ -40,7 +40,7 @@ Create the configured LaunchAgent plist with these keys:
 | --- | --- |
 | `Label` | The exact configured `launch_agent_label` |
 | `ProgramArguments` | `/usr/bin/python3`, absolute runtime `watch.py`, `--config`, absolute runtime `config.json`, `tick` |
-| `StartInterval` | `900` |
+| `StartInterval` | `1800` |
 | `WorkingDirectory` | The configured working directory |
 | `StandardOutPath` / `StandardErrorPath` | Separate log paths inside the private runtime directory |
 

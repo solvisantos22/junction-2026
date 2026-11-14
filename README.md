@@ -11,4 +11,4 @@ We are provisionally committed to AfterQuery's **Break the Agent** challenge and
 - [AfterQuery ideas](afterquery-ideas.md): the short team discussion brief.
 - [AfterQuery research](docs/research/README.md): prior results, failures, methods and implications for our choice.
 - [Sponsor tools and extra prizes](SPONSOR_OPTIONS.md): verified offers, conditions and fit judgments.
-- [Junction Watch](tools/junction_watch/README.md): the local 15-minute update monitor, its controls and limitations.
+- [Junction Watch](tools/junction_watch/README.md): the local 30-minute update monitor, its controls and limitations.
