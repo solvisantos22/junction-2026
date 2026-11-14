@@ -41,6 +41,7 @@ DEFAULTS: Dict[str, Any] = {
     "replan_every": 12,         # ticks between routine replans
     "arrive_m": 0.9,            # sample when the predicted distance to the target is under this
     "floor": 5.0,               # never start a drive that would leave less battery than this
+    "home_floor": 2.0,          # ... except on the way home, where the reserve is there to be spent
     "home_margin": 4.0,         # be home this many ticks before the end
     "home_slack": 1.08,         # ... and count the way home this much longer than the ground model says
     "deadline_margin": 2,       # plan to sample this many ticks before a deadline
@@ -433,8 +434,25 @@ class Pilot:
             metres *= 0.5
             if metres < 0.2:
                 return {"action": "wait"} if not self.opt["terrain"] else self._sidestep(x, y, want)
-        if battery - model["energy"] - self.sun.idle < self.opt["floor"]:
-            return {"action": "wait"}                          # let the sun catch up
+        reserve = self.opt["floor"]
+        if goal == "base":
+            # a reserve is worth nothing once the mission is over, and stopping a metre short of
+            # the lander costs half the score: on the way home, spend it
+            reserve = min(reserve, self.opt["home_floor"])
+        spare = battery - self.sun.idle - reserve
+        if model["energy"] > spare:
+            if goal != "base" or spare <= 0.0:
+                return {"action": "wait"}                      # let the sun catch up
+            # creep home on what the battery can pay for now: the first part of the same drive
+            for _ in range(4):
+                metres *= min(0.9, spare / model["energy"])
+                if metres < 0.5:
+                    return {"action": "wait"}
+                model = drive(self.surface, self.physics, x, y, heading, metres, self.slip)
+                if model["stop"] is None and model["energy"] <= spare:
+                    break
+            else:
+                return {"action": "wait"}
         return {"action": "drive", "heading_deg": (heading - self.filter.bias) % 360.0, "metres": round(metres, 3)}
 
     def _sidestep(self, x: float, y: float, want: float) -> Dict[str, Any]:
