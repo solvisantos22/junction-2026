@@ -5,8 +5,8 @@ Update and push your claim before substantial work. Use a narrow scope and inclu
 > **Lightlag Traverse is frozen (Saturday 14 November, about 20:40 Helsinki; decided by Kristján).** Build on this version; change none of it without Kristján's OK.
 >
 > - **Rules:** `lightlag_traverse` 0.1.0 as it is: ground, map generation, physics, sensing, the five tools and the scoring (`environment.py`, `surface.py`, `terrain.py`). The harsher day (`sun_margin_ticks` 0) was tested and dropped.
-> - **Reference:** the pilot of task 0.1.1 (commit `1545627`, on branch `worktree-claude-gap-research` until Kristján merges it). Under these rules it scores the same as 0.1.0.
-> - **Submission candidate:** the three-mission campaign `harbor/lightlag-traverse-campaign/` 0.1.0 on worlds 2027, 2028 and 2029 (commit `3bff7b2`, same branch), subject to its remaining agent runs. The first Opus 5.5 run scored 0.267 against the reference's 0.476. Fallback: the single-mission task `harbor/lightlag-traverse/` on world 2026.
+> - **Reference:** the pilot of task 0.1.1 (commit `1545627`, merged into `main` at Kristján's request in `0130fa6`). Under these rules it scores the same as 0.1.0.
+> - **Submission candidate:** the three-mission campaign `harbor/lightlag-traverse-campaign/` 0.1.0 on worlds 2027, 2028 and 2029 (commit `3bff7b2`, included in merge `0130fa6`), subject to its remaining agent runs. The first Opus 5.5 run scored 0.267 against the reference's 0.476. Fallback: the single-mission task `harbor/lightlag-traverse/` on world 2026.
 > - **MAX map** (`lightlag_traverse_max/`, Manh): a sandbox and a harder variant for the write-up, not the submission.
 > - **On top of the freeze:** RL training (Sölvi), auditing Claude's runs (Manh's decision auditor is the obvious tool), the demo, the README and the submission. Seed claims in the rows below stand.
 
