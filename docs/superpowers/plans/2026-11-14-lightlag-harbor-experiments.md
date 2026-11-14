@@ -17,17 +17,17 @@ Docker and MCP 2.3.0 for execution. Model authentication is local `.env` only.
 
 ## 1. Prepare the experiment package
 
-- [ ] Add `tests/lightlag_experiments/test_prepare.py`: generate a task in a
+- [x] Add `tests/lightlag_experiments/test_prepare.py`: generate a task in a
   `TemporaryDirectory`, import its isolated reference package, instantiate its
   simulator-side service and assert profile/horizon/delay, verify every manifest
   hash, and prove a second invocation preserves an existing directory.
-- [ ] Run `python3 -m unittest discover -s tests/lightlag_experiments -v` before
+- [x] Run `python3 -m unittest discover -s tests/lightlag_experiments -v` before
   implementation and confirm it fails because preparation is missing.
-- [ ] Implement `tools/lightlag_experiments/prepare.py` and a small
+- [x] Implement `tools/lightlag_experiments/prepare.py` and a small
   `play_policy.py` entry point. Reuse existing public-tool controllers and MCP
   client. Fail on unexpected template structure instead of silently producing a
   partially changed task.
-- [ ] Run the new tests, `python3 harbor/sync_task.py --check`, and the existing
+- [x] Run the new tests, `python3 harbor/sync_task.py --check`, and the existing
   Harbor tests. Review the staged diff, commit and push the verified generator.
 
 The intended command is:
@@ -39,9 +39,9 @@ python3 tools/lightlag_experiments/prepare.py /tmp/lightlag-rush-500-kf \
 
 ## 2. Verify the actual lifecycle
 
-- [ ] Install the pinned Harbor toolchain outside the repo and record its version.
-- [ ] Lint the generated task and run its oracle and no-op. Save jobs outside Git.
-- [ ] Generate identical-settings tasks for `open_loop` and `leg_and_wait`; run
+- [x] Install the pinned Harbor toolchain outside the repo and record its version.
+- [x] Lint the generated task and run its oracle and no-op. Save jobs outside Git.
+- [x] Generate identical-settings tasks for `open_loop` and `leg_and_wait`; run
   their oracle solutions and compare with direct simulator results. Treat
   infrastructure errors separately from scores.
 - [ ] Once `.env` contains a key, run one model against the reference task. Keep
@@ -63,11 +63,13 @@ to keep raw results outside the checkout.
 
 ## 3. Publish evidence and handoff
 
-- [ ] Add `docs/lightlag-experiments.md` with exact preparation/run commands,
+- [x] Add `docs/lightlag-experiments.md` with exact preparation/run commands,
   measured results, limits and next step. Link sanitized artifacts and manifest.
-- [ ] Refresh `docs/afterquery-readiness.md` for the already delivered base model
+- [x] Refresh `docs/afterquery-readiness.md` for the already delivered base model
   run and current credit information. Attribute Kristján's and Manh's work.
-- [ ] Add one real contribution entry to `docs/prize-evidence.md`; update and
+- [x] Add one real contribution entry to `docs/prize-evidence.md`; update and
   release this task's claim with completed work and any unresolved API access.
-- [ ] Verify links, artifacts, clean diff and affected tests; fetch, integrate,
+- [x] Verify links, artifacts, clean diff and affected tests; fetch, integrate,
   push and confirm the final commit is on `origin/main`.
+
+Execution note: the generator is on main at `0bc0d43`; all four scripted Harbor runs are saved and match the direct runner. The real model step is pending the user filling the Git-ignored `.env`. No harder-task model score or paid usage is claimed.
