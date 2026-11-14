@@ -426,6 +426,62 @@ class AllInOneTest(unittest.TestCase):
 
 
 @unittest.skipUnless(HAVE_NUMPY, "the Manh controllers need numpy")
+class AllInOneWithGateTest(unittest.TestCase):
+    """Controller 37: 36 with controller 35's gate in front of its filter, the gate's prior made
+    sand-aware. Quiet without faults, and as good as 35 with them (delay 3 unless noted)."""
+
+    @staticmethod
+    def _classes():
+        from lightlag_dynamic.manh_controllers import controllers as mc
+        from lightlag_dynamic.manh_controllers.swarm import resolve
+        return tuple(getattr(mc, name.rpartition("_manh_controller_")[0]) for name in resolve(["36", "37"]))
+
+    @staticmethod
+    def _row(number, profile, factors, seed, delay=3):
+        from lightlag_dynamic.manh_controllers.swarm import resolve, run_one
+        row, _ = run_one((resolve([number])[0], {"name": "t", "profile": profile, "factors": factors},
+                          delay, seed, False))
+        return row
+
+    def test_without_faults_it_sends_what_36_sends(self):
+        # A plain episode, hidden sand on the way home, and hidden sand at delay 0, where the plain
+        # gate (its prior on the published map) holds back a true fix and loses a sample.
+        from lightlag_dynamic.manh_controllers import controllers as mc
+        from lightlag_dynamic.manh_controllers.scenarios import make_env
+        c36, c37 = self._classes()
+        plain_gate = type("plain_gate", (mc._GapGate, c36), {})
+        cases = (("rush_noisy", 3, 3, {}), ("noisy", 5, 3, {"hidden_patches": 1}),
+                 ("rush_noisy", 6, 0, {"hidden_patches": 2}))
+        commands = {}
+        for profile, seed, delay, factors in cases:
+            for name, cls in (("36", c36), ("37", c37), ("plain gate", plain_gate)):
+                env = make_env(seed, delay, profile, factors=factors)
+                commands[name] = AllInOneTest._commands(cls, env)
+            with self.subTest(profile=profile, seed=seed, delay=delay):
+                self.assertEqual(commands["37"], commands["36"])
+        self.assertNotEqual(commands["plain gate"], commands["36"])  # the last case: why the prior is sand-aware
+
+    def test_outlier_fixes(self):
+        # rush, 15% of fixes off by 3 m, development seed 7029: 36 believes them and dies;
+        # 35 and 37 hold them back and sample everything.
+        outliers = {"fix_outliers": {"p": 0.15, "sigma": 3.0}}
+        row36, row35, row37 = (self._row(n, "rush", outliers, 7029) for n in ("36", "35", "37"))
+        self.assertFalse(row36["alive"])
+        self.assertAlmostEqual(row35["share"], 1.0)
+        self.assertAlmostEqual(row37["share"], 1.0)
+        self.assertTrue(row37["alive"] and row37["at_base"])
+
+    def test_lost_packets(self):
+        # rush_noisy, half the telemetry packets lost, development seed 7032: 36 applies no drive
+        # whose packet is lost and scores 0.3; 37 bridges the gaps as 35 does.
+        loss = {"packet_loss": {"p": 0.5}}
+        row36, row37 = self._row("36", "rush_noisy", loss, 7032), self._row("37", "rush_noisy", loss, 7032)
+        self.assertLess(row36["share"], 0.5)
+        self.assertAlmostEqual(row37["share"], 1.0)
+        self.assertTrue(row37["alive"] and row37["at_base"])
+
+
+@unittest.skipUnless(HAVE_NUMPY, "the Manh controllers need numpy")
 class SwarmTest(unittest.TestCase):
     def test_run_and_report(self):
         from lightlag_dynamic.manh_controllers import swarm

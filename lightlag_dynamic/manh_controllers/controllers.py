@@ -1327,6 +1327,48 @@ class EKF_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_
     (RESERVE_CLEAN = 2.0) it sends exactly 34's commands turn-based (2,160 episodes checked)."""
 
 
+class _SandAwareGatePrior:
+    """Lets _GapGate's prior use the battery's terrain labels (needs _SandAwareFilter; must sit in
+    front of _GapGate).
+
+    The gate compares each position fix with a prior that propagates the packet's drive over the
+    published map. 36's own filter step first relabels that drive from the battery reading
+    (_SandAwareFilter). On unmapped sand the two then disagree: the gate's prior overshoots, and a
+    true fix is held back as an outlier. On development seeds this happened in 9 of 96 hidden-sand
+    episodes and cost up to 22 points in one. With the same labels in the gate's prior it happened
+    in none.
+
+    After a gap (lost packets) the battery reading does not belong to a single drive, so the plain
+    prior is used and the gate's own gap logic decides."""
+
+    def _filter(self, packet):
+        f = self.filter
+        sand_wheel = self._battery_sand_wheel(packet)
+        if sand_wheel is None:
+            return super()._filter(packet)
+        base = type(f).propagate
+
+        def propagate(mean, cov, heading_deg, wheel, terrain_at):
+            labels = []
+            base(f, mean, cov, heading_deg, wheel, lambda x, y: labels.append(terrain_at(x, y)) or labels[-1])
+            it = iter(self._relabel(labels, wheel, sand_wheel, packet))
+            return base(f, mean, cov, heading_deg, wheel, lambda x, y: next(it, None) or terrain_at(x, y))
+
+        f.propagate = propagate
+        try:
+            return super()._filter(packet)
+        finally:
+            f.__dict__.pop("propagate", None)  # _SandAwareFilter, further down, has usually removed it
+
+
+class EKF_gapgate_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_aimdisc_turncost_window_MPC(  # noqa: E501
+        _SandAwareGatePrior, _GapGate,
+        EKF_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_aimdisc_turncost_window_MPC):  # noqa: E501
+    """37: 36 with controller 35's gate (_GapGate, unchanged) in front of its filter, so the
+    all-in-one also survives lost telemetry packets and gross position fixes. The gate's prior is
+    made sand-aware (_SandAwareGatePrior), which keeps it quiet on unmapped sand."""
+
+
 # =============================================================================================
 # Registry
 # =============================================================================================
@@ -1598,6 +1640,27 @@ register("EKF_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedgu
              "28 of 192 suite cells (worst -3.7), below solvi_reference in one (noisy, two hidden patches, "
              "delay 0), 3.9 below 34 where a slip check and a hidden patch are combined (-7.7 to -0.3), and "
              "level with 29 at two ticks of thinking per call (-1.0, -3.6 to +1.6).")
+_R9 = "2026-11-14, all-in-one with the gate (36 + controller 35's lost-packet bridging and fix gate)"
+register("EKF_gapgate_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_"
+         "aimdisc_turncost_window_MPC_manh_controller_37",
+         _ours(EKF_gapgate_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_aimdisc_turncost_window_MPC),  # noqa: E501
+         built=_R9,
+         note="36 with controller 35's gate (lost-packet bridging and a chi-square gate on position fixes, "
+              "unchanged) in front of its filter, and the gate's prior made sand-aware",
+         why="36 did not carry 35's gate, so lost packets and outlier fixes hurt it as they hurt 34 (17 points "
+             "below 35 on the faults suite). Two keep rules were declared before any run. With faults it must "
+             "not be below 35: met. Without faults it must send 36's commands: not met to the letter, and no "
+             "gate can meet it, since a 99.9% gate holds back one honest fix in a thousand. The plain gate also "
+             "held back true fixes on unmapped sand, because its prior used the published map while 36's "
+             "filter uses the battery's terrain labels (9 of 96 hidden-sand development episodes, up to 22 "
+             "points in one); giving the gate's prior the same labels removed that. One final check on fresh "
+             "seeds (suites 9000-9059, plain profiles 9060-9259, faults 9000-9059, Mars rules and real-time "
+             "clock 9000-9039). Without faults against 36: suites -0.01 (-0.03 to +0.01), plain profiles -0.03 "
+             "(-0.06 to +0.00), score or survival different in 36 of 13,920 episodes; the one measurable cost "
+             "is after a slip jump, -0.4 (-0.8 to -0.1). With faults: +1.0 over 35 (+0.4 to +1.8), +16.9 over "
+             "36 (+15.4 to +18.3), no death in 2,160 episodes (35: 9, 36: 20, controller 1: 629). Suites +2.3 "
+             "over 35 and +4.3 over controller 1; Mars rules +3.3 over 33 (+2.5 to +4.3); real-time clock +2.5 "
+             "over 29 (+1.2 to +3.7). It inherits 36's weak cells (README, 'Controller 36').")
 for _name in ("solvi_reference", "kristjan_reference", "blind", "cautious"):
     register(_name, _team(_name), kind="team", logged=False, note="team controller, imported unchanged",
              why="comparison only")

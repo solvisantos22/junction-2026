@@ -22,7 +22,7 @@ python3 -m lightlag_dynamic.manh_controllers --suite base  --seeds 0-19         
 python3 -m lightlag_dynamic.manh_controllers --suite noise --controllers 1 20 team   # names, numbers or kinds (manh, bound, team)
 python3 -m lightlag_dynamic.manh_controllers --suite partb --controllers 22 --append  # add a new controller to existing results
 python3 -m lightlag_dynamic.manh_controllers --suite faults --controllers 1 24 35      # lost packets and outlier fixes on rush / rush_noisy
-python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                     # 25 tests, about 15 seconds
+python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                     # 28 tests, about 20 seconds
 ```
 
 - Results go to `~/lightlag-manh-results/<suite>/`, outside the repository; use `--out` to change this, and do not commit result rows.
@@ -61,7 +61,8 @@ python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                
 | 33 | `EKF_executive_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_33` | 31 plus the executive | **Best on the slip check.** Fresh seeds 900–979, `noisy`: limit 0.40 80.3% → 88.8% (home 77 → 80 of 80), 0.35 75.0% → 85.9%; never below 31. Equals 24 without a slip check. [Details](../../docs/lightlag-dynamic-pilot.md#mars-operations-tweaks-sandbox-off-by-default). |
 | 34 | `EKF_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC_manh_controller_34` | 27 with the guarded moves run only when a probe is free: one telemetry round trip of delay costs the current plan no value and still fits the horizon (always so on the way home). Otherwise 24's stay-alive rule | **Best overall until 36**, which builds on it. Keeps 24's score on the published profiles and 27's survival on hidden sand. Fresh seeds 5000–5259: +3.2 over 1 (+2.7 to +3.8), +1.2 over 24, +0.5 over 27; plain `rush` / `rush_noisy` +0.2 over 24 (a tie) and +1.8 over 27. Not ahead in every cell: see "Controller 34" below. |
 | 35 | `EKF_gapgate_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_35` | 24 with gap bridging (acknowledged drives applied across lost telemetry packets) and a chi-square gate on position fixes in front of the filter | **Most robust to link and localiser faults; identical to 24 on the published profiles.** Fresh seeds 8000–8059: published profiles +0.02 over 24 (2 of 720 episodes differ); faults suite +24.7 over 24, +17.1 over 34, +31.9 over 1, 2 deaths in 2160 episodes against 75 for 24. See "Controller 35" below. |
-| 36 | `EKF_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_aimdisc_turncost_window_MPC_manh_controller_36` | Everything that worked, in one controller: 34 on the real-time-aware base of 29, under the Mars slip-check layer and executive of 33, with the rules read once and an energy reserve of 1.0 until the battery shows unmapped sand (the stock 2.0 after) | **Best overall, and ahead of each front's own specialist.** Each layer is inactive without its rule: with the stock reserve it sends exactly 34's commands. Fresh seeds 6000–6259, used once: suites +1.0 over 34 (+0.7 to +1.3) and +4.1 over 1; plain profiles +1.0 over 34; Mars rules +3.4 over 33 (+2.5 to +4.2); real-time clock +1.7 over 29 (+0.5 to +2.9); hidden-sand deaths as 34. Not ahead in every cell: see "Controller 36" below. 35's lost-packet bridging and fix gate are not folded in: it landed while 36 was being tested. |
+| 36 | `EKF_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_aimdisc_turncost_window_MPC_manh_controller_36` | Everything that worked, in one controller: 34 on the real-time-aware base of 29, under the Mars slip-check layer and executive of 33, with the rules read once and an energy reserve of 1.0 until the battery shows unmapped sand (the stock 2.0 after) | **Best overall, and ahead of each front's own specialist.** Each layer is inactive without its rule: with the stock reserve it sends exactly 34's commands. Fresh seeds 6000–6259, used once: suites +1.0 over 34 (+0.7 to +1.3) and +4.1 over 1; plain profiles +1.0 over 34; Mars rules +3.4 over 33 (+2.5 to +4.2); real-time clock +1.7 over 29 (+0.5 to +2.9); hidden-sand deaths as 34. Not ahead in every cell: see "Controller 36" below. 35's lost-packet bridging and fix gate are not in 36; 37 adds them. |
+| 37 | `EKF_gapgate_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_aimdisc_turncost_window_MPC_manh_controller_37` | 36 with controller 35's gate (lost-packet bridging and a chi-square gate on position fixes, unchanged) in front of its filter, and the gate's prior made sand-aware | **Best overall: 36's score without faults, and 35's robustness with them.** Fresh seeds 9000–9259, used once. Without faults against 36: suites −0.01 (−0.03 to +0.01), plain profiles −0.03 (−0.06 to +0.00). With lost packets and outlier fixes: +1.0 over 35 (+0.4 to +1.8), +16.9 over 36, no death in 2,160 episodes. Mars rules +3.3 over 33; real-time clock +2.5 over 29. One measurable cost: −0.4 after a slip jump. See "Controller 37" below. |
 
 **Bounds** use privileged information through `scenarios.ScenarioEnvironment`. They are yardsticks, not entries.
 
@@ -373,7 +374,7 @@ Left out on purpose:
 - The particle and cubature filters (2, 8, 20, 21): they win only at heavy noise.
 - 28's cautious sand pricing: it trades the third target for safety, so it stays a separate twin.
 
-Not folded in yet: 35's lost-packet bridging and position-fix gate. Controller 35 landed while 36 was being tested, so 36 has 34's behaviour under those faults (see "Controller 35" above).
+Not in 36: 35's lost-packet bridging and position-fix gate. Controller 35 landed while 36 was being tested, so 36 has 34's behaviour under those faults. Controller 37 adds them (see "Controller 37" below).
 
 **Each layer is inactive without its rule.** With the reserve rule set to the stock 2.0, 36 was compared with 34 command for command, turn-based and without a slip check:
 - 1,440 development episodes (every suite scenario and plain rush, delays 0/3/5, seeds 0–7): all identical.
@@ -439,6 +440,66 @@ The other two fronts, against each front's own specialist:
 - **Hidden sand on `noisy`:** the share is level with 34 (+0.6, −0.5 to +1.7), but 36 is home less often (64% against 69%): it more often takes the third target and ends alive away from base.
 
 **What it is for.** One controller to keep improving instead of three lines. It is not a reference decision: `kf_mpc` stays the reference everywhere it is used.
+
+### Controller 37: the all-in-one with controller 35's gate (Saturday about 14:30 Helsinki)
+
+**What it is.** 36 with controller 35's gate (`_GapGate`, unchanged) in front of its filter:
+- **Lost telemetry packets are bridged:** acknowledged drives are applied across the gap.
+- **A position fix far outside the prediction is held back** (99.9% chi-square gate), before the fading can lean towards it.
+- **One addition** (`_SandAwareGatePrior`): the gate's prior uses the battery's terrain labels, as 36's own filter step does.
+
+**Two keep rules, declared in `TEAM_STATUS.md` before any run:**
+1. **With faults, 37 must not be below 35.** Met: +1.0 on fresh seeds.
+2. **Without faults, 37 must send 36's commands.** Not met to the letter, and no gate can meet it: a 99.9% gate holds back one honest fix in a thousand, and a slip jump looks like an outlier for one packet. What was measured instead: no difference in score overall, and one small cost after a slip jump.
+
+**Why the gate's prior had to be sand-aware.** 36 against 37 without faults, on development seeds (suites and plain profiles 0–7, Mars rules 0–19):
+
+| Without faults, against 36 | Plain gate | Gate with the sand-aware prior (37) |
+|---|---|---|
+| Turn-based episodes with different commands (of 1,632) | 39 | 27 |
+| Hidden-sand episodes with different commands (of 96) | 9 | 0 |
+| Score, all turn-based | −0.05 (−0.10 to −0.01) | 0.00 (−0.01 to +0.00) |
+| Score, hidden sand | −0.35 (−1.04 to +0.00) | 0.00 |
+| Score, after a slip jump | −0.49 (−1.48 to +0.00) | −0.06 (−0.17 to +0.00) |
+| Score, Mars rules (480 episodes) | −0.03 (−0.10 to +0.02) | 0.00 |
+
+- The gate compares each fix with a prior that drives over the published map. 36's filter first relabels that drive from the battery. On unmapped sand the gate's prior overshoots, and a true fix is held back. One development episode lost 22 points that way.
+- With faults the two variants play identically, because the faults suite has no hidden sand. Development seeds 7000–7039: a tie with 35 (+0.04, −0.50 to +0.60) and +18.1 over 36.
+
+**Final check, once, on fresh seeds 9000–9259.**
+- **Episodes:** the suites on 9000–9059 (11,520 per controller), the four plain profiles on 9060–9259 (2,400), the faults suite on 9000–9059 (2,160 with a fault), Mars rules and the real-time clock on 9000–9039.
+- **Pass rules set before the run:**
+  - without faults, the difference to 36 has an interval that includes zero and is under 0.2 points;
+  - with faults, not below 35;
+  - not below 33 on Mars rules or 29 on the real-time clock;
+  - no crash.
+- **All were met.** The registered class reproduced the prototype on 2,516 episodes.
+
+| Fresh seeds | `kf_mpc` | 35 | 36 | **37** |
+|---|---|---|---|---|
+| Suites, no faults | 72.3% | 74.3% | 76.6% | **76.6%** |
+| Plain profiles | 83.9% | 85.7% | 86.9% | **86.9%** |
+| Hidden sand | 48.5% | 50.6% | 62.7% | **62.7%** |
+| Faults suite, cells with a fault | 41.0% | 72.0% | 56.2% | **73.0%** |
+| Dead with a fault (of 2,160) | 629 | 9 | 20 | **0** |
+| Home with a fault | 56% | 99% | 76% | **100%** |
+
+Paired by episode, in points of share, with a 95% bootstrap over seeds:
+
+| 37 against | Suites | Plain profiles | Cells with a fault |
+|---|---|---|---|
+| 36 | −0.01 (−0.03 to +0.01) | −0.03 (−0.06 to +0.00) | +16.9 (+15.4 to +18.3) |
+| 35 | +2.3 (+1.9 to +2.8) | +1.2 (+0.9 to +1.5) | +1.0 (+0.4 to +1.8) |
+| `kf_mpc` | +4.3 (+3.9 to +4.8) | +2.9 (+2.6 to +3.3) | +32.1 (+29.7 to +34.2) |
+
+- **Mars rules:** +3.3 over 33 (+2.5 to +4.3); level with 36 (+0.01).
+- **Real-time clock:** +2.5 over 29 (+1.2 to +3.7); level with 36 (−0.04, −0.13 to +0.00).
+
+**Where 37 is not ahead:**
+- **After a slip jump:** −0.4 against 36 (−0.8 to −0.1). The first fix after the jump is held back once before the gate accepts that the prediction is what is wrong.
+- **Single cells:** against 36 it is lower in 19 of 192 suite cells, higher in 11 and equal in 162; the worst is −1.3 (`rush_noisy`, slip jump, delay 3). Score or survival differs from 36 in 36 of 13,920 fault-free episodes.
+- **36's weak cells remain:** a slip check together with a hidden patch, two ticks of thinking per tool call, and the one cell below Sölvi's reference (see "Controller 36" above).
+- **Faults the gate cannot see** (lost uplinks, safe mode, battery fade) are not covered, as for 35.
 
 ## Discriminative seeds
 
