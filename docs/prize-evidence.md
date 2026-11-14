@@ -185,6 +185,25 @@ These are recommended evidence choices, not newly asserted official entry requir
   model result, final rules choice or prize submission. Author attribution for
   existing teammate components is preserved. Codex model version unrecorded.
 
+### R06 — 14 November — Separate capable-reference study
+
+- Codex predeclared candidate 24 versus the original KF + MPC, froze the source
+  independently of teammates' live work, and ran 96 public-callback episodes.
+  The policies themselves retain their original team authorship.
+- All eight historical reference replays reproduce exactly. Candidate 24's
+  fresh rush mean gain is **0.007898**, with 3 wins, 16 ties and 1 loss; all
+  noisy-profile scores tie. Every episode survives at base. These results do
+  not change the canonical reference or prove general model difficulty.
+- Verification: independent review, 96 exact transcript replays / 6,310 calls,
+  ten representative policy reruns, 100 byte-identical reproduction files and
+  five runner guard checks. Full source hashes, dependency versions, errors
+  (none), complete trajectories and the retrospective model comparison remain.
+- Evidence: [study and commands](lightlag-runs/overnight-reference-study/README.md),
+  [verification](lightlag-runs/overnight-reference-study/verification-final.json),
+  [runner](../tools/lightlag_experiments/overnight_references.py). No paid
+  inference, Modal or Gemini usage. Project/reference adoption remains a team
+  decision; Codex's contribution is experiment engineering and critical review.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.

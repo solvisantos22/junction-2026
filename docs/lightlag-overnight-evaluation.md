@@ -253,6 +253,25 @@ findings. A09 remains running, so this is still not the finished block.
   audit's large `LATE_SAMPLE` attribution includes the subsequent continuation
   loss; lateness alone does not explain erasing all science value.
 
+## Reference-strength study complete
+
+The [96-episode result and full reproduction instructions](lightlag-runs/overnight-reference-study/README.md)
+are now available. Every episode survives and ends at base; all eight original
+KF results and complete replays match their frozen Harbor counterparts.
+
+Candidate 24 gains **0.103846** mean reward on the four historical rush maps,
+but only **0.007898** on the 20 fresh rush maps (3 wins, 16 ties, 1 loss).
+Every noisy-profile score ties the old reference, although trajectories can
+differ. This supports keeping the newer policy available, not claiming uniform
+superiority or silently replacing the old reference. Original model outcomes
+remain mixed even under the separate retrospective substitution analysis.
+
+Independent review checked all rows/hashes, replayed all **6,310 public and
+evaluator calls**, and reran ten representative policies. Root reran the
+full transcript verifier and five guard tests. The reproduction check matches
+100 scientific files byte for byte; it adds no independent samples. Candidate
+27 remains a separately declared supplement, with no results in this study.
+
 ## Block A complete: all nine declared attempts
 
 All nine fresh sessions finished without provider or execution exceptions.
