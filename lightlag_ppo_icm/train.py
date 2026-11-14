@@ -113,14 +113,22 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128,
           int_coef=0.5, int_final=0.1, lr=3e-4, lr_final=0.3, icm_lr=1e-3, ent_coef=0.005, hidden=128, headings=16,
           wait_bias=4.0, sample_bias=2.0, eval_every=20, train_seeds=None, dev_seeds=None,
           max_minutes=None, quiet=False, metres="auto", home_pull=0.0, home_guard=False,
-          targets=False, slots=12, home_bias=-4.0, gamma=None, pool=None, callback=None):
+          targets=False, slots=12, home_bias=-4.0, gamma=None, pool=None, callback=None, resume=False):
     """Train once and return the summary that is also written to <out>/summary.json. `pool`: anything
     with map(function, jobs, chunksize) to play the rollouts on (modal_train.py passes Modal's); by
-    default a process pool of `workers`. `callback(update, row)` runs after every update's log line."""
+    default a process pool of `workers`. `callback(update, row)` runs after every update's log line.
+    With `resume`, a folder that already holds a run continues from its last checkpoint (last.npz,
+    written at every development check): the log is cut back to it and the same training draws
+    follow. The optimiser's moments and the minibatch order start afresh."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
+    resumed = None
     if (out / "log.jsonl").exists():
-        raise ValueError(f"{out} already holds a run; give a new folder")
+        if not resume:
+            raise ValueError(f"{out} already holds a run; give a new folder")
+        resumed = resume_point(out)
+        if resumed is None:
+            (out / "log.jsonl").unlink()     # no checkpoint yet: start over
     if targets:
         if env != "traverse":
             raise ValueError("--targets is built for the traverse (normal map) only")
@@ -146,6 +154,13 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128,
         agent.actor.params[-1][WAIT] = wait_bias
         agent.actor.params[-1][SAMPLE] = sample_bias
     rng = np.random.default_rng(seed)
+    first = 1
+    if resumed is not None:
+        agent, last_update, last_steps, last_best, last_minutes = resumed
+        for _ in range(last_update):     # the draws the first attempt made, so the same ones follow
+            rng.integers(train_seeds[0], train_seeds[1] + 1, size=episodes)
+            rng.integers(0, 2 ** 62, size=episodes)
+        first = last_update + 1
     dev = [(s, 0) for s in range(dev_seeds[0], dev_seeds[1] + 1)]
     settings = {"env": env, "delay": delay, "updates": updates, "episodes": episodes, "seed": seed,
                 "int_coef": int_coef, "int_final": int_final, "lr": lr, "lr_final": lr_final, "icm_lr": icm_lr,
@@ -156,12 +171,16 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128,
                 "gamma": agent.config.gamma, "train_seeds": list(train_seeds), "dev_seeds": list(dev_seeds)}
     extra = {"task": task.to_dict(), "env": env, "delay": delay, "settings": settings}
     best, started, steps, done = {"share": -1.0, "update": 0}, time.time(), 0, 0
+    if resumed is not None:
+        if agent.config.obs_dim != task.obs_dim or agent.config.n_actions != task.n_actions:
+            raise ValueError(f"the checkpoint in {out} is for another task")
+        best, steps, done, started = last_best, last_steps, first - 1, time.time() - 60.0 * last_minutes
     own_pool = pool is None and workers > 1
     if own_pool:
         pool = Pool(workers)
     try:
         with open(out / "log.jsonl", "a") as log:
-            for update in range(1, updates + 1):
+            for update in range(first, updates + 1):
                 progress = (update - 1) / max(1, updates - 1)
                 now_int = int_coef * (1.0 - (1.0 - int_final) * progress)
                 seeds = rng.integers(train_seeds[0], train_seeds[1] + 1, size=episodes)
@@ -208,6 +227,23 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128,
               "minutes": round((time.time() - started) / 60.0, 2), "best_dev": best}
     (out / "summary.json").write_text(json.dumps(result, indent=2) + "\n")
     return result
+
+
+def resume_point(out):
+    """(agent, update, steps, best, minutes) at the last checkpoint of a run folder, with its log cut
+    back to that update; None when it has no checkpoint yet."""
+    if not (out / "last.npz").exists():
+        return None
+    agent, extra = Agent.load(out / "last.npz")
+    update = int(extra["update"])
+    rows = [json.loads(line) for line in (out / "log.jsonl").read_text().splitlines() if line.strip()]
+    rows = [row for row in rows if row["update"] <= update]
+    (out / "log.jsonl").write_text("".join(json.dumps(row) + "\n" for row in rows))
+    best = {"share": -1.0, "update": 0}
+    if (out / "best.npz").exists():
+        _, best_extra = Agent.load(out / "best.npz")
+        best = {**best_extra["dev"], "update": best_extra["update"]}
+    return agent, update, (rows[-1]["steps"] if rows else 0), best, (rows[-1]["minutes"] if rows else 0.0)
 
 
 def drive_lengths(env, delay=3):
@@ -271,6 +307,7 @@ def main(argv=None):
     parser.add_argument("--train-seeds", type=seed_pair, help="e.g. 200000-299999 (default: the mode's own)")
     parser.add_argument("--dev-seeds", type=seed_pair)
     parser.add_argument("--max-minutes", type=float, help="stop after the update that passes this")
+    parser.add_argument("--resume", action="store_true", help="continue a run folder from its last checkpoint")
     args = parser.parse_args(argv)
     result = train(**vars(args))
     print(json.dumps(result["best_dev"]))

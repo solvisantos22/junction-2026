@@ -90,6 +90,20 @@ class TargetMissionTests(unittest.TestCase):
         self.assertGreater(np.mean(scores), np.mean(randoms))
 
 
+class CampaignToolTests(unittest.TestCase):
+    def test_the_campaign_tool_scores_all_missions_together(self):
+        from lightlag_ppo_icm.campaign import play_campaign
+        out = play_campaign(("nearest", "nearest_targets", None, (410006, 410007)))
+        self.assertEqual([m["seed"] for m in out["missions"]], [410006, 410007])
+        self.assertAlmostEqual(out["score"], out["raw_score"] / out["max_available_value"])
+        self.assertGreater(out["score"], 0.0)
+
+    def test_the_campaign_tool_refuses_unknown_players(self):
+        from lightlag_ppo_icm.campaign import campaign_player
+        with self.assertRaises(ValueError):
+            campaign_player("plain", None)
+
+
 class MaskTests(unittest.TestCase):
     def test_a_policy_never_picks_a_masked_action(self):
         rng = np.random.default_rng(0)
@@ -143,6 +157,20 @@ class WorldTests(unittest.TestCase):
 
 
 class TargetTrainingTests(unittest.TestCase):
+    def test_a_stopped_run_resumes_from_its_last_checkpoint(self):
+        with tempfile.TemporaryDirectory() as folder:
+            out = os.path.join(folder, "run")
+            settings = dict(env="traverse", targets=True, out=out, episodes=1, workers=1,
+                            dev_seeds=(420000, 420000), eval_every=2, quiet=True)
+            train(updates=3, **settings)          # checkpoints at update 2; update 3 is logged after it
+            with self.assertRaises(ValueError):
+                train(updates=4, **settings)      # a folder that holds a run needs resume
+            result = train(updates=4, resume=True, **settings)
+            self.assertEqual(result["updates_done"], 4)
+            with open(os.path.join(out, "log.jsonl")) as handle:
+                updates = [json.loads(line)["update"] for line in handle]
+            self.assertEqual(updates, [1, 2, 3, 4])   # update 3 was cut back and played again
+
     def test_a_short_run_writes_a_policy_that_plays_the_target_mode(self):
         with tempfile.TemporaryDirectory() as folder:
             out = os.path.join(folder, "run")
