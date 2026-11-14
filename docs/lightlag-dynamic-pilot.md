@@ -57,7 +57,7 @@ Tested with a fake clock (9 tests) and live over HTTP with a 0.5 s tick, includi
 
 **Status for agents and teammates: proposal by Manh; do not switch any reference to it without team agreement.** Nothing imports it. `kf_mpc` stays the reference everywhere it is used today.
 
-**What.** [`lightlag_dynamic/kf_mpc_rt.py`](../lightlag_dynamic/kf_mpc_rt.py), policy `kf_mpc_rt`. Registry entry `EKF_latencyaware_MPC_manh_controller_29` in `manh_controllers` follows in a separate commit. It is `kf_mpc` with three changes:
+**What.** [`lightlag_dynamic/kf_mpc_rt.py`](../lightlag_dynamic/kf_mpc_rt.py), policy `kf_mpc_rt`. In the Manh registry it is `EKF_latencyaware_MPC_manh_controller_29` (the swarm plays turn-based, where 29 equals controller 1). It is `kf_mpc` with three changes:
 - It measures its lag: the ticks between the tick it decided on and its uplink's `sent_tick`, as the median of its last five uplinks.
 - It decides that much earlier, so its next commands arrive just as the queue empties and the rover does not idle while it thinks. The plan itself is `kf_mpc`'s.
 - Commands that no longer fit before the horizon are dropped instead of crashing the controller.

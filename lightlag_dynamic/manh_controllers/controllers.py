@@ -30,6 +30,7 @@ import numpy as np
 import lightlag_dynamic.controllers as _lc
 from lightlag_dynamic.controllers import HAZARD_CLEARANCE, Leg, _clip_interval
 from lightlag_dynamic.kf_mpc import GATE, VAR_FLOOR, DriveFilter, KalmanMPCController
+from lightlag_dynamic.kf_mpc_rt import RealTimeKalmanMPC
 
 from .estimators import ParticleFilter, cubature_drive, rts_smooth
 
@@ -1062,6 +1063,16 @@ class Oracle_exact_tight_MPC(_AimDisc, _Tight, _OracleExact):
 
 
 # =============================================================================================
+# Real-time clock (lightlag_dynamic/realtime.py; an optional extra, not adopted)
+# =============================================================================================
+
+class EKF_latencyaware_MPC(LogMixin, RealTimeKalmanMPC):
+    """29: controller 1 for the real-time clock (lightlag_dynamic/kf_mpc_rt.py). It measures its
+    own lag and decides that much earlier; with no lag (turn-based play, as in the swarm) it
+    sends exactly controller 1's commands."""
+
+
+# =============================================================================================
 # Registry
 # =============================================================================================
 
@@ -1242,6 +1253,15 @@ register("EKF_fading_sandfilter_sandodo_bayessand_guarded_aimdisc_turncost_windo
          _ours(EKF_fading_sandfilter_sandodo_bayessand_guarded_aimdisc_turncost_window_MPC), built=_R4,
          note="27 + 26's Bayesian unmapped-sand pricing on the way home",
          why=_WHY28)
+register("EKF_latencyaware_MPC_manh_controller_29", _ours(EKF_latencyaware_MPC),
+         built="2026-11-14, real-time clock (optional extra)",
+         note="controller 1 for the real-time clock: measures its own lag (median of the last five uplinks' "
+              "sent_tick minus its decision tick) and decides that much earlier; turn-based it equals 1 exactly",
+         why="On the real-time clock ticks pass while a controller thinks, and controller 1 then lets the queue "
+             "run empty; deciding early keeps commands arriving as the queue empties. The swarm plays "
+             "turn-based, where 29 equals 1: the gain shows only on the real-time clock. Fresh seeds 600-639 "
+             "at 1 tick of thinking per call: +4.0 points on rush_noisy and +8.9 on rush, never worse. A "
+             "proposal, not adopted (docs/lightlag-dynamic-pilot.md, 'Real-time-aware reference').")
 for _name in ("solvi_reference", "kristjan_reference", "blind", "cautious"):
     register(_name, _team(_name), kind="team", logged=False, note="team controller, imported unchanged",
              why="comparison only")
