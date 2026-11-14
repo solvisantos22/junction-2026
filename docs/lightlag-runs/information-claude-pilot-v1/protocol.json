@@ -1,0 +1,55 @@
+{
+  "attempts_per_context": 1,
+  "budget_note": "Soft target, not hard provider cap. OpenCode steps12 is a prompt guard, output8192 caps each model response, not total cost. Prior coordinator usage9.9394628 and potentially shared Rocks1.4873214 tracked conservatively against user-reported15.70. Stop on unexpected runaway usage; interrupted rows are not capability failures.",
+  "harness": "OpenCode 1.19.5 / Harbor 0.25",
+  "judging": "Report realized score vs same-seed reference separately from prior/posterior decision correctness and timing. Four independent sessions are a diagnostic pilot, not population reliability.",
+  "model": "anthropic/claude-opus-5-5",
+  "opencode_config": {
+    "agent": {
+      "build": {
+        "steps": 12
+      }
+    },
+    "provider": {
+      "anthropic": {
+        "models": {
+          "claude-opus-5-5": {
+            "limit": {
+              "context": 200000,
+              "output": 8192
+            }
+          }
+        }
+      }
+    }
+  },
+  "order": [
+    {
+      "context": "uncertain",
+      "seed_commitment": "0c530a7823c3d1d4c9df9f6d009e327b92fc917747134df6304c3b248a10e3a5"
+    },
+    {
+      "context": "likely_firm",
+      "seed_commitment": "e165bce72d2d9af63cdb18c934ab8757c80e1376a1d0c7320abd9e8b5d9bdcdc"
+    },
+    {
+      "context": "likely_soft",
+      "seed_commitment": "357ad1948dc6660ae120799a923dcf4732dad0170b31e2f0180b9577426db4fc"
+    },
+    {
+      "context": "costly_probe",
+      "seed_commitment": "d10994615e368229d2d0f01b9d0ae4c27cdb3057fcf1127b8d20496c3e7ef06a"
+    }
+  ],
+  "parallelism": 1,
+  "pilot_spend_target_usd": 1.5,
+  "preflight": "43 tests and independent review; real Harbor selective reference and no-op; protected sidecar/token/separate verifier.",
+  "retries": 0,
+  "schema_version": 1,
+  "scope": "Frozen microenvironment, no core-rule changes, clear instructions and scripting allowed. No supplied optimal policy. All attempted, failed and unrun assignments retained.",
+  "seed_commitment_format": "SHA256 compact sorted JSON of context, seed, salt; seed and salt private until outcomes",
+  "selection": "No seed outcome inspected before generating private assignments or publishing commitments. Public context parameters are earlier hand-designed development cases.",
+  "stop_new_launches_at_pilot_reported_usd": 1.0,
+  "stop_on_unknown_usage": true,
+  "timeout_sec": 1800
+}
