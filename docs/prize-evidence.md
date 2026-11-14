@@ -829,3 +829,16 @@ call. The study does not make a new Claude-performance claim.
 [development/selection published before fresh evaluation](https://github.com/solvisantos22/junction-2026/commit/ca558c9),
 [protocol](reference-ablation.md), [results and raw data](reference-ablation-results/README.md),
 [verification](reference-ablation-results/verification.json).
+
+### Kristján / Codex — Modal classical planner learning (15 November)
+
+Kristján explicitly requested parallel Modal training, prioritizing speed using
+his remaining credits, to try to beat the reference with a learned model. Codex
+built an isolated public-state strategy selector, counterfactual rollout dataset
+and three classical model fits; the existing reference remains the team's work.
+Six focused tests pass. All 12 initial Modal smoke missions finish home/alive;
+common prefixes/features agree and the baseline replay matches the local run
+exactly. A Modal SDK cleanup warning after completion is retained and will be
+fixed before production. Training and fresh results are pending. No canonical
+reference change or new LLM-performance claim. [Protocol](learned-portfolio.md),
+[evidence](learned-portfolio-results/README.md).
