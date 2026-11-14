@@ -1,95 +1,91 @@
-# AfterQuery readiness after the 14 November update
+# AfterQuery readiness — recovered morning checkpoint
 
-Updated 14 November against Kristján's delivered Harbor/model evidence
-(`180e504`), Manh's dynamic service/controller (`fb9ae07`, `b4bdd2e`) and the
-[isolated dynamic experiment](lightlag-experiments.md) (`0bc0d43`). Organizer
-requirements still come from the team's [record of Ved's 01:35 announcement](afterquery-update-2026-11-14.md).
-This update does not claim a fresh read of logged-in Discord or prize pages.
+Updated 14 November after syncing the team’s `5d01106` changes and publishing
+all overnight A/B results (`6fb112f`). The shared tool descriptions are now
+corrected (`64fe6db`); historical experiment packages remain frozen. See the
+[morning brief](lightlag-morning-brief.md) for the direction recommendation.
+Lightlag, the final mission and the reference choice remain provisional.
 
-**The basic submission path is demonstrated, and the fixed comparison now has
-three auditable model deficits alongside three model wins and two ties.** All
-[eight predeclared additional attempts](lightlag-fixed-seed-comparison.md) are
-complete. The reference has higher mean reward in both profiles; two battery
-failures strongly affect those means. Each run replays exactly with no
-infrastructure findings. The next priority is repeatability, reference strength
-and a clear decision-focused demo. Lightlag and final rules remain provisional.
+**The model/container path and auditable failures are demonstrated. The main
+remaining gap is choosing and packaging the actual judge task.** Canonical
+`harbor/lightlag` still runs the original core seed 7, which the model solved.
+Generated dynamic experiments and demo changes do not automatically replace it.
 
-## What is now demonstrated
+## What is complete
 
-- Deterministic simulator, fixed-horizon scoring, delayed public tools and
-  [480 scripted comparison episodes](lightlag-reference-results.md).
-- [Real Docker/Harbor runs](lightlag-harbor.md): original reference 1.0, no-op
-  0.0, OpenCode 1.19.5 / Claude Opus 5.5 **1.0**, seed 7, delay 3. The model run
-  recorded $0.31 and 27 tool calls. This is Kristján's evidence, not a new run by
-  this audit.
-- The simulator-side finish/collect hook, protected artifacts, separate verifier
-  and five-tool discovery worked in that original model run.
-- Manh's delivered [dynamic profiles, KF + MPC and MCP entry point](lightlag-dynamic-pilot.md).
-  His [additional controller collection](../lightlag_dynamic/manh_controllers/README.md)
-  landed in `b867839` during this update; it is not part of the frozen experiment.
-- The [rush experiment](lightlag-experiments.md), seed 500, delay 3, now works
-  through Harbor too: reference 1.0, blind 0.571429, whole-leg waiting 0.535714,
-  no-op 0.0. All four reached tick 50 and matched direct runs. The waiting
-  controller scored 1.0 in a direct delay-0 control. The fresh OpenCode 1.19.5 /
-  Claude Opus 5.5 run also scored **1.0**, with 30 rover tool calls and reported
-  cost **$0.4821436**. All six samples were on time; no execution error occurred.
-- The [matched noisy pilot](lightlag-noisy-experiment.md) also produced Claude
-  **1.0** / reference **1.0**, with all six samples on time, 29 rover tool calls,
-  no execution exception and reported cost **$0.4642194**. The two new model
-  attempts together report **$0.946363**. The noisy waiting baseline scored
-  0.267857 and the blind plan 0.571429; neither predicts this model's result.
-- [Fixed seeds 501–504](lightlag-fixed-seed-comparison.md): eight matched Harbor
-  references, 32 direct controls and **8/8 model attempts** retained. Mean
-  Claude/reference reward: rush **0.554808 / 0.724679**, noisy
-  **0.544071 / 0.690224**. Three model wins, two ties, three deficits. All eight
-  audits reproduce exactly with no infrastructure findings. Two energy-budget
-  failures and a command-queue deficit have packet/rule pointers and explicit
-  continuation checks. Reported API usage **$3.3513574** for this set;
-  **$4.2977204** including this chat's two seed-500 pilots.
-- A [replay viewer](../viewer/README.md) for the original runs is delivered;
-  adapting its presentation to a future dynamic model result remains separate.
+| Evidence | Result and practical limit |
+|---|---|
+| Kristján’s original Harbor path | Reference 1.0, no-op 0.0, OpenCode / Claude Opus 5.5 1.0. Protected sidecar artifacts, early-stop collection and separate verifier worked. [Details](lightlag-harbor.md). |
+| Two dynamic seed-500 pilots | Model and original KF both score 1.0 on rush and noisy missions. These examples establish execution, not a model deficit. [Rush](lightlag-experiments.md), [noisy](lightlag-noisy-experiment.md). |
+| Original fixed comparison | Eight model attempts: 3 wins, 2 ties, 3 deficits against KF; two battery deaths drive much of the mean gap. All exact audits. [Full results](lightlag-fixed-seed-comparison.md). |
+| Repeatability block A | Nine new attempts on three failure-selected cases: 2 wins, 2 ties, 5 deficits, including 3 deaths. All exact audits, no infrastructure findings. This is conditional recurrence, not a random-map failure rate. [Protocol/results](lightlag-overnight-evaluation.md). |
+| Prompt-aid block B | All twelve attempts complete: mean original prompt 0.406571 / aid 0.732265; paired gain +0.325694, five improvements and one tie. Deaths 1/6 versus 0/6. Improvement gate passes; stricter gap-removal gate fails on noisy504. Combined guidance does not identify an energy-only mechanism. [Ledger](lightlag-runs/overnight-b-summary.json). |
+| Reference strength | Candidate 24 gains only 0.007898 on fresh rush maps and ties every noisy score. Candidate 27 loses on the inspected plain-profile means. Preserve these negative findings and separate them from scenario-specific gains. [24](lightlag-runs/overnight-reference-study/README.md), [27](lightlag-runs/overnight-reference27-study/README.md). |
+| Presentable evidence | Kristján’s [3D demo](../viewer/mars-demo.html) shows all three A attempts and a reference on each of two selected cases. The [decision demo](lightlag-decision-demo.md) and [62-second clip](lightlag-demo-media/README.md) show checked post-hoc continuations with clear labels. All 28 viewer tests pass after sync; the new 3D reserve explanation has a separately claimed correction. |
+| Public contract wording | Shared descriptions now accurately allow dynamic discoveries, noisy odometry and credited sampling value. Only three constants and their generated copy changed; 18 MCP + 11 Harbor checks pass. [Verification](superpowers/specs/2026-11-14-lightlag-interface-clarity.md). |
 
-## Gaps that matter now
+Manh’s morning [ablation](../lightlag_dynamic/manh_controllers/README.md#plain-profile-check-the-guarded-moves-are-the-whole-cost-saturday-about-1100-helsinki)
+reports that controller 27’s guarded moves explain the plain-profile cost,
+while helping under hidden sand. This coordinator read the commit and report,
+but has not independently rerun that ablation. No canonical reference changed.
 
-| Priority | Gap | Concrete completion evidence |
+The separately predeclared [reusable-policy test](lightlag-synthesis-experiment.md)
+has a reviewed offline preparation: isolated worker, public-only request and
+exact historical reference gate. It has **no generated policy or fresh-map
+result yet**. A one-response transfer experiment is a different condition from
+an online OpenCode playthrough and cannot replace the required Harbor evidence.
+
+## Remaining gates, in order
+
+| Priority | Action | Completion evidence |
 |---|---|---|
-| 1 | **Repeatability and reference strength.** The completed set contains three deficits, three model wins and two ties; two battery deaths strongly affect the average. | Repeat the identified failure cases with a fixed fresh-attempt budget and retain recoveries. Compare the team's newer reference separately on the same seeds; preserve the frozen comparison. Do not tune rules solely to defeat saved traces. |
-| 1 | **API budget tracking.** The user-supplied Claude key worked for the real run. User reports individual credits obtained and team Gemini application submitted; grant source and remaining balances are not independently verified. | Record reported cost per run and keep credentials local. Gemini application is not confirmation of an available balance. Modal's confirmed compute grant is separate. AfterQuery supplies no inference credits. |
-| 2 | **Evidence for a general reasoning/control gap.** Specific energy/queue failures are audited, but there are only four maps per profile and one model attempt per map. | Use capable baselines and fresh predeclared confirmation data after any tuning. Keep infrastructure errors separate from poor decisions and retain negative findings. The new one-log minimum does not cancel earlier judging-rerun requirements. |
-| 2 | **Final mission and demo.** The canonical task still uses the original profile; the generated experiment intentionally does not replace it. | Choose/version a profile after model evidence. Coordinate any canonical-task update with its owner, sync generated copies, and show the objective, decisive actions and reward in a playthrough. Exact judging model/budget remain unresolved. |
-| 2 | **Submission and license.** The platform entry remains the recorded editable draft; prize selections/forms and a repository license are not confirmed. | Check final track/prize entries and any separate forms. The public Junction FAQ says submissions are open-sourced under MIT; confirm the team's terms/license treatment before finalizing. |
+| 1 | Team chooses the objective, profile and one reference from the full evidence. | A versioned task contract, fair public instructions and a precise claim that retains model recoveries. Avoid adding mechanics solely to defeat saved traces. |
+| 1 | Package that choice as the actual judge entry point. | Coordinate with Kristján; lint/build the selected Harbor task, record its exact hashes and run it from a clean checkout. Canonical seed7 is currently solved. |
+| 1 | Validate the selected package and any material changes. | Matching real-model log and score, fixed reference, no-op and early-stop checks. Keep all predeclared attempts, errors and source versions; use fresh confirmation maps after tuning. |
+| 2 | Rehearse the explanation with the final evidence. | One mission objective, a concrete commitment error, the protected terminal reward, mixed-results context and one reproducible command. A selected failure or post-hoc rescue is not a population claim. |
+| 2 | Confirm submission and prize requirements. | Current authenticated organizer/platform read, final track/prize selections and any separate forms, team license decision, exact artifact links. The saved entry remains a recorded draft; no final submission has been made here. |
 
-The reward adapter uses `raw_score / max_available_value`, validates finite
-values and a positive denominator, and rejects malformed results. In the dynamic
-task the maximum includes all generated targets, including later discoveries;
-late samples earn the published reduced value. This is mission-value scaling,
-not reference normalization. Preserve reference ratios as a separate metric.
+The maximum reward is total maximum value generated for the mission, including
+later discoveries; late samples earn the published reduced value. The adapter
+writes `raw_score / max_available_value`, validates finite values and rejects
+malformed results. This is mission-value scaling, not reference normalization.
+Keep any reference ratio separate. Grading continues to the horizon after the
+agent stops; already accepted commands still execute and idle drain continues.
 
-Harbor's generic verifier accepts text or JSON rewards and prefers JSON when
-both exist; AfterQuery's specific requirement is the single-number
-`/logs/verifier/reward.txt`. The separate verifier receives protected artifacts
-from the simulator after the agent stops. [Official verifier documentation](https://docs.harborframework.com/tasks/verifier).
+## Budget, sponsor evidence and source freshness
 
-The public event schedule previously checked on 14 November lists final
-submission at **10:00 Sunday 15 November**, event local time. Recheck the platform
-before final submission. The same page describes MIT submissions and tech prizes
-accompanying any main track. [Junction schedule and FAQ](https://2026.hackjunction.com/).
+User-reported overnight starting budget: **$15.70**. Block A reports
+**$3.9709816**, B **$5.4645252**, total **$9.4355068**. No paid attempts remained
+running when the user returned. The nominal remainder is **$6.2644932**, not
+an independently verified account balance; earlier $4.2977204 runs are separate.
+Synthesis reserves at most $1 and has not made a provider call at this checkpoint.
+No new launch after $12 cumulative overnight usage; no retries or replacement
+outcomes. Codex itself hit a usage limit, interrupting final publication and
+preparation review. That does not imply an Anthropic API error or lost run data.
 
-## Coordination and next steps
+[Prize evidence](prize-evidence.md) records actual Codex orchestration and
+verification, Claude task execution, and teammate authorship. Modal’s confirmed
+compute grant is separate and unused in these studies. Gemini application is
+user-reported; available balance is unverified. Do not claim sponsor use or a
+prize entry from credit redemption alone.
 
-1. Use the completed [fixed seed comparison and handoff](lightlag-fixed-seed-comparison.md)
-   for a fixed-budget repeatability check and a decision-focused demo. Source/task
-   hashes and mixed outcomes are preserved; canonical-task changes remain
-   coordinated with the existing owner.
-2. Keep the task's source commit/file hashes fixed during comparisons. Manh's
-   newly delivered controller collection must not silently replace this reference.
-3. Keep the current rules for the repeatability check. Manh's new real-time
-   clock/controller remains a separate proposal, not part of this evidence.
-   Scripting stays available; further physics or training is not a prerequisite.
-4. Keep [prize evidence](prize-evidence.md) alongside delivered work, with accurate
-   Claude Code/Codex/provider attribution. Credit redemption is not a prize entry.
+Requirements still come from the team’s [record of Ved’s 01:35 announcement](afterquery-update-2026-11-14.md):
+Harbor task, a single normalized `/logs/verifier/reward.txt`, at least one actual
+model log/score, and a short README; playthrough encouraged, training optional,
+no AfterQuery inference credits. The exact judging model, effort and resource
+limits remain unresolved. General [Harbor verifier documentation](https://docs.harborframework.com/tasks/verifier)
+accepts other formats, but the recorded challenge asks for the single number.
 
-Still unknown: exact judging model/version/effort and resource limits, this
-team's remaining API balances, current additional-prize entry/form details and
-later organizer announcements. This update submits no entry and chooses no
-final project rules.
+The last successful authenticated watcher coverage was **04:29 Helsinki on
+14 November**. Later checks through 05:58 could not read the browser/native
+surfaces; after the usage interruption a queued check remained pending. These
+are stale source checkpoints, not evidence that announcements stayed unchanged.
+The last verified final deadline was **Sunday 15 November, 10:00 Helsinki**.
+The previously checked [Junction schedule/FAQ](https://2026.hackjunction.com/)
+described MIT submissions and tech prizes alongside a main track. Confirm
+current terms, repository license treatment and entry forms before submitting.
+
+Current ownership is in [TEAM_STATUS.md](../TEAM_STATUS.md). Historical B exports
+must use the pre-description-fix checkout `6fb112f`; do not change their hashes
+to fit the new package. Final project, rules and prize choices remain with the
+team.
