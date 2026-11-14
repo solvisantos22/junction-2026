@@ -52,7 +52,7 @@ modal run tools/traverse_farm/modal_app.py::replays --policies "pilot,..." --see
 ## 3. Training and the live demo
 
 - **Training:** Sölvi's launchers ([`tools/lightlag_rl/modal_job.py`](../tools/lightlag_rl/modal_job.py), [`tools/learning_campaign/modal_job.py`](../tools/learning_campaign/modal_job.py)) run bounded CPU jobs with a frozen image, a deadline and a budget cap; see [`learning-campaign.md`](learning-campaign.md).
-- **The live demo** (the 15% "live deployed demo" part of the prize): https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run, from [`tools/traverse_farm/live_app.py`](../tools/traverse_farm/live_app.py) (`modal deploy`). Pick any world; Modal drives the reference, a textbook controller and two Claude-written autopilots on it and serves the replay. A MAX row could be added once the MAX map's players are settled.
+- **The live demo** (the 15% "live deployed demo" part of the prize): https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run, from [`tools/traverse_farm/live_app.py`](../tools/traverse_farm/live_app.py) (`modal deploy`). Pick any world; Modal drives the reference, a textbook controller and the six saved Claude-written autopilots that can drive a new world on it, eight containers at once, and serves the replay. Scroll, drag and right-drag move the camera. A MAX row could be added once the MAX map's players are settled.
 
 ## Seeds: who uses what
 

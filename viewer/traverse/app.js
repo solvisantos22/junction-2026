@@ -592,7 +592,7 @@ const ACTORS = RUNS.map(run => {
 // Draw the mission at tick t. `S` is how much bigger than life markers are drawn, `chase` how far the camera has swung to the chase view.
 const TOAST = Math.max(3, T / 70);                                     // ticks a note stays over a rover: about a second at the opening speed
 function apply(t, wall, S, chase) {
-  const whole = Math.floor(t + 1e-6), steps = Math.floor(clamp(t, 0, T) * SUB + 1e-6), width = lerp(S_MAP * 0.2, 0.22, chase);
+  const whole = Math.floor(t + 1e-6), steps = Math.floor(clamp(t, 0, T) * SUB + 1e-6), width = lerp(S_MAP * 0.2, 0.22, chase) * user.scale;
   const lead = REF.track.at(t), mine = state.follow ? state.follow.track.at(t) : null;
   const crowded = mine && Math.hypot(lead.x - mine.x, lead.y - mine.y) < 5 * S;       // the two names would sit on each other
   for (const actor of ACTORS) {
@@ -699,6 +699,66 @@ renderer.setClearColor(0x0b0807, 1);
 const MAP_FOV = 34, CHASE_FOV = 52, TILT = rad(52);
 const camera = new THREE.PerspectiveCamera(MAP_FOV, 1, 4, 9000);
 const view = { k: 0, eye: new THREE.Vector3(), look: new THREE.Vector3(), yaw: null, snap: true, drawn: '' };
+// The visitor's own camera: scroll or pinch zooms toward the pointer, a drag moves over the ground, a right drag
+// (or Shift and a drag) turns the view, and R or a double click hands the camera back. It sits on top of the map,
+// chase and story cameras, so a page nobody touches plays exactly as before.
+const user = { on: false, back: false, zoom: 1, yaw: 0, pitch: 0, pan: new THREE.Vector3(), scale: 1 };
+const userEye = new THREE.Vector3(), userLook = new THREE.Vector3(), userOff = new THREE.Vector3();
+function steer(eye, look) {
+  userOff.subVectors(eye, look);
+  const base = Math.max(1e-6, userOff.length()), r = Math.max(4, base * user.zoom);
+  const polar = clamp(Math.acos(clamp(userOff.y / base, -1, 1)) + user.pitch, 0.06, 1.5), turn = Math.atan2(userOff.x, userOff.z) + user.yaw;
+  userLook.copy(look).add(user.pan);
+  userLook.x = clamp(userLook.x, -WIDTH / 2 - 60, WIDTH / 2 + 60); userLook.z = clamp(userLook.z, -DEPTH / 2 - 60, DEPTH / 2 + 60);
+  userEye.set(Math.sin(polar) * Math.sin(turn), Math.cos(polar), Math.sin(polar) * Math.cos(turn)).multiplyScalar(r).add(userLook);
+  userEye.y = Math.max(userEye.y, groundHeight(userEye.x + WIDTH / 2, DEPTH / 2 - userEye.z) * EXAG + 1.5);   // never under the ground
+  return { eye: userEye, look: userLook };
+}
+function place() {                     // the camera where the visitor moved it, or where the page put it
+  const at = user.on ? steer(view.eye, view.look) : { eye: view.eye, look: view.look };
+  camera.position.copy(at.eye); camera.lookAt(at.look); camera.updateMatrixWorld();
+  return at;
+}
+const ray = new THREE.Raycaster(), probe = new THREE.Vector3();
+function groundUnder(at) {             // the drawn ground under a point of the view (-1 to 1 each way), or null where it shows sky
+  ray.setFromCamera(at, camera);
+  const { origin, direction } = ray.ray;
+  const below = s => { probe.copy(direction).multiplyScalar(s).add(origin); return probe.y <= groundHeight(probe.x + WIDTH / 2, DEPTH / 2 - probe.z) * EXAG; };
+  let lo = 0, hi = 0;
+  for (let s = 2, step = 2; s < 8000; step *= 1.05, s += step) { if (below(s)) { hi = s; break; } lo = s; }
+  if (!hi) return null;
+  for (let i = 0; i < 22; i++) { const mid = (lo + hi) / 2; if (below(mid)) hi = mid; else lo = mid; }
+  return probe.copy(direction).multiplyScalar(hi).add(origin).clone();
+}
+function takeOver() {
+  if (!user.on) { user.on = true; user.zoom = 1; user.yaw = user.pitch = 0; user.pan.set(0, 0, 0); }
+  user.back = false;
+}
+function handBack(now) {               // the camera returns to the page's own: at once, or flying back
+  if (!user.on) return;
+  if (now) { user.on = user.back = false; user.zoom = 1; user.yaw = user.pitch = 0; user.pan.set(0, 0, 0); return; }
+  user.back = true; user.yaw = Math.atan2(Math.sin(user.yaw), Math.cos(user.yaw));
+}
+function easeBack(dt) {
+  const keep = Math.exp(-dt * 5);
+  user.zoom = Math.exp(Math.log(user.zoom) * keep); user.yaw *= keep; user.pitch *= keep; user.pan.multiplyScalar(keep);
+  if (Math.abs(Math.log(user.zoom)) < 2e-3 && Math.abs(user.yaw) < 2e-3 && Math.abs(user.pitch) < 2e-3 && user.pan.length() < 0.05) handBack(true);
+}
+function limitPan() {                  // the point looked at stays over the map, or just off its edge
+  user.pan.x = clamp(view.look.x + user.pan.x, -WIDTH / 2 - 60, WIDTH / 2 + 60) - view.look.x;
+  user.pan.z = clamp(view.look.z + user.pan.z, -DEPTH / 2 - 60, DEPTH / 2 + 60) - view.look.z;
+}
+function slide(from, at) {             // move so that the ground point `from` is under the view point `at`
+  const here = from && groundUnder(at);
+  if (!here) return;
+  user.pan.x += from.x - here.x; user.pan.z += from.z - here.z; limitPan(); place();
+}
+function zoomAt(at, factor) {
+  const before = groundUnder(at), base = Math.max(1e-6, view.eye.distanceTo(view.look));
+  takeOver();
+  user.zoom = clamp(user.zoom * factor, 6 / base, 3200 / base);
+  place(); slide(before, at);
+}
 // The overview: from the south, north up, swaying a little, the whole map inside the part of the stage that the readouts leave free.
 const FRAME = { x: 0.95, top: 0.9, bottom: -0.78 }, SWAY = 0.05, fits = new Map();
 function overview(aspect) {
@@ -742,7 +802,9 @@ function aim(aspect, wall, t, dt) {
   view.eye.lerp(eye, pull); view.look.lerp(look, pull);
   view.snap = false;
   camera.fov = lerp(lerp(MAP_FOV, CHASE_FOV, k), MAP_FOV, w); camera.near = lerp(lerp(4, 0.8, k), 1, w); camera.aspect = aspect;
-  camera.position.copy(view.eye); camera.lookAt(view.look); camera.updateProjectionMatrix();
+  const at = place();
+  if (user.on) camera.near = Math.min(camera.near, Math.max(0.3, at.eye.distanceTo(at.look) * 0.03));   // close up, the ground must not be clipped
+  camera.updateProjectionMatrix();
   scene.fog.density = lerp(lerp(0.00022, 0.0011, k), 0.0005, w);
   SKY.position.copy(camera.position);
 }
@@ -916,6 +978,7 @@ function frameFor(m) {
   return { distance, look, eye: new THREE.Vector3(look.x, look.y + Math.sin(lean) * distance, look.z + Math.cos(lean) * distance) };
 }
 function startStory() {
+  handBack(true);                                                      // the story's own frames
   story.on = true; story.active = null; story.end = 0;
   story.i = MOMENTS.findIndex(m => m.t >= state.t - 1e-6); if (story.i < 0) story.i = MOMENTS.length;
   if (state.t >= T) { seek(0); story.i = 0; }
@@ -1043,7 +1106,7 @@ function updateBoard() {
 function setPlaying(on) { state.playing = on; $('#play').textContent = on ? '❚❚' : '▶'; }
 function seek(t) { state.t = clamp(t, 0, T); }
 function setSpeed(i) { state.speed = clamp(i, 0, SPEEDS.length - 1); $('#speed').textContent = SPEEDS[state.speed] + '×'; }
-function setCam(name) { state.cam = name === 'chase' ? 'chase' : 'map'; }
+function setCam(name) { const next = name === 'chase' ? 'chase' : 'map'; if (next !== state.cam) handBack(false); state.cam = next; }
 function showTitle(on) { title.classList.toggle('gone', !on); if (on) setPlaying(false); }
 function toggleFull() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
 $('#play').onclick = event => { event.currentTarget.blur(); if (state.t >= T) seek(0); setPlaying(!state.playing); };
@@ -1071,10 +1134,66 @@ window.addEventListener('keydown', event => {
   else if (key === '=' || key === '+') setSpeed(state.speed + 1);
   else if (key === 'f' || key === 'F') toggleFull();
   else if (key === 'c' || key === 'C') setCam(state.cam === 'chase' ? 'map' : 'chase');
+  else if (key === 'r' || key === 'R') handBack(false);
   else if (key === 'Escape') showTitle(true);
   else if (key === 'Tab' && OTHERS.length) { event.preventDefault(); state.follow = OTHERS[(OTHERS.indexOf(state.follow) + (event.shiftKey ? OTHERS.length - 1 : 1)) % OTHERS.length]; }
 });
 window.addEventListener('resize', fitUi);
+
+// The visitor's camera (see `user`): the mouse, a trackpad or fingers on the 3D view.
+const stage = $('#stage'), touches = new Map();
+let drag = null;
+const viewPoint = (x, y) => { const port = view.port || { vw: window.innerWidth, vh: window.innerHeight, top: 0 }; return new THREE.Vector2(x / port.vw * 2 - 1, 1 - (y - port.top) / port.vh * 2); };
+const middle = () => { const [a, b] = [...touches.values()]; return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, gap: Math.hypot(a.x - b.x, a.y - b.y) }; };
+function pick(at) {                    // a click on a rover follows it
+  const ground = groundUnder(at);
+  if (!ground) return;
+  const x = ground.x + WIDTH / 2, y = DEPTH / 2 - ground.z, reach = Math.max(3, 3 * (view.S || 1));
+  let best = null, nearest = reach;
+  for (const run of OTHERS) { const pose = run.track.at(state.t), d = Math.hypot(pose.x - x, pose.y - y); if (d < nearest) { nearest = d; best = run; } }
+  if (best) state.follow = best;
+}
+stage.addEventListener('contextmenu', event => event.preventDefault());
+stage.addEventListener('wheel', event => {
+  event.preventDefault();
+  const amount = clamp(event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 400 : 1), -300, 300);
+  zoomAt(viewPoint(event.clientX, event.clientY), Math.exp(amount * (event.ctrlKey ? 0.01 : 0.0015)));   // ctrl: a trackpad pinch
+}, { passive: false });
+stage.addEventListener('pointerdown', event => {
+  touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  try { stage.setPointerCapture(event.pointerId); } catch (error) { /* a pointer the browser no longer tracks */ }
+  stage.classList.add('dragging');
+  if (touches.size === 2) { const m = middle(); drag = { pinch: m.gap, grab: groundUnder(viewPoint(m.x, m.y)), moved: 99 }; return; }
+  const turn = event.button === 2 || event.button === 1 || event.shiftKey;
+  drag = { turn, grab: turn ? null : groundUnder(viewPoint(event.clientX, event.clientY)), moved: 0 };
+});
+stage.addEventListener('pointermove', event => {
+  const last = touches.get(event.pointerId);
+  if (!last || !drag) return;
+  touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (drag.pinch) {                    // two fingers: apart zooms in, together zooms out, and both together move
+    if (touches.size < 2) return;
+    const m = middle(), at = viewPoint(m.x, m.y);
+    zoomAt(at, drag.pinch / Math.max(1, m.gap)); drag.pinch = Math.max(1, m.gap); slide(drag.grab, at);
+    return;
+  }
+  const dx = event.clientX - last.x, dy = event.clientY - last.y;
+  drag.moved += Math.abs(dx) + Math.abs(dy);
+  if (drag.moved < 4) return;
+  takeOver();
+  if (drag.turn) { user.yaw -= dx * 0.006; user.pitch = clamp(user.pitch - dy * 0.004, -1.4, 1.4); place(); }
+  else slide(drag.grab, viewPoint(event.clientX, event.clientY));
+});
+function release(event) {
+  if (!touches.has(event.pointerId)) return;
+  touches.delete(event.pointerId);
+  if (stage.hasPointerCapture(event.pointerId)) stage.releasePointerCapture(event.pointerId);
+  if (drag && !drag.pinch && !drag.turn && drag.moved < 4 && event.type === 'pointerup') pick(viewPoint(event.clientX, event.clientY));
+  if (touches.size === 1) { const p = [...touches.values()][0]; drag = { turn: false, grab: groundUnder(viewPoint(p.x, p.y)), moved: 99 }; }
+  else if (!touches.size) { drag = null; stage.classList.remove('dragging'); }
+}
+stage.addEventListener('pointerup', release); stage.addEventListener('pointercancel', release);
+stage.addEventListener('dblclick', () => handBack(false));
 
 let last = performance.now(), shown = -1;
 function frame(now) {
@@ -1096,11 +1215,16 @@ function frame(now) {
   const chase = smooth(0, 1, view.k);
   let S = lerp(S_MAP, S_CHASE, chase);
   if (story.frame && story.weight > 0) S = lerp(S, Math.max(S_CHASE, S_MAP * story.frame.distance / overview(view.aspect || 1.6).distance), smooth(0, 1, story.weight));
+  if (user.back) easeBack(dt);
+  const before = S;                                                    // zoomed in, markers shrink toward life size; zoomed out, they grow
+  if (user.on) S = clamp(S * user.zoom, S_CHASE, Math.max(before, S_MAP));
+  user.scale = S / before; view.S = S;
   setDaylight(t); apply(t, wall, S, chase); drawStory(t, S, wall);
   // viewport: everything left of the standings and under the top strip
   const s = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--s')) || 1;
   const W = window.innerWidth, Hh = window.innerHeight, barH = Math.round(42 * s), boardW = Math.round(340 * s);
   const vw = Math.max(200, W - boardW), vh = Math.max(200, Hh - barH);
+  view.port = { vw, vh, top: barH };
   if (renderer.domElement.width !== Math.round(W * renderer.getPixelRatio()) || renderer.domElement.height !== Math.round(Hh * renderer.getPixelRatio())) renderer.setSize(W, Hh, false);
   aim(vw / vh, wall, t, dt);
   fitLabels(vh, S, chase);

@@ -30,7 +30,7 @@ Saturday 14 November, about 22:20 Helsinki. Kristján's freeze holds (rules 0.1.
 | Effective use | 40% | The rollout farm: ~6,000 missions in containers, the 300-world comparison in half an hour, model-written code isolated; Sölvi's training jobs | Keep the app IDs and spend in `docs/prize-evidence.md` current |
 | Ambition | 25% | The paired 300-world evaluation, the point-of-no-return analysis on every mission, RL from scratch | — |
 | Impact | 20% | It turned "the reference wins on one world" into "on 288–300 of 300"; it found the 87% | — |
-| Live deployed demo | 15% | ✅ deployed: https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run (pick any world; Modal drives the reference, a textbook controller and two Claude autopilots on it and serves the replay) | Put the link in the README, the video and the platform entry |
+| Live deployed demo | 15% | ✅ deployed: https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run (pick any world; Modal drives the reference, a textbook controller and six Claude autopilots on it and serves the replay) | Put the link in the README, the video and the platform entry |
 
 ## Before 10:00
 
