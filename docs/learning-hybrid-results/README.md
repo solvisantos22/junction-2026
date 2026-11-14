@@ -1,6 +1,6 @@
 # RL–greedy hybrid search
 
-The 65-mission smoke stage is running on Modal; production results are pending. [Fixed protocol](../learning-hybrid.md).
+The 65-mission Modal smoke passed; development production is ready to launch. [Fixed protocol](../learning-hybrid.md).
 
 The 65-arm development search compares individual-policy shortlists, rank
 ensembles across all retained seeds, and RL–greedy rank blends. It uses new
@@ -8,7 +8,7 @@ maps and leaves the completed [learning evidence](../learning-final-results/READ
 and the team reference unchanged. This is a composition experiment using
 existing trained weights, not another RL training run.
 
-Nineteen policy/selection/worker tests and thirteen orchestration tests pass.
+Nineteen policy/selection/worker tests and thirteen orchestration tests pass. All 65 cloud smoke cases passed physics/choice audits, returned alive at home and had no invalid calls.
 Checks include original-policy equivalence, whole-group selection, safety
 gates, tamper detection, complete controller replay, source/weight integrity,
 deadlines and duplicate-launch refusal. Only used smoke worlds 1/2 have been
@@ -49,3 +49,5 @@ No prior supervisor is restarted. App IDs, progress, costs and final handoff
 will be appended here as stages complete.
 
 Smoke app: [`ap-SiN8z0aHUAlm2IPQLFEXoU`](https://modal.com/apps/solvisantos22/main/ap-SiN8z0aHUAlm2IPQLFEXoU). [Durable launch receipt](smoke/receipt.json). Source/weights and both smoke/development matrices were published in `4f203d4` before launch. The client log-stream timeout occurred after the detached call was submitted; a read-only status poll confirms the coordinator is running, with no reported error.
+
+[Smoke summary](smoke/summary.json) · [audited rows](smoke/state.json). All 65 cases completed in 63.26 seconds of coordinator time, 589.59 summed worker seconds and $0.01034 estimated worker compute. This used world 1 only and is an execution check, not evidence of performance gains. Production remains the predeclared 8320-mission matrix; estimated 20–40 minutes based on smoke throughput, to be revised from live progress.
