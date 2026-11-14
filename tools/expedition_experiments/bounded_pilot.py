@@ -8,6 +8,7 @@ are not provider caps: a response already in flight can exceed them.
 import argparse
 from datetime import datetime, timezone
 import hashlib
+import inspect
 import json
 import math
 import os
@@ -67,6 +68,36 @@ def reported_usage(path, final=False):
     return {"cost_usd": cost, "finished_steps": len(seen), "unknown": unknown}
 
 
+def container_usage(job_dir, docker="/usr/local/bin/docker"):
+    """Harbor copies logs after completion; read only usage scalars while live."""
+    trials = [p for p in job_dir.iterdir() if p.is_dir()] if job_dir.exists() else []
+    if len(trials) > 1:
+        return {"cost_usd": 0.0, "finished_steps": 0, "unknown": True}
+    if not trials:
+        return None
+    name = trials[0].name.lower() + "__env-main-1"
+    running = subprocess.run([docker, "ps", "--filter", "name=^/" + name + "$",
+                              "--format", "{{.Names}}"], capture_output=True, text=True, timeout=10)
+    if running.returncode:
+        return {"cost_usd": 0.0, "finished_steps": 0, "unknown": True}
+    if name not in running.stdout.splitlines():
+        return None
+    code = ("from pathlib import Path\nimport json,math\n" + inspect.getsource(valid_cost)
+            + "\n" + inspect.getsource(reported_usage)
+            + '\np=Path("/logs/agent/opencode.txt");print(json.dumps(dict(reported_usage(p),present=p.exists())))')
+    result = subprocess.run([docker, "exec", name, "python", "-c", code],
+                            capture_output=True, text=True, timeout=10)
+    if result.returncode:
+        # Normal teardown can remove the container between ps and exec.
+        after = subprocess.run([docker, "ps", "--format", "{{.Names}}"],
+                               capture_output=True, text=True, timeout=10)
+        if after.returncode == 0 and name not in after.stdout.splitlines():
+            return None
+        return {"cost_usd": 0.0, "finished_steps": 0, "unknown": True}
+    usage = json.loads(result.stdout)
+    return usage if usage.get("present") else None
+
+
 def previous_usage(runtime, assignment_id):
     assignments = json.loads((runtime / "assignments.private.json").read_text())
     order = [row["assignment_id"] for row in assignments]
@@ -122,21 +153,28 @@ def run(runtime, assignment_id, env_file, harbor):
                "-n", "1", "-k", "1", "--max-retries", "0", "--jobs-dir",
                str(runtime / "jobs"), "--job-name", "model-" + assignment_id]
     usage, reason, interrupted_at = {}, None, None
+    live_observations = []
     with (runtime / ("model-" + assignment_id + ".launcher.log")).open("x") as log:
         process = subprocess.Popen(command, env=env, stdout=log, stderr=subprocess.STDOUT)
         while process.poll() is None:
             paths = list((runtime / "jobs" / ("model-" + assignment_id)).glob("*/agent/opencode.txt"))
-            if len(paths) == 1:
-                try:
-                    usage = reported_usage(paths[0])
-                except Exception:
-                    usage = {"cost_usd": 0.0, "finished_steps": 0, "unknown": True}
+            try:
+                if len(paths) == 1:
+                    current = reported_usage(paths[0])
+                elif len(paths) > 1:
+                    current = {"cost_usd": 0.0, "finished_steps": 0, "unknown": True}
+                    reason = reason or "unexpected_multiple_trials"
+                else:
+                    current = container_usage(runtime / "jobs" / ("model-" + assignment_id))
+            except Exception:
+                current = {"cost_usd": 0.0, "finished_steps": 0, "unknown": True}
+            if current is not None:
+                usage = current
+                live_observations.append(dict(usage, observed_at=time.time()))
                 if usage["unknown"]:
                     reason = reason or "unknown_inflight_usage"
                 elif prior + usage["cost_usd"] >= INFLIGHT_GUARD:
                     reason = reason or "reported_usage_guard"
-            elif len(paths) > 1:
-                reason = reason or "unexpected_multiple_trials"
             if reason and interrupted_at is None:
                 process.send_signal(signal.SIGINT)
                 interrupted_at = time.monotonic()
@@ -155,6 +193,7 @@ def run(runtime, assignment_id, env_file, harbor):
         reason = reason or "unknown_final_usage"
     report = {"assignment_id": assignment_id, "harbor_returncode": code,
               "censored_reason": reason, "final_stream_usage": usage,
+              "live_observations": live_observations,
               "prior_reported_cost_usd": prior,
               "guard_crossed_at_completion": prior + usage.get("cost_usd", 0) >= INFLIGHT_GUARD,
               "note": "Reported completed-response usage; not a provider cap or live account balance."}

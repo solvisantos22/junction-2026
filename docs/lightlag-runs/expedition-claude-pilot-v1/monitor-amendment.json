@@ -1,0 +1,13 @@
+{
+  "amended_launcher_sha256": "db46c53d6199d7bc797669e65d937e5f9717ddc2cce03567c755f1b1e3804007",
+  "at": "2026-11-14T13:09:32.567294+00:00",
+  "discovery": "This Harbor configuration has no live host log mounts; agent logs are copied after the container run. The original local-file monitor could therefore only inspect completed usage.",
+  "first_trial": "First direct container check observed two responses costing0.1639184; supplementary monitor first recorded six responses costing0.2235492, and then observed every completed-step total through all21responses/$0.6094926. No threshold crossed, no interruption, restart or replacement. Initial monitoring blind interval is retained as a limitation.",
+  "future_trials": "The runner now reads scalar step-finish usage from /logs/agent/opencode.txt via docker exec for the exact trial container when the host log is absent. Complete malformed/unknown usage interrupts the owned Harbor process.",
+  "limits": "Reported completed-response costs can lag an in-flight request; guard is not a provider cap.",
+  "original_launcher_sha256": {
+    "tools/expedition_experiments/bounded_pilot.py": "71a34ca53e833336a2313af97ed03abaa214fb9ff0a5d19bfd05f315ac1cecbe"
+  },
+  "scope": "Host spending supervision only. Frozen model tasks, prompts, simulator, controller, assignments and model settings unchanged.",
+  "verification": "Seven focused guard tests pass, including the actual scalar extractor and mocked whole-run budget/unknown-usage interruptions; independent review passes."
+}
