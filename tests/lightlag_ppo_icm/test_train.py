@@ -130,3 +130,32 @@ class TrainingTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class HomeGuardTrainingTests(unittest.TestCase):
+    def test_a_run_with_the_home_guard_records_it_and_the_check_and_habits_play_with_it(self):
+        with tempfile.TemporaryDirectory() as folder:
+            out = os.path.join(folder, "run")
+            result = train(env="max", out=out, updates=1, episodes=4, workers=1, eval_every=1,
+                           dev_seeds=(300000, 300001), quiet=True, home_guard=True)
+            self.assertTrue(result["settings"]["home_guard"])
+            path = os.path.join(out, "policy.npz")
+            extra = load_player(path).extra
+            self.assertTrue(extra["task"]["home_guard"])
+            self.assertTrue(extra["settings"]["home_guard"])
+            self.assertIn("plain_home", check.default_players(extra, "max"))
+            self.assertNotIn("plain_home", check.default_players({"task": TaskConfig().to_dict()}, "max"))
+            with contextlib.redirect_stdout(io.StringIO()):
+                rows = check.main(["--policy", path, "--seeds", "300004", "--workers", "1",
+                                   "--players", "ppo_icm,plain,plain_home,random_home",
+                                   "--also-home", "last_home=" + os.path.join(out, "last.npz")])
+            self.assertEqual([row["player"] for row in rows],
+                             ["ppo_icm", "last_home", "plain", "plain_home", "random_home"])
+            self.assertTrue(all(row["crash"] is None and row["alive"] for row in rows))
+            with contextlib.redirect_stdout(io.StringIO()) as printed:
+                rows = habits.main(["--policy", path, "--seeds", "300004-300005"])
+            self.assertTrue(all(row["home_guard"] for row in rows))
+            self.assertIn("the home guard replaced", printed.getvalue())
+            env = make_env("max", 300004)
+            load_player(path, home_guard=False)(PublicTools(env))      # switched off: the plain adapter
+            self.assertEqual(len(env.replay()["commands"]), 47)

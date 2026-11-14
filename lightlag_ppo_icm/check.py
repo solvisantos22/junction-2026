@@ -5,11 +5,15 @@
         --players ppo_icm,kf_mpc,blind,random,nothing
     python3 -m lightlag_ppo_icm.check --policy lightlag_ppo_icm/policies/max.npz \
         --also ppo_alone=lightlag_ppo_icm/policies/max-ppo-alone.npz           # a second policy in the same table
+    python3 -m lightlag_ppo_icm.check --policy lightlag_ppo_icm/policies/max-home-guard.npz \
+        --also-home max_guarded=lightlag_ppo_icm/policies/max.npz              # an older policy with the home guard on
 
 The environment and the delay are the ones the policy was trained on unless --env says
 otherwise. Players: ppo_icm (greedy), ppo_icm_sampled (actions drawn as in training), plain
 (a hand-written rule on the same observation), random (the same adapter with random actions),
-nothing, and the scripted players of the environment:
+nothing, plain_home, random_home and ppo_icm_home (plain, random and the policy with the home guard
+of task.py on; plain_home plays by default when the policy was trained with the guard), and the
+scripted players of the environment:
 max_navigator, fused, c37, kf_mpc, blind on the max env; kf_mpc, blind, reference, leg_and_wait on
 a profile or biome; pilot, pilot_fast, greedy, straight on the traverse, and manh_max,
 manh_max_fast besides on its MAX map (the full-search pilot and manh_max are slow, so they play
@@ -27,6 +31,7 @@ from lightlag_dynamic.biomes.max_check import seed_range, table
 
 from .envs import FiveTools, finish, make_env, share
 from .player import load_player, plain_player, random_player
+from .task import TaskConfig
 
 
 def scripted(spec):
@@ -50,17 +55,30 @@ def player(name, policy, spec):
         return load_player(policy)
     if name == "ppo_icm_sampled":
         return load_player(policy, sample_seed=0)
+    if name == "ppo_icm_home":
+        return load_player(policy, home_guard=True)
     if name == "random":
         return random_player()
+    if name == "random_home":
+        return random_player(config=TaskConfig(home_guard=True))
     if name == "plain":
         return plain_player()
+    if name == "plain_home":
+        return plain_player(TaskConfig(home_guard=True))
     if name == "nothing":
         return lambda tools, env=None: None
     players = scripted(spec)
     if name not in players:
-        raise ValueError(f"no player {name!r} for {spec}; there are ppo_icm, ppo_icm_sampled, plain, random, nothing, "
-                         + ", ".join(players))
+        raise ValueError(f"no player {name!r} for {spec}; there are ppo_icm, ppo_icm_sampled, ppo_icm_home, plain, "
+                         "plain_home, random, random_home, nothing, " + ", ".join(players))
     return players[name]
+
+
+def default_players(extra, spec):
+    """ppo_icm, plain (and plain_home when the policy plays with the home guard), random, nothing,
+    then the scripted players of the environment but the slow ones."""
+    builtin = ["ppo_icm", "plain"] + (["plain_home"] if extra["task"].get("home_guard") else []) + ["random", "nothing"]
+    return builtin + [n for n in scripted(spec) if n not in builtin + ["pilot", "manh_max"]]
 
 
 def episode(job):
@@ -86,21 +104,22 @@ def main(argv=None):
     parser.add_argument("--players", help="default: ppo_icm, plain, random, nothing and every scripted player")
     parser.add_argument("--also", action="append", default=[], metavar="NAME=POLICY",
                         help="another trained policy to play (greedy) under this name; may be repeated")
+    parser.add_argument("--also-home", action="append", default=[], metavar="NAME=POLICY",
+                        help="the same, with the home guard on whatever the policy was trained with")
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--out", help="write the rows as JSON here")
     args = parser.parse_args(argv)
     extra = load_player(args.policy).extra
     spec = args.env or extra["env"]
     delay = extra["delay"] if args.delay is None else args.delay
-    builtin = ["ppo_icm", "plain", "random", "nothing"]
-    names = (args.players.split(",") if args.players
-             else builtin + [n for n in scripted(spec) if n not in builtin + ["pilot", "manh_max"]])
+    names = args.players.split(",") if args.players else default_players(extra, spec)
     entries = [(name, name, args.policy) for name in names]
-    for extra_policy in args.also:
-        label, _, path = extra_policy.partition("=")
-        if not label or not path or label in names:
-            raise ValueError("--also takes NAME=POLICY with a name no other player has")
-        entries.insert(1, (label, "ppo_icm", path))
+    for flag, kind, given in (("--also", "ppo_icm", args.also), ("--also-home", "ppo_icm_home", args.also_home)):
+        for extra_policy in given:
+            label, _, path = extra_policy.partition("=")
+            if not label or not path or label in [e[0] for e in entries]:
+                raise ValueError(f"{flag} takes NAME=POLICY with a name no other player has")
+            entries.insert(1, (label, kind, path))
     for _, name, path in entries:
         player(name, path, spec)     # an unknown player is an error here, not forty crashed episodes
     jobs = [(label, name, path, spec, seed, delay) for label, name, path in entries for seed in seed_range(args.seeds)]

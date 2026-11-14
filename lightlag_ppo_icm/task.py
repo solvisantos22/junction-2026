@@ -31,6 +31,21 @@ a wait goes in its place. Without it an untrained agent drives the battery flat 
 episode, a dead rover scores 0 whatever it sampled, and there is nothing to learn from. What to
 spend the energy on, and whether to keep enough of it to come home, is still the agent's to learn.
 
+A second rule is optional (TaskConfig.home_guard, off by default; flat 40 m family only): the home
+guard. Before a command is sent it looks at where the command leaves the rover. If from there the
+way home (home.py: around hazards, and around ground that can stop a drive when that is cheap)
+would no longer fit, the guard sends its own command instead: the next drive of the way home, or
+a wait at the base. "Fit" means energy and time. Energy: what the battery guard would charge for
+every drive home (the dearest ground, the biggest wheels), the turns, the idle drain to the horizon
+and one unit to spare. Time: the drives home plus two slots, and, for a drive that can be stopped
+where the map does not expect it (soft or risky ground, close past a hazard), the slots a stop can
+cost on top. Sand that trips the onboard slip check stops every step on it and moves the rover about
+6 cm per round trip of the link, so where the published slip range of sand reaches over the check,
+and elsewhere once telemetry reports a stop by it, the guard keeps the rover off sand: the way home
+keeps clear of it where it can, a drive onto it is replaced, and a rover on it is driven off it.
+With the guard on, the observation's two margins for getting home are the guard's own: how much
+time and energy is left before it takes over. What to spend the rest on is the agent's.
+
 Reward: the official score, cut into pieces so that the rewards of an episode add up to
 raw_score / max_available_value exactly: half of each sample's credited value when it is taken,
 and at the last decision the rest (plus the other half at base, minus it if the rover died).
@@ -54,6 +69,7 @@ import numpy as np
 
 from .belief import Belief
 from .ground import make_ground
+from .home import HomeField
 
 GLOBAL, BASE, PER_TARGET, PER_HEADING = 23, 7, 10, 3
 WAIT, SAMPLE, FIRST_DRIVE = 0, 1, 2
@@ -67,6 +83,7 @@ class TaskConfig:
     targets: int = 6                   # open targets in the observation, nearest first
     ray_reach: float = 2.0             # the view reaches this many full drives
     guard: bool = True                 # replace a command that would empty the battery by a wait
+    home_guard: bool = False           # keep the energy and time to get home; drive home when they run out
 
     @property
     def n_actions(self):
@@ -87,13 +104,13 @@ class TaskConfig:
 
     def to_dict(self):
         return {"headings": self.headings, "metres": list(self.metres), "targets": self.targets,
-                "ray_reach": self.ray_reach, "guard": self.guard}
+                "ray_reach": self.ray_reach, "guard": self.guard, "home_guard": self.home_guard}
 
     @classmethod
     def from_dict(cls, data):
         return cls(headings=int(data["headings"]), metres=tuple(float(m) for m in data["metres"]),
                    targets=int(data["targets"]), ray_reach=float(data["ray_reach"]),
-                   guard=bool(data.get("guard", True)))
+                   guard=bool(data.get("guard", True)), home_guard=bool(data.get("home_guard", False)))
 
 
 def _wrap(degrees):
@@ -152,6 +169,11 @@ class RoverTask:
         self.stops, self.last_stop, self.rejects = 0, None, 0
         self.decisions = []   # (execute tick, action) of every decision, in order
         self.guarded = 0      # commands the safety rule replaced by a wait
+        self.homed = 0        # commands the home guard replaced by its own
+        self.field = HomeField(self.ground, self.base, self.base_radius) if config.home_guard else None
+        # A stop clears the queue: what it can cost, at most, in slots (the closed part of a relay
+        # period, the news of the stop coming down, the new commands going up).
+        self.stop_slots = (self.passes[0] - self.passes[1] if self.passes else 0) + 2 * self.delay + 1
         self.trace = []       # (value taken to be sampled, believed distance to base) at every decision
         self._expected = None  # (slot, the state expected there), from the latest observation
 
@@ -222,6 +244,68 @@ class RoverTask:
         return self.ground.worst_energy(x, y, heading_deg, metres * (1.0 + self.scale_error),
                                         abs(_wrap(heading_deg - heading)))
 
+    # ---- the home guard ---------------------------------------------------------------------------
+    def _home_need(self, slot, x, y, heading, gr, gi):
+        """(energy the home guard keeps back, drives the way home takes) from (x, y), for a rover
+        whose last commanded heading is `heading`, with the idle drain from `slot` to the horizon."""
+        g = max(0.5, math.hypot(gr, gi))
+        reach = self.max_metres * (1.0 - self.ground.slip_at(x, y)) * g
+        ground_m, wheel_m, first, sand_m = self.field.left(x, y, reach)
+        energy = self.need_from[min(slot, self.horizon + 1)] + 1.0
+        if ground_m <= 0.0:
+            return energy, 0
+        # The first leg's commanded heading is its ground heading less the rotation the belief has learned;
+        # the turns after it are allowed 45 degrees in all.
+        heading_out = first - math.degrees(math.atan2(gi, gr))
+        turn = abs(_wrap(heading_out - heading)) + 45.0
+        energy += self.ground.worst_energy(x, y, heading_out, wheel_m / g * (1.0 + self.scale_error), turn)
+        per_drive = self.max_metres * (1.0 - self.ground.firm_slip) * min(1.0, g)
+        if self.field.sand_stops and sand_m > 0.0:
+            # Sand that stops every step: each step of the way costs a round trip of the link.
+            return energy, self.horizon + 1
+        return energy, math.ceil(ground_m / per_drive) + 1
+
+    def _home_slots(self, drives, unsure=False):
+        """Slots the way home needs: its drives and two to spare, and what a stop can cost when the
+        command before it can be stopped unexpectedly."""
+        return (drives + 2 if drives else 0) + (self.stop_slots if unsure else 0)
+
+    def _home_ok(self, command, slot):
+        """After `command` at `slot`, is there still the energy and the time to get home?"""
+        kf, heading, battery, _, _, alive, risk = self._state(slot)
+        if not alive:
+            return True      # nothing left to bring home
+        x, y, gr, gi = (float(v) for v in kf.m)
+        spend, unsure = 0.0, False
+        if command["action"] == "sample":
+            spend = self.sample_cost
+        elif command["action"] == "drive":
+            spend = self._worst(command["heading_deg"], command["metres"], x, y, heading)
+            dx, dy, _, _, stopped = self.ground.advance(x, y, command["heading_deg"], command["metres"], gr, gi, True)
+            nx, ny = x + gr * dx - gi * dy, y + gr * dy + gi * dx
+            if self.field.into_sand(x, y, nx, ny):
+                return False     # no drive onto sand that stops every step, but the guard's own
+            unsure = stopped or self.field.may_stop(x, y, nx, ny)
+            x, y, heading = nx, ny, command["heading_deg"]
+        energy, drives = self._home_need(slot, x, y, heading, gr, gi)
+        return battery - risk - spend >= energy and self.horizon - slot >= self._home_slots(drives, unsure)
+
+    def _home_command(self, slot):
+        """The home guard's own command: the next drive of the way home, or a wait at the base."""
+        kf, _, _, _, _, alive, _ = self._state(slot)
+        x, y, gr, gi = (float(v) for v in kf.m)
+        if not alive or self.field.home(x, y):
+            return {"action": "wait"}
+        gain = complex(gr, gi)
+        slip = self.ground.slip_at(x, y)
+        wx, wy = self.field.waypoint(x, y, self.max_metres * (1.0 - slip) * abs(gain))
+        wheel = complex(wx - x, wy - y) / gain        # the drive that the belief expects to end there
+        metres = min(self.max_metres, abs(wheel) / (1.0 - slip))
+        if metres < 0.05:
+            return {"action": "wait"}
+        return {"action": "drive", "heading_deg": math.degrees(math.atan2(wheel.imag, wheel.real)) % 360.0,
+                "metres": round(metres, 3)}
+
     def _state(self, slot):
         if self._expected is None or self._expected[0] != slot:
             self._expected = (slot, self._predict(slot))
@@ -231,6 +315,9 @@ class RoverTask:
         command = self.command(action)
         if slot is None:
             slot = max(self.tick + self.delay + 1, self.reserved + 1)
+        if self.field is not None and not self._home_ok(command, slot):
+            command = self._home_command(slot)
+            self.homed += 1
         if self.config.guard and not self._affordable(command, slot):
             command = {"action": "wait"}
             self.guarded += 1
@@ -354,6 +441,8 @@ class RoverTask:
                 self.stops += 1
                 self.last_stop = tick
                 self._flush(tick, tick + 1)
+                if self.field is not None and event.get("reason") == "slip_limit":
+                    self.field.learn_trip()
             elif event["type"] == "target_discovered":
                 self._read_targets({"targets": [event["target"]]})
             elif event["type"] == "sample_taken" and event["target_id"] in self.targets:
@@ -418,7 +507,7 @@ class RoverTask:
     def observe(self, slot, batch_index=0):
         """The observation for the command that will run at `slot`."""
         c = self.config
-        kf, heading, battery, stop, previous, alive, _ = self._state(slot)
+        kf, heading, battery, stop, previous, alive, risk = self._state(slot)
         x, y, gr, gi = (float(v) for v in kf.m)
         reach = self.max_metres
         per_drive = reach * (1.0 - self.ground.firm_slip)
@@ -461,6 +550,11 @@ class RoverTask:
         obs[i + 4] = float(distance <= self.base_radius)
         obs[i + 5] = min(1.0, max(-1.0, (slots_left - math.ceil(distance / per_drive)) / 10.0))
         obs[i + 6] = min(1.0, max(-1.0, (battery - home_energy) / self.battery0))
+        if self.field is not None and alive:
+            # The home guard's own margins, as they stand if this slot is a wait.
+            energy, drives = self._home_need(slot, x, y, heading, gr, gi)
+            obs[i + 5] = min(1.0, max(-1.0, (self.horizon - slot - self._home_slots(drives)) / 10.0))
+            obs[i + 6] = min(1.0, max(-1.0, (battery - risk - energy) / self.battery0))
 
         i += BASE
         for distance, target_id in open_targets[:c.targets]:
