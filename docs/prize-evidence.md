@@ -543,6 +543,9 @@ These are recommended evidence choices, not newly asserted official entry requir
 
 - **Adaptation tooling verified before API:** 33 focused tests pass, including 12 fake-provider budget/failure tests and seven fresh-check integrity tests. A real NumPy-image replay matches the prior control exactly. Full prompt and fixed rules independently reviewed; no hidden fresh-instance input. No new spend during preparation.
 
+- **Paid continuation and attribution:** Claude Opus 5.5 received the full original code, published rules and Codex's failure analysis, with adaptive thinking/medium effort and a 16,000-token response cap. The first free token-count request rejected an unsupported schema; Codex fixed and retained that preflight before the corrected launch. The one generated response spent all 16,000 output tokens on thinking and supplied no program. Reported usage: 17,914 input/16,000 output, **$0.391656**. No retry, practice episode or fresh case followed. This is a resource-censored experiment, not a model-capability failure. [Retained usage and verification](rule-transfer-results/adaptation-v2/), [decision/handoff](rule-transfer-results/README.md).
+- **Final verification:** 34 focused tests; independent audit confirms all 70 current and declared-revision source pins, prompt/tool hashes, budget calculation, preserved initial preflight and absence of private thinking in public artifacts. Fresh seeds 52000–52039 remain unused. No task promotion, other-team credit attribution or prize submission. Codex's contribution includes identifying that its own generation cap prevented the planned repair evaluation; no improvement is claimed.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.

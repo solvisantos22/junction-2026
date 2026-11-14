@@ -109,3 +109,79 @@ the API boundary. It made **zero generation requests and spent no generation
 credits**. The [retained preflight](adaptation/adaptation.json) and
 [declared correction](adaptation-preflight-correction.md) document the adapter
 fix before the corrected launch; this is not a failed model attempt.
+
+
+## Context from the four new teammate pilots
+
+Kristján's separately authored [four direct-agent runs](../lightlag-shift.md)
+landed in `afbb89f` while this experiment was running. The saved grades match
+verifier rewards (rounding aside): .613636, .775, .555556 and zero. They are four
+single attempts, not a replicated estimate, and no pilot is folded into our
+fresh comparison or cost ledger.
+
+One agent correctly inferred the turning coefficient and tied Prepared, so the
+old program's turning failures do not establish inability to detect that rule.
+The ground pilot's first missed sample preceded the change, complicating
+attribution of its score deficit; its final relay diagnosis was wrong. The relay
+pilot made an unaffordable late detour and depleted at home without extra relay
+scheduling delay. The acknowledgement's newly present `transmit_tick` field was
+still a public cue even when equal to `sent_tick`.
+
+These observations make reliable energy and queue accounting worth testing.
+They do not justify assuming that a larger mission or harder diagnosis will
+produce a robust gap. Pilot metadata acknowledges stale task hashes and omits
+some change-module sources; reference comparisons are reported in the write-up.
+This was a read-only trace/grade review, not a fresh replay audit of those runs.
+
+## Bounded adaptation result: incomplete
+
+The corrected launch from `e7bbc73` made **one** Opus 5.5 request. The provider
+reported 17,914 input tokens and 16,000 output tokens, all 16,000 classified as
+thinking. It stopped at `max_tokens` with no text or tool submission. Therefore
+there is no candidate program, no practice result, no final freeze and no fresh
+evaluation. The runner stopped exactly as declared; it did not retry or fall
+back to an earlier policy.
+
+Reported cost is **$0.391656**, below the first request's $0.402920 reservation
+and the $1 total launch guard. Request ID: `req_011Ch36m4zEyZ6hS7RUffiaY`.
+[Public response/usage](adaptation-v2/response_1-public.json),
+[complete public metadata](adaptation-v2/adaptation.json),
+[verification](adaptation-v2/verification.json). Private thinking/signatures
+remain outside the repository. The first rejected token-count preflight made
+zero generation requests and adds no generation cost.
+
+The 16,000-token response cap was our experimental resource limit. It prevented
+a submitted program here, so this is **censored evidence, not a failed repair or
+a capability gap**. We should not increase mission difficulty based on this
+result. The held-out range **52000–52039 remains unused**; a future run needs a
+new declared protocol before consuming it.
+
+Historical possibly shared usage rises from $13.882161 to $14.273817 when adding
+this request; this is bookkeeping, **not a live balance**. Kristján's separately
+approved calls are not silently charged to this ledger.
+
+```sh
+python3.12 docs/rule-transfer-results/verify_incomplete_adaptation.py
+```
+
+## Decision and handoff
+
+Keep the four-rule mission provisional. The free transfer establishes a concrete
+energy-accounting weakness in a saved program, and the new direct-agent pilots
+show that an agent can diagnose turning cost correctly. Neither establishes a
+reliable strong-agent gap. The latest stereo and sample-chain experiments also
+fail their own difficulty gates; those are not proven alternatives to promote.
+
+The next useful test is an adequately resourced full coding-agent attempt on the
+existing rules, with scripting and practice intact, before any bigger build.
+Its key question is whether budgeting for queued actions, return and idle drain
+removes the failures. Choose its generation budget against the available credit
+balance before launch; this bounded experiment made no such additional request.
+If a strong code-generating agent removes the deficit, retire this configuration
+for gap hunting. If it leaves a repeatable deficit under fair resources, inspect
+that specific failure before extending the environment.
+
+Published runner, protocols, prompt, incomplete attempts and audit tools are
+ready for reuse. **34 focused tests pass**; free replay audit remains valid.
+Existing simulator, reference, original policy, teammate studies and canonical
+Harbor task are unchanged. No final project/rules choice or prize submission.
