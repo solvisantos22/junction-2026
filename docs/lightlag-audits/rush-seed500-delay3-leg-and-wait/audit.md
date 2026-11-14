@@ -40,6 +40,7 @@ None found: every agent call reached the simulator, Harbor recorded no exception
 ## Episode outcome
 
 - **TARGETS_LEFT**: never sampled: t4
+- superlog labels (`lightlag_dynamic/manh_controllers/superlog.py`): LATE_SAMPLE, SKIPPED_WITH_ENERGY; share 0.536, 5 samples taken, 0 failed, 2 late, battery at the end 25.1
 
 ## Every decision
 

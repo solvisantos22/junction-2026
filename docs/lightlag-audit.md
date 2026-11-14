@@ -62,6 +62,12 @@ A decision can have *negative* points lost. That happens when the reference, tak
 
 **Outcome**: `PERFECT`, `DEAD`, `NOT_HOME`, `NOTHING_SAMPLED`, `TARGETS_LEFT`. These use the same names as `lightlag_dynamic/manh_controllers/superlog.py`.
 
+**superlog labels.** Each report also runs `superlog.summarize(replay, None, None)` on the evaluator's replay. It adds episode labels such as `SKIPPED_WITH_ENERGY`, `ENERGY_LIMITED`, `LATE_SAMPLE`, `DISCOVERY_MISSED` and `MISS_UNLOGGED`, together with its share, sample counts and final battery. Its share matches `reward.txt` on all 13 saved runs.
+
+superlog's labels describe the episode from the truth. A discovery that arrived after a no-op agent had stopped still counts as `DISCOVERY_MISSED` there. The auditor's own `DISCOVERY_MISSED` counts only discoveries whose packet reached the agent before it stopped.
+
+superlog needs numpy. Without numpy, the report says the labels are unavailable, and the audit still runs.
+
 Every main mistake also shows the reference's alternative: what it would have sent first, which samples it would have taken from that point, and its final score. It also quotes the agent's own words from the same trajectory step when the trajectory recorded any. OpenCode's Opus trajectory records reasoning token counts but no reasoning text for most steps, and the report says so instead of guessing.
 
 ## Limits
@@ -70,7 +76,7 @@ Every main mistake also shows the reference's alternative: what it would have se
 - `STALE_AIM` uses nominal dead reckoning (no slip) with a tolerance of 0.15 m per metre driven, and only considers targets the agent knew about at that tick.
 - The audit needs `artifacts/evaluator/replay.json` and `transcript.jsonl`. Without `agent/trajectory.json`, it still audits the decisions but cannot quote the agent or detect calls that never reached the simulator.
 
-Tests (13; about 70 seconds, most of it the reference replanning at every decision):
+Tests (14; about 70 seconds, most of it the reference replanning at every decision):
 
 ```bash
 python3 -m unittest discover -s tests/lightlag_audit -v

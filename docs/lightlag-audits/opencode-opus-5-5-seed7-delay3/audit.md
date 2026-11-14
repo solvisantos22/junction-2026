@@ -26,6 +26,7 @@ None found: every agent call reached the simulator, Harbor recorded no exception
 ## Episode outcome
 
 - **PERFECT**: scored 4, the reference scored 4 from the start
+- superlog labels (`lightlag_dynamic/manh_controllers/superlog.py`): PERFECT; share 1.000, 3 samples taken, 0 failed, 0 late, battery at the end 7.2
 
 ## Every decision
 

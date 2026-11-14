@@ -1,0 +1,260 @@
+{
+  "counts": {
+    "infrastructure": {},
+    "outcome": {
+      "NOTHING_SAMPLED": 1
+    },
+    "reasoning": {
+      "STOPPED_EARLY": 1
+    }
+  },
+  "decisions": [],
+  "decomposition": {
+    "adds_up": true,
+    "decisions_raw": 0,
+    "stop_loss_raw": 7.0
+  },
+  "delay_ticks": 3,
+  "infrastructure": [],
+  "main_mistakes": [
+    {
+      "agent_words": null,
+      "findings": [
+        {
+          "evidence": {
+            "reference_plan": {
+              "alive": true,
+              "at_base": true,
+              "first_uplink": {
+                "commands": [
+                  {
+                    "action": "drive",
+                    "heading_deg": 83.569619,
+                    "metres": 2.518408
+                  },
+                  {
+                    "action": "drive",
+                    "heading_deg": 83.569619,
+                    "metres": 2.518408
+                  },
+                  {
+                    "action": "sample"
+                  }
+                ],
+                "tick": 0
+              },
+              "raw_score": 7.0,
+              "samples": [
+                {
+                  "on_time": true,
+                  "target_id": "t1",
+                  "tick": 6
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t3",
+                  "tick": 9
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t5",
+                  "tick": 11
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t2",
+                  "tick": 14
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t4",
+                  "tick": 17
+                },
+                {
+                  "on_time": true,
+                  "target_id": "d1",
+                  "tick": 20
+                }
+              ],
+              "tick": 0
+            },
+            "stop_tick": 0
+          },
+          "kind": "reasoning",
+          "n": null,
+          "summary": "stopped at tick 0; the reference would have scored 7 from there, not 0",
+          "tag": "STOPPED_EARLY"
+        }
+      ],
+      "kind": "stop",
+      "n": null,
+      "points_lost": 7.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 83.569619,
+              "metres": 2.518408
+            },
+            {
+              "action": "drive",
+              "heading_deg": 83.569619,
+              "metres": 2.518408
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 0
+        },
+        "raw_score": 7.0,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 6
+          },
+          {
+            "on_time": true,
+            "target_id": "t3",
+            "tick": 9
+          },
+          {
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 11
+          },
+          {
+            "on_time": true,
+            "target_id": "t2",
+            "tick": 14
+          },
+          {
+            "on_time": true,
+            "target_id": "t4",
+            "tick": 17
+          },
+          {
+            "on_time": true,
+            "target_id": "d1",
+            "tick": 20
+          }
+        ],
+        "tick": 0
+      },
+      "reward_lost": 1.0,
+      "tick": 0,
+      "tool": "stop"
+    }
+  ],
+  "max_ticks": 50,
+  "model": null,
+  "outcome": [
+    {
+      "evidence": {},
+      "kind": "outcome",
+      "n": null,
+      "summary": "no sample was collected",
+      "tag": "NOTHING_SAMPLED"
+    },
+    {
+      "evidence": {
+        "reference_plan": {
+          "alive": true,
+          "at_base": true,
+          "first_uplink": {
+            "commands": [
+              {
+                "action": "drive",
+                "heading_deg": 83.569619,
+                "metres": 2.518408
+              },
+              {
+                "action": "drive",
+                "heading_deg": 83.569619,
+                "metres": 2.518408
+              },
+              {
+                "action": "sample"
+              }
+            ],
+            "tick": 0
+          },
+          "raw_score": 7.0,
+          "samples": [
+            {
+              "on_time": true,
+              "target_id": "t1",
+              "tick": 6
+            },
+            {
+              "on_time": true,
+              "target_id": "t3",
+              "tick": 9
+            },
+            {
+              "on_time": true,
+              "target_id": "t5",
+              "tick": 11
+            },
+            {
+              "on_time": true,
+              "target_id": "t2",
+              "tick": 14
+            },
+            {
+              "on_time": true,
+              "target_id": "t4",
+              "tick": 17
+            },
+            {
+              "on_time": true,
+              "target_id": "d1",
+              "tick": 20
+            }
+          ],
+          "tick": 0
+        },
+        "stop_tick": 0
+      },
+      "kind": "reasoning",
+      "n": null,
+      "summary": "stopped at tick 0; the reference would have scored 7 from there, not 0",
+      "tag": "STOPPED_EARLY"
+    }
+  ],
+  "profile": "rush_noisy",
+  "reference": "kf_mpc",
+  "replay_matches": true,
+  "run": "rush-noisy-seed500-delay3-nop",
+  "run_findings": [],
+  "score": {
+    "agent_raw": 0.0,
+    "agent_reward": 0.0,
+    "gap_raw": 7.0,
+    "gap_reward": 1.0,
+    "max_available_value": 7.0,
+    "reference_raw": 7.0,
+    "reference_reward": 1.0,
+    "reward_txt": 0.0
+  },
+  "seed": 500,
+  "stop_tick": 0,
+  "superlog": {
+    "available": true,
+    "battery_end": 75.0,
+    "home_dist": 0.0,
+    "labels": [
+      "DISCOVERY_MISSED",
+      "SKIPPED_WITH_ENERGY"
+    ],
+    "late": 0,
+    "safety_stops": 0,
+    "samples_failed": 0,
+    "samples_taken": 0,
+    "share": 0.0
+  }
+}

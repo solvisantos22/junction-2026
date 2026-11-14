@@ -88,7 +88,25 @@ def audit_run(run, reference=None):
         "outcome": outcome,
         "infrastructure": infrastructure,
         "counts": _counts(decisions, unattached, outcome, infrastructure),
+        "superlog": superlog_labels(run.replay),
     }
+
+
+SUPERLOG_FIELDS = ("labels", "share", "samples_taken", "samples_failed", "safety_stops", "late", "battery_end",
+                   "home_dist")
+
+
+def superlog_labels(replay):
+    """Episode labels from lightlag_dynamic/manh_controllers/superlog.py, run on the evaluator's replay.
+
+    Optional: superlog needs numpy. Without a controller log, a failed sample is labelled
+    MISS_UNLOGGED (superlog only knows the confidence of Manh's own controllers)."""
+    try:
+        from lightlag_dynamic.manh_controllers.superlog import summarize
+        summary = summarize(replay, None, None)
+    except Exception as failure:  # an optional add-on: never let it stop the audit
+        return {"available": False, "reason": f"{type(failure).__name__}: {failure}"}
+    return {"available": True, **{key: summary.get(key) for key in SUPERLOG_FIELDS}}
 
 
 def _tail(text, limit=WORDS_LIMIT):
@@ -259,6 +277,14 @@ def to_markdown(audit):
         lines.append(f"- **{finding['tag']}**: {finding['summary']}")
     if not audit["outcome"]:
         lines.append("- nothing notable")
+    superlog = audit.get("superlog") or {}
+    if superlog.get("available"):
+        lines.append(f"- superlog labels (`lightlag_dynamic/manh_controllers/superlog.py`): "
+                     f"{', '.join(superlog['labels']) or 'none'}; share {superlog['share']:.3f}, "
+                     f"{superlog['samples_taken']} samples taken, {superlog['samples_failed']} failed, "
+                     f"{superlog['late']} late, battery at the end {superlog['battery_end']:.1f}")
+    elif superlog:
+        lines.append(f"- superlog labels unavailable here ({superlog.get('reason')})")
     lines.append("")
 
     lines.append("## Every decision")

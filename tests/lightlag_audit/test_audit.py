@@ -175,6 +175,19 @@ class SavedRuns(unittest.TestCase):
         # The discovered target d1 was unknown at tick 0, so no uplink at tick 0 can be "aimed" at it.
         self.assertNotIn("STALE_AIM", {f["tag"] for d in audit["decisions"] for f in d["findings"]})
 
+    def test_superlog_labels_ride_along(self):
+        try:
+            import numpy  # noqa: F401  superlog needs it
+        except ImportError:
+            self.skipTest("numpy not installed")
+        open_loop = self.audits["rush-seed500-delay3-open-loop"]["superlog"]
+        self.assertTrue(open_loop["available"])
+        self.assertEqual(open_loop["labels"], ["DISCOVERY_MISSED", "SKIPPED_WITH_ENERGY"])
+        self.assertAlmostEqual(open_loop["share"], self.audits["rush-seed500-delay3-open-loop"]["score"]["agent_reward"])
+        core = self.audits["opencode-opus-5-5-seed7-delay3"]["superlog"]
+        self.assertIn("PERFECT", core["labels"])
+        self.assertIn("superlog labels", to_markdown(self.audits["rush-seed500-delay3-open-loop"]))
+
     def test_tool_failures_stay_out_of_the_reasoning_findings(self):
         with tempfile.TemporaryDirectory() as scratch:
             copy = Path(scratch) / "broken"

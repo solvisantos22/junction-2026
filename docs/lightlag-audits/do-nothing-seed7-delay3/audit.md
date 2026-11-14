@@ -22,6 +22,7 @@ None found: every agent call reached the simulator, Harbor recorded no exception
 
 - **NOTHING_SAMPLED**: no sample was collected
 - **STOPPED_EARLY**: stopped at tick 0; the reference would have scored 4 from there, not 0
+- superlog labels (`lightlag_dynamic/manh_controllers/superlog.py`): SKIPPED_WITH_ENERGY; share 0.000, 0 samples taken, 0 failed, 0 late, battery at the end 60.0
 
 ## Every decision
 
