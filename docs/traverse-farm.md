@@ -96,7 +96,9 @@ At the Traverse owner's request, the pilot alone on the same 300 worlds with the
 | 0.1.0 day (`sun_margin_ticks` 56) | 0.502 | 0 | 0 |
 | Harsher day (`sun_margin_ticks` 0) | 0.435 | 0 | 2 |
 
-Paired on the same worlds, the harsher day costs the pilot 0.067 [95%: 0.062 to 0.071]; it scores lower on 292 worlds, the same on 1 and higher on 7. Its battery never ran out; it was stranded away from base on worlds 752 (0.214, against 0.475 on the 0.1.0 day) and 861 (0.225, against 0.507). A mission also takes longer to plan: 65 s against 48 s on a Modal core.
+Paired on the same worlds, the harsher day costs the pilot 0.067 [95%: 0.062 to 0.071]; it scores lower on 292 worlds, the same on 1 and higher on 7. Its battery never ran out; it was stranded away from base on worlds 752 (0.214, against 0.475 on the 0.1.0 day) and 861 (0.225, against 0.507). A mission also takes longer to plan: 65 s against 48 s on a Modal core. The Traverse owner traced both strandings to one end-of-mission flaw and fixed it in task 0.1.1 (a `home_floor` option: on the way home the pilot may spend its reserve down to 2.0), which leaves the 0.1.0 day's scores unchanged.
+
+**Dropped.** The Traverse owner's fresh agent runs under this day scored Opus 0.407 and 0.425 and Sonnet 0.000, against the reference's 0.491 on world 2026, so the best run stayed within 0.07 and the day does not widen the gap at the top. An option search for the 0.1.1 pilot under this day (app `ap-4Je5wVyglx36EqxxsNduKY`, rows in [`traverse-farm/search-sun0-1/`](traverse-farm/search-sun0-1/), including `home_floor`) was stopped after 2 of its 4 generations: the best of 16 settings scored −0.001 and then +0.005 against the defaults on 30 worlds each, and the defaults never lost or stranded a rover. Tuning the options would not have widened the gap either.
 
 ## Checked so far
 
