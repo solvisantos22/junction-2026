@@ -242,6 +242,9 @@ These are recommended evidence choices, not newly asserted official entry requir
   [tool](../tools/lightlag_experiments/overnight_runs.py).
   Second pair adds **0.807692 treatment / 0.615385 control**, both alive/home;
   all four B audits are exact, B usage **$2.1651708**, eight assignments pending.
+  Third pair adds **0 control / 0.916667 treatment** on rush 501; the control
+  dies and treatment survives at base. All six B audits are exact, B usage
+  **$2.8120282**, six assignments pending. The sample is still incomplete.
   Reported usage is not a verified balance. No Modal/Gemini use or prize entry.
 
 ## Keep recording with minimal overhead

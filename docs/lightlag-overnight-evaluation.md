@@ -370,6 +370,15 @@ The control's main reference-relative loss is an empty-queue interval at
 call 10 / tick 11. These two completed pairs still do not establish the
 six-pair treatment effect or a causal decomposition of the combined aid.
 
+### Halfway: rush 501, repetition 1
+
+B05 control scores **0**, dying away from base after collecting 9 science
+points; B06 treatment scores **11/12 = 0.916667**, alive at base, with no late
+samples. The third pair's difference is **+0.916667**. All six completed B
+attempts replay exactly with no infrastructure findings. B usage is now
+**$2.8120282**, A+B **$6.7830098**. Three pairs remain; retain this recovery and
+failure together without treating the halfway result as the final effect.
+
 ## Status
 
 Block A protocol was published at `253b263` before new attempts; all nine are
