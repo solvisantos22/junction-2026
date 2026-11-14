@@ -1,34 +1,66 @@
-# Lightlag replay viewer
+# Lightlag demo
 
-One page that plays Lightlag episodes side by side on the same clock: where the rover really is, where the operator last saw it, the commands still in transit, and (for scripted controllers) where the controller believes the rover is.
+## The 3D Mars demo
 
-**Open [`demo.html`](demo.html) by double-clicking it.** It needs no server and no network. It currently shows four runs on seed 7 at delay 3: the reference, Claude Opus 5.5 through Harbor, a controller that forgets commands in transit, and one that waits for every command to land.
+**Open [`mars-demo.html`](mars-demo.html) by double-clicking it.** It is one file with everything inside, so it needs no server and no network. Use Chrome, press **F** for full screen, then **space**.
 
-Controls: Play, the slider, and the speed menu. Space toggles play; the left and right arrows step one tick.
+It replays recorded runs. Nothing is simulated in the page and nothing is invented: every tool call it shows was made by the agent in that run.
 
-## Build a page from other runs
+### Mission view (four screens, one run)
+
+| Screen | What it shows |
+|---|---|
+| **Mars · what is really happening** | The rover right now, with a hologram where the operator last saw it |
+| **Earth · what the operator sees** | The same scene as it arrives on Earth, 3 ticks late |
+| **Mission map** | Top-down: the real path, the last seen position, commands still in transit |
+| **Agent console** | The five MCP tools as buttons that light up when the agent calls them, the call being made, commands and telemetry travelling between Earth and Mars, and the log of every call |
+
+The default run is **Claude Opus 5.5 playing through Harbor** (the saved run in `docs/lightlag-runs/opencode-opus-5-5-seed7-delay3`). Its rejected command at tick 9 is in the log in red, and its final report appears in its own words at the end.
+
+### Compare view (four runs at once)
+
+Claude Opus 5.5, our reference controller, a controller that forgets its queued commands, and one that waits for every command to land. Same map, same seed, same clock.
+
+### Controls
+
+| Key | Does |
+|---|---|
+| space | play / pause |
+| ← → | step one tick |
+| M | switch between Mission and Compare |
+| 1 2 3 4 | show that run in Mission view |
+| F | full screen |
+
+Adding `#auto` to the address starts it automatically and loops, for an unattended screen.
+
+### What to say while it plays (Claude's run)
+
+- **Tick 0:** Claude reads the rules and the map, then sends three commands at once. Watch the yellow dots leave Earth in the signal lane; the rover does not move until they arrive.
+- **Tick 4–6:** the left picture moves first. The right picture, what Claude can see, follows three ticks later.
+- **Tick 9:** Claude asks for a 5.25 m drive. The limit is 5 m, so the server rejects it and says why. Claude corrects it on the next call.
+- **Tick 19:** Claude uses its own shell to compute a heading. That button is dashed because it is not one of our tools.
+- **Throughout:** after each leg Claude advances time until telemetry catches up, then decides. That is why it succeeds here: waiting costs nothing in an 80-tick episode.
+- **Then press 3:** the controller that forgets its queued commands. At tick 8 it believes the rover is at base (the ✕ on the map) while the rover is 11 m away with commands still arriving. It hits the edge of the operating zone and drains the battery.
+- **Then press M:** all four runs side by side.
+
+### Rebuild it
 
 ```sh
-python3 viewer/build.py --out viewer/demo.html \
-    "Reference=policy:reference" \
-    "Claude Opus 5.5 via OpenCode (Harbor run)=docs/lightlag-runs/opencode-opus-5-5-seed7-delay3/artifacts/evaluator/replay.json" \
-    "Forgets commands in transit=policy:stale_telemetry" \
-    "Waits for every command to land=policy:move_and_wait"
+python3 viewer/build_mars.py     # refreshes viewer/mars/data.json and viewer/mars-demo.html
 ```
 
-Each argument is `LABEL=SOURCE`. A source is either a `replay.json` (every Harbor run writes one under `artifacts/evaluator/`) or `policy:NAME`, which plays a scripted policy from `lightlag_controllers` on the simulator; `--seed` and `--delay` apply to those. `viewer/template.html` opened alone accepts replay files by drag and drop.
+The runs it shows are listed at the top of `build_mars.py`. For development, serve `viewer/mars/` with any static server (`python3 -m http.server` in that folder) and open `index.html`; it loads `app.js`, `style.css` and `data.json` separately. A test fails if the committed `mars-demo.html` is stale.
 
-## What to say while it plays
+three.js (r187, MIT licence, in `viewer/mars/vendor/`) is the only dependency. The terrain, rover, lander and textures are generated in code; there are no image or model files.
 
-- **Around tick 7:** the reference's raw view is about two metres behind, but its own estimate is within 0.3 m. The controller that forgets its queued commands believes the rover is still at base while it is 15 m away with four commands in transit.
-- **Tick 9:** that controller hits the map edge. It keeps re-sending moves and drains the battery.
-- **The end:** the reference and the model both collect everything and get home. The cautious controller runs out of clock with two targets.
-- **The chart:** dashed lines are the raw delayed view, which is stale for everyone. Solid lines are each controller's own estimate. The reference's solid line stays near zero.
+### Limits
 
-The belief marker exists only for scripted controllers, because they record what they believed. A model's run has no such record, so its panel shows the true rover and the delayed view only.
+- **It shows a run where the model succeeded.** Under the current rules Claude scores 1.0, so this demo shows the environment and the delay, not yet a gap. A run under harder rules drops in by changing one path in `build_mars.py`.
+- **Checked in Chrome only,** on this laptop (about 54 frames a second in Mission view), and opened from disk in headless Chrome.
+- **Queued commands are drawn as if the wheels did not slip.** The dashed line is where commands aim, not where they land.
+- **The hologram and the delayed picture move smoothly between packets.** Real telemetry arrives once per tick.
+- A replay contains the true rover states and the hidden slip values, so the page is evaluator-side material.
 
-## Limits
+## The simple 2D page
 
-- A replay contains the true rover states and the hidden slip values. It is evaluator-side material: fine for a demo, never for an agent's container.
-- Queued commands are drawn as if the wheels did not slip, so the dashed line is where the commands aim, not where they will land.
-- The page was checked by opening it in Chrome. `tests/viewer/` covers the build step only.
+[`demo.html`](demo.html) is the earlier flat version: four runs side by side on a top-down map with a chart of how wrong each operator's view is. Build it with `python3 viewer/build.py` (see `--help`). `template.html` opened alone accepts replay files by drag and drop.

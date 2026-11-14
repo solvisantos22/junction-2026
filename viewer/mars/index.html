@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lightlag · Mars ops</title>
+<!--DEV-->
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{"imports": {"three": "./vendor/three.module.js"}}</script>
+<script type="module">
+  window.LIGHTLAG_DATA = await (await fetch("data.json")).json();
+  await import("./app.js");
+</script>
+<!--/DEV-->
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="ui">
+  <header id="bar">
+    <div class="brand"><b>LIGHTLAG</b><span>Mars ops · drive a rover you can only see in the past</span></div>
+    <div class="transport">
+      <button id="play" title="Play / pause (space)">▶</button>
+      <div class="timeline"><canvas id="marks"></canvas><input id="scrub" type="range" min="0" max="80" step="0.01" value="0" aria-label="Time"></div>
+      <div id="clock"><b>000</b><span>/ 80 ticks</span></div>
+    </div>
+    <div class="options">
+      <div class="seg" id="mode"><button data-mode="mission" class="on">Mission</button><button data-mode="compare">Compare</button></div>
+      <select id="runpick" title="Which run to show"></select>
+      <select id="speed" title="Playback speed"><option value="0.75">0.5×</option><option value="1.5" selected>1×</option><option value="3">2×</option><option value="6">4×</option></select>
+      <button id="full" title="Full screen (F)">⛶</button>
+    </div>
+  </header>
+  <main id="stage"></main>
+  <div id="intro">
+    <div class="card">
+      <small>JUNCTION 2026 · AFTERQUERY · BREAK THE AGENT</small>
+      <h1>LIGHTLAG</h1>
+      <p>Every command reaches Mars <b id="introK">3</b> ticks late.<br>Every picture from Mars is <b>3</b> ticks old.</p>
+      <button id="start">▶ Start the mission</button>
+      <em>space: play · ←/→: step · M: switch view · F: full screen</em>
+    </div>
+  </div>
+</div>
+</body>
+</html>
