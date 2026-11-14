@@ -42,7 +42,8 @@ def collect(job):
             logps.append(logp)
             return action
 
-        episode = run_episode(job["env"], seed, choose, job["delay"], config, record=not job["greedy"])
+        episode = run_episode(job["env"], seed, choose, job["delay"], config, record=not job["greedy"],
+                              home_pull=job.get("home_pull", False))
         if not job["greedy"]:
             episode.update(obs=np.asarray(obs, dtype=np.float32), actions=np.asarray(actions, dtype=np.int16),
                            logp=np.asarray(logps, dtype=np.float32))
@@ -50,11 +51,11 @@ def collect(job):
     return out
 
 
-def rollouts(pool, workers, actor, task, env, delay, episodes, greedy=False):
+def rollouts(pool, workers, actor, task, env, delay, episodes, greedy=False, home_pull=False):
     """Episodes [(seed, sampling seed), ...] spread over the workers; results in the same order."""
     chunks = [episodes[i::workers] for i in range(workers) if episodes[i::workers]]
     jobs = [{"actor": actor, "task": task.to_dict(), "env": env, "delay": delay, "episodes": chunk,
-             "greedy": greedy} for chunk in chunks]
+             "greedy": greedy, "home_pull": home_pull} for chunk in chunks]
     results = pool.map(collect, jobs, chunksize=1) if pool is not None else [collect(job) for job in jobs]
     by_key = {}
     for chunk, played in zip(chunks, results):
@@ -73,7 +74,7 @@ def summary(episodes):
 def train(env="max", out="lightlag_ppo_icm/runs/max", updates=300, episodes=256, workers=8, delay=3, seed=0,
           int_coef=0.5, int_final=0.1, lr=3e-4, lr_final=0.3, icm_lr=1e-3, ent_coef=0.01, hidden=128, headings=16,
           wait_bias=4.0, sample_bias=2.0, eval_every=10, train_seeds=TRAIN_SEEDS, dev_seeds=DEV_SEEDS,
-          max_minutes=None, quiet=False, metres="auto"):
+          max_minutes=None, quiet=False, metres="auto", home_pull=False):
     """Train once and return the summary that is also written to <out>/summary.json."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
@@ -92,6 +93,7 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=300, episodes=256,
     settings = {"env": env, "delay": delay, "updates": updates, "episodes": episodes, "seed": seed,
                 "int_coef": int_coef, "int_final": int_final, "lr": lr, "lr_final": lr_final, "icm_lr": icm_lr,
                 "ent_coef": ent_coef, "hidden": hidden, "wait_bias": wait_bias, "sample_bias": sample_bias,
+                "home_pull": home_pull, "metres": list(task.metres),
                 "train_seeds": list(train_seeds), "dev_seeds": list(dev_seeds)}
     extra = {"task": task.to_dict(), "env": env, "delay": delay, "settings": settings}
     best, started, steps, done = {"share": -1.0, "update": 0}, time.time(), 0, 0
@@ -104,7 +106,7 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=300, episodes=256,
                 seeds = rng.integers(train_seeds[0], train_seeds[1] + 1, size=episodes)
                 draws = rng.integers(0, 2 ** 62, size=episodes)
                 played = rollouts(pool, workers, agent.actor.state(), task, env, delay,
-                                  [(int(s), int(d)) for s, d in zip(seeds, draws)])
+                                  [(int(s), int(d)) for s, d in zip(seeds, draws)], home_pull=home_pull)
                 batch, stats = agent.prepare(played, now_int)
                 stats.update(agent.update(batch, 1.0 - (1.0 - lr_final) * progress))
                 steps += stats["steps"]    # decisions played so far, all updates together
@@ -190,6 +192,9 @@ def main(argv=None):
                                              "auto: 2/3, 4/3 and 8/3 of the sampling radius")
     parser.add_argument("--wait-bias", type=float, default=4.0, help="starting logit of wait (drives start at 0)")
     parser.add_argument("--sample-bias", type=float, default=2.0, help="starting logit of sample")
+    parser.add_argument("--home-pull", action="store_true",
+                        help="pay what being home is worth along the way (a potential; the pieces still add up "
+                             "to the official score)")
     parser.add_argument("--eval-every", type=int, default=10)
     parser.add_argument("--train-seeds", type=seed_pair, default=TRAIN_SEEDS, help="e.g. 200000-299999")
     parser.add_argument("--dev-seeds", type=seed_pair, default=DEV_SEEDS)

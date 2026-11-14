@@ -34,6 +34,16 @@ spend the energy on, and whether to keep enough of it to come home, is still the
 Reward: the official score, cut into pieces so that the rewards of an episode add up to
 raw_score / max_available_value exactly: half of each sample's credited value when it is taken,
 and at the last decision the rest (plus the other half at base, minus it if the rover died).
+
+Optional (rewards(..., home_pull=True)): the half that being home is worth is paid out along the
+way instead of only at the end. With the potential
+
+    phi = 1/2 * (value sampled so far / all value) * D / (D + distance to base),   D = 8 base radii
+
+each decision also gets phi(next) - phi(now), and the last one gives phi back. The pieces still
+add up to the official score (the potential starts and ends at 0), and no policy becomes better or
+worse by it (Ng, Harada and Russell 1999); it only tells the agent sooner. Distance and value are
+the adapter's own belief, not the evaluator's truth.
 """
 
 from dataclasses import dataclass
@@ -141,6 +151,7 @@ class RoverTask:
         self.stops, self.last_stop, self.rejects = 0, None, 0
         self.decisions = []   # (execute tick, action) of every decision, in order
         self.guarded = 0      # commands the safety rule replaced by a wait
+        self.trace = []       # (value taken to be sampled, believed distance to base) at every decision
         self._expected = None  # (slot, the state expected there), from the latest observation
 
         angles = np.radians(np.arange(config.headings) * 360.0 / config.headings)
@@ -222,6 +233,8 @@ class RoverTask:
         if self.config.guard and not self._affordable(command, slot):
             command = {"action": "wait"}
             self.guarded += 1
+        x, y = self._state(slot)[0].m[:2]
+        self.trace.append((sum(self.credited.values()), math.hypot(self.base[0] - x, self.base[1] - y)))
         ack = self.tools.uplink([command])[0]
         slot = int(ack["execute_tick"])
         self.acks[slot] = {"id": ack["command_id"], "sent": int(ack["sent_tick"]), "action": command["action"],
@@ -238,8 +251,9 @@ class RoverTask:
                 self.credited[near[1]] = self._worth(near[1], slot)
         return slot
 
-    def rewards(self, result):
-        """The extrinsic reward of every decision; they add up to raw_score / max_available_value."""
+    def rewards(self, result, home_pull=False):
+        """The extrinsic reward of every decision; they add up to raw_score / max_available_value.
+        With `home_pull`, what being home is worth is paid along the way (see the module text)."""
         out = np.zeros(len(self.decisions))
         total = result["max_available_value"]
         if not len(out) or total <= 0:
@@ -250,6 +264,11 @@ class RoverTask:
             out[index.get(sample["tick"], len(out) - 1)] += 0.5 * sample["credited_value"] / total
             value += sample["credited_value"]
         out[-1] += (result["survival_factor"] - 0.5) * value / total
+        if home_pull:
+            scale = 8.0 * self.base_radius
+            phi = np.array([0.5 * min(1.0, taken / total) * scale / (scale + distance)
+                            for taken, distance in self.trace] + [0.0])
+            out += phi[1:] - phi[:-1]
         return out
 
     # ---- telemetry ----------------------------------------------------------------------------

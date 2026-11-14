@@ -53,13 +53,65 @@ Because the adapter does this much, `check` always prints two players that use t
 - **Training data**: every episode is a new map (seeds 200000-299999), so a mission cannot be memorised. The development seeds 300000-300063 pick the checkpoint that is kept. The fresh check seeds are played once, afterwards.
 - Every gradient is written by hand and checked against finite differences in the tests.
 
+## Results
+
+One training run per row, on this machine's CPU, about half an hour each. Checked once on fresh seeds 2700-2739 (40 missions, delay 3). "Home" counts missions that end alive at base. The last column is the PPO + ICM policy minus that player, in points, with a 95% bootstrap interval over the seeds.
+
+**The max env** (`python3 -m lightlag_ppo_icm.check --policy lightlag_ppo_icm/policies/max.npz --also ppo_alone=lightlag_ppo_icm/policies/max-ppo-alone.npz`; rows in `policies/max.check-2700-2739.json`):
+
+| Player | Share | Dead | Home | PPO + ICM minus it |
+|---|---|---|---|---|
+| `max_navigator` (the max env's scripted controller) | 28.2% | 0 | 33 | -17.2 (-21.8 to -12.6) |
+| `plain` (a hand rule on this adapter) | 15.3% | 0 | 17 | -4.3 (-7.8 to -0.9) |
+| `blind` (plans once, never reads telemetry) | 12.3% | 0 | 21 | -1.3 (-7.0 to +3.9) |
+| `fused` (the fusing reference) | 11.5% | 0 | 8 | -0.4 (-4.1 to +3.2) |
+| **`ppo_icm`** (PPO + ICM, 3.6 million decisions) | **11.0%** | 0 | 0 | |
+| `ppo_alone` (the same without curiosity, 3.0 million) | 10.7% | 0 | 1 | +0.3 (-2.5 to +2.8) |
+| `c37` (Manh controller 37) | 9.8% | 0 | 29 | +1.2 (-1.8 to +4.4) |
+| `ppo_icm_sampled` (actions drawn as in training) | 9.3% | 0 | 0 | +1.7 (-0.4 to +4.0) |
+| `kf_mpc` (the frozen reference) | 6.2% | 0 | 14 | +4.9 (+2.0 to +7.5) |
+| `random` (random actions on this adapter) | 0.1% | 0 | 0 | +10.9 (+8.8 to +13.0) |
+| `nothing` | 0.0% | 0 | 40 | +11.0 (+8.9 to +13.1) |
+
+What this says:
+
+- **The agent learns the mission from nothing**: 11 points above random actions on the same adapter. It ends level with three of the scripted players (`fused`, `blind`, `c37`), ahead of the frozen `kf_mpc`, and 17 points below `max_navigator`.
+- **It is below a rule of a few lines on its own observation** (`plain`, 15.3%). The adapter carries a good part of the result, and the learning has not caught up with what the observation allows.
+- **It never comes home**: 0 of 40 missions, against 17 for the rule. A rover that is alive but away from base keeps half of what it sampled, so this alone costs up to half the score. The bonus for being home is paid once, at the end, for standing within 0.75 m of the base, and an agent that has never been paid it has no reason to try. See HOME_PULL_PLACEHOLDER.
+- **Curiosity made no measurable difference** on the check (+0.3, interval -2.5 to +2.8). During training the run without it was ahead for the first two million decisions and the two were level at three million:
+
+| Decisions | PPO + ICM, development score | PPO alone, development score |
+|---|---|---|
+| 0.6 million | 6.9% | 9.2% |
+| 1.2 million | 8.7% | 10.4% |
+| 1.8 million | 10.0% | 11.5% |
+| 2.4 million | 9.9% | 11.5% |
+| 3.0 million | 11.4% | 11.6% |
+
+One run each, so this shows no benefit; it does not show harm.
+
+**The plain `rush` profile**, as a check that the learner learns where sensing is exact (`policies/rush.npz`, 2.65 million decisions, 17 minutes; rows in `policies/rush.check-2700-2739.json`):
+
+| Player | Share | Dead | Home | PPO + ICM minus it |
+|---|---|---|---|---|
+| `kf_mpc` | 82.3% | 0 | 40 | -54.3 (-59.2 to -49.2) |
+| `reference` | 82.2% | 0 | 40 | -54.2 (-58.8 to -49.4) |
+| `blind` | 60.2% | 0 | 38 | -32.1 (-36.2 to -27.5) |
+| `plain` | 56.1% | 0 | 31 | -28.0 (-34.5 to -21.4) |
+| **`ppo_icm`** | **28.1%** | 0 | 1 | |
+| `ppo_icm_sampled` | 26.2% | 0 | 0 | +1.8 (-0.6 to +5.1) |
+| `random` | 0.0% | 0 | 0 | +28.1 (+25.3 to +31.4) |
+
+It samples about five targets a mission and, again, does not come home. On this profile the scripted players are far ahead: with exact position fixes the mission is a planning problem, and they plan.
+
 ## What building it showed
 
 Three things went wrong on the way, and each says something about the environment as a learning problem.
 
-1. **A dead rover scores 0 whatever it sampled, so an untrained agent has nothing to learn from.** Random commands drive the battery flat in almost every episode. Half a sample's value is paid when it is taken and taken back at the end if the rover died, so the two cancel, and in the first test runs the score stayed at 0.0% for 400,000 steps, with or without curiosity. With the battery guard the rover survives and the same runs start to score within a few updates. What to spend the energy on is still learned.
+1. **A dead rover scores 0 whatever it sampled, so an untrained agent has nothing to learn from.** Random commands drive the battery flat in almost every episode. Half a sample's value is paid when it is taken and taken back at the end if the rover died, so the two cancel: in the first test runs on `rush` the score stayed at or below 0.2% for 450,000 decisions, with or without curiosity, with 1 to 7% of the rovers alive at the end. With the battery guard every rover survived and the same settings were at 1.4% and 2.2% after 250,000 decisions and rising. What to spend the energy on is still learned. (Those test runs were not kept; the numbers are from their printed logs.)
 2. **Curiosity found a hazard to bump.** The first curious agent parked against a hazard and sent drive after drive into it. Each one was stopped at once and cost almost nothing, and the observation's "previous command" entries kept changing, which the curiosity module took for novelty. The module now sees only the entries that say where the rover is and what is around it, not the echo of the agent's own last action. A test holds that.
 3. **Curiosity and energy pull in opposite directions.** The curiosity reward grows with how much the observation changes, so it favours long drives; before the guard that meant an earlier death.
+4. **The shortest drive has to fit inside the sampling disc.** With a quarter, a half and a full drive, `rush` (drives up to 5 m, a disc 1.5 m across) reached 4.2% on the development seeds after 1.2 million decisions (`policies/rush-quarter-half-full.log.jsonl`). With 0.5, 1 and 2 m, the lengths the max env's 2 m limit gives anyway, the same learner passed 25% within 0.6 million. Drive lengths are now set from the sampling radius by default (`--metres auto`).
 
 ## Limits
 
