@@ -6,18 +6,19 @@
 
 It replays recorded runs. Nothing is simulated in the page and nothing is re-enacted: every tool call it shows was made by the agent in that saved trial, and the scores are the ones the verifier wrote.
 
-### The two missions
+### The three missions
 
-Both come from the overnight evaluation ([protocol and all results](../docs/lightlag-overnight-evaluation.md)). Each shows the three unchanged-prompt attempts by Claude Opus 5.5 and the frozen reference controller on the same seed.
+Each shows three unchanged-prompt attempts by Claude Opus 5.5 and the frozen reference controller on the same seed. The first two come from the overnight evaluation ([protocol and all results](../docs/lightlag-overnight-evaluation.md)); the third was run on Saturday for this page.
 
 | Mission | Rules | Claude, attempts 1 · 2 · 3 | Reference |
 |---|---|---|---|
 | **1 Deadlines** (rush, seed 501) | Seven samples with deadlines, two appear mid-mission, 50 ticks | **0.00** · 0.83 · **0.00** | 0.83 |
 | **2 Sand** (rush + noisy, seed 502) | The same, plus noisy position fixes and targets across sand | **0.46** · 0.77 · 0.81 | 0.77 |
+| **3 Rocks** (rush + noisy, seed 1026) | The same rules on a map where two rock fields sit on the routes | 0.85 · **0.52** · 0.69 | 0.77 |
 
-The demo opens on the failing attempt in each (attempt 3 in Deadlines, attempt 1 in Sand). The other attempts are one key away, including the ones where Claude ties or beats the reference.
+The demo opens on the weakest attempt in each (attempt 3 in Deadlines, attempt 1 in Sand, attempt 2 in Rocks). The other attempts are one key away, including the ones where Claude ties or beats the reference.
 
-**These seeds are not a random sample.** They were picked overnight because the model had already failed on them, to see whether the failure repeats. It repeats sometimes. Say so when presenting.
+**These seeds are not a random sample.** Seeds 501 and 502 were picked overnight because the model had already failed on them, to see whether the failure repeats. It repeats sometimes. Seed 1026 was picked for its map alone, before any model played it: it is one of the three seeds, out of 0–1199, with the most straight routes blocked by rock. Say so when presenting.
 
 ### Mission view (four screens, one run)
 
@@ -78,6 +79,14 @@ Attempt 1 illustrates why the warning concerns the finish: it warns at tick 23, 
 - **Tick 22:** a second miss, at D2, the most valuable target, which appeared mid-mission.
 - **End:** home alive with 6 of 13 points, 0.46. The reference gets 0.77, and so does Claude's second attempt; its third beats the reference.
 
+**Rocks, attempt 2** (press N again):
+
+- **The map:** one rock field sits between the base and the targets to the north-west, a second between two targets. The route has to weave between them.
+- **Tick 16:** a sample at T2 fails: the rover is not where Claude thinks it is.
+- **Tick 17:** the next drive runs into the rocks. Safety stop, and every queued command is dropped, including the sample at T3. The Earth screen at that moment still shows tick 14 and a sample being taken.
+- **After:** Claude finds out three ticks later, re-plans, gets T2 on a second try and reaches D2 late for a quarter of its value. Home alive: 0.52.
+- **Then press 1:** the same model weaves through cleanly and scores 0.85, above the reference's 0.77. Worth saying out loud: on this map the reference is not the best run.
+
 ### Rebuild it
 
 ```sh
@@ -90,7 +99,8 @@ three.js (r187, MIT licence, in `viewer/mars/vendor/`) is the only dependency. T
 
 ### Limits
 
-- **It shows chosen runs.** Two seeds where the model had failed before, and the failing attempt first. The full record, wins included, is in the overnight evaluation.
+- **It shows chosen runs.** Two seeds where the model had failed before, one chosen for its rocks, and the weakest attempt first. The full overnight record, wins included, is in the overnight evaluation.
+- **The Rocks runs needed a second launch.** The first three launches timed out installing OpenCode in the container (slow network) before any model call, so there was nothing to keep from them. The three attempts shown are the only ones in which the model played.
 - **The HOME marker is the page's own arithmetic,** not something the simulator reports or the model predicted. It includes idle drain through the horizon and the shortest distance to the accepted base radius, but excludes slip, detours and other action costs, including queued samples. On Mars it uses true replay positions: a necessary lower bound, not a safe-route forecast. Earth uses the delayed, potentially noisy reported position, so its marker is an estimate and its caption says “low estimated reserve.” The synthetic true-state warning is omitted from Earth; it is a replay annotation, not a telemetry event.
 - **Checked in Chrome only,** on this laptop (about 60 frames a second in Mission view and 35 in Compare), and opened from disk in headless Chrome.
 - **Queued commands are drawn as if the wheels did not slip.** The dashed line is where commands aim, not where they land.

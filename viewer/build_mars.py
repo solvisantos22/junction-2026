@@ -27,10 +27,10 @@ REPO = Path(__file__).resolve().parent.parent
 MARS = REPO / "viewer" / "mars"
 RUNS = REPO / "docs" / "lightlag-runs"
 
-# Two missions from the overnight evaluation (docs/lightlag-overnight-evaluation.md).
-# Each lists the three unchanged-prompt attempts by Claude Opus 5.5 from block A,
-# in the order they ran, and the frozen reference on the same seed. `featured`
-# is the run the demo opens on. These seeds were chosen overnight because the
+# Each mission lists three unchanged-prompt attempts by Claude Opus 5.5, in the order
+# they ran, and the frozen reference on the same seed. `featured` is the run the demo
+# opens on. The first two come from block A of the overnight evaluation
+# (docs/lightlag-overnight-evaluation.md); those seeds were chosen overnight because the
 # model had failed on them before, so they are not a random sample of maps.
 MISSIONS: List[Dict[str, Any]] = [
     {
@@ -53,6 +53,19 @@ MISSIONS: List[Dict[str, Any]] = [
             ("claude-2", "overnight-a05-rush-noisy-seed502-r2-opus-5-5"),
             ("claude-3", "overnight-a08-rush-noisy-seed502-r3-opus-5-5"),
             ("reference", "rush-noisy-seed502-delay3-kf-mpc"),
+        ],
+    },
+    # Chosen for its map alone, before any model played it: one of the three seeds in 0-1199
+    # with the most straight routes blocked by rock. Three attempts on Saturday 14 November, in order.
+    {
+        "id": "rocks", "name": "Rocks", "featured": "claude-2",
+        "brief": "Two rock fields sit on the routes. Drive into one and the rover stops and drops every queued command, "
+                 "and Earth only hears about it three ticks later.",
+        "runs": [
+            ("claude-1", "rocks-rush-noisy-seed1026-r1-opus-5-5"),
+            ("claude-2", "rocks-rush-noisy-seed1026-r2-opus-5-5"),
+            ("claude-3", "rocks-rush-noisy-seed1026-r3-opus-5-5"),
+            ("reference", "rocks-rush-noisy-seed1026-delay3-kf-mpc"),
         ],
     },
 ]

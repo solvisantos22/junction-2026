@@ -673,7 +673,7 @@ function verdict(run) {
 // The agent's closing words: the first paragraph, and the one where it says what went wrong.
 function closingWords(run) {
   const parts = run.report.split(/\n\s*\n/).map(s => s.replace(/\*\*/g, '').replace(/\s+/g, ' ').trim()).filter(Boolean);
-  const wrong = parts.slice(1).find(s => /^(what went wrong|missed)/i.test(s));
+  const wrong = parts.slice(1).find(s => /^(what went wrong|what i missed|missed)/i.test(s));
   return [parts[0], wrong].filter(Boolean).map(s => s.length > 330 ? s.slice(0, 328) + '…' : s);
 }
 

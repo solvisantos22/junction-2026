@@ -88,7 +88,7 @@ class Missions(unittest.TestCase):
                 self.assertIn("-r{}-".format(attempt), run["source"])
             self.assertIn(mission["featured"], [run["id"] for run in mission["runs"]])
 
-    def test_the_reference_gets_home_alive_in_both_missions(self):
+    def test_the_reference_gets_home_alive_in_every_mission(self):
         for mission in DATA["missions"]:
             result = mission["runs"][-1]["replay"]["result"]
             self.assertTrue(result["alive"] and result["at_base"], mission["id"])
@@ -119,10 +119,23 @@ class Missions(unittest.TestCase):
                 short.append(1 - moved / command["metres"])
         self.assertGreater(max(short), 0.2)
 
+    def test_rocks_opens_on_the_run_that_drove_into_the_rocks(self):
+        run = run_of("rocks", MISSIONS["rocks"]["featured"])
+        stops = events(run, "safety_stop")
+        self.assertEqual([event["reason"] for _, event in stops], ["hazard"])
+        self.assertLess(run["reward"], MISSIONS["rocks"]["runs"][-1]["reward"])
+        self.assertIn("hazard", run["report"])
+        # commands queued behind the stop were dropped, never executed
+        executed = {event["command_id"] for _, event in events(run, "command_executed")}
+        dropped = [c for c in run["replay"]["commands"] if c["sent_tick"] < stops[0][0] < c["execute_tick"] and c["command_id"] not in executed]
+        self.assertGreater(len(dropped), 0)
+
     def test_the_other_attempts_are_kept_including_the_ones_that_did_well(self):
         self.assertEqual([run["reward"] for run in MISSIONS["deadlines"]["runs"][:3]], [0.0, 0.833333, 0.0])
         sand = [run["reward"] for run in MISSIONS["sand"]["runs"]]
         self.assertGreater(sand[2], sand[3])     # the third attempt beat the reference, and is shown
+        rocks = [run["reward"] for run in MISSIONS["rocks"]["runs"]]
+        self.assertGreater(rocks[0], rocks[3])   # so did the first attempt on the rock map
 
 
 class StandalonePage(unittest.TestCase):
