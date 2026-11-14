@@ -27,8 +27,8 @@ Learning methods: [Which learning methods could beat our environments?](2026-11-
 that saves the energy for the trip home, copying a teacher before RL, search
 plus a learned value, attention routing networks, and a teacher that sees the
 hidden values. Advises keeping PPO with curiosity switched off, and lists about
-245 checked papers, competitions and award winners. A brainstorm; nothing
-trained, no team decision.
+245 checked papers, competitions and award winners. A brainstorm and no team
+decision; its first pick has since been built and tested in the PPO + ICM tester.
 
 The earlier reviews below are retained as historical decision support. Their
 candidate rankings predate the implemented Lightlag experiments.
