@@ -557,14 +557,122 @@ harbor run -p /tmp/lightlag-wheels-2408 -a opencode \
 - Image digests are not pinned: the task inherits the canonical `python:3.12-slim` tag, like the dynamic experiments.
 - The fusing reference has no Harbor run and cannot have one as it is: it needs numpy.
 
+## The max env: everything on at once, and a controller for it
+
+A sandbox stress test at Manh's request (Saturday evening). Not a rules decision, not in the catalog, the trial or the demo.
+
+### What is switched on
+
+`lightlag_dynamic/biomes/maxenv.py`, `make_max_env(seed, delay=3)`:
+
+- **Profile `rush_noisy`, 50 ticks:** five targets with deadlines plus one or two discoveries, noisy sensing and heading drift.
+- **Five biomes at once** (`MAX_BIOME`): Relay Pass, Hidden Valley, Bagnold Dunes, Troy Crust and Meridiani Ripples. `rocks=True` swaps Hidden Valley for Gale Rock Field, because the two cannot be combined.
+- **No GPS-quality fix (`MANY_SENSORS`):**
+  - a weak 2 m position fix and four beacons;
+  - a gyroscope and coarse visual odometry;
+  - a hidden wheel scale of ±20% and a heading bias of ±15°.
+- **The lab's factors:**
+  - turn cost 0.01 per degree;
+  - drives split at 2 m;
+  - **10% of telemetry packets lost**;
+  - **5% of position fixes wild**, with 3 m of extra error.
+
+The last two did not work inside a biome before. The Mars layer's factor check refused them. They now pass through (`mars.py`, one line), and `NoGpsEnvironment` refuses wild fixes when there is no fix to make wild. In `main_mars` they are exactly the lab's faults; a test checks this. **Left out:** the slip jump and hidden patches (they cannot be combined with Bagnold Dunes), downlink passes (they add nothing on top of relay passes) and the real-time clock.
+
+### The controller: `max_navigator()` in `max_players.py`
+
+It is the fusing particle filter (`fused`) under controller 37's planning layers, with what the max env adds.
+
+**Estimation:**
+- lost packets bridged with the acknowledged drives;
+- wild fixes handled with a mixture likelihood;
+- crust readings expected at the published soft rate;
+- the wheel scale read exactly off the battery on the first clean bedrock drive.
+
+**Planning** (37's layers that do not need its Kalman filter: the slip-check layer and executive, guarded moves, stay-alive, uplink windows, aim at the disc, turn cost), with five changes found on development seeds:
+
+| Change | Why |
+|---|---|
+| **Dunes are traps** | With dune faces, mapped sand trips the slip check on almost every face. One trip strands the rover: every later drive stops after 5 cm. So sand counts as tripping, and a target that only dune sand reaches is dropped without waiting for proof |
+| **Trip chance from the true slip** | The planner sees an "effective" slip that folds in the wheel scale. With big wheels it is below zero. Once the filter was sure of it, the slip layer read bedrock as certain to trip and dropped targets on it |
+| **No waiting to confirm** | Every leg ends with a sample attempt. Waiting to see where the rover landed costs a round trip plus a closed relay pass; a missed attempt costs one tick and the sampling energy |
+| **Energy reserve 5** | The plan prices each leg's first turn at 90° and cannot see soft cells. With the reserve of 1, rovers that collected every target ran out of battery at base |
+| **Longer back-out drives** | 0.6 m instead of 0.1 m steps. The slip roll is drawn once per drive, so one lucky roll gets the rover out at once |
+
+### Development (seeds 0–59 and 1100–1299, delay 3)
+
+260 seeds each, the same seeds for every player, paired 95% bootstrap intervals:
+
+| Player | Mean share | Dead | Home |
+|---|---|---|---|
+| **`max_navigator`** | **34.0%** | 0 | 214 |
+| fusing reference `fused` | 13.5% (−20.4, −22.9 to −17.9) | 0 | – |
+| controller 37 | 11.5% (−22.4, −24.8 to −20.2) | 0 | – |
+| `kf_mpc` | 6.7% (−27.3, −29.6 to −25.0) | 0 | – |
+| `max_navigator` on the fusing planner (`layers=False`) | 29.8% (−4.2, −5.9 to −2.6) | 6 | – |
+
+Each piece switched off on its own, against the full controller's 34.0%:
+
+| Switched off | Share | Change |
+|---|---|---|
+| bridging lost packets | 16.4% | −17.6, and 4 dead |
+| no waiting to confirm (back to 37's rule) | 29.8% | −4.2 |
+| 37's planning layers (the fusing planner instead) | 29.8% | −4.2, and 6 dead |
+| dunes are traps | 31.1% | −2.9 |
+| dropping before any trip | 31.2% | −2.8 |
+| energy reserve 5 (back to 1) | 33.0% | −1.0, and 4 dead |
+| trip chance from the true slip | 33.2% | −0.8 |
+| longer back-out drives | 33.7% | −0.3 |
+| wheel scale from the battery | 33.8% | −0.2 |
+
+**What each mechanic still costs** (switched off in the environment, 60 seeds, an earlier version of the controller at 29.3%):
+- **Troy Crust: +7.8 points.** Almost all of it comes from missions where the sand slip is high enough that a hidden soft cell strands the rover;
+- Hidden Valley's slip check: +4.8;
+- the weak fix (2 m against 0.3 m): +3.8;
+- relay passes: +2.9;
+- Bagnold Dunes: +1.0;
+- everything else: within a point.
+
+**Tried and dropped:**
+- **Routing around crust regions, or treating them as sand: −4 to −9 points.** In most worlds soft cells are harmless, and the detours and dropped targets cost more than the traps.
+- Marking found soft cells as sand: −1. Marking only cells that tripped: −0.5.
+- Chaining legs across relay passes: −2, with two deaths.
+
+### Fresh check, declared before it ran (Saturday 18:08 Helsinki)
+
+- **Seeds 2600–2639, delay 3**, the preset `make_max_env`. These seeds were unused: they are not in `TEAM_STATUS.md` on `origin/main` at `d0bdf1a`.
+- **The controller is frozen** as committed with this note. One run, no change afterwards.
+- **Keep rule:** the claim "`max_navigator` plays the max env better than the fusing reference" stands if the paired 95% bootstrap interval of `max_navigator` − `fused` is above zero.
+- **Also reported, with no keep rule:** controller 37, `kf_mpc` and the fixed plan; deaths and returns home.
+
+```sh
+python3 -m lightlag_dynamic.biomes.max_check --seeds 2600-2639 --workers 20
+```
+
+**Result (run once at 18:09; the keep rule holds):**
+
+| Player | Mean share | Dead | Home | `max_navigator` minus it (95%) |
+|---|---|---|---|---|
+| **`max_navigator`** | **29.0%** | 1 | 30 | – |
+| fusing reference `fused` | 11.2% | 0 | 10 | **+17.8 (+11.8 to +23.7)** |
+| controller 37 | 8.5% | 0 | 29 | +20.5 (+14.6 to +26.3) |
+| `kf_mpc` | 6.4% | 0 | 9 | +22.6 (+17.3 to +27.9) |
+| fixed plan | 11.2% | 0 | 21 | +17.8 (+11.3 to +24.5) |
+
+- **About 2.5 times the share of the next best controller.** The share is of all the value on the map, deadlines included.
+- **Five points lower than on the development seeds (34.0%)**, as expected after tuning on them.
+- **One death (seed 2625):** three missed sample attempts cost 9 energy, and the rover ran dry at the last tick. Attaching an attempt only when a miss is affordable might close this; it is not tried.
+- Three missions scored zero.
+- `kf_mpc` crashed once (seed 2624: commands beyond the horizon), as on the development seeds.
+
 ## Limits
 
 - **No model has played a biome.** Whether a biome opens a gap between an agent and a reference is unknown.
-- **No controller reads the new published areas.** Crust regions, rock fields and dune slopes are in `map()`, but every controller here only reacts to them through telemetry. The trial shows which existing controller is most robust, not how well a biome can be played. A controller that prices crust at its published rate, counts wheel wear, or fits the slope line should do better; none is built.
+- **Only the max-env controller reads any of the new published areas**, and only two: crust regions, in its terrain matching, and dune faces, as traps. Rock fields and dune slopes are in `map()`, but the trial's controllers only react to them through telemetry. The trial shows which existing controller is most robust, not how well a biome can be played. A controller that prices crust at its published rate, counts wheel wear, or fits the slope line should do better; none is built.
 - **Bound 16 is not a bound in the biomes.** Its planner ignores their rules. On Relay Pass at delay 0 it scores below controller 36.
 - **40 seeds, one draw each.** Differences under about one point are noise.
 - **Mixed biomes** work and have one test; they were not part of the trial.
-- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting and position probes; 2200–2239, 2300–2339 and 2500–2539 for the no-GPS, weak-GPS and many-sensors results. All now used. 2400–2403, 2405 and 2408 are set aside for the proposed model runs; the scripted players have already played them.
+- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting and position probes; 2200–2239, 2300–2339 and 2500–2539 for the no-GPS, weak-GPS and many-sensors results. All now used. 2400–2403, 2405 and 2408 are set aside for the proposed model runs; the scripted players have already played them. The max env: development 0–59 and 1100–1299, the fresh check 2600–2639 (now used).
 
 ## Suggested next steps (not done)
 

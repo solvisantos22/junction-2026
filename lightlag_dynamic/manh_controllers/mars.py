@@ -123,7 +123,8 @@ class MarsEnvironment(ScenarioEnvironment, _SlipCheckDrive):
         return replay
 
 
-_SCENARIO_FACTORS = {"max_metres", "vo_by_terrain", "windows", "hidden_patches", "slip_change", "turn_cost"}
+_SCENARIO_FACTORS = {"max_metres", "vo_by_terrain", "windows", "hidden_patches", "slip_change", "turn_cost",
+                     "packet_loss", "fix_outliers"}
 
 
 def make_mars_env(seed, delay, profile="rush_noisy", horizon=None, **kw):

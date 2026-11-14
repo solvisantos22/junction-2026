@@ -137,6 +137,8 @@ class NoGpsEnvironment(BiomeEnvironment):
             raise ValueError("beacon_hear_chance must be in (0, 1]")
         if nav["wheel_scale_error"] >= 0.5:
             raise ValueError("wheel_scale_error must be below 0.5")
+        if nav["position_noise_m"] is None and (kw.get("factors") or {}).get("fix_outliers"):
+            raise ValueError("fix_outliers needs a position fix, and this navigation setting has none")
         if sensing is None:  # the published sensing model, on every profile, with the wider bias
             sensing = {name: value * noise_level for name, value in SENSING.items()}
             sensing["heading_bias_deg"] = nav["heading_bias_deg"]

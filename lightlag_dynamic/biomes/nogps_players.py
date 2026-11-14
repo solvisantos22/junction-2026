@@ -227,6 +227,10 @@ class _Navigator:
     USE = frozenset(SENSORS)
     N = 1000
     HOLD_FOR_FIXES = False   # without a fix, standing still at a target teaches almost nothing
+    PF_CLASS = NavParticleFilter
+
+    def _made_pf(self, rules):
+        """Called once, right after the particle filter is made: a hook for subclasses."""
 
     def absorb(self, packet):
         self._fix = packet["position"] if "fix" in self.USE else None
@@ -240,8 +244,8 @@ class _Navigator:
         if not hasattr(self, "pf"):
             rules = self.tools.rules()
             self.nav = rules.get("navigation") or {}
-            self.pf = NavParticleFilter(rules, self.packets[0]["position"], self.sand, f.rough_cells, f.cell_m,
-                                        n=self.N, seed=7, slip_walk=self.SLIP_WALK, map_size=self.size)
+            self.pf = self.PF_CLASS(rules, self.packets[0]["position"], self.sand, f.rough_cells, f.cell_m,
+                                    n=self.N, seed=7, slip_walk=self.SLIP_WALK, map_size=self.size)
             self.beacons = [(b["x"], b["y"]) for b in self.tools.map().get("beacons", [])]
             self.pf.gyro = "gyro" in self.USE and self.nav.get("gyro_noise_deg") is not None
             published = self.nav.get("wheel_scale_error") or (rules.get("wheels") or {}).get("wheel_scale_error") or 0.0
@@ -254,6 +258,7 @@ class _Navigator:
                 f.ranges = {t: (1.0 - (1.0 + error) * (1.0 - lo), 1.0 - (1.0 - error) * (1.0 - hi))
                             for t, (lo, hi) in f.ranges.items()}
                 self.slip_floor = min(lo for lo, _ in f.ranges.values())
+            self._made_pf(rules)
         pf, nav = self.pf, self.nav
         drive = _executed_drive(self, packet)
         if drive is not None:
