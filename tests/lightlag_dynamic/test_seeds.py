@@ -40,6 +40,7 @@ class CalibrationTest(unittest.TestCase):
         self.assertEqual(cell["features"], {"targets_at_launch": 5, "discoveries": 1, "deadlines": 6,
                                             "total_value": 7})
         self.assertAlmostEqual(cell["1"]["share"], 1.0)
+        self.assertAlmostEqual(cell["no_drift"]["share"], cell["1"]["share"])  # no noise: drift modelling is moot
         self.assertTrue(cell["verdict"]["tier1"])
         self.assertFalse(cell["verdict"]["tier2"])
         self.assertIn("Tier 1: 1. Tier 2: 0.", report(cells, ["rush"], 3))

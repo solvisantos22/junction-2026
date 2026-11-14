@@ -160,47 +160,53 @@ The settings match Sölvi's Harbor experiments: horizon 50, noise level 1, bumpi
 - **Tier 2, "needs delay-aware, rule-aware feedback":** tier 1, plus `stale_telemetry` (treats the last packet as the present) and `window_blind` (ignores deadlines and discoveries) both score at most 0.60.
 - **Ranking:** by the gap between the lowest selector and the highest shortcut.
 - **Reported, never selected on:** `kf_mpc` (controller 1, the frozen Harbor reference) and bound 16. This avoids picking seeds where the reference happened to be lucky.
+- **Also reported, never selected on: the no-drift proxy.** This is `kf_mpc` believing the heading bias is zero (bias variance at the floor, no bias walk). It re-plans from every fix, like Claude Opus on seed 500, but never models drift. It was added after the search; the selection did not change.
 
 **Selection uses scripted controllers only, never a model's outcome.** A seed that every shortcut fails shows that it needs the behaviour, not that a model lacks it. Seed 500 passes tier 1 on both profiles, and Opus solved it.
 
 Seeds 1000–1499, delay 3:
 
-| Profile | Selectors ≥ 0.90 | Tier 1 | Tier 2 | 19 | `kf_mpc` | Bound 16 | Blind | Cautious | Window-blind |
+| Profile | Selectors ≥ 0.90 | Tier 1 | Tier 2 | 19 | `kf_mpc` | Bound 16 | No-drift | Blind | Cautious | Window-blind |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `rush` | 139 | 34 | 14 | 81% | 78% | 82% | 78% | 60% | 59% | 64% |
+| `rush_noisy` | 55 | 18 | 15 | 69% | 68% | 81% | 70% | 54% | 40% | 17% |
+
+The last seven columns are mean scores. Below, the top tier-2 seeds per profile. Scores are shares of the maximum. Controllers 19–24 score the same on every row listed.
+
+`rush` (no noise, so the no-drift proxy equals `kf_mpc`):
+
+| Seed | Gap | 19–24 | `kf_mpc` (1) | Bound 16 | No-drift | Blind | Cautious | Window-blind | Targets (launch + found) |
 |---|---|---|---|---|---|---|---|---|---|
-| `rush` | 139 | 34 | 14 | 81% | 78% | 82% | 60% | 59% | 64% |
-| `rush_noisy` | 55 | 18 | 15 | 69% | 68% | 81% | 54% | 40% | 17% |
-
-The last six columns are mean scores. Below, the top tier-2 seeds per profile. Scores are shares of the maximum. Controllers 19–24 score the same on every row listed.
-
-`rush`:
-
-| Seed | Gap | 19–24 | `kf_mpc` (1) | Bound 16 | Blind | Cautious | Window-blind | Targets (launch + found) |
-|---|---|---|---|---|---|---|---|---|
-| 1428 | +0.50 | 1.00 | 0.75 | 1.00 | 0.42 | 0.46 | 0.50 | 5 + 2 |
-| 1295 | +0.48 | 1.00 | 0.88 | 0.83 | 0.50 | 0.50 | 0.52 | 5 + 2 |
-| 1095 | +0.47 | 1.00 | 1.00 | 1.00 | 0.50 | 0.50 | 0.53 | 5 + 1 |
-| 1100 | +0.44 | 1.00 | 0.67 | 1.00 | 0.56 | 0.56 | 0.50 | 5 + 1 |
-| 1156 | +0.44 | 1.00 | 0.67 | 1.00 | 0.56 | 0.56 | 0.50 | 5 + 1 |
-| 1001 | +0.42 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.58 | 5 + 1 |
-| 1035 | +0.42 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.58 | 5 + 1 |
-| 1155 | +0.42 | 1.00 | 1.00 | 1.00 | 0.50 | 0.56 | 0.58 | 5 + 2 |
-| 1208 | +0.42 | 1.00 | 1.00 | 1.00 | 0.50 | 0.52 | 0.58 | 5 + 2 |
-| 1390 | +0.42 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.58 | 5 + 1 |
+| 1428 | +0.50 | 1.00 | 0.75 | 1.00 | 0.75 | 0.42 | 0.46 | 0.50 | 5 + 2 |
+| 1295 | +0.48 | 1.00 | 0.88 | 0.83 | 0.88 | 0.50 | 0.50 | 0.52 | 5 + 2 |
+| 1095 | +0.47 | 1.00 | 1.00 | 1.00 | 1.00 | 0.50 | 0.50 | 0.53 | 5 + 1 |
+| 1100 | +0.44 | 1.00 | 0.67 | 1.00 | 0.67 | 0.56 | 0.56 | 0.50 | 5 + 1 |
+| 1156 | +0.44 | 1.00 | 0.67 | 1.00 | 0.67 | 0.56 | 0.56 | 0.50 | 5 + 1 |
+| 1001 | +0.42 | 1.00 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.58 | 5 + 1 |
+| 1035 | +0.42 | 1.00 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.58 | 5 + 1 |
+| 1155 | +0.42 | 1.00 | 1.00 | 1.00 | 1.00 | 0.50 | 0.56 | 0.58 | 5 + 2 |
+| 1208 | +0.42 | 1.00 | 1.00 | 1.00 | 1.00 | 0.50 | 0.52 | 0.58 | 5 + 2 |
+| 1390 | +0.42 | 1.00 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.58 | 5 + 1 |
 
 `rush_noisy`:
 
-| Seed | Gap | 19–24 | `kf_mpc` (1) | Bound 16 | Blind | Cautious | Window-blind | Targets (launch + found) |
-|---|---|---|---|---|---|---|---|---|
-| 1165 | +0.80 | 1.00 | 1.00 | 1.00 | 0.05 | 0.20 | 0.00 | 5 + 1 |
-| 1344 | +0.55 | 1.00 | 1.00 | 1.00 | 0.45 | 0.36 | 0.00 | 5 + 2 |
-| 1458 | +0.52 | 1.00 | 1.00 | 1.00 | 0.23 | 0.48 | 0.00 | 5 + 1 |
-| 1129 | +0.50 | 0.90 | 0.90 | 1.00 | 0.40 | 0.40 | 0.00 | 5 + 1 |
-| 1460 | +0.50 | 1.00 | 1.00 | 1.00 | 0.50 | 0.45 | 0.45 | 5 + 1 |
-| 1035 | +0.44 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.00 | 5 + 1 |
-| 1155 | +0.42 | 1.00 | 1.00 | 1.00 | 0.50 | 0.42 | 0.58 | 5 + 2 |
-| 1018 | +0.40 | 1.00 | 1.00 | 1.00 | 0.60 | 0.50 | 0.00 | 5 + 1 |
-| 1318 | +0.40 | 1.00 | 1.00 | 0.72 | 0.60 | 0.45 | 0.00 | 5 + 1 |
-| 1001 | +0.36 | 0.92 | 0.92 | 1.00 | 0.56 | 0.56 | 0.50 | 5 + 1 |
+| Seed | Gap | 19–24 | `kf_mpc` (1) | Bound 16 | No-drift | Blind | Cautious | Window-blind | Targets (launch + found) |
+|---|---|---|---|---|---|---|---|---|---|
+| 1165 | +0.80 | 1.00 | 1.00 | 1.00 | 0.20 | 0.05 | 0.20 | 0.00 | 5 + 1 |
+| 1344 | +0.55 | 1.00 | 1.00 | 1.00 | 1.00 | 0.45 | 0.36 | 0.00 | 5 + 2 |
+| 1458 | +0.52 | 1.00 | 1.00 | 1.00 | 1.00 | 0.23 | 0.48 | 0.00 | 5 + 1 |
+| 1129 | +0.50 | 0.90 | 0.90 | 1.00 | 0.60 | 0.40 | 0.40 | 0.00 | 5 + 1 |
+| 1460 | +0.50 | 1.00 | 1.00 | 1.00 | 0.80 | 0.50 | 0.45 | 0.45 | 5 + 1 |
+| 1035 | +0.44 | 1.00 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.00 | 5 + 1 |
+| 1155 | +0.42 | 1.00 | 1.00 | 1.00 | 1.00 | 0.50 | 0.42 | 0.58 | 5 + 2 |
+| 1018 | +0.40 | 1.00 | 1.00 | 1.00 | 0.78 | 0.60 | 0.50 | 0.00 | 5 + 1 |
+| 1318 | +0.40 | 1.00 | 1.00 | 0.72 | 0.62 | 0.60 | 0.45 | 0.00 | 5 + 1 |
+| 1001 | +0.36 | 0.92 | 0.92 | 1.00 | 0.67 | 0.56 | 0.56 | 0.50 | 5 + 1 |
+
+**Where not modelling drift costs points (`rush_noisy`, tier 2).**
+- The no-drift proxy scores below `kf_mpc` on 9 of the 15 tier-2 seeds.
+- It scores 0.60 or less on three: 1129, 1165 and 1302.
+- **1165 is the sharpest seed found.** The reference scores 1.00 and every player that ignores feedback, the delay, the rules or the drift scores 0.20 or less.
 
 **Tier 2 on both profiles: 1001, 1021, 1035, 1155, 1390.**
 - `kf_mpc` scores 1.00 on all five on `rush`.
@@ -211,6 +217,9 @@ Caveats:
 - **The agreement check is weak.** The four selectors share one planner, and 24 equals 19 on the published profiles. They score the same on 480 of 500 `rush` seeds and 434 of 500 `rush_noisy` seeds.
 - **Tier 2 is in practice decided by `window_blind`.** `stale_telemetry` runs out of energy on nearly every seed: it scores above 0 on 31 `rush` seeds and 14 `rush_noisy` seeds, and never above 0.20.
 - **Bound 16 is not a strict upper bound.** Its tight planner sometimes scores below the selectors, for example 0.83 on 1295 and 0.72 on 1318.
+- **Passes are rare on `rush_noisy`:** 18 tier-1 seeds out of 500. On seeds 0–19 and 600–639 none of 60 pass; feedback controllers average 72% there and bound 16 averages 84%.
+- **At the published heading bias of ±5°, ignoring drift costs little on average.** The no-drift proxy averages 70% on `rush_noisy` against 68% for `kf_mpc`. On `noisy` (seeds 0–19 and 600–639, horizon 80) it averages 86% against 92%. Seeds alone may therefore not open a gap. A drift the agent has to learn, such as a wider published bias range, is the more likely lever; it is untested here.
+- **Do not pair uplink windows with `kf_mpc` as the reference.** It isn't window-aware. On `rush_noisy`, delay 3, seeds 1000–1019, it stops with "commands would execute beyond the episode horizon" in 9 of 20 episodes with 10/3 windows and 15 of 20 with 16/4. Controllers 19 and 24 never stop.
 - **These seeds are reserved for this search.** 0–19, 100–139, 200–209, 300–319, 400–419 and 500–504 are taken by development, held-out checks and Sölvi's Harbor comparisons.
 
 ## Files

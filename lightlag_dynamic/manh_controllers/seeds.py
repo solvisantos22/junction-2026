@@ -20,6 +20,9 @@ Players
   reported    controller 1 (the repo's kf_mpc, the frozen Harbor reference) and bound 16
               (exact hidden information); scored and shown, never selected on, so the list does
               not favour seeds where the reference happened to get lucky.
+              no_drift: kf_mpc that believes the heading bias is zero (bias variance at the
+              floor, no bias walk). It re-plans from every fix like an agent that never models
+              drift; added after the search as a report-only column, never selected on.
 
 Criteria, declared before any seed in the search range was played (per profile, per seed):
   feedback    every selector alive and home at the horizon, and min(selectors) >= 0.90
@@ -47,6 +50,7 @@ SELECTORS = ("19", "20", "21", "24")
 TIER1_SHORTCUTS = ("blind", "cautious")
 TIER2_SHORTCUTS = ("stale_telemetry", "window_blind")
 REPORTED = ("1", "16")
+PROXIES = ("no_drift",)  # report-only stand-ins, never selected on
 FEEDBACK_FLOOR = 0.90
 SHORTCUT_CEILING = 0.60
 # Policies of lightlag_dynamic.controllers that the Manh registry does not hold.
@@ -55,13 +59,23 @@ EXTRA_POLICIES = ("stale_telemetry", "window_blind")
 
 def _names():
     from .swarm import resolve
-    return {key: resolve([key])[0] for key in SELECTORS + REPORTED} | {k: k for k in TIER1_SHORTCUTS + TIER2_SHORTCUTS}
+    return ({key: resolve([key])[0] for key in SELECTORS + REPORTED}
+            | {k: k for k in TIER1_SHORTCUTS + TIER2_SHORTCUTS + PROXIES})
+
+
+def no_drift(tools):
+    """kf_mpc that believes the heading bias is zero: an agent that re-plans but never models drift."""
+    from lightlag_dynamic.kf_mpc import VAR_FLOOR, KalmanMPCController
+    controller = KalmanMPCController(tools)
+    controller.filter.cov[2][2] = VAR_FLOOR
+    controller.filter.q_walk = 0.0
+    controller.run()
 
 
 def play(job):
     """One episode: (player key, registry name or policy, profile, delay, seed) -> result row."""
     key, name, profile, delay, seed = job
-    if key in EXTRA_POLICIES:
+    if key in EXTRA_POLICIES + PROXIES:
         from lightlag_dynamic.controllers import POLICIES
         from lightlag_dynamic.tools import PublicTools
 
@@ -70,7 +84,7 @@ def play(job):
         env = make_env(seed, delay, profile)
         crash = None
         try:
-            POLICIES[name](PublicTools(env))
+            (no_drift if key == "no_drift" else POLICIES[name])(PublicTools(env))
         except Exception as exc:  # a controller error is a result, not a harness failure
             crash = f"{type(exc).__name__}: {exc}"[:200]
         while not env.advance(5)["episode_complete"]:
@@ -126,13 +140,15 @@ def score(seeds, profiles, delay, workers=1):
 
 def _row(seed, cell, gap_key):
     v, f = cell["verdict"], cell["features"]
-    shares = " | ".join(f"{cell[k]['share']:.2f}" for k in SELECTORS + REPORTED + TIER1_SHORTCUTS + TIER2_SHORTCUTS)
+    shares = " | ".join(f"{cell[k]['share']:.2f}" for k in COLUMNS)
     return (f"| {seed} | {v[gap_key]:+.2f} | {shares} | {f['targets_at_launch']}+{f['discoveries']} "
             f"| {f['deadlines']} | {f['total_value']:g} |")
 
 
-HEADER = ("| Seed | Gap | 19 | 20 | 21 | 24 | kf_mpc (1) | bound 16 | blind | cautious | stale | window-blind "
-          "| Targets (launch+found) | Deadlines | Value |\n|---|" + "---|" * 14)
+COLUMNS = SELECTORS + REPORTED + PROXIES + TIER1_SHORTCUTS + TIER2_SHORTCUTS
+LABELS = {"1": "kf_mpc", "16": "bound 16", "no_drift": "no-drift"}
+HEADER = ("| Seed | Gap | 19 | 20 | 21 | 24 | kf_mpc (1) | bound 16 | no-drift | blind | cautious | stale | window-blind "
+          "| Targets (launch+found) | Deadlines | Value |\n|---|" + "---|" * 15)
 
 
 def report(cells, profiles, delay, top=10):
@@ -147,9 +163,7 @@ def report(cells, profiles, delay, top=10):
         lines += [f"## {profile}", "",
                   f"{n} seeds. Feedback floor met: {count('feedback')}. Tier 1: {count('tier1')}. "
                   f"Tier 2: {count('tier2')}.", "",
-                  "Mean share: " + ", ".join(f"{k if k not in ('1', '16') else ('kf_mpc' if k == '1' else 'bound 16')} "
-                                              f"{mean(k):.0%}" for k in SELECTORS + REPORTED + TIER1_SHORTCUTS + TIER2_SHORTCUTS),
-                  ""]
+                  "Mean share: " + ", ".join(f"{LABELS.get(k, k)} {mean(k):.0%}" for k in COLUMNS), ""]
         for tier, gap in (("tier2", "gap2"), ("tier1", "gap1")):
             picked = sorted((s for s, c in mine.items() if c["verdict"][tier]),
                             key=lambda s: (-mine[s]["verdict"][gap], s))[:top]
