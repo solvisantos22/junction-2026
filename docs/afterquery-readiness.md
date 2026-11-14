@@ -7,7 +7,7 @@ packages remain frozen. The bounded generation attempt is closed. See the
 [morning brief](lightlag-morning-brief.md) for the direction recommendation.
 Lightlag, the final mission and the reference choice remain provisional.
 
-Event requirements below were refreshed after [Ved's 14:01–14:02 clarification](afterquery-judging-clarifications-2026-11-14.md). The technical results remain the recorded overnight handoff.
+Event requirements below were refreshed through [Ved's 16:54 clarification](afterquery-judging-clarifications-2026-11-14.md). The technical results remain the recorded overnight handoff.
 
 **The model/container path and auditable failures are demonstrated. The main
 remaining gap is choosing and packaging the actual judge task.** Canonical
@@ -86,18 +86,23 @@ prize entry from credit redemption alone.
 The team’s [record of Ved’s 01:35 announcement](afterquery-update-2026-11-14.md) requires a
 Harbor task, a single normalized `/logs/verifier/reward.txt`, at least one actual
 model log/score, and a short README; playthrough encouraged, training optional,
-no AfterQuery inference credits. [Ved's 14:01–14:02 replies](afterquery-judging-clarifications-2026-11-14.md)
-clarify that judges can use models specified in the team's README, will run local
-Docker with Compose support, and expect agent timeouts in `task.toml`. No single
-model or numerical timeout cap was prescribed. Reasoning/token/resource details
-and the live demo's timing, location, eligibility and Q&A split remain unresolved.
+no AfterQuery inference credits. [Ved's later replies](afterquery-judging-clarifications-2026-11-14.md)
+confirm local Docker with Compose support and agent timeouts in `task.toml`.
+At 16:54 he says **Harbor + OpenCode is expected and judging models will not be
+disclosed**. The earlier README model-preference offer does not guarantee their
+choice; document our tested setup and keep the selected package portable.
+Difficulty gap and realistic failure modes matter roughly equally, as qualitative
+guidance alongside the published rubric. At 15:56 he emphasized the submission
+video as a large part of judging. Reasoning/token/resource details and a numerical
+timeout cap remain unconfirmed; separate live-demo questions were referred to organizers.
 General [Harbor verifier documentation](https://docs.harborframework.com/tasks/verifier)
 accepts other formats, but the recorded challenge asks for the single number.
 
-Junction Watch completed a full authenticated check at **13:48 Helsinki on
-14 November**, after recovering the earlier access and usage-limit gaps. It
+Junction Watch completed a full authenticated check at **17:24 Helsinki on
+14 November**, after recovering the platform gap since 16:21. It
 reported submissions open, the saved Lightlag entry still Draft, and material
-links/deck empty. This chat subsequently read Ved's 14:01–14:02 replies directly.
+links/deck empty. This chat read Ved's replies through 16:54 directly. The guide
+still requires a public video of at most two minutes.
 The verified final deadline remains **Sunday 15 November, 10:00 Helsinki**.
 The previously checked [Junction schedule/FAQ](https://2026.hackjunction.com/)
 described MIT submissions and tech prizes alongside a main track. Confirm
