@@ -1,0 +1,93 @@
+{
+  "all_six_latest_above_best_recorded_opus": true,
+  "all_six_latest_above_best_recorded_sonnet": true,
+  "audit_sha256": "846bbb9429f2e2c357c8689e3280b4ca6ce2e494610c6e470e2f954cec2b4082",
+  "audited_campaigns": 19,
+  "audited_missions": 57,
+  "beam": 0.4762569832402235,
+  "beam_exactly_matches_recorded_reference": true,
+  "best_recorded_opus": 0.2674581005586592,
+  "best_recorded_sonnet": 0.2925977653631285,
+  "greedy": 0.36731843575418993,
+  "latest_policies": [
+    {
+      "alive": 3,
+      "arm": "ppo-17-08192",
+      "episodes": 8192,
+      "home": 3,
+      "invalid_calls": 0,
+      "missions": 3,
+      "reward": 0.3638268156424581
+    },
+    {
+      "alive": 3,
+      "arm": "ppo-29-08192",
+      "episodes": 8192,
+      "home": 3,
+      "invalid_calls": 0,
+      "missions": 3,
+      "reward": 0.3400837988826816
+    },
+    {
+      "alive": 3,
+      "arm": "ppo-43-08192",
+      "episodes": 8192,
+      "home": 3,
+      "invalid_calls": 0,
+      "missions": 3,
+      "reward": 0.3952513966480447
+    },
+    {
+      "alive": 3,
+      "arm": "replay-17-08192",
+      "episodes": 8192,
+      "home": 3,
+      "invalid_calls": 0,
+      "missions": 3,
+      "reward": 0.33100558659217877
+    },
+    {
+      "alive": 3,
+      "arm": "replay-29-08192",
+      "episodes": 8192,
+      "home": 3,
+      "invalid_calls": 0,
+      "missions": 3,
+      "reward": 0.3261173184357542
+    },
+    {
+      "alive": 3,
+      "arm": "replay-43-02048",
+      "episodes": 2048,
+      "home": 3,
+      "invalid_calls": 0,
+      "missions": 3,
+      "reward": 0.3435754189944134
+    }
+  ],
+  "limits": [
+    "Existing seven attempts on one fixed three-world campaign; model-family means are descriptive and do not estimate general failure rates.",
+    "All seven have NonZeroAgentExitCodeError and recorded EPIPE; six Opus/Sonnet attempts still reached campaign_complete.",
+    "Haiku zero is length-censored and must not be described as a completed reasoning/control failure; terminal home/alive comes from untouched rovers and verifier completion.",
+    "Scores use aggregate raw/max, not the unweighted mean of the three mission ratios. Official six-decimal Harbor scores are separately retained.",
+    "No single-world 2026, harsher-day task, one-request program or saved-program replay is included.",
+    "This extraction verifies retained arithmetic and provenance; it does not rerun the simulator, agents, Harbor or any new API call.",
+    "Recorded costs are Harbor-reported API estimates, not verified billing.",
+    "Fixed three-world campaign; no confidence interval or broader LLM superiority inferred.",
+    "Hybrid controllers use hand-written navigation; training/compute budgets differ from the historical LLM agents.",
+    "Replay latest policies have budgets8192,8192,2048; no seed or checkpoint selected by score."
+  ],
+  "mean_latest_reward": {
+    "ppo": 0.36638733705772814,
+    "replay": 0.3335661080074488
+  },
+  "minimum_latest_reward": 0.3261173184357542,
+  "recorded_llm_sha256": "4812a20a1d24d3836ba24cd3c103442b1a2d10629c9a58b7cd8f8fc3654634c8",
+  "report_sha256": "5cc07fb929375fd06e55c3142f03454d18d48c94f680be6b8c653d6a13438888",
+  "schema": "learning-final-recorded-campaign-comparison-v1",
+  "worlds": [
+    2027,
+    2028,
+    2029
+  ]
+}

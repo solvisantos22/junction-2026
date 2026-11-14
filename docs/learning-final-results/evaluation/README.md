@@ -36,6 +36,8 @@ The fresh replay gain over 2048 is retained even though its development continua
 
 All three latest PPO policies lose the rover on world **82001**; PPO seed 29 at 2048 also loses it on **82024**. These four cases score zero and remain in every mean. The corresponding latest PPO home/survival count is 117/120, not a perfect-return result. Replay, greedy and beam return alive in every retained fresh case. The 736 development validation episodes had no such failure, so their perfect return record did not guarantee fresh-map safety.
 
+[Post-hoc saved-trace diagnosis](failure-notes.json) finds all four deaths on the home leg after queued drives deplete the battery. The three latest PPO controllers on 82001 follow similar return corridors and die 20.65–23.46 m from base; PPO29 at 2048 on 82024 dies 6.02 m away. Their saved home forecasts were feasible. This motivates investigating forecast/controller-execution mismatch on development maps; it does not establish a cause, justify retuning on these final worlds, or alter the frozen result. The diagnosis checks saved artifacts only, with no additional policy or simulation runs.
+
 These are small learned goal selectors above a hand-written navigation and feasibility scaffold. Their substantial improvement over initialization is evidence of learning in that system; it is not a learned-controller win over the stronger planner or an LLM post-training result. The [exact submission-campaign comparison](../campaign/README.md) is separate: no LLM played these 40 fresh evaluation worlds.
 
 ## Evidence and reproduction
