@@ -95,3 +95,11 @@ The [bounded adaptation protocol](adaptation-protocol.md) reserves fresh seeds
 one practice evaluation and a final submission, with a $1 usage guard. This is
 a repair diagnostic, not a full interactive-agent benchmark. The final program
 must be frozen before the 600-episode local comparison starts.
+
+
+Adaptation preparation also verifies the new NumPy-enabled image against the
+previous unchanged-control replay on used seed 3200: the entire replay and grade
+match. API dry-run validates the prompt, source/image pins and explicit local
+credential setup without contacting the provider. Neither check opens fresh
+cases or spends credits. The launch tooling and its focused error/budget tests
+are published in the next increment before the paid request.

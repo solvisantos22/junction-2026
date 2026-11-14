@@ -541,6 +541,8 @@ These are recommended evidence choices, not newly asserted official entry requir
   the authorized conditional adaptation. Existing model code was not changed.
 - **Failure analysis:** all 23 lost rovers end inside base, 19 deplete on idle ticks; public battery discrepancies precede 22 deaths. Reconstructed from retained artifacts with no new cases. Published the bounded adaptation protocol, original-code/full-rules prompt and fresh-seed reservation before spending or opening check maps. Evaluator-only parking counterfactuals are labelled and excluded from model feedback.
 
+- **Adaptation tooling verified before API:** 33 focused tests pass, including 12 fake-provider budget/failure tests and seven fresh-check integrity tests. A real NumPy-image replay matches the prior control exactly. Full prompt and fixed rules independently reviewed; no hidden fresh-instance input. No new spend during preparation.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
