@@ -1,0 +1,21 @@
+services:
+  main:
+    depends_on:
+      information:
+        condition: service_healthy
+  information:
+    build:
+      context: ./simulator
+    expose:
+      - "8000"
+    environment:
+      INFORMATION_SEED: "220410034955451117273494427747770691579"
+      INFORMATION_CONTEXT: "uncertain"
+      INFORMATION_ARTIFACT_DIR: /evaluator
+      INFORMATION_TOKEN_FILE: /run/information/token
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 3s

@@ -1,0 +1,34 @@
+{
+    "task": {
+        "path": "<pilot-runtime>/tasks/uncertain"
+    },
+    "trial_name": "uncertain__3TTBJAu",
+    "trials_dir": "<pilot-runtime>/jobs/model-uncertain",
+    "agent": {
+        "name": "opencode",
+        "model_name": "anthropic/claude-opus-5-5",
+        "kwargs": {
+            "version": "1.19.5",
+            "opencode_config": {
+                "agent": {
+                    "build": {
+                        "steps": 12
+                    }
+                },
+                "provider": {
+                    "anthropic": {
+                        "models": {
+                            "claude-opus-5-5": {
+                                "limit": {
+                                    "context": 200000,
+                                    "output": 8192
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "job_id": "e9eac14c-e7b2-42c5-8337-2d9b186b1102"
+}

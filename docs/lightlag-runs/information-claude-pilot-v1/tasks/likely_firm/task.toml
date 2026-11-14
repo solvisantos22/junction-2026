@@ -1,0 +1,39 @@
+schema_version = "1.4"
+artifacts = [{ source = "/evaluator", service = "information" }]
+
+[task]
+name = "neural-network-november/information-choice-pilot"
+version = "0.1.0"
+description = "Decide whether to acquire a costly delayed observation before an irreversible route choice."
+authors = []
+keywords = ["partial-observability", "information-acquisition", "mcp"]
+
+[metadata]
+
+[verifier]
+timeout_sec = 120.0
+environment_mode = "separate"
+
+[[verifier.collect]]
+service = "information"
+command = "python /srv/finish.py --url http://127.0.0.1:8000 --token-file /run/information/token"
+timeout_sec = 60.0
+
+[verifier.env]
+
+[agent]
+timeout_sec = 1800.0
+
+[environment]
+network_mode = "public"
+build_timeout_sec = 900.0
+os = "linux"
+
+[[environment.mcp_servers]]
+name = "information"
+transport = "streamable-http"
+url = "http://information:8000/mcp"
+
+[environment.env]
+
+[solution.env]

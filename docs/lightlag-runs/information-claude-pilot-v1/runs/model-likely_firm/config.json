@@ -1,0 +1,34 @@
+{
+    "task": {
+        "path": "<pilot-runtime>/tasks/likely_firm"
+    },
+    "trial_name": "likely_firm__JayY87c",
+    "trials_dir": "<pilot-runtime>/jobs/model-likely_firm",
+    "agent": {
+        "name": "opencode",
+        "model_name": "anthropic/claude-opus-5-5",
+        "kwargs": {
+            "version": "1.19.5",
+            "opencode_config": {
+                "agent": {
+                    "build": {
+                        "steps": 12
+                    }
+                },
+                "provider": {
+                    "anthropic": {
+                        "models": {
+                            "claude-opus-5-5": {
+                                "limit": {
+                                    "context": 200000,
+                                    "output": 8192
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "job_id": "3d177d8d-2e0c-4476-9eb9-a92a15d2db5e"
+}

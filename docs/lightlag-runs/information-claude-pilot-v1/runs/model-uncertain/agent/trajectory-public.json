@@ -1,0 +1,233 @@
+{
+  "agent": {
+    "model_name": "anthropic/claude-opus-5-5",
+    "name": "opencode",
+    "version": "1.19.5"
+  },
+  "export_note": "All message fields omitted; tool calls, observations and measured metrics retained. Private provider state and raw provider logs are not published.",
+  "final_metrics": {
+    "total_cached_tokens": 68223,
+    "total_completion_tokens": 767,
+    "total_cost_usd": 0.1124056,
+    "total_prompt_tokens": 68237,
+    "total_steps": 7
+  },
+  "schema_version": "ATIF-v1.7",
+  "session_id": "ses_e262c2c93ffe4bCIK1xZ01zloH",
+  "steps": [
+    {
+      "source": "user",
+      "step_id": 1
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "completion_tokens": 50,
+        "cost_usd": 0.063826,
+        "extra": {
+          "cache_write_tokens": 12562
+        },
+        "prompt_tokens": 4
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "observation": {
+        "results": [
+          {
+            "content": "{\"context\":{\"id\":\"uncertain\",\"prior_firm\":0.5,\"probe_energy\":1},\"initial_energy\":10,\"horizon\":30,\"delay\":1,\"signal_accuracy\":0.9,\"penalty_per_tick\":0.25,\"normalization\":10,\"max_batch_size\":5,\"max_advance_ticks\":5,\"routes\":{\"shortcut\":{\"target_value\":10,\"duration\":2,\"energy\":{\"firm\":4,\"soft\":12}},\"detour\":{\"target_value\":6,\"duration\":6,\"energy\":{\"firm\":8,\"soft\":8}}},\"command_schema\":[{\"action\":\"probe\"},{\"action\":\"commit\",\"route\":\"shortcut|detour\"},{\"action\":\"wait\"}],\"command_timing\":\"First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.\",\"acceptance\":\"Validate the entire batch, including execution at or before horizon, atomically. At most one probe and one commitment; probe must precede commitment in accepted order. Commitment is immutable on acceptance.\",\"probe\":\"Spend probe_energy at execution and produce the fixed episode signal. Signal equals terrain with signal_accuracy. Repeated log reads add no evidence.\",\"telemetry\":\"Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.\",\"trip\":\"A completed route includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain.\",\"grading\":\"A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.\"}",
+            "source_call_id": "toolu_01Nr4X8FgXk2PNE5dFxpSpyY"
+          },
+          {
+            "content": "{\"context\":{\"id\":\"uncertain\",\"prior_firm\":0.5,\"probe_energy\":1},\"terrain_states\":[\"firm\",\"soft\"],\"routes\":{\"shortcut\":{\"target_value\":10,\"duration\":2,\"energy\":{\"firm\":4,\"soft\":12}},\"detour\":{\"target_value\":6,\"duration\":6,\"energy\":{\"firm\":8,\"soft\":8}}},\"description\":\"Choose one immutable trip: shortcut to a 10-point target or detour to a separate 6-point target, both returning home.\"}",
+            "source_call_id": "toolu_01B84aWCWBvyjdj46Acj9TuH"
+          }
+        ]
+      },
+      "source": "agent",
+      "step_id": 2,
+      "timestamp": "2026-11-14T11:31:42.886000+00:00",
+      "tool_calls": [
+        {
+          "arguments": {},
+          "function_name": "information_rules",
+          "tool_call_id": "toolu_01Nr4X8FgXk2PNE5dFxpSpyY"
+        },
+        {
+          "arguments": {},
+          "function_name": "information_map",
+          "tool_call_id": "toolu_01B84aWCWBvyjdj46Acj9TuH"
+        }
+      ]
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "cached_tokens": 12562,
+        "completion_tokens": 61,
+        "cost_usd": 0.0159454,
+        "extra": {
+          "cache_write_tokens": 861,
+          "reasoning_tokens": 395
+        },
+        "prompt_tokens": 12564
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "observation": {
+        "results": [
+          {
+            "content": "{\"sent_tick\":0,\"accepted\":[{\"action\":\"probe\",\"execution_tick\":2}]}",
+            "source_call_id": "toolu_01FK41Fyk9QgM4hL67BYAG84"
+          }
+        ]
+      },
+      "source": "agent",
+      "step_id": 3,
+      "timestamp": "2026-11-14T11:31:44.869000+00:00",
+      "tool_calls": [
+        {
+          "arguments": {
+            "commands": [
+              {
+                "action": "probe"
+              }
+            ]
+          },
+          "function_name": "information_uplink",
+          "tool_call_id": "toolu_01FK41Fyk9QgM4hL67BYAG84"
+        }
+      ]
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "cached_tokens": 13423,
+        "completion_tokens": 50,
+        "cost_usd": 0.0061676,
+        "extra": {
+          "cache_write_tokens": 495
+        },
+        "prompt_tokens": 13425
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "observation": {
+        "results": [
+          {
+            "content": "{\"current_tick\":3,\"entries\":[{\"action\":\"briefing\",\"state_tick\":0,\"delivery_tick\":0,\"energy\":10,\"status\":\"ready\",\"route\":null},{\"action\":\"probe\",\"state_tick\":2,\"delivery_tick\":3,\"energy\":9,\"status\":\"ready\",\"route\":null,\"signal\":\"soft\"}]}",
+            "source_call_id": "toolu_01UhrToaLoUNMLaEFxoWXk49"
+          }
+        ]
+      },
+      "source": "agent",
+      "step_id": 4,
+      "timestamp": "2026-11-14T11:31:49.921000+00:00",
+      "tool_calls": [
+        {
+          "arguments": {
+            "ticks": 3
+          },
+          "function_name": "information_advance",
+          "tool_call_id": "toolu_01UhrToaLoUNMLaEFxoWXk49"
+        }
+      ]
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "cached_tokens": 13918,
+        "completion_tokens": 68,
+        "cost_usd": 0.0057966,
+        "extra": {
+          "cache_write_tokens": 165,
+          "reasoning_tokens": 41
+        },
+        "prompt_tokens": 13920
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "observation": {
+        "results": [
+          {
+            "content": "{\"sent_tick\":3,\"accepted\":[{\"action\":\"commit\",\"route\":\"detour\",\"execution_tick\":5}]}",
+            "source_call_id": "toolu_01REAWaMcB8krz1yB7yDKMMU"
+          }
+        ]
+      },
+      "source": "agent",
+      "step_id": 5,
+      "timestamp": "2026-11-14T11:31:51.670000+00:00",
+      "tool_calls": [
+        {
+          "arguments": {
+            "commands": [
+              {
+                "action": "commit",
+                "route": "detour"
+              }
+            ]
+          },
+          "function_name": "information_uplink",
+          "tool_call_id": "toolu_01REAWaMcB8krz1yB7yDKMMU"
+        }
+      ]
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "cached_tokens": 14083,
+        "completion_tokens": 97,
+        "cost_usd": 0.0055346,
+        "extra": {
+          "cache_write_tokens": 154
+        },
+        "prompt_tokens": 14085
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "observation": {
+        "results": [
+          {
+            "content": "{\"current_tick\":8,\"entries\":[{\"action\":\"briefing\",\"state_tick\":0,\"delivery_tick\":0,\"energy\":10,\"status\":\"ready\",\"route\":null},{\"action\":\"probe\",\"state_tick\":2,\"delivery_tick\":3,\"energy\":9,\"status\":\"ready\",\"route\":null,\"signal\":\"soft\"},{\"action\":\"commit\",\"state_tick\":5,\"delivery_tick\":6,\"energy\":1,\"status\":\"traveling\",\"route\":\"detour\"}]}",
+            "source_call_id": "toolu_0127R6d6LGvRst59k6FY1DRw"
+          },
+          {
+            "content": "{\"current_tick\":13,\"entries\":[{\"action\":\"briefing\",\"state_tick\":0,\"delivery_tick\":0,\"energy\":10,\"status\":\"ready\",\"route\":null},{\"action\":\"probe\",\"state_tick\":2,\"delivery_tick\":3,\"energy\":9,\"status\":\"ready\",\"route\":null,\"signal\":\"soft\"},{\"action\":\"commit\",\"state_tick\":5,\"delivery_tick\":6,\"energy\":1,\"status\":\"traveling\",\"route\":\"detour\"},{\"action\":\"complete\",\"state_tick\":11,\"delivery_tick\":12,\"energy\":1,\"status\":\"complete\",\"route\":\"detour\"}]}",
+            "source_call_id": "toolu_01LARrbKB3rHNhS77hhJnmoH"
+          }
+        ]
+      },
+      "source": "agent",
+      "step_id": 6,
+      "timestamp": "2026-11-14T11:31:53.881000+00:00",
+      "tool_calls": [
+        {
+          "arguments": {
+            "ticks": 5
+          },
+          "function_name": "information_advance",
+          "tool_call_id": "toolu_0127R6d6LGvRst59k6FY1DRw"
+        },
+        {
+          "arguments": {
+            "ticks": 5
+          },
+          "function_name": "information_advance",
+          "tool_call_id": "toolu_01LARrbKB3rHNhS77hhJnmoH"
+        }
+      ]
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "cached_tokens": 14237,
+        "completion_tokens": 441,
+        "cost_usd": 0.0151354,
+        "extra": {
+          "cache_write_tokens": 512,
+          "reasoning_tokens": 45
+        },
+        "prompt_tokens": 14239
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "source": "agent",
+      "step_id": 7,
+      "timestamp": "2026-11-14T11:31:55.945000+00:00"
+    }
+  ]
+}
