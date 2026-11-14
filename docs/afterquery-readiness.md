@@ -7,11 +7,14 @@ requirements still come from the team's [record of Ved's 01:35 announcement](aft
 This update does not claim a fresh read of logged-in Discord or prize pages.
 
 **The basic submission path is demonstrated: Harbor, a real model run and a
-valid reward are recorded. The research gap is still unproven.** Claude matched
-the reference at 1.0 on the original task and on both seed-500 profiles, `rush`
-and `rush_noisy`. The next milestone is a fixed additional seed comparison and
-decision audit, rather than treating weak scripted baselines as proof of model
-difficulty. Lightlag and final rules remain provisional.
+valid reward are recorded. The fixed seed comparison now has specific model
+failures and model wins; a broad gap is not established.** Claude matched the
+reference at 1.0 on the original task and both seed-500 profiles. In the first
+four [predeclared additional attempts](lightlag-fixed-seed-comparison.md), it
+beats the reference twice and trails twice. The deficits involve full-horizon
+energy budgeting and delayed command queues; all four replay audits are exact
+with no infrastructure findings. Finish seeds 503–504 before interpreting the
+whole set. Lightlag and final rules remain provisional.
 
 ## What is now demonstrated
 
@@ -37,6 +40,12 @@ difficulty. Lightlag and final rules remain provisional.
   no execution exception and reported cost **$0.4642194**. The two new model
   attempts together report **$0.946363**. The noisy waiting baseline scored
   0.267857 and the blind plan 0.571429; neither predicts this model's result.
+- [Fixed seeds 501–504](lightlag-fixed-seed-comparison.md): eight matched Harbor
+  references verified, 32 direct controls retained; **4/8 model runs complete**.
+  Seed 501 rush/noisy: Claude **0.0 / 0.791667**, reference **0.833333 / 0.666667**.
+  Seed 502: Claude **0.769231 / 0.634615**, reference **0.615385 / 0.769231**.
+  Four exact decision audits, no infrastructure findings; reported API usage
+  **$1.7880344** for this set so far, in addition to **$0.946363** for seed 500.
 - A [replay viewer](../viewer/README.md) for the original runs is delivered;
   adapting its presentation to a future dynamic model result remains separate.
 
@@ -44,9 +53,9 @@ difficulty. Lightlag and final rules remain provisional.
 
 | Priority | Gap | Concrete completion evidence |
 |---|---|---|
-| 1 | **Meaningful model difficulty.** Claude solved the original task and both seed-500 profiles at 1.0. Default sensing noise did not separate it from the reference on this seed. | Evaluate a fixed, predeclared set of additional seeds under unchanged rules and matched references. Preserve successes as well as failures; use the decision auditor to explain any actual gap. Do not tune difficulty solely to defeat one saved trace. |
+| 1 | **Meaningful model difficulty.** Four additional attempts show two model deficits versus the reference and two model wins; the remaining four attempts are pending. | Complete the predeclared set under unchanged rules and matched references. Preserve successes as well as failures; use the decision auditor to explain any actual gap. Do not tune difficulty solely to defeat one saved trace. |
 | 1 | **API budget tracking.** The user-supplied Claude key worked for the real run. User reports individual credits obtained and team Gemini application submitted; grant source and remaining balances are not independently verified. | Record reported cost per run and keep credentials local. Gemini application is not confirmation of an available balance. Modal's confirmed compute grant is separate. AfterQuery supplies no inference credits. |
-| 2 | **Evidence for a general reasoning/control gap.** Seed 500 separates scripted strategies but the real model matches the reference. | Use matched rules and capable baselines, additional predeclared seeds and delay-0 controls where useful. Keep infrastructure errors separate from poor decisions and retain negative findings. The new one-log minimum does not cancel earlier judging-rerun requirements. |
+| 2 | **Evidence for a general reasoning/control gap.** Specific energy/queue failures are now audited, but the model also beats the frozen reference and the fixed set is incomplete. | Use matched rules and capable baselines, additional predeclared seeds and delay-0 controls where useful. Keep infrastructure errors separate from poor decisions and retain negative findings. The new one-log minimum does not cancel earlier judging-rerun requirements. |
 | 2 | **Final mission and demo.** The canonical task still uses the original profile; the generated experiment intentionally does not replace it. | Choose/version a profile after model evidence. Coordinate any canonical-task update with its owner, sync generated copies, and show the objective, decisive actions and reward in a playthrough. Exact judging model/budget remain unresolved. |
 | 2 | **Submission and license.** The platform entry remains the recorded editable draft; prize selections/forms and a repository license are not confirmed. | Check final track/prize entries and any separate forms. The public Junction FAQ says submissions are open-sourced under MIT; confirm the team's terms/license treatment before finalizing. |
 
@@ -68,10 +77,10 @@ accompanying any main track. [Junction schedule and FAQ](https://2026.hackjuncti
 
 ## Coordination and next steps
 
-1. Use the [rush](lightlag-experiments.md) and [noisy](lightlag-noisy-experiment.md)
-   handoffs and their successful model traces to design the next matched seed
-   comparison. The original `harbor/lightlag/`, simulator and teammate controllers
-   were preserved; experiment tasks are generated outside the checkout.
+1. Finish the [fixed seed comparison](lightlag-fixed-seed-comparison.md) and
+   retain the mixed findings. Source/task hashes are frozen and all generated
+   tasks live outside the checkout; the canonical task and teammate code remain
+   owned by their existing authors.
 2. Keep the task's source commit/file hashes fixed during comparisons. Manh's
    newly delivered controller collection must not silently replace this reference.
 3. Let real model evidence guide the next difficulty experiment. Scripting stays

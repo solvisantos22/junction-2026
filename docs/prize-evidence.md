@@ -107,7 +107,14 @@ These are recommended evidence choices, not newly asserted official entry requir
   Manh's auditor reconstructs both exactly, with zero infrastructure findings.
   Codex connected the rush failure to full-horizon battery budgeting, checked
   the explanation against the protected replay, and preserved the model win
-  on noisy. The remaining six attempts are pending; no general gap claim.
+  on noisy. Independent evidence review approved both runs and a post-hoc
+  check showing that foregoing the homeward drive could still salvage 5.25/12.
+- Second model batch, **4/8 attempts cumulative**: seed 502 rush **0.769231** vs
+  reference **0.615385**, noisy **0.634615** vs **0.769231**. The noisy audit
+  identifies a queue-running-dry wait (2.25 raw points lost, 0.5 recovered by the
+  next action). Both replay exactly with no infrastructure findings. Cumulative
+  reported API cost **$1.7880344**; remaining four attempts pending. Two model
+  wins and two deficits so far; no general gap claim.
 - [Predeclared protocol, results and limitations](lightlag-fixed-seed-comparison.md),
   [machine-readable evidence](lightlag-runs/fixed-seeds501-504-summary.json).
 - Team components retain their original authorship; Codex's contribution is

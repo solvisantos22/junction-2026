@@ -1603,34 +1603,188 @@
       "tool_calls": 32,
       "trial_duration_seconds": 360.3933,
       "trial_name": "rush_noisy-501__zPFgW2x"
+    },
+    {
+      "agent": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "agent_metrics": {
+        "total_cached_tokens": 344003,
+        "total_completion_tokens": 2558,
+        "total_cost_usd": 0.2967346,
+        "total_prompt_tokens": 344039,
+        "total_steps": 18
+      },
+      "alive": true,
+      "at_base": true,
+      "audit": {
+        "decomposition_adds_up": true,
+        "evidence": "fixed-seeds501-504/rush-seed502-delay3-opus-5-5",
+        "infrastructure_findings": 0,
+        "optional_superlog_available": false,
+        "reference_minus_model": -0.15384615384615385,
+        "replay_matches": true
+      },
+      "evidence": "rush-seed502-delay3-opus-5-5",
+      "exception": null,
+      "kind": "opus",
+      "maximum": 13,
+      "profile": "rush",
+      "raw_score": 10.0,
+      "reported_cost_usd": 0.2967346,
+      "reward": 0.769231,
+      "samples": [
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t1",
+          "tick": 5
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t2",
+          "tick": 17
+        },
+        {
+          "credited_value": 1,
+          "on_time": true,
+          "target_id": "t4",
+          "tick": 14
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t5",
+          "tick": 7
+        },
+        {
+          "credited_value": 3,
+          "on_time": true,
+          "target_id": "d2",
+          "tick": 20
+        }
+      ],
+      "seed": 502,
+      "source_commit": "02e4f7062ec3feaca14d9cc2eeb953af870ba769",
+      "task_digest": "sha256:ee6c8dcdd9b8e34cce51f1d23502ee34714a38c936545c15cefcdbfcb04ca6d1",
+      "tick": 50,
+      "tool_calls": 22,
+      "trial_duration_seconds": 218.016615,
+      "trial_name": "rush-502__hH9bFW2"
+    },
+    {
+      "agent": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "agent_metrics": {
+        "total_cached_tokens": 363408,
+        "total_completion_tokens": 2285,
+        "total_cost_usd": 0.36217259999999996,
+        "total_prompt_tokens": 363442,
+        "total_steps": 17
+      },
+      "alive": true,
+      "at_base": true,
+      "audit": {
+        "decomposition_adds_up": true,
+        "evidence": "fixed-seeds501-504/rush-noisy-seed502-delay3-opus-5-5",
+        "infrastructure_findings": 0,
+        "optional_superlog_available": false,
+        "reference_minus_model": 0.1346153846153846,
+        "replay_matches": true
+      },
+      "evidence": "rush-noisy-seed502-delay3-opus-5-5",
+      "exception": null,
+      "kind": "opus",
+      "maximum": 13,
+      "profile": "rush_noisy",
+      "raw_score": 8.25,
+      "reported_cost_usd": 0.36217259999999996,
+      "reward": 0.634615,
+      "samples": [
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t1",
+          "tick": 5
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t2",
+          "tick": 22
+        },
+        {
+          "credited_value": 1,
+          "on_time": true,
+          "target_id": "t3",
+          "tick": 31
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t5",
+          "tick": 9
+        },
+        {
+          "credited_value": 0.5,
+          "on_time": false,
+          "target_id": "d1",
+          "tick": 33
+        },
+        {
+          "credited_value": 0.75,
+          "on_time": false,
+          "target_id": "d2",
+          "tick": 25
+        }
+      ],
+      "seed": 502,
+      "source_commit": "02e4f7062ec3feaca14d9cc2eeb953af870ba769",
+      "task_digest": "sha256:f77417317a46cac25fe82dda399427fe7a8e5b2190dcace9aa3c08b986511cff",
+      "tick": 50,
+      "tool_calls": 23,
+      "trial_duration_seconds": 229.731681,
+      "trial_name": "rush_noisy-502__VVwKZLL"
     }
   ],
   "noise_level": 1.0,
   "paired_aggregates": [
     {
-      "mean_matched_reference_reward": 0.8333333333333334,
-      "mean_model_reward": 0.0,
-      "mean_reference_minus_model": 0.8333333333333334,
-      "model_wins": 0,
-      "n_completed": 1,
+      "mean_matched_reference_reward": 0.7243589743589745,
+      "mean_model_reward": 0.38461538461538464,
+      "mean_reference_minus_model": 0.33974358974358976,
+      "model_wins": 1,
+      "n_completed": 2,
       "n_planned": 4,
       "perfect_model_runs": 0,
       "profile": "rush",
       "reference_wins": 1,
-      "reported_cost_usd": 0.41854800000000003,
+      "reported_cost_usd": 0.7152826000000001,
       "ties": 0
     },
     {
-      "mean_matched_reference_reward": 0.6666666666666666,
-      "mean_model_reward": 0.7916666666666666,
-      "mean_reference_minus_model": -0.125,
+      "mean_matched_reference_reward": 0.717948717948718,
+      "mean_model_reward": 0.7131410256410255,
+      "mean_reference_minus_model": 0.004807692307692346,
       "model_wins": 1,
-      "n_completed": 1,
+      "n_completed": 2,
       "n_planned": 4,
       "perfect_model_runs": 0,
       "profile": "rush_noisy",
-      "reference_wins": 0,
-      "reported_cost_usd": 0.7105791999999997,
+      "reference_wins": 1,
+      "reported_cost_usd": 1.0727517999999998,
       "ties": 0
     }
   ],
@@ -2033,7 +2187,7 @@
       "trial_name": "rush_noisy-504__wKT9dTT"
     }
   ],
-  "reported_cost_usd": 1.1291271999999997,
+  "reported_cost_usd": 1.7880343999999997,
   "schema_version": 1,
   "seeds": [
     501,
@@ -2042,14 +2196,6 @@
     504
   ],
   "unrun_model_cells": [
-    {
-      "profile": "rush",
-      "seed": 502
-    },
-    {
-      "profile": "rush_noisy",
-      "seed": 502
-    },
     {
       "profile": "rush",
       "seed": 503
