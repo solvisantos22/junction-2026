@@ -218,7 +218,14 @@ Caveats:
 - **Tier 2 is in practice decided by `window_blind`.** `stale_telemetry` runs out of energy on nearly every seed: it scores above 0 on 31 `rush` seeds and 14 `rush_noisy` seeds, and never above 0.20.
 - **Bound 16 is not a strict upper bound.** Its tight planner sometimes scores below the selectors, for example 0.83 on 1295 and 0.72 on 1318.
 - **Passes are rare on `rush_noisy`:** 18 tier-1 seeds out of 500. On seeds 0–19 and 600–639 none of 60 pass; feedback controllers average 72% there and bound 16 averages 84%.
-- **At the published heading bias of ±5°, ignoring drift costs little on average.** The no-drift proxy averages 70% on `rush_noisy` against 68% for `kf_mpc`. On `noisy` (seeds 0–19 and 600–639, horizon 80) it averages 86% against 92%. Seeds alone may therefore not open a gap. A drift the agent has to learn, such as a wider published bias range, is the more likely lever; it is untested here.
+- **At the published heading bias of ±5°, ignoring drift costs little on average.** The no-drift proxy averages 70% on `rush_noisy` against 68% for `kf_mpc`. On `noisy` (seeds 0–19 and 600–639, horizon 80) it averages 86% against 92%. Seeds alone may therefore not open a gap. A drift the agent has to learn is the stronger lever. With a wider published bias range (`rush_noisy`, delay 3, seeds 0–19 and 600–639, `sensing` override in `scenarios.make_env`), the cost of ignoring drift grows from about 1 point to 28:
+
+  | Heading bias | `kf_mpc` | No-drift | Blind | Leg-and-wait |
+  |---|---|---|---|---|
+  | ±5° (published) | 72% | 71% | 58% | 44% |
+  | ±15° | 65% | 37% | 28% | 24% |
+
+  Changing the published bias range is a rules decision for the team.
 - **Do not pair uplink windows with `kf_mpc` as the reference.** It isn't window-aware. On `rush_noisy`, delay 3, seeds 1000–1019, it stops with "commands would execute beyond the episode horizon" in 9 of 20 episodes with 10/3 windows and 15 of 20 with 16/4. Controllers 19 and 24 never stop.
 - **These seeds are reserved for this search.** 0–19, 100–139, 200–209, 300–319, 400–419 and 500–504 are taken by development, held-out checks and Sölvi's Harbor comparisons.
 
