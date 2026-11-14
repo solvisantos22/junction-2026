@@ -1,6 +1,6 @@
 # Lightlag Traverse: demo script and talking points
 
-Saturday 14 November 2026, about 21:15 Helsinki. Owner: Kristján / Claude Code (farm session). A draft for the two-minute video and the 10:30 peer review, with every number traced to its source. **Update the campaign numbers when the Traverse session's agent table is final** (only one campaign agent run so far).
+Saturday 14 November 2026, about 21:15 Helsinki. Owner: Kristján / Claude Code (farm session). A draft for the two-minute video and the 10:30 peer review, with every number traced to its source. Campaign numbers are final: seven Claude agent runs, all below the reference (the Traverse session's table, `docs/lightlag-traverse-campaign.md`).
 
 ## The pitch in one sentence
 
@@ -12,7 +12,7 @@ Lightlag Traverse is a Mars rover mission behind a 3-tick light delay: every rul
 |---|---|---|
 | 0:00–0:15 | `docs/traverse-farm/replays/world-871.html` title screen, then the map | "A rover on 600 by 400 metres of Mars-like ground: craters, sand, rock fields. Every command arrives three ticks late. The sun charges the battery; driving drains it, more uphill and in sand. Run the battery flat and the whole mission scores zero." |
 | 0:15–0:50 | Same page: Enter, click "Opus 5.5 · agent 3", speed up with `=`; pause at tick 244, then at 324; final screen | "This is Claude Opus's own autopilot, on a world it has never seen. Two-thirds of the way in it is level with our reference, 0.39 each. Then it keeps collecting, past the point where it could still get home, and at tick 324 the battery runs out holding 19 samples. Score: zero. The reference keeps a reserve and brings 25 samples home." |
-| 0:50–1:20 | `viewer/traverse-campaign.html` (the three campaign sites), then the campaign table | "What judges run is a campaign: three unseen sites in a row, scored together. The reference scores 0.476. Claude Opus 5.5, through OpenCode, scored 0.267: fewer samples at every site, the battery down to 1 at two of them, and an autopilot that played all three missions in 40 seconds before it noticed anything." |
+| 0:50–1:20 | `viewer/traverse-campaign.html` (the three campaign sites), then the campaign table | "What judges run is a campaign: three unseen sites in a row, scored together. The reference scores 0.476. Seven Claude agent runs through OpenCode all scored less; the best, Sonnet, 0.293. Half of the Opus and Sonnet runs ran a battery flat at a site, the others came home with a third to a half fewer samples, and their autopilots played a whole site in 8 to 30 seconds before the agent looked." |
 | 1:20–1:45 | The 300-world table and the 87% number (`docs/traverse-farm.md`) | "It's not one unlucky world. On 300 fresh worlds the reference beats every Claude program on 288 to 300 of them and never loses a rover. And 87% of Claude's lost rovers ran flat while the way home was still open: stopping to recharge would have saved every one." |
 | 1:45–2:00 | Terminal: `harbor run -p harbor/lightlag-traverse-campaign -a oracle` | "Everything is public through five tools, and it reruns in Docker: the reference scores 0.476 in two minutes, the same on a laptop, on Modal and through Harbor." |
 
@@ -22,7 +22,8 @@ Lightlag Traverse is a Mars rover mission behind a 3-tick light delay: every rul
 |---|---|---|
 | Campaign, reference (Harbor 0.25.0) | 0.476257 (0.459, 0.508, 0.460, all at the lander), about 2 minutes | `lightlag_traverse/README.md`, `docs/lightlag-traverse-readiness.md` |
 | Campaign, controls | do nothing 0, stopped after site 1 0.149 | same |
-| Campaign, first Claude agent run (Opus 5.5, OpenCode 1.19.5) | 0.267 (0.265, 0.274, 0.263), 15–17 samples a site against 19–26 | the Traverse session's run report; its final table is pending |
+| Campaign, 7 Claude agent runs (OpenCode 1.19.5) | all below the reference: Sonnet 2 0.293, Opus 1 0.267, Opus 3 0.247, Opus 4 0.244, Sonnet 1 0.213, Opus 2 0.120, Haiku 0.000 (ended without a command); Opus mean 0.220 (4 runs), Sonnet 0.253 (2); reported cost $4.15 | `docs/lightlag-traverse-campaign.md` |
+| Campaign failures | 3 of 6 Opus/Sonnet runs ran a battery flat at one or two sites (once 13 m from the lander); the other 3 came home with 28–53% fewer samples; programs played a site in 8–30 s of wall time | same |
 | One mission, world 2026 | reference 0.565; 7 Opus/Sonnet agent runs average 0.258, best 0.528 | `docs/reference-gap-review/review.json`, `lightlag_traverse/README.md` |
 | Gap split on world 2026 | 69% less sample value (0.212 of 0.307), 31% lost or stranded rovers (0.095) | `docs/reference-gap-review/review.json` |
 | 300 fresh worlds | reference 0.502, never lost or stranded; higher than every saved Claude program on 288–300 of 300 | `docs/traverse-farm.md` |
