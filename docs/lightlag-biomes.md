@@ -343,6 +343,84 @@ Share of the maximum, and rovers home, on the same seeds:
 - With the finer 6° compass the compass carries everything from 2 m up (53% against 51% without the fix).
 - 2 m with a 12° compass is the cell where both matter.
 
+### Many weak sensors: more beacons, a gyroscope and wheels of a hidden size
+
+*Added Saturday about 16:30 Helsinki, at Manh's request: more noisy sensors that have to be fused, and a rover that can overshoot its mark.*
+
+`navigation=MANY_SENSORS`, or `--many-sensors` on the runner, the MCP entry, the probe and the task generator. It keeps the weak GPS and adds to it, so that each question has more than one answer and none can be trusted alone:
+
+| Question | What answers it |
+|---|---|
+| How far did it drive? | The wheel odometer, off by a hidden wheel scale of up to ±20%. Visual odometry, now with 15% noise (was 5%). |
+| Which way? | The sun compass, 12°. A gyroscope: the turn between two executed drives, 1°. |
+| Where is it? | The position fix, 2 m. Four radio beacons: noise 0.25 m plus 10% of the distance, and a packet hears each beacon only 70% of the time. |
+
+- **The rover can now overshoot.** Until now a drive could only fall short: slip is never below zero. With a wheel scale, a drive of `M` commanded metres covers `M × wheel_scale × (1 − slip)`, and the wheel odometer still reports `M`. The scale is hidden for the whole mission; its range is published, and visual odometry shows the ground really covered.
+- **Every piece is its own setting**, off unless given: `beacons` (1 to 8, placed by the seed 9 to 14 m from the base and listed in `map()`), `beacon_range_noise_per_m`, `beacon_hear_chance`, `gyro_noise_deg`, `wheel_scale_error`, `visual_odometry_noise`, and two dials for the steering error, `heading_walk_deg` and `heading_wobble_deg`. A test holds fingerprints of the settings pushed before: their episodes and the texts an agent is told are unchanged.
+- **The reference** weighs one more ring per beacon heard, each with its own width, and the gyroscope's turn against each particle's own two headings. It carries the wheel scale as one more unknown per particle, and hands the planner the slip that explains the ground covered, which is below zero when the wheels are big.
+
+**Result on unused seeds 2500–2539** (6,240 episodes, no errors). Share of the maximum, and rovers home:
+
+| Player | `rush_noisy`, delay 0 | delay 3 | delay 5 | `noisy` (80 ticks), delay 3 |
+|---|---|---|---|---|
+| **`fused`**: everything | **83%**, 100% | **51%**, 100% | **30%**, 100% | **77%**, 100% |
+| `fused_no_scale`: takes the wheels at nominal size | 55%, 98% | 37%, 92% | 26%, 88% | 62%, 88% |
+| `fused_no_range`: no beacons | 77%, 95% | 40%, 95% | 21%, 98% | 66%, 95% |
+| `fused_no_fix` | 79%, 98% | 47%, 100% | 26%, 100% | 76%, 100% |
+| `fused_no_compass` | 83%, 100% | 46%, 100% | 26%, 100% | 76%, 100% |
+| `fused_no_gyro` | 81%, 100% | 52%, 100% | 28%, 100% | 79%, 100% |
+| `kf_mpc_on_fix`: the frozen reference as it is | 49%, 85% | 23%, 90% | 13%, 98% | 50%, 85% |
+| `kf_mpc_on_crossings`: its fix replaced by the beacons' crossing | 47%, 78% | 22%, 92% | 13%, 100% | 51%, 75% |
+| `dr_gyro_compass`: gyroscope and compass, ten lines, no filter | 19%, 15% | 11%, 12% | 8%, 15% | 9%, 28% |
+| `dr_beacons`: the same, jumping to the rings' crossing | 3%, 5% | 2%, 8% | 3%, 10% | 0%, 0% |
+| `blind` | 16%, 75% | 16%, 82% | 16%, 90% | 11%, 52% |
+| Weak GPS alone: `fused` | 79%, 100% | 51%, 100% | 29%, 100% | 81%, 100% |
+
+To play it again: `python3 -m lightlag_dynamic.biomes.nogps_players --many-sensors --seeds 2500-2539 --delays 0 3 5 --profiles rush_noisy noisy`.
+
+What each piece is worth to the reference, paired over delays 0, 3 and 5, in points of share with a 95% interval:
+
+| Ignored | `rush_noisy` | `noisy` |
+|---|---|---|
+| The wheel scale | +15.2 (+9.0 to +21.7) | +13.0 (+6.1 to +20.8) |
+| The beacons | +8.6 (+5.5 to +11.6) | +4.6 (+1.1 to +8.3) |
+| The position fix | +3.6 (+1.3 to +6.7) | +1.0 (−2.1 to +4.2) |
+| The compass | +3.0 (+1.1 to +5.0) | +0.6 (−2.5 to +3.5) |
+| The terrain reading | +1.2 (+0.3 to +2.4) | +1.7 (−0.2 to +3.5) |
+| The gyroscope | +0.7 (−0.6 to +2.0) | −1.7 (−4.6 to +0.8) |
+
+- **Knowing that the wheels may be off size is worth the most:** 13 to 15 points. A filter that takes them at nominal size also loses rovers.
+- **Several beacons count:** 5 to 9 points, where one beacon was worth nothing.
+- **The gyroscope adds nothing here.** While driving, the reference knows the rover's position to 0.3–0.4 m without it and 0.25–0.35 m with it (development seeds), both inside the 0.75 m a sample needs. The likely reason it does not show in the score: what is left to lose is in the drives still to come, which a gyroscope cannot see. It helps only the simplest player a little.
+- **The fix and the compass are worth 3 to 4 points on `rush_noisy` and nothing measurable on the 80-tick map.**
+- **Leaning on one sensor now costs more.** The frozen reference on the fix is 26 points below `fused` on `rush_noisy` (21.5 to 30.4) and 25 on `noisy`; with weak GPS alone it was 15 and 11. Turning the ranges into a fix for it does no better.
+- **Jumping to the rings' crossing kills the rover.** Rings this vague cross in the wrong place, and a player that believes the crossing chases it.
+- **For the reference itself this is no harder than weak GPS alone:** 51% against 51% at delay 3 on `rush_noisy` (+1.6 points over the delays, −1.2 to +4.0), and 77% against 81% on the 80-tick map (−1.9, −6.2 to +2.1). The extra sensors make up for the coarser odometry and the wheel scale. What changes is how far a player that does not fuse falls behind.
+
+**The wheel scale on its own, with today's sensing** (fix 0.3 m, heading bias ±5°), same seeds:
+
+| Player | `rush_noisy`, delay 0 | delay 3 | delay 5 | `noisy`, delay 3 |
+|---|---|---|---|---|
+| Controller 36, no wheel scale | 88%, 100% | 71%, 100% | 58%, 98% | 97%, 100% |
+| Controller 36, wheel scale ±20% | 71%, 95% | 48%, 92% | 37%, 90% | 74%, 100% |
+| `kf_mpc`, no wheel scale | 85%, 100% | 71%, 100% | 57%, 98% | 90%, 100% |
+| `kf_mpc`, wheel scale ±20% | 73%, 98% | 46%, 92% | 35%, 88% | 75%, 100% |
+| `fused`, which estimates the scale, wheel scale ±20% | 85%, 100% | 61%, 100% | 45%, 100% | 88%, 100% |
+| `blind`, no wheel scale | 56%, 95% | 54%, 95% | 56%, 95% | 66%, 72% |
+| `blind`, wheel scale ±20% | 34%, 88% | 35%, 90% | 34%, 92% | 36%, 52% |
+
+To play it again, without controller 36, which is not one of the probe's players: `python3 -m lightlag_dynamic.biomes.nogps_players --gps-noise 0.3 --set heading_bias_deg=5 --set wheel_scale_error=0.2 --seeds 2500-2539 --delays 0 3 5 --players kf_mpc_on_fix fused blind`.
+
+- **This is the largest single effect measured in this package on today's environment.** A hidden ±20% takes controller 36 down by 20.3 points on `rush_noisy` (13.9 to 26.8) and 17.3 on `noisy`; `kf_mpc` by 19.6 and 11.0. Neither estimates a wheel scale, and both clip slip at zero.
+- **A filter that estimates the scale gets part of it back**: 12.3 points above `kf_mpc` on `rush_noisy` (7.2 to 17.5), 8.5 on `noisy`. At delay 3 it scores 61%, where `kf_mpc` scored 71% without the wheel scale and 46% with it. A likely reason for the rest, not checked: the first drives are sent before any packet has shown how big the wheels are.
+
+**How the setting was chosen** (development seeds 0–19, `rush_noisy`, delay 3):
+
+- **Exact beacons make it too easy.** With four exact beacons the player that jumps to the crossing scored 64%, above `fused` at 61%. Once ranges get 5% vaguer per metre that player falls to 4%. So the beacons are vague far away, and sometimes unheard.
+- **Coarser visual odometry alone changes nothing** (47% to 49% for noise from 5% to 40%). The wheel odometer is exact and slip on bedrock is under 5%, so distance stays easy. The wheel scale is what breaks that.
+- **The gyroscope was worth between −3 and +6 points** across the cells tried, also with a coarser compass, a faster-wandering bias and more steering wobble. It stayed in the setting as one more sensor; the confirmation above says it does not count.
+- **The rule for the choice** was that ignoring the fix, the beacons, the compass or the wheel scale each costs the reference at least five points. On the confirmation seeds the fix and the compass come out at 3 to 4.
+
 ### What it does not show
 
 - **No model has played it.** Claude writes code, and averaging the compass error is ten lines that already reach 37–47%. A careful agent could write the particle filter too. What the prototype adds for certain is that reading the rover's position off a packet no longer works, and that the last drive home has to be checked against the beacon.
@@ -350,7 +428,8 @@ Share of the maximum, and rovers home, on the same seeds:
 - **The demo page cannot show it.** Its Earth view draws the reported position, which is null here.
 - **The reference needs numpy**, like every Manh controller built on the particle filter, so it cannot run inside the Harbor task image as it is.
 - **There is no bound** for this setting, so "56%" is the best known player, not the best possible.
-- **Seeds:** 0–19 for the sensitivity tables and the grid, 2100–2139 for the probe, 2200–2239 for the no-GPS result, 2300–2339 for the weak-GPS result. All now used.
+- **The many-sensors reference is approximate and unbounded.** It stretches a whole drive by the wheel scale, which is exact on one terrain and slightly off where a drive crosses into sand. It ran out of battery once in 20 development episodes at delay 3 (wheels 13% oversized), and never on the 40 confirmation seeds. Only Main Mars was played.
+- **Seeds:** 0–19 for the sensitivity tables and the grids, 2100–2139 for the probe, 2200–2239 for the no-GPS result, 2300–2339 for the weak-GPS result, 2500–2539 for the many-sensors result. All now used.
 
 ## Ready for a model run: the weak-GPS option as a Harbor task
 
@@ -366,7 +445,7 @@ Share of the maximum, and rovers home, on the same seeds:
    - In a biome, the texts point at `rules()["biome"]` and at the map's extra layers.
    - With Main Mars and today's fix nothing changes.
    - No file of `lightlag_mcp` is edited, and the swap fails loudly if that wording ever changes. Every sentence says what telemetry reports, never what to do with it. The sentences are in `lightlag_dynamic/biomes/wording.py`.
-2. **A task generator,** `tools/biome_experiments/prepare.py`. It follows Sölvi's `tools/lightlag_experiments/prepare.py`: the task is written outside the checkout, an existing directory is never overwritten, and `experiment.json` records the hash of every source and generated file. It takes `--biome`, `--profile`, `--seed`, `--delay`, `--policy` and `--navigation gps | weak_gps | no_gps`.
+2. **A task generator,** `tools/biome_experiments/prepare.py`. It follows Sölvi's `tools/lightlag_experiments/prepare.py`: the task is written outside the checkout, an existing directory is never overwritten, and `experiment.json` records the hash of every source and generated file. It takes `--biome`, `--profile`, `--seed`, `--delay`, `--policy` and `--navigation gps | weak_gps | no_gps | many_sensors`.
    - **With today's fix in Main Mars the agent gets the dynamic experiment's task.** `instruction.md` is byte for byte the one Sölvi's generator writes, and so is every other file except the simulator's entry point, its settings and the task name. A test compares the two outputs.
    - **A navigation setting adds one section to the instruction, "Where the rover is", and rewrites nothing.** Without a fix, one clause changes too: "position and visual odometry are noisy" becomes "visual odometry is noisy".
    - **The oracle solution is the frozen reference `kf_mpc`,** played through the five tools. It checks the pipeline; it is not the reference for the setting. The fusing reference needs numpy, which neither image has, so its scores below are direct runs.
@@ -431,7 +510,7 @@ harbor run -p /tmp/lightlag-nav-weak_gps-2400 -a opencode \
 - **Bound 16 is not a bound in the biomes.** Its planner ignores their rules. On Relay Pass at delay 0 it scores below controller 36.
 - **40 seeds, one draw each.** Differences under about one point are noise.
 - **Mixed biomes** work and have one test; they were not part of the trial.
-- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting and position probes; 2200–2239 and 2300–2339 for the no-GPS and weak-GPS results. All now used. 2400–2403 are set aside for the proposed model run; the scripted players have already played them.
+- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting and position probes; 2200–2239, 2300–2339 and 2500–2539 for the no-GPS, weak-GPS and many-sensors results. All now used. 2400–2403 are set aside for the proposed model run; the scripted players have already played them.
 
 ## Suggested next steps (not done)
 
@@ -439,7 +518,8 @@ harbor run -p /tmp/lightlag-nav-weak_gps-2400 -a opencode \
 2. With those, a second calibration: stronger settings should then pass the keep rule.
 3. The weak-GPS pilot prepared above: eight model runs on four fixed seeds. It costs API credit, and it is a team decision.
 4. One model run in one biome at delay 0 and delay 3. This is the delay-relevance test with a real agent; the same generator packs it, and it is a team decision too.
-5. A team decision on whether any biome ever joins a graded profile. The brainstorm's advice stands: at most one or two, Relay Pass first, and only after a model has played it.
+5. A team decision on the wheel scale. It is the one change here that costs the best controllers 20 points on today's environment, it is published like every other rule, and it would need a reference that estimates it before it could join a graded profile.
+6. A team decision on whether any biome ever joins a graded profile. The brainstorm's advice stands: at most one or two, Relay Pass first, and only after a model has played it.
 
 ## The biome edition of the 3D demo
 

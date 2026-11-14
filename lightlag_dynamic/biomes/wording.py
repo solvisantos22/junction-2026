@@ -20,7 +20,14 @@ import contextlib
 HEADING_ERROR = ("The rover does not drive exactly the commanded heading: `rules` describes the hidden heading "
                  "error, and its `navigation` section gives the noise of every reading.")
 BEACON = "the distance to a radio beacon at the base (beacon_range_m)"
+BEACONS = ("the distance to each radio beacon listed in `map` (beacon_ranges_m, in the order of `map`'s beacons, "
+           "the base first)")
+UNHEARD = "an entry is null when that beacon was not heard"
 COMPASS = "the heading actually driven, measured by a sun compass (sun_heading_deg)"
+GYRO = ("how far that heading turned since the previous executed drive, measured by a gyroscope (gyro_turn_deg)")
+WHEELS = ("The wheels are a hidden few percent bigger or smaller than nominal (`rules`, navigation.wheel_scale): a "
+          "drive of M commanded metres covers M x wheel_scale x (1 - slip) of ground, so a drive can also overshoot. "
+          "wheel_odometry reports the commanded wheel metres, visual_odometry the ground covered.")
 
 
 def _navigation(rules):
@@ -35,15 +42,26 @@ def _navigation(rules):
         position = ("Telemetry reports a position, but only coarsely: each fix is the true position plus noise of "
                     "{:g} m per axis (`rules`, navigation.position_noise_m).".format(noise))
         field = "position [x, y] (a noisy fix, see `rules`)"
+    several, gyro, wheels = nav.get("beacons", 1) > 1, nav.get("gyro_noise_deg") is not None, "wheel_scale" in nav
+    unheard = nav.get("beacon_hear_chance", 1.0) < 1
+    beacon = (BEACONS + ("; " + UNHEARD if unheard else "")) if several else BEACON
+    driven = COMPASS + (", and " + GYRO if gyro else "")
+    fields = field + ", beacon_range_m (measured distance to the base{})".format(", or null when not heard" if unheard else "")
+    if several:
+        fields += ", beacon_ranges_m (measured distance to each beacon of `map`{})".format(
+            ", null when not heard" if unheard else "")
+    fields += ", sun_heading_deg (measured heading of the drive executed in that tick, or null)"
+    if gyro:
+        fields += ", gyro_turn_deg (measured turn of that heading since the previous executed drive, or null)"
     return {
-        "paragraph": "Position: {} Every packet reports {}; the packet of an executed drive also reports {}. {}"
-                     .format(position, BEACON, COMPASS, HEADING_ERROR),
-        "fields": field + ", beacon_range_m (measured distance to the base), sun_heading_deg (measured heading of "
-                          "the drive executed in that tick, or null), heading_deg (commanded heading)",
+        "paragraph": "Position: {} Every packet reports {}; the packet of an executed drive also reports {}. {}{}"
+                     .format(position, beacon, driven, HEADING_ERROR, " " + WHEELS if wheels else ""),
+        "fields": fields + ", heading_deg (commanded heading)",
+        "map": " `beacons` lists the radio beacons whose ranges telemetry reports." if several else "",
         "bullets": [position,
-                    "Every packet reports {}.".format(BEACON),
-                    "The packet of an executed drive also reports {}.".format(COMPASS),
-                    HEADING_ERROR],
+                    "Every packet reports {}.".format(beacon),
+                    "The packet of an executed drive also reports {}.".format(driven),
+                    HEADING_ERROR] + ([WHEELS] if wheels else []),
     }
 
 
@@ -76,9 +94,11 @@ def tool_wording(rules):
         changes["RULES_DESCRIPTION"] = [("and command limits.",
                                          "command limits, and under `navigation` what telemetry reports about the "
                                          "rover's position and how noisy each reading is.")]
-    if biome:
+    layers = (biome["map"] if biome else "") + (navigation["map"] if navigation else "")
+    if layers:
         old = "Everything not sand is bedrock."
-        changes["MAP_DESCRIPTION"] = [(old, old + biome["map"])]
+        changes["MAP_DESCRIPTION"] = [(old, old + layers)]
+    if biome:
         rule = ("and command limits.", "command limits, and under `biome` the rules of the biome this episode is set in.")
         if navigation:
             old, new = changes["RULES_DESCRIPTION"][0]

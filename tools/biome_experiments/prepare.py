@@ -11,7 +11,9 @@ five tools and what the agent is told about it:
 
     --biome        any biome of lightlag_dynamic.biomes (default main_mars); mix with +
     --navigation   gps (today's position fix), weak_gps (a 2 m fix, a sun compass and a beacon
-                   range) or no_gps (no fix; the compass and the beacon only)
+                   range), no_gps (no fix; the compass and the beacon only) or many_sensors (the
+                   weak fix, four vague beacons, a gyroscope, coarse visual odometry and wheels
+                   of a hidden size)
 
 The simulator container runs `python -m lightlag_dynamic.biomes.serve`, whose tool
 descriptions are made true for the episode, and instruction.md gets the same facts. The
@@ -32,7 +34,8 @@ import sys
 
 REPO = Path(__file__).resolve().parents[2]
 BASE = Path("harbor/lightlag")
-NAVIGATION = {"gps": {}, "weak_gps": {"LIGHTLAG_WEAK_GPS": "1"}, "no_gps": {"LIGHTLAG_NO_GPS": "1"}}
+NAVIGATION = {"gps": {}, "weak_gps": {"LIGHTLAG_WEAK_GPS": "1"}, "no_gps": {"LIGHTLAG_NO_GPS": "1"},
+              "many_sensors": {"LIGHTLAG_MANY_SENSORS": "1"}}
 POLICIES = ("kf_mpc", "open_loop", "leg_and_wait")
 PROFILES = ("rush", "rush_noisy", "noisy")
 
@@ -60,7 +63,8 @@ def episode_rules(biome, profile, seed, delay, navigation):
         from lightlag_dynamic.missions import PROFILES as HORIZONS
         service = BiomeEpisodeService(seed=seed, biome=biome, profile=profile,
                                       config=Config(delay_ticks=delay, max_ticks=HORIZONS[profile][4]),
-                                      no_gps=navigation == "no_gps", weak_gps=navigation == "weak_gps")
+                                      no_gps=navigation == "no_gps", weak_gps=navigation == "weak_gps",
+                                      many_sensors=navigation == "many_sensors")
         return service._env.rules()
     finally:
         sys.path.remove(str(REPO))

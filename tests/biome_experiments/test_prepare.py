@@ -71,7 +71,8 @@ def direct(policy, seed, delay, profile="rush_noisy", biome="main_mars", navigat
     """The same episode played in this process, straight on the environment."""
     service = BiomeEpisodeService(seed=seed, biome=biome, profile=profile,
                                   config=Config(delay_ticks=delay, max_ticks=PROFILES[profile][4]),
-                                  no_gps=navigation == "no_gps", weak_gps=navigation == "weak_gps")
+                                  no_gps=navigation == "no_gps", weak_gps=navigation == "weak_gps",
+                                  many_sensors=navigation == "many_sensors")
     env = service._env
     policy(PublicTools(env))
     while not env.advance(5)["episode_complete"]:
@@ -359,6 +360,28 @@ class DryRunWithoutContainers(unittest.TestCase):
         truth = {state["tick"]: state["position"] for state in replay["states"]}
         errors = [abs(packet["position"][0] - truth[packet["tick"]][0]) for packet in packets[1:]]
         self.assertGreater(max(errors), 1.0, "the fix on the wire is the coarse one")
+
+    def test_many_sensors_task_tells_and_serves_every_reading(self):
+        with self.served("--navigation", "many_sensors", "--seed", "7", "--delay", "3") as running:
+            task, url, environment, folder = running
+            self.assertEqual(settings_of(task)["LIGHTLAG_MANY_SENSORS"], "1")
+            brief = (task / "instruction.md").read_text()
+            instructions, described = self.look(url)
+            for fact in ("beacon_ranges_m", "gyro_turn_deg", "navigation.wheel_scale", "can also overshoot"):
+                self.assertIn(fact, brief)
+                self.assertIn(fact, instructions)
+            self.assertIn("gyro_turn_deg (measured turn", described["telemetry_log"])
+            self.assertIn("`beacons` lists the radio beacons", described["map"])
+            self.solve(task, url, environment)
+            packets = self.telemetry(url)
+            text, result = self.grade(task, url, environment, folder)
+            replay = json.loads((folder / "evaluator/replay.json").read_text())
+        self.assertTrue(all(len(packet["beacon_ranges_m"]) == 4 and "gyro_turn_deg" in packet for packet in packets))
+        self.assertTrue(any(reading is None for packet in packets[1:] for reading in packet["beacon_ranges_m"]))
+        self.assertTrue(any(packet["gyro_turn_deg"] is not None for packet in packets))
+        self.assertNotEqual(replay["navigation"]["wheel_scale"], 1.0)
+        expected = direct(POLICIES["kf_mpc"], 7, 3, navigation="many_sensors")
+        self.assertEqual(text, "{:.6f}\n".format(expected["raw_score"] / expected["max_available_value"]))
 
     def test_no_gps_task_with_the_blind_plan(self):
         with self.served("--navigation", "no_gps", "--policy", "open_loop", "--seed", "7", "--delay", "3") as running:

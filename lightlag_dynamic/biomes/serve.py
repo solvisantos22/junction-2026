@@ -8,8 +8,9 @@ The same five tools, evaluator-only finish, artifacts and settings as
 `python3 -m lightlag_dynamic.serve` (LIGHTLAG_SEED, LIGHTLAG_DELAY, LIGHTLAG_TICKS,
 LIGHTLAG_PROFILE, LIGHTLAG_NOISE_LEVEL, LIGHTLAG_ARTIFACT_DIR, LIGHTLAG_EVALUATOR_TOKEN,
 LIGHTLAG_TOKEN_FILE), plus --biome / LIGHTLAG_BIOME and, for the no-GPS prototype, --no-gps /
-LIGHTLAG_NO_GPS=1 or --weak-gps / LIGHTLAG_WEAK_GPS=1. With the default biome, main_mars, and
-today's position fix, the episode is the one `lightlag_dynamic.serve` plays.
+LIGHTLAG_NO_GPS=1, --weak-gps / LIGHTLAG_WEAK_GPS=1 or --many-sensors / LIGHTLAG_MANY_SENSORS=1.
+With the default biome, main_mars, and today's position fix, the episode is the one
+`lightlag_dynamic.serve` plays.
 
 The tool descriptions are made true for the episode (wording.py): with --no-gps or --weak-gps
 they say what telemetry reports instead of a trustworthy position, and in a biome they point
@@ -41,7 +42,7 @@ class BiomeEpisodeService(EpisodeService):
     """lightlag_mcp's EpisodeService, playing a dynamic profile in a chosen biome."""
 
     def __init__(self, seed, biome=MAIN, profile="rush", config=None, artifact_dir=None, noise_level=1.0,
-                 no_gps=False, gps_noise=None, weak_gps=False):
+                 no_gps=False, gps_noise=None, weak_gps=False, many_sensors=False):
         parse_biome(biome)
         if profile not in PROFILES:
             raise ValueError(f"unknown profile {profile!r}; use one of {', '.join(PROFILES)}")
@@ -49,9 +50,9 @@ class BiomeEpisodeService(EpisodeService):
             config = Config(max_ticks=PROFILES[profile][4])
         super().__init__(seed=seed, config=config, artifact_dir=artifact_dir)
         # Swap the episode before any tool call; the lock, transcript and grading are unchanged.
-        if no_gps or weak_gps or gps_noise is not None:  # prototype: no position fix, or a very noisy one
-            from .nogps import WEAK_GPS, NoGpsEnvironment
-            navigation = dict(WEAK_GPS) if weak_gps else {}
+        if no_gps or weak_gps or many_sensors or gps_noise is not None:  # prototype: no fix, or weak sensors
+            from .nogps import MANY_SENSORS, WEAK_GPS, NoGpsEnvironment
+            navigation = dict(MANY_SENSORS) if many_sensors else dict(WEAK_GPS) if weak_gps else {}
             if gps_noise is not None:
                 navigation["position_noise_m"] = gps_noise
             self._env = NoGpsEnvironment(seed=seed, config=config, profile=profile, biome=biome,
@@ -63,7 +64,7 @@ class BiomeEpisodeService(EpisodeService):
         self._max_ticks = rules["max_ticks"]
         self._max_advance = rules["max_advance_ticks"]
         self.profile, self.biome = profile, biome
-        self.no_gps = bool(no_gps or weak_gps or gps_noise is not None)
+        self.no_gps = bool(no_gps or weak_gps or many_sensors or gps_noise is not None)
 
 
 def build_biome_server(service, evaluator_token=None):
@@ -110,6 +111,9 @@ def main(argv=None):
                         help="prototype: no position fix; a beacon range and a sun compass instead")
     parser.add_argument("--weak-gps", action="store_true", default=os.environ.get("LIGHTLAG_WEAK_GPS") in ("1", "true", "yes"),
                         help="prototype: as --no-gps, but keep a very noisy position fix (nogps.WEAK_GPS)")
+    parser.add_argument("--many-sensors", action="store_true",
+                        default=os.environ.get("LIGHTLAG_MANY_SENSORS") in ("1", "true", "yes"),
+                        help="prototype: many weak sensors to fuse (nogps.MANY_SENSORS)")
     parser.add_argument("--gps-noise", type=float,
                         default=float(os.environ["LIGHTLAG_GPS_NOISE"]) if os.environ.get("LIGHTLAG_GPS_NOISE") else None,
                         help="prototype: as --no-gps, but keep a position fix with this much noise per axis (metres)")
@@ -125,7 +129,8 @@ def main(argv=None):
     service = BiomeEpisodeService(seed=args.seed, biome=args.biome, profile=args.profile,
                                   config=Config(delay_ticks=args.delay, max_ticks=ticks),
                                   artifact_dir=args.artifact_dir, noise_level=args.noise_level,
-                                  no_gps=args.no_gps, gps_noise=args.gps_noise, weak_gps=args.weak_gps)
+                                  no_gps=args.no_gps, gps_noise=args.gps_noise, weak_gps=args.weak_gps,
+                                  many_sensors=args.many_sensors)
     token = os.environ.get("LIGHTLAG_EVALUATOR_TOKEN") or None
     if token is None and args.token_file and args.transport == "http":
         token = secrets.token_urlsafe(32)  # exists only inside this process's container

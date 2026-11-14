@@ -1,8 +1,10 @@
 """The no-GPS prototype: telemetry without a position fix, and players that work the position out.
 
-The environment tests are standard library only. The player tests need numpy; about ten seconds.
+The environment tests are standard library only. The player tests need numpy; about thirty seconds.
 """
 
+import hashlib
+import json
 import math
 import statistics
 import types
@@ -10,7 +12,7 @@ import unittest
 
 from lightlag import Config
 from lightlag_dynamic.biomes import make_biome_env
-from lightlag_dynamic.biomes.nogps import NAVIGATION, WEAK_GPS, NoGpsEnvironment, make_nogps_env
+from lightlag_dynamic.biomes.nogps import MANY_SENSORS, NAVIGATION, WEAK_GPS, NoGpsEnvironment, make_nogps_env
 from lightlag_dynamic.biomes.serve import BiomeEpisodeService, build_biome_server
 from lightlag_dynamic.biomes.wording import brief, patched, reworded, tool_wording
 from lightlag_dynamic.controllers import POLICIES
@@ -139,6 +141,147 @@ class EnvironmentTest(unittest.TestCase):
 
 
 @unittest.skipUnless(HAVE_NUMPY, "the players are built on the Manh controllers, which need numpy")
+def find(node, key):
+    """The first value stored under `key` anywhere in a nested replay."""
+    if isinstance(node, dict):
+        if key in node:
+            return node[key]
+        for value in node.values():
+            found = find(value, key)
+            if found is not None:
+                return found
+    return None
+
+
+def wrap(degrees):
+    return (degrees + 180.0) % 360.0 - 180.0
+
+
+DRIVES = [{"action": "drive", "heading_deg": 30.0, "metres": 4.0}, {"action": "drive", "heading_deg": 75.0, "metres": 3.0},
+          {"action": "sample"}, {"action": "drive", "heading_deg": 200.0, "metres": 5.0}]
+
+
+def fingerprint(**kw):
+    """What a player is told and sent in one episode driven by fixed commands."""
+    env = make_nogps_env(seed=7, delay=3, **kw)
+    env.uplink(DRIVES)
+    finish(env)
+    blob = json.dumps([env.rules()["navigation"], env.rules()["sensing"], env.map(), env.telemetry_log(),
+                       env.replay()["navigation"]], sort_keys=True)
+    return hashlib.sha256(blob.encode()).hexdigest()[:16]
+
+
+class MoreSensorsTest(unittest.TestCase):
+    """More to fuse: several vague beacons, a gyroscope and wheels of a hidden size. All off by default."""
+
+    def test_episodes_without_the_new_settings_are_what_they_were(self):
+        # Fingerprints taken from the code as it was before these settings existed (commit 6a5e36a).
+        self.assertEqual(fingerprint(profile="rush_noisy"), "84e5f951211fe4b7")
+        self.assertEqual(fingerprint(profile="rush_noisy", navigation=dict(WEAK_GPS)), "d63a402e7a4b89f6")
+        self.assertEqual(fingerprint(profile="rush_noisy", navigation=dict(WEAK_GPS), biome="troy_crust+relay_pass"),
+                         "378ba7a71acc67d7")
+        self.assertEqual(fingerprint(profile="noisy", navigation={"position_noise_m": 1.0}), "191ab0014fb63f18")
+        packet = drive_out(make_nogps_env(seed=3, delay=0, navigation=WEAK_GPS)).telemetry_log()[2]
+        self.assertFalse({"beacon_ranges_m", "gyro_turn_deg"} & set(packet))
+        self.assertNotIn("beacons", make_nogps_env(seed=3, navigation=WEAK_GPS).map())
+
+    def test_beacons_are_on_the_map_and_their_ranges_are_the_truth_plus_the_published_noise(self):
+        nav = {"beacons": 4, "beacon_range_noise_per_m": 0.1, "beacon_hear_chance": 0.6}
+        scaled, heard, total = [], 0, 0
+        for seed in range(10):
+            env = drive_out(make_nogps_env(seed=seed, delay=0, navigation=nav), metres=(4.0, 4.0, 3.0), heading=20.0 + 33 * seed)
+            public, rules, replay, log = env.map(), env.rules(), env.replay(), env.telemetry_log()
+            beacons = [(b["x"], b["y"]) for b in public["beacons"]]
+            self.assertEqual([b["id"] for b in public["beacons"]], ["base", "beacon_1", "beacon_2", "beacon_3"])
+            self.assertEqual(list(beacons[0]), list(public["base"]))
+            for beacon in beacons[1:]:
+                self.assertTrue(9.0 - 1e-6 <= math.dist(beacon, public["base"]) <= 14.0 + 1e-6)
+                self.assertTrue(1.0 <= beacon[0] <= public["width"] - 1.0 and 1.0 <= beacon[1] <= public["height"] - 1.0)
+            self.assertEqual({name: rules["navigation"][name] for name in nav}, nav)
+            self.assertIn("beacon_ranges_m", rules["navigation"])
+            self.assertEqual(log[0]["beacon_ranges_m"], [round(math.dist(beacons[0], b), 6) for b in beacons])
+            truth = {state["tick"]: state["position"] for state in replay["states"]}
+            for packet in log[1:]:
+                self.assertEqual(packet["beacon_range_m"], packet["beacon_ranges_m"][0])
+                for beacon, reading in zip(beacons, packet["beacon_ranges_m"]):
+                    total += 1
+                    if reading is not None:
+                        heard += 1
+                        distance = math.dist(truth[packet["tick"]], beacon)
+                        if distance > 1.0:  # close to a beacon the reading is cut off at zero
+                            scaled.append((reading - distance) / (0.25 + 0.1 * distance))
+        self.assertAlmostEqual(heard / total, 0.6, delta=0.05)
+        self.assertAlmostEqual(statistics.pstdev(scaled), 1.0, delta=0.1)
+        self.assertAlmostEqual(statistics.mean(scaled), 0.0, delta=0.1)
+
+    def test_the_gyroscope_reports_the_turn_between_two_executed_drives(self):
+        commands = [{"action": "drive", "heading_deg": h, "metres": 2.0} for h in (30.0, 75.0, 350.0)]
+        commands.insert(2, {"action": "wait"})
+        errors_seen = []
+        for noise in (0.0, 2.0):
+            for seed in range(12):
+                env = make_nogps_env(seed=seed, delay=0, navigation={"gyro_noise_deg": noise})
+                env.uplink(commands)
+                finish(env)
+                log = env.telemetry_log()
+                drove = [packet for packet in log if packet["wheel_odometry"] > 0]
+                error = {entry["tick"]: entry["error_deg"] for entry in find(env.replay(), "heading_errors")}
+                self.assertEqual(len(drove), 3)
+                self.assertIsNone(drove[0]["gyro_turn_deg"], "nothing to turn from before the first drive")
+                self.assertTrue(all(packet["gyro_turn_deg"] is None for packet in log if packet["wheel_odometry"] == 0))
+                for before, after in zip(drove, drove[1:]):
+                    turned = wrap((after["heading_deg"] + error[after["tick"]]) - (before["heading_deg"] + error[before["tick"]]))
+                    miss = wrap(after["gyro_turn_deg"] - turned)
+                    if noise == 0:
+                        self.assertAlmostEqual(miss, 0.0, places=4)
+                    else:
+                        errors_seen.append(miss)
+        self.assertAlmostEqual(statistics.pstdev(errors_seen), 2.0, delta=0.6)
+        self.assertIn("gyro_turn_deg", make_nogps_env(seed=1, navigation={"gyro_noise_deg": 1.0}).rules()["navigation"])
+
+    def test_wheels_of_a_hidden_size_make_a_drive_fall_short_or_overshoot(self):
+        ratios = []
+        for seed in range(12):
+            plain = make_nogps_env(seed=seed, delay=0, profile="noisy")
+            sized = make_nogps_env(seed=seed, delay=0, profile="noisy", navigation={"wheel_scale_error": 0.3})
+            ground, spent = [], []
+            for env in (plain, sized):
+                env.uplink([{"action": "drive", "heading_deg": 180.0, "metres": 3.0}])   # west: bedrock all the way
+                finish(env)
+                states = env.replay()["states"]
+                self.assertEqual((states[1]["terrain"], round(env.telemetry_log()[1]["wheel_odometry"], 9)), ("bedrock", 3.0),
+                                 "the odometer counts wheel turns: it reports the commanded metres")
+                ground.append(math.dist(states[0]["position"], states[1]["position"]))
+                spent.append(states[0]["battery"] - states[1]["battery"])
+            scale = sized.replay()["navigation"]["wheel_scale"]
+            self.assertTrue(0.7 <= scale <= 1.3)
+            self.assertAlmostEqual(ground[1] / ground[0], scale, places=5)
+            self.assertEqual(spent[1] > spent[0], scale > 1.0, "the wheels spend energy on the metres they really turn")
+            self.assertLessEqual(ground[0], 3.0, "without the setting a drive can only fall short")
+            self.assertEqual(sized.rules()["navigation"]["wheel_scale_error"], 0.3)
+            self.assertNotIn("wheel_scale", plain.replay()["navigation"])
+            self.assertNotIn(str(scale), json.dumps([sized.rules(), sized.map(), sized.telemetry_log()]))
+            ratios.append(ground[1] / 3.0)
+        self.assertGreater(max(ratios), 1.05, "some rover covers more ground than it was told to")
+        self.assertLess(min(ratios), 0.9)
+
+    def test_the_settings_reach_the_published_model_and_bad_ones_are_refused(self):
+        rules = make_nogps_env(seed=1, navigation={"heading_walk_deg": 3.0, "heading_wobble_deg": 4.0,
+                                                   "visual_odometry_noise": 0.2}).rules()
+        self.assertEqual((rules["sensing"]["heading_bias_walk_deg"], rules["sensing"]["heading_noise_deg"],
+                          rules["sensing"]["visual_odometry_noise"]), (3.0, 4.0, 0.2))
+        many = make_nogps_env(seed=1, navigation=MANY_SENSORS).rules()
+        self.assertEqual({name: many["navigation"][name] for name in ("beacons", "gyro_noise_deg", "wheel_scale_error")},
+                         {"beacons": 4, "gyro_noise_deg": 1.0, "wheel_scale_error": 0.2})
+        self.assertEqual((many["sensing"]["visual_odometry_noise"], many["sensing"]["position_noise_m"]), (0.15, 2.0))
+        for bad in ({"beacons": 0}, {"beacons": 9}, {"beacons": 2.5}, {"beacon_hear_chance": 0.0},
+                    {"wheel_scale_error": 0.5}, {"gyro_noise_deg": -1.0}, {"beacons": None}, {"lidar": 1}):
+            with self.assertRaises(ValueError, msg=bad):
+                make_nogps_env(seed=1, navigation=bad)
+        service = BiomeEpisodeService(seed=3, profile="rush_noisy", many_sensors=True)
+        self.assertEqual(len(service.map()["beacons"]), 4)
+
+
 class PlayerTest(unittest.TestCase):
     def test_each_likelihood_pulls_the_particles_the_right_way(self):
         from lightlag_dynamic.biomes.nogps_players import NavParticleFilter
@@ -211,6 +354,58 @@ class PlayerTest(unittest.TestCase):
         self.assertEqual([p["position"] for p in handed], [list(env.map()["base"])] * 3)
         self.assertNotEqual([p["position"] for p in raw.telemetry_log()[1:4]], [p["position"] for p in handed])
 
+    def test_crossing_finds_where_the_rings_meet(self):
+        from lightlag_dynamic.biomes.nogps_players import crossing
+        beacons, rover = [(20.0, 20.0), (12.0, 27.0), (31.0, 24.0), (14.0, 9.0)], (23.5, 17.25)
+        ranges = [math.dist(rover, beacon) for beacon in beacons]
+        found = crossing(beacons, ranges, [20.0, 20.0], (40.0, 40.0))
+        self.assertAlmostEqual(found[0], rover[0], places=5)
+        self.assertAlmostEqual(found[1], rover[1], places=5)
+        ranges[1] = None  # three rings still cross at one point; a far, vague ring counts for less
+        found = crossing(beacons, ranges, [20.0, 20.0], (40.0, 40.0), sigma=0.25, per_m=0.1)
+        self.assertAlmostEqual(math.dist(found, rover), 0.0, places=4)
+
+    def test_the_filter_weighs_a_turn_and_learns_the_wheel_scale(self):
+        from lightlag_dynamic.biomes.nogps_players import NavParticleFilter
+        rules = make_nogps_env(seed=1, navigation={"wheel_scale_error": 0.2, "gyro_noise_deg": 1.0}).rules()
+        pf = NavParticleFilter(rules, (20.0, 20.0), [], n=4000, seed=1)
+        pf.gyro = True
+        pf.learn_scale(0.2)
+        pf.predict(0.0, 4.0)
+        pf.update_gyro(40.0, 1.0)            # no drive before it: nothing to weigh
+        self.assertEqual(float(np.ptp(pf.logw)), 0.0)
+        pf.update_visual_odometry(4.0 * 1.15 * 0.975)   # big wheels: more ground than the wheel metres
+        scale = 1.0 + float(pf.weights() @ pf.g)
+        self.assertAlmostEqual(scale, 1.15, delta=0.04)
+        mean, _ = pf.moments()
+        self.assertLess(mean[3], 0.0, "the planner is handed a slip below zero: the drive overshoots")
+        pf.maybe_resample()
+        pf.predict(40.0, 2.0)
+        spread = float(np.sqrt(pf.weights() @ (pf.turn - pf.weights() @ pf.turn) ** 2))
+        pf.update_gyro(47.0, 1.0)
+        turned = math.degrees(float(pf.weights() @ pf.turn))
+        self.assertAlmostEqual(turned, 47.0, delta=1.0)
+        self.assertLess(float(np.sqrt(pf.weights() @ (pf.turn - pf.weights() @ pf.turn) ** 2)), spread)
+        before = (pf.g.copy(), pf.prev_theta.copy())
+        self.assertTrue(pf.maybe_resample())
+        self.assertEqual((len(pf.g), len(pf.prev_theta)), (4000, 4000))
+        self.assertLess(float(pf.g.std()), float(before[0].std()) + 1e-9)
+
+    def test_the_reference_fuses_the_new_readings(self):
+        from lightlag_dynamic.biomes.nogps_players import default_players, probe
+        names = default_players(True, MANY_SENSORS)
+        for name in ("fused_no_gyro", "fused_no_scale", "dr_gyro_compass", "dr_beacons", "kf_mpc_on_crossings"):
+            self.assertIn(name, names)
+            self.assertNotIn(name, default_players(True, WEAK_GPS))
+        rows = probe(["fused", "fused_no_range", "fused_no_scale", "kf_mpc_on_fix", "dr_beacons"], ["rush_noisy"], [3],
+                     list(range(10)), 1, navigation=dict(MANY_SENSORS))
+        self.assertFalse([r["crash"] for r in rows if r["crash"]])
+        mean = {n: statistics.mean(r["share"] for r in rows if r["player"] == n) for n in {r["player"] for r in rows}}
+        self.assertGreater(mean["fused"], mean["fused_no_range"] + 0.05, "the beacons are worth something once fused")
+        self.assertGreater(mean["fused"], mean["fused_no_scale"] + 0.05, "so is knowing the wheels may be off size")
+        self.assertGreater(mean["fused"], mean["kf_mpc_on_fix"] + 0.15, "the frozen reference leans on the fix alone")
+        self.assertGreater(mean["fused"], mean["dr_beacons"] + 0.15, "jumping to the rings' crossing is not enough")
+
     def test_the_reference_also_plays_with_a_fix(self):
         from lightlag_dynamic.biomes.nogps_players import navigator
         env = make_biome_env("main_mars", 3, 3, "rush_noisy")
@@ -264,6 +459,28 @@ class WordingTest(unittest.TestCase):
         self.assertEqual(sorted(both), ["INSTRUCTIONS", "MAP_DESCRIPTION", "RULES_DESCRIPTION", "TELEMETRY_DESCRIPTION"])
         self.assertIn("under `navigation`", both["RULES_DESCRIPTION"][0][1])
         self.assertIn("under `biome`", both["RULES_DESCRIPTION"][0][1])
+
+    def test_more_sensors_are_described_and_the_pushed_texts_are_what_they_were(self):
+        rules = service(many_sensors=True, biome="troy_crust")._env.rules()
+        changes = tool_wording(rules)
+        fields, told, layers = (changes[name][0][1] for name in ("TELEMETRY_DESCRIPTION", "INSTRUCTIONS", "MAP_DESCRIPTION"))
+        for field in ("beacon_ranges_m", "gyro_turn_deg", "null when not heard"):
+            self.assertIn(field, fields)
+        for fact in ("beacon_ranges_m", "gyroscope (gyro_turn_deg)", "navigation.wheel_scale", "can also overshoot"):
+            self.assertIn(fact, told)
+            self.assertIn(fact, brief(rules))
+        self.assertIn("crust_regions", layers)
+        self.assertIn("`beacons` lists the radio beacons", layers)
+        for words in (told, fields, brief(rules)):   # the hidden values stay hidden
+            self.assertNotIn(str(service(many_sensors=True)._env._wheel_scale)[:6], words)
+
+        def texts(**kw):
+            told = service(**kw)._env.rules()
+            return hashlib.sha256(json.dumps([tool_wording(told), brief(told)], sort_keys=True).encode()).hexdigest()[:16]
+        # What a model would be told in the weak-GPS pilot, as pushed in commit 6a5e36a.
+        self.assertEqual(texts(weak_gps=True), "bc2f73eb6bfe8bdc")
+        self.assertEqual(texts(no_gps=True), "d71921946e408440")
+        self.assertEqual(texts(weak_gps=True, biome="troy_crust"), "79eead717a14cde6")
 
     def test_a_change_in_the_stock_wording_fails_loudly_and_swaps_nothing(self):
         rules = service(weak_gps=True)._env.rules()
