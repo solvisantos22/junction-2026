@@ -1,0 +1,72 @@
+{
+  "attempts": [
+    {
+      "id": "plain-1",
+      "prompt": "plain.md"
+    },
+    {
+      "id": "plain-2",
+      "prompt": "plain.md"
+    },
+    {
+      "id": "hinted-1",
+      "prompt": "hinted.md"
+    }
+  ],
+  "authorization": "not granted by preparation; requires explicit user approval",
+  "bundle_hashes": {
+    "development-compact.json": "f8040be8989f865e58279d1d777de1d70eb42ee0aded426871229ab418d717d1",
+    "development-expanded.json": "6e26bfa0affc58abea5ff0662f07028b303ed05da12194ac938ea2b0e2852877",
+    "hinted.md": "b62437fadb256d995f0f99dccc95eb89ae6f78b9dff137b6f4ca9b87c0b4e1cf",
+    "plain.md": "4f2e1cf4563c198da5b3b1337fd2a3f97d98895fc8ca41f47f8b8f6466867cf8",
+    "public/stereo_survey/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public/stereo_survey/geometry.py": "636d7d0def7f7f788438c746985181d4f76110a4c16a4f84287da0049378a6aa",
+    "public/stereo_survey/verify.py": "f173542dcad152cb2d1a24d03ad10aaae7160246377b30e2c500c46843511c3d",
+    "public/worker.py": "d5892ea3515185628a5b63a3f6e7d0c21762db026a500b11d07e9abeb51b4956"
+  },
+  "check": {
+    "count": 24,
+    "profiles": [
+      "compact",
+      "expanded"
+    ],
+    "start": 62000
+  },
+  "effort": "high",
+  "interpretation": "One-shot success falsifies difficulty; failure requires a feedback-enabled coding-agent control.",
+  "max_tokens": 64000,
+  "model": "claude-opus-5-5",
+  "price_checked": "2026-11-14",
+  "price_source": "https://platform.claude.com/docs/en/models/opus-5-5/overview",
+  "prices_per_million": {
+    "input": 4.0,
+    "output": 20.0
+  },
+  "proposed_budget_usd": 5.0,
+  "reference": {
+    "max_joint": 10000000,
+    "max_local": 10000
+  },
+  "sandbox": {
+    "cpus": "1",
+    "image": "sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b",
+    "image_label": "python:3.12-slim",
+    "memory": "512m",
+    "output_bytes": 65536,
+    "seconds": 30
+  },
+  "source_hashes": {
+    "stereo_survey/__init__.py": "8ffefd734e3ace3223984609e9327d562fafc883847e280201b182cf72e8279a",
+    "stereo_survey/__main__.py": "72298e11bc45a3e251cfe5d7a20d71328d06ebd2886f81d58e8934c4e787555d",
+    "stereo_survey/geometry.py": "636d7d0def7f7f788438c746985181d4f76110a4c16a4f84287da0049378a6aa",
+    "stereo_survey/mission.py": "483a5cb73ef9b14ee586b42641e34089acf29d293f46c829aa8f213d1dba6a7e",
+    "stereo_survey/search.py": "3ecb8049dd0277a5f1ebe664cfd32e6b908e7feab1d41350d765d3adf3cfdb0c",
+    "stereo_survey/study.py": "a42eb10f2296760ede2a9e408acfd64d88ea1da90d8676cdb90b76c74a696311",
+    "stereo_survey/verify.py": "f173542dcad152cb2d1a24d03ad10aaae7160246377b30e2c500c46843511c3d",
+    "tools/stereo_survey_experiments/__init__.py": "080df03fcab10d55b5c75d3272965aaf70f2dc03f6786d39909d2faf498566c3",
+    "tools/stereo_survey_experiments/pilot.py": "0f348ab87ebd0dbf580a7625938b2bdf7ba81d6fa5e961e83bf6ee902ab0a9fd",
+    "tools/stereo_survey_experiments/task.md": "ae8305a73f2cae71daf75dc85b72fd72bcfb45e0a29f41632709ffb86a478b40",
+    "tools/stereo_survey_experiments/worker.py": "d5892ea3515185628a5b63a3f6e7d0c21762db026a500b11d07e9abeb51b4956"
+  },
+  "version": "stereo-agent-falsification-v2"
+}

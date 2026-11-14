@@ -24,7 +24,8 @@ from stereo_survey.verify import verify
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 MODEL = "claude-opus-5-5"
-MAX_TOKENS = 16_000
+MAX_TOKENS = 64_000
+MAX_BUDGET = 5.0
 IMAGE = "sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b"
 PRICES = {"input": 4.0, "output": 20.0}  # USD / million tokens, standard global.
 PRICE_SOURCE = "https://platform.claude.com/docs/en/models/opus-5-5/overview"
@@ -73,7 +74,7 @@ def prepare(bundle):
     (bundle / "plain.md").write_text(prompt)
     (bundle / "hinted.md").write_text(prompt + HINT)
     protocol = {
-        "version": "stereo-agent-falsification-v1", "model": MODEL,
+        "version": "stereo-agent-falsification-v2", "model": MODEL,
         "effort": "high", "max_tokens": MAX_TOKENS,
         "attempts": [{"id": "plain-1", "prompt": "plain.md"},
                      {"id": "plain-2", "prompt": "plain.md"},
@@ -86,7 +87,7 @@ def prepare(bundle):
         "bundle_hashes": {str(p.relative_to(bundle)): digest(p.read_bytes())
                           for p in sorted(bundle.rglob("*")) if p.is_file()},
         "prices_per_million": PRICES, "price_source": PRICE_SOURCE,
-        "price_checked": "2026-11-14", "proposed_budget_usd": 2.0,
+        "price_checked": "2026-11-14", "proposed_budget_usd": MAX_BUDGET,
         "authorization": "not granted by preparation; requires explicit user approval",
         "interpretation": "One-shot success falsifies difficulty; failure requires a feedback-enabled coding-agent control.",
     }
@@ -334,8 +335,8 @@ def main():
     elif args.action == "preflight":
         result = preflight(args.bundle)
     elif args.action == "ask":
-        if not args.attempt or not args.approved_budget_usd or not 0 < args.approved_budget_usd <= 2:
-            parser.error("ask needs an attempt and explicit approved budget of at most $2")
+        if not args.attempt or not args.approved_budget_usd or not 0 < args.approved_budget_usd <= MAX_BUDGET:
+            parser.error(f"ask needs an attempt and explicit approved budget of at most ${MAX_BUDGET:g}")
         result = ask(args.bundle, args.attempt, args.approved_budget_usd)
     else:
         if not args.attempt:

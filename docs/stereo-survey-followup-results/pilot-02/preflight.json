@@ -1,0 +1,619 @@
+{
+  "cases": [
+    {
+      "execution": {
+        "exit_code": 0,
+        "plan": {
+          "images": []
+        },
+        "seconds": 2.1068212499958463,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "{\"images\": []}\n"
+      },
+      "optimum": 44,
+      "profile": "compact",
+      "program": "empty",
+      "program_sha256": "89ee4312d5d58de963f5c6acb43f8dcf8a6e4f4ec25ae4bbcb57bff978df3171",
+      "replay": {
+        "covered_cells": [],
+        "errors": [],
+        "events": [],
+        "products": [],
+        "resources": {
+          "camera-0": {
+            "battery_remaining": 14,
+            "captured": 0,
+            "peak_memory": 0,
+            "unreturned": 0
+          },
+          "camera-1": {
+            "battery_remaining": 14,
+            "captured": 0,
+            "peak_memory": 0,
+            "unreturned": 0
+          }
+        },
+        "science": 0,
+        "valid": true
+      }
+    },
+    {
+      "execution": {
+        "exit_code": 0,
+        "plan": {
+          "images": [
+            "unknown"
+          ]
+        },
+        "seconds": 1.2261835410026833,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "{\"images\": [\"unknown\"]}\n"
+      },
+      "optimum": 44,
+      "profile": "compact",
+      "program": "invalid",
+      "program_sha256": "419057dd8118a3b1d7356004b17558b506a61f74b29aea29d7e872c02e72f58b",
+      "replay": {
+        "errors": [
+          "unknown or duplicate image"
+        ],
+        "science": 0,
+        "valid": false
+      }
+    },
+    {
+      "execution": {
+        "exit_code": 0,
+        "plan": {
+          "images": [
+            "p0-t01-v1",
+            "p0-t02-v1",
+            "p0-t03-v0",
+            "p1-t00-v1",
+            "p1-t02-v0",
+            "p1-t04-v1"
+          ]
+        },
+        "seconds": 1.2387385409965646,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "{\"images\": [\"p0-t01-v1\", \"p0-t02-v1\", \"p0-t03-v0\", \"p1-t00-v1\", \"p1-t02-v0\", \"p1-t04-v1\"]}\n"
+      },
+      "optimum": 44,
+      "profile": "compact",
+      "program": "reference",
+      "program_sha256": "1aaa9c8263a2e0c8c2ef0a65e9a32bd0d7492df22aac5384aac386435cb00adc",
+      "replay": {
+        "covered_cells": [
+          "cell-0-2",
+          "cell-0-3",
+          "cell-0-4",
+          "cell-1-2",
+          "cell-1-3",
+          "cell-1-4",
+          "cell-2-0",
+          "cell-2-1",
+          "cell-2-2",
+          "cell-2-3",
+          "cell-3-0",
+          "cell-3-1",
+          "cell-3-2",
+          "cell-3-3"
+        ],
+        "errors": [],
+        "events": [
+          {
+            "event": "capture",
+            "image": "p1-t00-v1",
+            "platform": "camera-1",
+            "tick": 0
+          },
+          {
+            "event": "capture",
+            "image": "p0-t01-v1",
+            "platform": "camera-0",
+            "tick": 3
+          },
+          {
+            "event": "capture",
+            "image": "p0-t02-v1",
+            "platform": "camera-0",
+            "tick": 6
+          },
+          {
+            "event": "capture",
+            "image": "p1-t02-v0",
+            "platform": "camera-1",
+            "tick": 6
+          },
+          {
+            "event": "transmit",
+            "image": "p0-t01-v1",
+            "platform": "camera-0",
+            "tick": 7
+          },
+          {
+            "event": "transmit",
+            "image": "p0-t02-v1",
+            "platform": "camera-0",
+            "tick": 7
+          },
+          {
+            "event": "transmit",
+            "image": "p1-t00-v1",
+            "platform": "camera-1",
+            "tick": 7
+          },
+          {
+            "event": "transmit",
+            "image": "p1-t02-v0",
+            "platform": "camera-1",
+            "tick": 7
+          },
+          {
+            "event": "capture",
+            "image": "p0-t03-v0",
+            "platform": "camera-0",
+            "tick": 9
+          },
+          {
+            "event": "capture",
+            "image": "p1-t04-v1",
+            "platform": "camera-1",
+            "tick": 12
+          },
+          {
+            "event": "transmit",
+            "image": "p0-t03-v0",
+            "platform": "camera-0",
+            "tick": 15
+          },
+          {
+            "event": "transmit",
+            "image": "p1-t04-v1",
+            "platform": "camera-1",
+            "tick": 15
+          }
+        ],
+        "products": [
+          {
+            "cells": [
+              "cell-0-2",
+              "cell-0-3",
+              "cell-0-4",
+              "cell-1-2",
+              "cell-1-3",
+              "cell-1-4"
+            ],
+            "images": [
+              "p0-t01-v1",
+              "p1-t04-v1"
+            ]
+          },
+          {
+            "cells": [
+              "cell-2-0",
+              "cell-3-0"
+            ],
+            "images": [
+              "p0-t02-v1",
+              "p0-t03-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-2-1",
+              "cell-2-2",
+              "cell-2-3",
+              "cell-3-1",
+              "cell-3-2",
+              "cell-3-3"
+            ],
+            "images": [
+              "p1-t00-v1",
+              "p1-t02-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-2-2",
+              "cell-2-3"
+            ],
+            "images": [
+              "p1-t02-v0",
+              "p1-t04-v1"
+            ]
+          }
+        ],
+        "resources": {
+          "camera-0": {
+            "battery_remaining": 0,
+            "captured": 3,
+            "peak_memory": 2,
+            "unreturned": 0
+          },
+          "camera-1": {
+            "battery_remaining": 0,
+            "captured": 3,
+            "peak_memory": 2,
+            "unreturned": 0
+          }
+        },
+        "science": 44,
+        "valid": true
+      }
+    },
+    {
+      "execution": {
+        "exit_code": 0,
+        "plan": {
+          "images": []
+        },
+        "seconds": 0.8915923750028014,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "{\"images\": []}\n"
+      },
+      "optimum": 57,
+      "profile": "expanded",
+      "program": "empty",
+      "program_sha256": "89ee4312d5d58de963f5c6acb43f8dcf8a6e4f4ec25ae4bbcb57bff978df3171",
+      "replay": {
+        "covered_cells": [],
+        "errors": [],
+        "events": [],
+        "products": [],
+        "resources": {
+          "camera-0": {
+            "battery_remaining": 20,
+            "captured": 0,
+            "peak_memory": 0,
+            "unreturned": 0
+          },
+          "camera-1": {
+            "battery_remaining": 20,
+            "captured": 0,
+            "peak_memory": 0,
+            "unreturned": 0
+          }
+        },
+        "science": 0,
+        "valid": true
+      }
+    },
+    {
+      "execution": {
+        "exit_code": 0,
+        "plan": {
+          "images": [
+            "unknown"
+          ]
+        },
+        "seconds": 1.139160124992486,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "{\"images\": [\"unknown\"]}\n"
+      },
+      "optimum": 57,
+      "profile": "expanded",
+      "program": "invalid",
+      "program_sha256": "419057dd8118a3b1d7356004b17558b506a61f74b29aea29d7e872c02e72f58b",
+      "replay": {
+        "errors": [
+          "unknown or duplicate image"
+        ],
+        "science": 0,
+        "valid": false
+      }
+    },
+    {
+      "execution": {
+        "exit_code": 0,
+        "plan": {
+          "images": [
+            "p0-t01-v1",
+            "p0-t03-v0",
+            "p0-t04-v1",
+            "p0-t05-v0",
+            "p1-t02-v0",
+            "p1-t03-v0",
+            "p1-t04-v0",
+            "p1-t06-v0"
+          ]
+        },
+        "seconds": 1.931372958002612,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "{\"images\": [\"p0-t01-v1\", \"p0-t03-v0\", \"p0-t04-v1\", \"p0-t05-v0\", \"p1-t02-v0\", \"p1-t03-v0\", \"p1-t04-v0\", \"p1-t06-v0\"]}\n"
+      },
+      "optimum": 57,
+      "profile": "expanded",
+      "program": "reference",
+      "program_sha256": "1aaa9c8263a2e0c8c2ef0a65e9a32bd0d7492df22aac5384aac386435cb00adc",
+      "replay": {
+        "covered_cells": [
+          "cell-0-1",
+          "cell-0-2",
+          "cell-0-3",
+          "cell-0-4",
+          "cell-1-0",
+          "cell-1-1",
+          "cell-1-2",
+          "cell-1-3",
+          "cell-1-4",
+          "cell-2-0",
+          "cell-2-1",
+          "cell-2-2",
+          "cell-2-3",
+          "cell-2-4",
+          "cell-3-0",
+          "cell-3-1",
+          "cell-3-2",
+          "cell-3-3",
+          "cell-3-4"
+        ],
+        "errors": [],
+        "events": [
+          {
+            "event": "capture",
+            "image": "p0-t01-v1",
+            "platform": "camera-0",
+            "tick": 3
+          },
+          {
+            "event": "capture",
+            "image": "p1-t02-v0",
+            "platform": "camera-1",
+            "tick": 6
+          },
+          {
+            "event": "transmit",
+            "image": "p0-t01-v1",
+            "platform": "camera-0",
+            "tick": 7
+          },
+          {
+            "event": "transmit",
+            "image": "p1-t02-v0",
+            "platform": "camera-1",
+            "tick": 7
+          },
+          {
+            "event": "capture",
+            "image": "p0-t03-v0",
+            "platform": "camera-0",
+            "tick": 9
+          },
+          {
+            "event": "capture",
+            "image": "p1-t03-v0",
+            "platform": "camera-1",
+            "tick": 9
+          },
+          {
+            "event": "capture",
+            "image": "p0-t04-v1",
+            "platform": "camera-0",
+            "tick": 12
+          },
+          {
+            "event": "capture",
+            "image": "p1-t04-v0",
+            "platform": "camera-1",
+            "tick": 12
+          },
+          {
+            "event": "transmit",
+            "image": "p0-t03-v0",
+            "platform": "camera-0",
+            "tick": 15
+          },
+          {
+            "event": "transmit",
+            "image": "p0-t04-v1",
+            "platform": "camera-0",
+            "tick": 15
+          },
+          {
+            "event": "capture",
+            "image": "p0-t05-v0",
+            "platform": "camera-0",
+            "tick": 15
+          },
+          {
+            "event": "transmit",
+            "image": "p1-t03-v0",
+            "platform": "camera-1",
+            "tick": 15
+          },
+          {
+            "event": "transmit",
+            "image": "p1-t04-v0",
+            "platform": "camera-1",
+            "tick": 15
+          },
+          {
+            "event": "capture",
+            "image": "p1-t06-v0",
+            "platform": "camera-1",
+            "tick": 18
+          },
+          {
+            "event": "transmit",
+            "image": "p0-t05-v0",
+            "platform": "camera-0",
+            "tick": 23
+          },
+          {
+            "event": "transmit",
+            "image": "p1-t06-v0",
+            "platform": "camera-1",
+            "tick": 23
+          }
+        ],
+        "products": [
+          {
+            "cells": [
+              "cell-0-1"
+            ],
+            "images": [
+              "p0-t01-v1",
+              "p1-t04-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-1-2"
+            ],
+            "images": [
+              "p0-t03-v0",
+              "p0-t05-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-0-2",
+              "cell-1-2"
+            ],
+            "images": [
+              "p0-t03-v0",
+              "p1-t02-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-0-2",
+              "cell-0-3",
+              "cell-0-4",
+              "cell-1-2",
+              "cell-1-3",
+              "cell-1-4"
+            ],
+            "images": [
+              "p0-t03-v0",
+              "p1-t04-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-1-1",
+              "cell-1-2",
+              "cell-2-1",
+              "cell-2-2"
+            ],
+            "images": [
+              "p0-t04-v1",
+              "p1-t02-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-2-3",
+              "cell-2-4",
+              "cell-3-3",
+              "cell-3-4"
+            ],
+            "images": [
+              "p0-t04-v1",
+              "p1-t03-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-1-1",
+              "cell-1-2",
+              "cell-1-3",
+              "cell-1-4"
+            ],
+            "images": [
+              "p0-t04-v1",
+              "p1-t04-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-2-1",
+              "cell-2-2",
+              "cell-3-1",
+              "cell-3-2"
+            ],
+            "images": [
+              "p0-t04-v1",
+              "p1-t06-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-1-0",
+              "cell-1-1",
+              "cell-1-2",
+              "cell-2-0",
+              "cell-2-1",
+              "cell-2-2"
+            ],
+            "images": [
+              "p0-t05-v0",
+              "p1-t02-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-1-1",
+              "cell-1-2"
+            ],
+            "images": [
+              "p0-t05-v0",
+              "p1-t04-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-2-0",
+              "cell-2-1",
+              "cell-2-2",
+              "cell-3-0",
+              "cell-3-1",
+              "cell-3-2"
+            ],
+            "images": [
+              "p0-t05-v0",
+              "p1-t06-v0"
+            ]
+          },
+          {
+            "cells": [
+              "cell-0-1",
+              "cell-0-2",
+              "cell-1-1",
+              "cell-1-2"
+            ],
+            "images": [
+              "p1-t02-v0",
+              "p1-t04-v0"
+            ]
+          }
+        ],
+        "resources": {
+          "camera-0": {
+            "battery_remaining": 3,
+            "captured": 4,
+            "peak_memory": 2,
+            "unreturned": 0
+          },
+          "camera-1": {
+            "battery_remaining": 1,
+            "captured": 4,
+            "peak_memory": 2,
+            "unreturned": 0
+          }
+        },
+        "science": 57,
+        "valid": true
+      }
+    }
+  ],
+  "passed": true,
+  "protocol_sha256": "702bfc89928279a1e668470fd258978d5863df796858cfdb5451ac1c0626663f"
+}
