@@ -1,6 +1,6 @@
 # Final Traverse training progress
 
-As of **2026-11-14 21:09:37 UTC** / **2026-11-14 23:09:37 EET**.
+As of **2026-11-14 21:25:39 UTC** / **2026-11-14 23:25:39 EET**.
 
 Stage: **fit**. Supervisor: **monitoring**.
 
@@ -8,12 +8,12 @@ These are reused validation worlds, not the untouched final check. All three see
 
 | Run | Stage / status | Batch-file mission coverage / target | Latest validated milestone | Score | Home / alive | Invalid | Elapsed | Rough time remaining | Hard cutoff UTC |
 |---|---|---:|---:|---:|---|---:|---:|---:|---|
-| ppo-17 | fit / running | 5,568 / 8,192 | 2048 | 0.378374 | 32/32 · 32/32 | 0 | 87 min | 41 min | 2026-11-14 22:42:06 UTC |
-| ppo-29 | fit / running | 6,176 / 8,192 | 2048 | 0.376544 | 32/32 · 32/32 | 0 | 87 min | 28 min | 2026-11-14 22:42:06 UTC |
-| ppo-43 | fit / running | 5,312 / 8,192 | 2048 | 0.385452 | 32/32 · 32/32 | 0 | 87 min | 47 min | 2026-11-14 22:42:06 UTC |
-| replay-17 | fit / running | 5,024 / 8,192 | 2048 | 0.377607 | 32/32 · 32/32 | 0 | 87 min | 55 min | 2026-11-14 22:42:06 UTC |
-| replay-29 | fit / running | 5,184 / 8,192 | 2048 | 0.366528 | 32/32 · 32/32 | 0 | 87 min | 51 min | 2026-11-14 22:42:06 UTC |
-| replay-43 | fit / running | 3,744 / 8,192 | 2048 | 0.364257 | 32/32 · 32/32 | 0 | 87 min | 104 min | 2026-11-14 22:42:06 UTC |
+| ppo-17 | fit / running | 6,624 / 8,192 | 2048 | 0.378374 | 32/32 · 32/32 | 0 | 103 min | 24 min | 2026-11-14 22:42:06 UTC |
+| ppo-29 | fit / running | 7,296 / 8,192 | 2048 | 0.376544 | 32/32 · 32/32 | 0 | 103 min | 13 min | 2026-11-14 22:42:06 UTC |
+| ppo-43 | fit / running | 6,368 / 8,192 | 2048 | 0.385452 | 32/32 · 32/32 | 0 | 103 min | 30 min | 2026-11-14 22:42:06 UTC |
+| replay-17 | fit / running | 5,728 / 8,192 | 2048 | 0.377607 | 32/32 · 32/32 | 0 | 103 min | 44 min | 2026-11-14 22:42:06 UTC |
+| replay-29 | fit / running | 5,856 / 8,192 | 2048 | 0.366528 | 32/32 · 32/32 | 0 | 103 min | 41 min | 2026-11-14 22:42:06 UTC |
+| replay-43 | fit / running | 4,288 / 8,192 | 2048 | 0.364257 | 32/32 · 32/32 | 0 | 103 min | 94 min | 2026-11-14 22:42:06 UTC |
 
 Method means use the highest checkpoint available for **all three seeds at the same training budget**:
 
