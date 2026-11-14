@@ -121,7 +121,11 @@ All treatment attempts count whether or not they visibly adopt the advice.
 Only `instruction.md` changes: append one newline and the appendix bytes to the
 frozen instruction. Keep the simulator, map, tools, verifier, original reference,
 model/harness versions, provider defaults and 1,800-second timeout unchanged.
-Record the original and treatment instruction/task hashes. Use fresh sessions
+Record the original and treatment instruction/task hashes. The prepared
+[public plan and six manifests](lightlag-runs/overnight-b-plan.json) match
+Harbor 0.25.0's own Packager; all three treatment tasks pass Harbor lint. The
+only packaged byte difference per pair is the fixed instruction appendix
+(experiment metadata also records the intervention). Use fresh sessions
 without earlier transcripts, no retries or replacement seeds.
 
 The case/condition ordering was generated independently of outcomes from the
