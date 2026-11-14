@@ -44,7 +44,7 @@ python3 tools/lightlag_experiments/prepare.py /tmp/lightlag-rush-500-kf \
 - [x] Generate identical-settings tasks for `open_loop` and `leg_and_wait`; run
   their oracle solutions and compare with direct simulator results. Treat
   infrastructure errors separately from scores.
-- [ ] Once `.env` contains a key, run one model against the reference task. Keep
+- [x] Once `.env` contains a key, run one model against the reference task. Keep
   the original model result untouched. Do not publish raw credentials or private
   runtime state. Record the model/version/settings and any runtime limitation.
 
@@ -72,4 +72,4 @@ to keep raw results outside the checkout.
 - [x] Verify links, artifacts, clean diff and affected tests; fetch, integrate,
   push and confirm the final commit is on `origin/main`.
 
-Execution note: the generator is on main at `0bc0d43`; all four scripted Harbor runs are saved and match the direct runner. The real model step is pending the user filling the Git-ignored `.env`. No harder-task model score or paid usage is claimed.
+Execution note: the generator is on main at `0bc0d43`; all four scripted Harbor runs are saved and match the direct runner. The subsequent model step used the user-filled, Git-ignored credentials file in the main checkout. Claude scored 1.0 on the frozen rush task, with reported cost $0.4821436; full evidence and interpretation are in `docs/lightlag-experiments.md`.
