@@ -717,6 +717,8 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
   - Opus agent 3's rebuilt program reproduces its Harbor score on the task's world (0.515), and the owner's eight scores on worlds 1–8.
   - Missions in containers that Modal preempted were replayed from the start; a mission is deterministic per world, so this changes no result.
 - **Evidence:** [write-up](traverse-farm.md), [comparison rows](traverse-farm/programs-1/), [harsher-day rows](traverse-farm/sun-margin-0/), [code](../tools/traverse_farm/), [tests](../tests/traverse_farm/).
+- **Live deployed demo (added 22:15, at Kristján's request):** `modal deploy tools/traverse_farm/live_app.py`, app `lightlag-traverse-live`, https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run. A visitor picks any world; Modal drives the reference, a textbook controller (terrain graph + Kalman filter, greedy targets) and two Claude-written autopilots on it in parallel containers and serves the Traverse demo page for that world, cached in a Modal Volume. Only fixed code from the repository runs; the visitor supplies only the world number. Checked: the landing page, a cached world, a new world built live, and a refused malformed request.
+- **Controller ladder (22:00):** on 300 fresh worlds a textbook controller (terrain graph + Kalman filter, greedy targets) scores 0.314 and strands 140 rovers, like the best saved Claude programs; route planning lifts it to 0.489; the reference's reserve adds 0.013 and prevents 10 flat batteries (app `ap-Z31svlFPlHs0F1fT95mFf7`).
 - **Scope:** no change to `lightlag_traverse/`, the Harbor task or any teammate's file; no Harbor run, model API spend or prize submission.
 
 ### 14 November — Kristján / Codex: charging-aware RL follow-up

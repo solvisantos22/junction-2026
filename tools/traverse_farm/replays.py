@@ -42,7 +42,8 @@ def run_meta(name: str, spec: Dict[str, Any], row: Dict[str, Any]) -> Dict[str, 
                     how="its saved program, replayed without the agent", program=spec.get("label"),
                     program_id=row.get("program_id"), died_tick=row.get("died_tick"), program_tick=row.get("program_tick"),
                     error=row.get("error"))
-    return dict(played, kind="scripted", label=name, how="lightlag_traverse.play policy {}, played by the Traverse farm".format(name))
+    return dict(played, kind="scripted", label=spec.get("label") or name,
+                how="lightlag_traverse.play policy {}, played by the Traverse farm".format(spec.get("policy", name)))
 
 
 def folder_name(name: str) -> str:
