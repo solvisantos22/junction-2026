@@ -472,6 +472,23 @@ These are recommended evidence choices, not newly asserted official entry requir
   evidence does not justify a paid call under this protocol. No new API spending.
   [Decision and handoff](lightlag-survey-handoff.md).
 
+### R16 — 14 November — Research before the next mechanism
+
+- Human direction: after the survey failed its information-value gate, Sölvi
+  asked for online prior art and alternative directions before committing to a
+  long campaign or repeated-mistake task.
+- Codex contribution: primary-source searches across memory, continual learning,
+  active experimentation, physical identification and workflow recovery; three
+  parallel domain reviews and an independently checked synthesis. Current strong
+  agent successes are retained alongside failures and scaffold limitations.
+- Decision support: the report proposes a short changed-dynamics versus faulty-
+  sensing diagnosis test, with unchanged controls, before expanding a campaign.
+  This is a recommendation; Sölvi/the team have not selected or implemented it.
+- Verification: source versions, model/harness distinctions, outcome denominators
+  and local document links checked. No external benchmark reproduction, new
+  environment implementation, API spending or prize submission.
+- Evidence: [research and handoff](research/2026-11-14-next-mechanism-review.md).
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
