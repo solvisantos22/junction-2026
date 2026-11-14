@@ -27,7 +27,7 @@ The page averages methods only at a checkpoint completed by all three seeds. Bat
 
 ### Progress publisher operation
 
-The publisher is active, PID **88036**, with idle-sleep guard **88037**. Its fixed runtime and private configuration/state/logs live in `/Users/solvisantos/.codex/junction-learning-final-progress-20261114/`. Integration happens only in `/tmp/junction-learning-progress-publish`, branch `codex/learning-progress-20261114`. Implementation `73b84fc`; the first actual automatic update reached main as **`637764d`**, with both methods at their common 2048 checkpoint. All **24 collector/publisher tests pass**, including real temporary-Git push races and interruption recovery.
+The publisher is active, PID **92298**, with idle-sleep guard **92299**. Its fixed runtime and private configuration/state/logs live in `/Users/solvisantos/.codex/junction-learning-final-progress-20261114/`. Integration happens only in `/tmp/junction-learning-progress-publish`, branch `codex/learning-progress-20261114`. Implementation `73b84fc`; the first actual automatic update reached main as **`637764d`**, with both methods at their common 2048 checkpoint. All **24 collector/publisher tests pass**, including real temporary-Git push races and interruption recovery.
 
 The publisher writes only `progress.md`, `progress.json` and timestamped `progress-snapshots/*.json` in this results directory. Each update is fetched/reconciled, checked and normally pushed; it never force-pushes or edits the training code. New same-budget method checkpoints and status changes trigger earlier updates; otherwise publication is every 15 minutes, with a five-minute polling cadence. Network downloads and Git operations can add delay. Full immutable policy/validation files are cached privately and remain on Modal; JSON snapshots retain their hashes and checked summaries.
 
@@ -45,7 +45,7 @@ Training worlds **80000–80511** and validation **81000–81031** are reused de
 
 ## Monitor and stop
 
-The continuation supervisor is running from the fixed checkout at `becbf3e`, PID **70439**; idle-sleep guard PID **70440** exits with it. Its state, heartbeat, events, terminal downloads and decisions live in `/tmp/junction-learning-final-monitor`. Cloud jobs continue independently of this local process. Automatic continuation requires the local supervisor to remain available.
+The continuation supervisor is running from the fixed checkout at `becbf3e`, PID **92082**; idle-sleep guard PID **92083** exits with it. Its state, heartbeat, events, terminal downloads and decisions live in `/tmp/junction-learning-final-monitor`. Cloud jobs continue independently of this local process. Automatic continuation requires the local supervisor to remain available.
 
 Read `/tmp/junction-learning-final-monitor/state.json` and the stage's `status.json` for current progress. The supervisor polls every 30 seconds and downloads artifacts only after all stage functions have returned and committed their volume. A failed function, corrupt evidence or ambiguous launch stops progress; no automatic retry or extra budget allocation follows.
 
@@ -58,13 +58,21 @@ MODAL_PROFILE=solvi-junction /tmp/junction-learning-venv/bin/python -m tools.lea
 
 Do not relaunch `fit`, clear cloud reservations or resume the old supervisor. If this new local monitor stops unexpectedly, inspect `state.json` and any launch intent before restarting the same command recorded in `/tmp/junction-learning-final-monitor/process.json`. Use the existing output directory and unchanged fixed checkout; a saved error/pause requires deliberate reconciliation.
 
+## Monitoring interruption and recovery, 21:00 UTC
+
+Training continued through two local reporting interruptions. At 20:42 UTC the progress publisher stopped because `AGENTS.md` gained the approved MAX Harbor-task instructions; that change was reviewed before updating its workflow pin. At 21:00 UTC the supervisor stopped on a DNS `ConnectionError` during a read-only Modal poll. A direct 21:03 UTC check confirmed all six original cloud calls still running, no job errors and no stop marker. [Retained status and recovery record](monitoring-recovery-20261114/record.json).
+
+The same supervisor and publisher were rearmed after preserving their error states and logs. Their frozen code, receipts, source pins, continuation gates, deadlines and cloud reservations are unchanged. No training was relaunched and no extra cloud job was created. Publication resumed in `a0e6f42`; the page now reflects current saved batches again. Read-only network failures remain fail-closed, so another connection failure can stop local monitoring while cloud jobs continue.
+
+The first completion watcher had already queued its one error alert, so it was retained unchanged and a **second generation** was activated for completion. Its current runtime path and PID are listed below. The original runtime remains under `/Users/solvisantos/.codex/junction-learning-final-wake-20261114/`; do not restart or clear its queued reservation. The new generation's live local check reports waiting. Queue acceptance is not a guarantee that resumed work finishes if connectivity or Codex availability fails.
+
 ## Continue this chat when training settles
 
-Sölvi asked for continued work after training. A separate one-time watcher is now active, PID **73408**, with idle-sleep guard **73409**. It polls the local monitor every 30 seconds and uses the installed `codex queue --thread … --message … --resume` command to resume this same chat when the monitor reaches final evaluation, reports an error/deadline, or has a heartbeat stale for 15 minutes. A final fallback fires at **03:40 UTC**, ten minutes after the training cutoff.
+Sölvi asked for continued work after training. A separate one-time watcher is now active, PID **92085**, with idle-sleep guard **92086**. It polls the local monitor every 30 seconds and uses the installed `codex queue --thread … --message … --resume` command to resume this same chat when the monitor reaches final evaluation, reports an error/deadline, or has a heartbeat stale for 15 minutes. A final fallback fires at **03:40 UTC**, ten minutes after the training cutoff.
 
 The queued instruction directs Codex to reconcile all runs, publish the all-seed policy freeze before opening final maps, evaluate and audit the learned policies beside greedy/beam, then publish findings and the handoff. It preserves the reference and original training freeze. An error wake-up requires diagnosis before new spend; it does not authorize repeating training. No cloud job is launched by this watcher.
 
-Runtime code, configuration, state and logs are under `/Users/solvisantos/.codex/junction-learning-final-wake-20261114/`. The private code copy is hash-bound and unaffected by later main commits. `state.json` reports `waiting`, `queued`, `uncertain` or `disabled`. Dispatch is reserved durably before the CLI call; an interrupted or ambiguous attempt is never automatically repeated. A `queued` state means the CLI reported acceptance, not that the follow-up work finished.
+Runtime code, configuration, state and logs are under `/Users/solvisantos/.codex/junction-learning-final-wake-20261114-generation-2/`. The private code copy is hash-bound and unaffected by later main commits. `state.json` reports `waiting`, `queued`, `uncertain` or `disabled`. Dispatch is reserved durably before the CLI call; an interrupted or ambiguous attempt is never automatically repeated. A `queued` state means the CLI reported acceptance, not that the follow-up work finished.
 
 A training pause/stop suppresses the wake-up. To disable only this watcher, create `/tmp/junction-learning-final-monitor/wake-stop`; current training continues. A disabled watcher requires deliberate rearming. The Mac and Codex must remain available, and Codex usage limits can interrupt the resumed work. Thirteen synthetic tests cover dispatch, pauses, interruption, identity changes and duplicate prevention; a real local poll verified `waiting`. No test follow-up message was sent to the chat.
 
