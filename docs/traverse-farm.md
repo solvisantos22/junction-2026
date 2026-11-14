@@ -62,6 +62,23 @@ The pilot scores higher than every saved Claude program on 288 to 300 of the 300
 
 Read with care: an agent's program was written during its own mission on world 2026 and is replayed here on worlds it never saw, with no agent watching. This measures the program, not the agent, which in a mission could notice trouble and step in. The one-request programs were written without seeing any world, so for them fresh worlds are a fair test.
 
+## What the reference's parts are worth: a controller ladder
+
+The reference is a robotics stack: an extended Kalman filter over position and heading bias, a graph of the height map searched for the cheapest way to every goal, a beam search over visiting orders with a battery-and-sun forecast, and battery reserves. Taking it apart, rung by rung, on the frozen code (task 0.1.1, the 0.1.0 rules):
+
+| Controller | Campaign worlds 2027–2029 (campaign score) | 300 fresh worlds 600–899 (mean) | Lost | Stranded |
+|---|---:|---:|---:|---:|
+| Straight lines + Kalman filter (`straight`) | 0.272 | 0.163 | 0 | 187 |
+| Terrain graph + Kalman filter, greedy next target (`greedy`) | 0.270 | 0.314 | 0 | 140 |
+| The reference without its reserves (floor, home floor, home margin 0; home slack 1.0) | 0.487 | 0.489 | 10 | 1 |
+| The reference | 0.476 | 0.502 | 0 | 0 |
+
+- **A textbook controller scores like Claude.** Graph search plus a Kalman filter with greedy targets scores 0.270 on the campaign's worlds, where Claude's agents score 0.120–0.293, and 0.314 on fresh worlds, where the best saved Claude programs score 0.309–0.321. It strands 140 rovers in 300: it never plans the whole day.
+- **Route planning is worth about 0.2:** the beam search over visiting orders, with the battery-and-sun forecast, lifts 0.314 to 0.489 on fresh worlds.
+- **The reserve is cheap discipline.** Without it the reference scores slightly more on many worlds (higher on 149, lower on 85, −0.013 on average [−0.024, −0.004]) but runs its battery flat 10 times in 300, every time with the way home still open, a median 31 m from the lander: Claude's failure. With it, no rover is lost.
+
+Campaign worlds played locally (`docs/traverse-farm/classic-campaign/`); fresh worlds on Modal with the point-of-no-return analysis (app `ap-Z31svlFPlHs0F1fT95mFf7`, `docs/traverse-farm/classic-fresh/`).
+
 ## Where the way home closed: the point of no return
 
 Every program's missions on worlds 600–899 again (the 0.1.0 rules, Modal app `ap-HeqHK3dHG5bKO0hFzbv9lU`, rows and `analysis.json` in [`traverse-farm/home-analysis/`](traverse-farm/home-analysis/)), now with `--analyse`: at every tick of a mission, from where the rover really was and with the battery it really had, could a drive over the cheapest ground still have reached the lander by the last tick, waiting for the sun when short? The drive model is the reference planner's own (`lightlag_traverse.planning.Ground`), fed the hidden truth (each terrain's true slip, the panel's true efficiency), and the check leans in the rover's favour: it ignores the 3-tick command delay and checks the battery only at the end of the drive home. The tick after the last "yes" is the point of no return ([`analysis.py`](../tools/traverse_farm/analysis.py)).
