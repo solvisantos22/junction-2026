@@ -1,0 +1,28 @@
+# Harbor supplies the `main` service (the agent's container) and merges this file
+# on top. `lightlag` is the simulator: a separate container, reached by name.
+services:
+  main:
+    depends_on:
+      lightlag:
+        condition: service_healthy
+
+  lightlag:
+    build:
+      context: ./simulator
+    expose:
+      - "8000"
+    environment:
+      # Campaign settings belong to the evaluator and exist only in this container.
+      LIGHTLAG_MISSIONS: "9003:rush_noisy,9007:rush_noisy,9008:rush_noisy,9012:rush_noisy,9013:rush_noisy,9020:rush_noisy"
+      LIGHTLAG_DELAY: "3"
+      LIGHTLAG_TICKS: "50"
+      LIGHTLAG_SECONDS_PER_TICK: "1.0"
+      LIGHTLAG_NOISE_LEVEL: "2.0"
+      LIGHTLAG_ARTIFACT_DIR: /evaluator
+      LIGHTLAG_TOKEN_FILE: /run/lightlag/token
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 3s
