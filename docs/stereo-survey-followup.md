@@ -1,5 +1,7 @@
 # Stereo follow-up: can an agent build the solver?
 
+**First fresh model result:** the first unhinted Opus 5.5 program reaches the proved optimum on **48/48 unseen missions**, with every plan valid. This already meets the predeclared rule for retiring this configuration as a difficulty candidate. The other plain attempt and hinted control are still being evaluated; all three programs were frozen before the check.
+
 14 November 2026. Kristján asked to continue investigating stereo survey and assess whether it is a good lead. The [v1 result](stereo-survey.md) remains unchanged: a small generic-search portfolio attains every fresh optimum. That establishes easy search **once an appropriate program exists**. It does not measure whether a coding agent will formulate and implement that program from the public rules.
 
 This follow-up targets that missing evidence before constructing a larger environment. It is a different, explicitly stated question, not a reinterpretation of the failed v1 screening gate. No LLM weakness is established at the start of this follow-up.
@@ -58,3 +60,11 @@ All three Opus 5.5 requests completed normally (`end_turn`) and returned syntact
 | Hinted 1 | 20,573 | 14,930 | $0.451636 |
 
 Total reported generation cost: **$1.023160**. All three receive the same 48 held-out missions next; quality is not known yet. The hinted response exceeded the original 16,000-token allowance, so increasing the allowance prospectively avoided truncating that trial.
+
+## First fresh outcome
+
+The protocol was published in [`792109b`](https://github.com/solvisantos22/junction-2026/commit/792109b), and all three generated programs were published in [`269217a`](https://github.com/solvisantos22/junction-2026/commit/269217a) before opening any fresh mission. [Plain 1 results](stereo-survey-followup-results/pilot-02/attempts/plain-1/evaluation.json): **24/24 compact and 24/24 expanded optima**, no invalid schedule, timeout or runtime error. Every reference completed its proof and replayed correctly. Mean raw science is 45.2083 compact / 50.5417 expanded. The submission's median container execution was about 0.61 / 0.58 seconds, maximum 1.09 seconds across the 48 cases; these are machine-specific observations, including startup.
+
+Independent host replay regenerated all 48 missions and verified every saved reference/model plan. The unhinted program precomputes pair-coverage bitmasks, enumerates feasible per-camera schedules, removes some dominated schedules and combines the survivors under coverage bounds. It also calls the supplied validator before returning a plan. Those mechanisms are visible in its submitted code, not inferred from hidden reasoning. It received no reference or search source and no example winning schedule.
+
+The first result closes the missing program-construction question for this bounded version: the current model can formulate and implement a winning solver in one response without tool feedback. Finish the two already-frozen controls, retain their outcomes, and report the final batch before closing the experiment.
