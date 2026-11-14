@@ -2,7 +2,7 @@
 
 14 November 2026. Owner: Kristján / Claude Code. Code: [`lightlag_shift/`](../lightlag_shift/), tests: [`tests/lightlag_shift/`](../tests/lightlag_shift/). **A proposal for the team, not a rules decision.** Nothing here changes `lightlag/`, `lightlag_dynamic/`, `lightlag_mcp/` or the canonical `harbor/lightlag` task.
 
-**Scripted controllers only so far. No model has played it**, so nothing here says how an agent does.
+**Three model runs so far, on the first mission only** (below): Claude copes. The second mission, where one of four rules changes, has scripted results only.
 
 ## What it is
 
@@ -46,9 +46,24 @@ Forty fresh seeds (3100–3139), `rush_noisy`, delay 3, one episode each, played
 - **The plain frozen reference does best here, ahead of controllers 27 and 36.** I have not found out why. One possibility, unchecked: the new slip lies outside the range first published, which some filters clamp to.
 - No controller was written for this mission. A reference that reads `ground_change`, watches for the jump and re-plans would be the honest yardstick, and there is none yet.
 
+## First model runs: Claude copes, with one weaker map
+
+Saturday evening, with Kristján's approval for the spend. Claude Opus 5.5 through OpenCode 1.19.5 and Harbor, one attempt on each of the three seeds set aside beforehand, against the frozen `kf_mpc` played through Harbor on the same task. Runs: `docs/lightlag-runs/shift-ground-seed310*`. Reported model cost: $1.72.
+
+| Seed | Ground changes at tick | Claude Opus 5.5 | Frozen reference | What happened to Claude |
+|---|---|---|---|---|
+| 3100 | 13 | **0.46** (6 of 13) | 0.62 (8 of 13) | Three failed samples after the change (ticks 16, 20, 26); home alive |
+| 3101 | 27 | **0.69** (9 of 13) | 0.65 (8.5 of 13) | One failed sample; home alive |
+| 3102 | 23 | **0.89** (8 of 9) | 0.89 (8 of 9) | One failed sample, right after the change; home alive |
+| Mean | | 0.68 | 0.72 | |
+
+- **This is not a gap.** Claude is ahead on one map, level on one and behind on one, and it never lost the rover. Three runs cannot separate 0.68 from 0.72.
+- **Claude noticed.** Its closing report on seed 3102 says that wheel slip on bedrock jumped to about 18%.
+- **The one clear loss is the map where the change came earliest.** With 37 ticks left to play on the new ground, Claude missed three samples in a row. That suggests, on one run, that an earlier window would bite harder; it is a guess until tested.
+
 ## Limits
 
-- **No model run.** Whether this opens a gap between an agent and a reference is unknown.
+- **Three model runs, one per seed.** Whether this opens a gap between an agent and a reference is still unknown.
 - **Forty seeds, one draw each;** differences of a couple of points are noise.
 - **The ground only ever gets worse.** That is a choice, to make ignoring the change costly; a change in either direction is a one-line edit of `SLIP_AFTER`.
 - **One profile** (`rush_noisy`), one delay.
