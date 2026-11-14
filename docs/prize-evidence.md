@@ -393,6 +393,27 @@ These are recommended evidence choices, not newly asserted official entry requir
   internal reasoning algorithm or a difficult benchmark. No continuous rover
   changes, measured model gap, final rules choice or prize submission.
 
+### R14 — 14 November — Compose scarce information with continuous rover control
+
+- Human direction: Sölvi approved the challenger-information check and requested
+  a substantially harder task using the same strong model. Final project/rules
+  selection remains with the team.
+- Codex closed the prior-leader coverage hole using two new explicit fixtures in
+  the unchanged allocation simulator: 672 branches and 54 nearby parameter
+  combinations pass. Exact reward .594375 for challenger inspection versus
+  .492375 for leader inspection and .51 for skipping; no model calls.
+- Codex implemented a separate continuous rover experiment: three shared regional
+  qualities, two imperfect delayed inspections, eight targets, discoveries,
+  deadlines and return-energy constraints. Physical samples also teach region
+  quality; hidden/public-quality modes preserve paired physics and grading.
+- Verification: 19 environment/generator tests including 100 map seeds, hidden
+  state isolation, atomic queues, quality scoring and all-rich equivalence to
+  the existing simulator; five independent challenger tests.
+- [Design and developing evidence](lightlag-expedition-experiment.md),
+  [package](../lightlag_expedition/). This first increment establishes mechanics,
+  not a model gap. Reference, protected adapter and free development comparisons
+  follow before any paid pilot. No canonical task or teammate physics changed.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
