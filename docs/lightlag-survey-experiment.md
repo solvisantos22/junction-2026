@@ -62,3 +62,24 @@ six-region hidden-state isolation, delayed learning, atomic inspection limits,
 constant-denominator scoring, and all-rich/no-inspection equivalence to the
 existing physical simulator on the same generated mission. No policy result or
 model gap is claimed by these mechanics tests.
+
+## Reference revision
+
+`lightlag_expedition/reference_v2.py` is separate from the frozen reference. It
+compares ordinary motion, waiting for a physical sample's revelation, waiting
+for remote inspections, and driving/sampling while inspections share the queue.
+Six-region development timing is approximately .28–.50 seconds per episode.
+Sixteen focused tests and independent review pass; the three-test repair-study
+runner retains controller errors separately from scores and reconstructs public
+transcripts and full replays.
+
+The planner caches feasible routes as regional value coefficients, evaluates at
+most four targets and one first-target candidate per region, and chooses at most
+two probes as a batch. All controls share its navigation and admission logic.
+Only the proposed first physical sample branches on estimated hit/miss; direct
+and continuation route samples use the frozen MPC's planned-success assumption.
+Hypothetical sample outcomes change quality beliefs but do not condition pose
+uncertainty, and future fixes/undiscovered positions are not forecast. Actual
+delivered failures still update the KF. Diagnostic values and return checks are
+heuristic predictions, not calibrated expectations or guarantees. These limits
+apply equally to the adaptive and simpler acquisition policies.

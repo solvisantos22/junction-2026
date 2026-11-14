@@ -447,8 +447,11 @@ These are recommended evidence choices, not newly asserted official entry requir
   constant-36 scoring and physical equivalence without inspections.
 - [Contract and developing evidence](lightlag-survey-experiment.md),
   [predeclared gate](lightlag-survey-gate.md), [package](../lightlag_survey/).
-  Comparator and free policy checks are next. No model gap, paid call, task
-  promotion or final project choice is claimed by this first increment.
+  The separate scheduling reference and 16 focused tests now pass independent
+  review; three repair-runner checks preserve errors and verify replay fidelity.
+  Sample/pose forecasting approximations are explicit and shared across controls.
+  Full free comparisons are next. No model gap, paid call, task promotion or
+  final project choice is claimed by these implementation increments.
 
 ## Keep recording with minimal overhead
 

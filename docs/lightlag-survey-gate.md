@@ -30,7 +30,12 @@ sample learning and return reserve. They may use zero, one or two inspections.
 Fixed-pair controls restrict eligible inspection regions; they are **not forced
 to waste both inspections**. Entropy restricts acquisition candidates by current
 entropy and uses the same value/admission calculation. Publish these limits: v2
-is a bounded heuristic, not a globally optimal continuous-policy solver.
+is a bounded heuristic, not a globally optimal continuous-policy solver. Only
+its proposed first physical sample branches on estimated hit/miss; direct and
+continuation route samples retain the MPC planned-success approximation.
+Hypothetical outcomes do not condition pose uncertainty or forecast future fixes
+or undiscovered positions. Actual delivered failures update the KF normally.
+Diagnostic values are heuristic, not calibrated expected returns or guarantees.
 
 Before the survey study, an optional comparator-repair diagnostic runs old and
 new references on the old three-region development maps 0–3, crossed with episode
