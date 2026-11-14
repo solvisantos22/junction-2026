@@ -19,8 +19,8 @@ of task.py on; plain_home plays by default when the policy was trained with the 
 scripted players of the environment:
 max_navigator, fused, c37, kf_mpc, blind on the max env; kf_mpc, blind, reference, leg_and_wait on
 a profile or biome; pilot, pilot_fast, greedy, straight on the traverse, and manh_max,
-manh_max_fast besides on its MAX map (the full-search pilot and manh_max are slow, so they play
-only when named).
+manh_max_fast, manh_max_home, manh_max_home_fast besides on its MAX map (the full-search pilot,
+manh_max and manh_max_home are slow, so they play only when named).
 
 Prints each player's mean share of the available value, deaths and returns home, and its paired
 difference to the first player with a 95% bootstrap interval over the seeds.
@@ -96,7 +96,7 @@ def default_players(extra, spec):
         builtin = ["ppo_icm", "nearest_targets", "cluster_targets", "random_targets", "nothing"]
         return builtin + [n for n in scripted(spec) if n not in builtin + ["pilot"]]
     builtin = ["ppo_icm", "plain"] + (["plain_home"] if extra["task"].get("home_guard") else []) + ["random", "nothing"]
-    return builtin + [n for n in scripted(spec) if n not in builtin + ["pilot", "manh_max"]]
+    return builtin + [n for n in scripted(spec) if n not in builtin + ["pilot", "manh_max", "manh_max_home"]]
 
 
 def episode(job):

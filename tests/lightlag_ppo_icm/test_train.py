@@ -125,7 +125,8 @@ class TrainingTests(unittest.TestCase):
             check.main(["--policy", os.path.join(self.out, "policy.npz"), "--seeds", "300004", "--players",
                         "ppo_icm,teleport", "--workers", "1"])
         self.assertEqual(sorted(check.scripted("traverse_max")),
-                         ["greedy", "manh_max", "manh_max_fast", "nothing", "pilot", "pilot_fast", "straight"])
+                         ["greedy", "manh_max", "manh_max_fast", "manh_max_home", "manh_max_home_fast", "nothing",
+                          "pilot", "pilot_fast", "straight"])
 
 
 if __name__ == "__main__":
