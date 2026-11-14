@@ -51,7 +51,7 @@ python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                
 | 24 | `EKF_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_24` | 19 plus 22 and 23 | The odometer fixes legs once a patch is found; the stay-alive rule covers a patch found too late. **Best on held-out seeds:** +1.9 over controller 1 (+1.6 to +2.3), +0.2 over 19 (+0.1 to +0.4); identical to 19 on the published profiles. |
 | 25 | `EKF_sandodo_mapdoubt_stayalive_aimdisc_turncost_window_MPC_manh_controller_25` | 24 plus map doubt: once the map is shown wrong, undriven bedrock on the way home is budgeted at the unmapped-sand rate seen so far | The remaining deaths of 24 come from the patch on the last route home. Cuts deaths with two patches from 20% to 12% but gains only 1 point there, and loses 0.4 points elsewhere: rare false odometer patches on clean maps switch the doubt on. |
 | 26 | `EKF_sandodo_bayessand_stayalive_aimdisc_turncost_window_MPC_manh_controller_26` | 24 plus a Bayesian belief about unmapped sand (Beta prior in metres, updated by the odometer), priced on every way home | Sölvi's static robust plan still won on `noisy` with hidden sand; adaptive robust routing says price a belief, not the worst case. Hidden sand on `noisy` 69% / 54% → 71% / 70% (one / two patches, held-out), no deaths, but clean `noisy` 90% → 75%: −2.5 points vs 1 overall. Traces then showed the estimator, not the budget, failing. |
-| 27 | `EKF_fading_sandfilter_sandodo_guarded_aimdisc_turncost_window_MPC_manh_controller_27` | 24 with the filter fixed for unmodelled ground (sand-aware propagation, adaptive fading) and guarded moves instead of the stay-alive rule | **Best controller, and ahead of Sölvi on every front.** Held-out: +2.7 over 1 (+2.2 to +3.4), +0.8 over 24 (+0.5 to +1.2); hidden sand on `noisy` 80% / 71% vs Sölvi's 73% / 68%, never dead there. See "Literature round" below. |
+| 27 | `EKF_fading_sandfilter_sandodo_guarded_aimdisc_turncost_window_MPC_manh_controller_27` | 24 with the filter fixed for unmodelled ground (sand-aware propagation, adaptive fading) and guarded moves instead of the stay-alive rule | **Best overall, and ahead of Sölvi's reference on every front.** Held-out: +2.7 over 1 (+2.2 to +3.4), +0.8 over 24 (+0.5 to +1.2); hidden sand on `noisy` 80% / 71% vs Sölvi's 73% / 68%, never dead there. **On plain `rush` / `rush_noisy`, 24 is better:** the guarded moves cost 2–3.5 points at delay 3 there (see "Plain-profile check" below). See "Literature round" below. |
 | 28 | `EKF_fading_sandfilter_sandodo_bayessand_guarded_aimdisc_turncost_window_MPC_manh_controller_28` | 27 plus 26's Bayesian pricing | The cautious twin: 75% and home in every held-out `noisy` episode, with or without hidden sand, but 75% instead of 92% on clean `noisy`, so about 5 points below 27 overall. |
 | 29 | `EKF_latencyaware_MPC_manh_controller_29` | 1 for the real-time clock (`lightlag_dynamic/kf_mpc_rt.py`): measures its own lag (median of the last five uplinks' `sent_tick` minus its decision tick) and decides that much earlier | On the real-time clock ticks pass while a controller thinks, and 1 then lets the queue run empty. **Turn-based, as the swarm plays, it equals 1 exactly**; the gain shows only on the real-time clock: fresh seeds 600–639 at 1 tick of thinking per call, +4.0 points on `rush_noisy` and +8.9 on `rush`, never worse. An optional extra, not adopted: [how to adopt or decline it](../../docs/lightlag-dynamic-pilot.md#real-time-aware-reference-optional-extra-awaiting-team-decision). |
 | 30 | `EKF_slipaware_MPC_manh_controller_30` | 1 plus the slip-check-aware layer (`mars.py`): a Bayesian trip chance per terrain from the filter's slip belief and every slip stop seen; routes around terrain above 10%, drops targets reachable only through terrain above 30% | Built for the Mars sandbox's onboard slip check, where 1 replans straight back into the sand that stopped it. **Without a slip check, as the swarm plays, it equals 1 exactly.** Fresh seeds 800–879, `noisy` at limit 0.35: 54.1% → 75.0%, home 51 → 80 of 80. |
@@ -210,6 +210,47 @@ Goal: beat Sölvi's static robust reference on every front. Before this round it
 - Sölvi's static plan never takes it, so it ties on clean maps and wins that one cell.
 - No policy can win both. Where Sölvi dies, at delays 3 and 5, 27 still comes out ahead. The cautious twin 28 gives the other trade-off: never below Sölvi on hidden sand, level with him on clean `noisy` maps.
 - Deaths: 27 dies more than Sölvi in 4 held-out `rush_noisy` hidden-sand cells (5–15% vs 0%), where it scores about twice his share (44–61% vs 14–44%).
+
+### Plain-profile check: the guarded moves are the whole cost (Saturday about 11:00 Helsinki)
+
+Sölvi's supplement (`docs/lightlag-runs/overnight-reference27-study/`) found 27 below both `kf_mpc` and 24 on plain `rush` / `rush_noisy` at delay 3. It noted that no ablation separated 27's three additions. This one does.
+
+**Setup:**
+- Scratch variants, nothing registered: each addition removed from 27 (27 − x), or added alone to 24 (24 + x).
+- Plain profiles, profile horizon 50, delays 0/3/5.
+- Our seeds 400–419 and 700–899: 220 seeds, 11,880 episodes. None of Sölvi's seed sets.
+- First, our swarm reproduced Sölvi's published scores for 1, 24 and 27 on one of their episodes, exactly. That episode was used only as this parity check.
+
+| Paired effect on plain `rush` + `rush_noisy` (points of share, 95% seed bootstrap) | All delays | Delay 3 |
+|---|---|---|
+| 27 vs 24 | −1.95 (−2.29 to −1.60) | −3.26 (−4.01 to −2.50) |
+| 27 vs `kf_mpc` | −1.01 (−1.43 to −0.56) | −2.43 (−3.27 to −1.62) |
+| 24 vs `kf_mpc` | +0.94 (+0.62 to +1.26) | +0.83 (+0.35 to +1.31) |
+| Guarded moves, inside 27 | −1.95 (−2.30 to −1.59) | −3.30 (−4.06 to −2.59) |
+| Adaptive fading, inside 27 | −0.01 (−0.08 to +0.06) | −0.02 (−0.23 to +0.17) |
+| Sand-aware filter, inside 27 | +0.01 (−0.06 to +0.09) | −0.02 (−0.16 to +0.10) |
+
+**Findings:**
+- **The guarded moves are the whole cost.** Without them, 27 scores what 24 scores on plain profiles: 76.6% each. Fading and the sand-aware filter are neutral there, alone or inside 27.
+- **Why.** A plain map has no hidden sand, but the worst-case check still prices every metre not yet driven as sand.
+  - In the 50-tick rush missions energy is tight. So the check fails, and 27 probes in 50–80% of episodes.
+  - Each probe waits a round trip: 2k + 2 = 8 ticks at delay 3.
+  - At delay 3, 27 had probed in 117 of the 118 episodes it lost to 24.
+  - No rover died in any variant, so on plain profiles the guard buys nothing.
+- **On hidden sand, the guard is what keeps rovers alive.** Held-out seeds 400–419, all suites:
+  - 27 without the guard is level with 24 overall: +0.2 (−0.1 to +0.5).
+  - Hidden-sand deaths come back: 10–25%, against 0–7% for 27.
+  - So the guard is worth +6.4 points with hidden sand (+2.9 to +9.8).
+- **The price comes from the short horizon.** On plain `noisy` (horizon 80) the guard helps: 92.1% against 90.0% without it.
+- **Agreement with Sölvi.** Their inspected-set gap for 27 vs `kf_mpc` on `rush` at delay 3 (−1.9) matches ours on our own seeds (−1.9).
+
+**What this means:**
+- The published profiles have no hidden patches. On them, **24 is the best Manh controller**: +0.9 over `kf_mpc`, +1.7 on plain `rush` at delay 3, and a tie on `rush_noisy`.
+- 27 is the controller for the sandbox, where hidden sand is not published.
+- **Next candidate (not built):** guard only when it pays.
+  - Either after the battery odometer has seen unmapped sand,
+  - or when a probe's round trip is cheap against the time left.
+  - Caveat for the first trigger: the sand-aware filter also relabels about 2 drive pieces per plain `rush_noisy` episode (position noise near mapped sand edges). A relabel alone is not evidence of hidden sand.
 
 ## Discriminative seeds
 
