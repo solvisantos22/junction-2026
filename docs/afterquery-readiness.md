@@ -1,8 +1,9 @@
-# AfterQuery readiness — recovered morning checkpoint
+# AfterQuery readiness — completed overnight handoff
 
-Updated 14 November after syncing the team’s `5d01106` changes and publishing
-all overnight A/B results (`6fb112f`). The shared tool descriptions are now
-corrected (`64fe6db`); historical experiment packages remain frozen. See the
+Updated 14 November after syncing teammate changes through `62ac788`, publishing
+all overnight A/B results (`6fb112f`) and independently checking Rocks (`21c890e`).
+The shared tool descriptions are corrected (`64fe6db`); historical experiment
+packages remain frozen. The bounded generation attempt is closed. See the
 [morning brief](lightlag-morning-brief.md) for the direction recommendation.
 Lightlag, the final mission and the reference choice remain provisional.
 
@@ -21,19 +22,28 @@ Generated dynamic experiments and demo changes do not automatically replace it.
 | Repeatability block A | Nine new attempts on three failure-selected cases: 2 wins, 2 ties, 5 deficits, including 3 deaths. All exact audits, no infrastructure findings. This is conditional recurrence, not a random-map failure rate. [Protocol/results](lightlag-overnight-evaluation.md). |
 | Prompt-aid block B | All twelve attempts complete: mean original prompt 0.406571 / aid 0.732265; paired gain +0.325694, five improvements and one tie. Deaths 1/6 versus 0/6. Improvement gate passes; stricter gap-removal gate fails on noisy504. Combined guidance does not identify an energy-only mechanism. [Ledger](lightlag-runs/overnight-b-summary.json). |
 | Reference strength | Candidate 24 gains only 0.007898 on fresh rush maps and ties every noisy score. Candidate 27 loses on the inspected plain-profile means. Preserve these negative findings and separate them from scenario-specific gains. [24](lightlag-runs/overnight-reference-study/README.md), [27](lightlag-runs/overnight-reference27-study/README.md). |
-| Presentable evidence | Kristján’s [3D demo](../viewer/mars-demo.html) shows all three A attempts and a reference on each of two selected cases. The [decision demo](lightlag-decision-demo.md) and [62-second clip](lightlag-demo-media/README.md) show checked post-hoc continuations with clear labels. All 28 viewer tests pass after sync; the [3D reserve correction](superpowers/specs/2026-11-14-mars-reserve-correction.md) now passes independent Chrome review. |
+| Presentable evidence | Kristján’s [3D demo](../viewer/mars-demo.html) shows Deadlines, Sand and Rocks, each with three model attempts and the reference. His current four-screen layout is preserved. The [decision demo](lightlag-decision-demo.md) and [62-second clip](lightlag-demo-media/README.md) show checked post-hoc continuations with clear labels. All 29 viewer tests pass after sync; the [3D reserve correction](superpowers/specs/2026-11-14-mars-reserve-correction.md) passes independent Chrome review. |
+| Teammate Rocks runs | Three model rewards 0.846154 / 0.519231 / 0.692308 versus KF 0.769231, all alive/home. All four saved replays, rewards and task packages independently verified. Missing initial installer logs and map-selection timing remain reported limitations. [Audit](lightlag-audits/overnight/team-rocks/README.md). |
 | Public contract wording | Shared descriptions now accurately allow dynamic discoveries, noisy odometry and credited sampling value. Only three constants and their generated copy changed; 18 MCP + 11 Harbor checks pass. [Verification](superpowers/specs/2026-11-14-lightlag-interface-clarity.md). |
 
 Manh’s morning [ablation](../lightlag_dynamic/manh_controllers/README.md#plain-profile-check-the-guarded-moves-are-the-whole-cost-saturday-about-1100-helsinki)
 reports that controller 27’s guarded moves explain the plain-profile cost,
-while helping under hidden sand. This coordinator read the commit and report,
-but has not independently rerun that ablation. No canonical reference changed.
+while helping under hidden sand. His new controller 34 (`62ac788`) only probes
+when its delay costs no planned value; he reports a plain-profile tie with 24
+and gains over 27 on fresh seeds 5000–5259. This coordinator read both reports
+but has not independently rerun those studies. No canonical reference changed;
+the overnight 24/27 studies remain separate frozen evidence. Biomes are claimed
+sandbox work, not a final task decision.
 
 The separately predeclared [reusable-policy test](lightlag-synthesis-experiment.md)
-has a reviewed offline preparation: isolated worker, public-only request and
-exact historical reference gate. It has **no generated policy or fresh-map
-result yet**. A one-response transfer experiment is a different condition from
-an online OpenCode playthrough and cannot replace the required Harbor evidence.
+is complete as a bounded attempt: the one response hit its 24,000-token output
+cap during thinking and produced no controller text. There was no retry or
+repair. All 40 cells / 80 policy-reference rows remain unrun/null, not zero
+rewards; no fresh maps were constructed. The transfer question remains open.
+All 42 runner tests and independent preparation/API/evaluation/artifact reviews
+pass. [Complete record](lightlag-runs/overnight-synthesis/README.md). This is a
+different condition from an online OpenCode playthrough and does not replace
+the required Harbor evidence.
 
 ## Remaining gates, in order
 
@@ -55,13 +65,15 @@ agent stops; already accepted commands still execute and idle drain continues.
 ## Budget, sponsor evidence and source freshness
 
 User-reported overnight starting budget: **$15.70**. Block A reports
-**$3.9709816**, B **$5.4645252**, total **$9.4355068**. No paid attempts remained
-running when the user returned. The nominal remainder is **$6.2644932**, not
-an independently verified account balance; earlier $4.2977204 runs are separate.
-Synthesis reserves at most $1 and has not made a provider call at this checkpoint.
-No new launch after $12 cumulative overnight usage; no retries or replacement
-outcomes. Codex itself hit a usage limit, interrupting final publication and
-preparation review. That does not imply an Anthropic API error or lost run data.
+**$3.9709816**, B **$5.4645252**, and the synthesis response adds **$0.503956
+calculated cost** (5,989 input / 24,000 output tokens). Total coordinated usage
+is **$9.9394628**. No paid calls remain running. Earlier $4.2977204 runs are
+separate. Kristján’s three saved Rocks trials report a separate **$1.4873214**;
+shared billing is unverified. These figures are not a checked provider balance.
+The $12 launch guard and $15.70 ceiling were respected; no retries or replacement
+outcomes. Codex hit a usage limit, interrupting final publication and review.
+The completed online run artifacts were recovered; generation later completed
+with the explicit capped-response outcome recorded above.
 
 [Prize evidence](prize-evidence.md) records actual Codex orchestration and
 verification, Claude task execution, and teammate authorship. Modal’s confirmed

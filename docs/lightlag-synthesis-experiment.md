@@ -128,3 +128,13 @@ isolation before generating the policy. Independent review precedes any paid
 request and final integration. Root controls credentials, generation, cost
 reconciliation and Git pushes. Project, final task and reference choice remain
 provisional.
+
+## Recorded outcome
+
+The one declared request ended at `max_tokens`, reporting 5,989 input and
+24,000 thinking tokens with no controller text. Calculated usage is $0.503956.
+No retry, repair or replacement followed. The evaluator records all 40 cells
+(80 planned policy/reference episodes) as unrun/null, with no fresh map
+construction. This leaves the transfer question unanswered; it is not evidence
+of zero task performance or general model incapability. See the
+[complete record and verification](lightlag-runs/overnight-synthesis/README.md).

@@ -1,11 +1,15 @@
-# Reusable-policy experiment: reviewed preparation checkpoint
+# Reusable-policy experiment: bounded generation outcome
 
-**No real provider endpoint or fresh seed 60000–60019 has been used yet.**
-The single-response [protocol](../../lightlag-synthesis-experiment.md) is
-predeclared. This increment publishes the exact public request, constrained
-worker, historical parity checks and reviewed API runner. The evaluation phase
-is now independently approved too; all 42 offline/actual-Docker checks pass.
-The request and all fresh cells remain unattempted at this checkpoint.
+**The single response hit its 24,000-token output cap during thinking, before
+producing any controller text.** The declared attempt is retained without a
+retry. There is **no transfer-performance result**: all 40 cells (80 planned
+policy/reference episodes) remain unrun with null rewards. No fresh maps were
+constructed, and the result does not establish inability to solve the task.
+
+The [generation record](generation-v1/synthesis.json) retains the exact request,
+response and stream hashes. The [unrun evaluation ledger](evaluation-v1/summary.json)
+keeps every planned identity, denominator and missing-score bound. Independent
+review verified both records and found no credential/path-pattern leakage.
 
 ## Frozen inputs
 
@@ -54,27 +58,35 @@ Without `SYNTHESIS_TEST_IMAGE`, the two Docker tests explicitly skip. The tests
 use only old fixture seeds, not the reserved fresh cells. Existing evidence
 directories are never overwritten. Do not run the generated policy on the host.
 
-## Pending launch and reporting
+## Completed one-response attempt
 
-A+B is complete and independently reconciled at **$9.4355068**. This phase
-reserves at most $1 inside the user’s reported $15.70 overnight budget; no new
-paid launch at $12 cumulative usage. The free token counter must pass the
-25%-plus-1000-token allowance and $0.90 maximum calculated bound first.
-One model response only, no retries or repairs, with recorded usage and
-calculated cost distinguished from a verified account balance.
+The exact predeclared request was sent once to `claude-opus-5-5`, with adaptive
+thinking, high effort and `max_tokens=24000`. The free counter estimated 5,989
+input tokens. Its padded allowance was 8,487, for a maximum calculated cost of
+$0.513948 including all 24,000 output tokens, within the $1 reservation.
 
-After this reviewed implementation is published, root can invoke the documented
-`synthesize` phase with the exact approved request hash and explicit operator
-flag. Credentials are supplied only in the child process environment, never
-in request artifacts or containers. Then freeze the unedited response and run
-exactly the declared 40 cells against original KF, retaining every outcome,
-protected grade, transcript, source hash and four verification repetitions.
-If generation is invalid or incomplete, retain all planned cells as unrun/null;
-do not buy another response or repair the program.
+The completed response reports **5,989 input tokens and 24,000 thinking tokens**,
+`stop_reason=max_tokens`, and no text block. Both `response-text.txt` and the
+extracted `policy.py` are empty. This is a response-budget outcome; no program
+was repaired, replaced or executed. Standard-tier token pricing gives a
+**calculated cost of $0.503956**, distinct from an invoice or verified balance.
 
-This is one sampled program across many maps, not forty independent model
-attempts, and is separate from the online OpenCode comparisons and required
-Harbor playthrough. A failure here does not establish inability with feedback.
+A+B reported $9.4355068; adding this calculated usage gives **$9.9394628** for
+this coordinated work. The $12 launch guard and $15.70 user-reported ceiling
+were respected. No paid request remains running.
+
+The evaluator took its declared ineligible-generation path: **0 attempted,
+0 scored, 80 unrun** primary rows and four unrun verification rows. Each
+policy/profile mean is null, with [0,1] missing-score bounds; paired bounds are
+[−1,1]. These are not zero-reward episodes. Seeds 60000–60019 remain uninspected.
+One `message_start` and one `message_stop`, all twelve generation artifact hashes,
+claim links, exact request bytes, usage and all planned evaluation identities
+were independently checked. No retry was made.
+
+The controller-transfer question remains open. This is neither an online
+OpenCode playthrough nor a qualifying new Harbor model run. A poor or incomplete
+single response under this budget does not establish general model incapability.
+The protocol forbids replacing it to obtain a more favorable result.
 
 ## Final runner review before launch
 

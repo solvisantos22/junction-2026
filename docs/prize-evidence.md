@@ -308,10 +308,29 @@ These are recommended evidence choices, not newly asserted official entry requir
 - Evidence: [protocol](lightlag-synthesis-experiment.md),
   [published request and checkpoint](lightlag-runs/overnight-synthesis/README.md),
   [preparation manifest](lightlag-runs/overnight-synthesis/preparation-v1/preparation.json).
-  Evaluation review is now complete: all 42 checks pass, including interrupted
-  attempt retention, null-score bounds and non-fabricated reproducibility. The
-  actual single paid response remains pending at this increment. No policy
-  result, sponsor usage or prize entry is claimed yet.
+  Evaluation review is complete: all 42 checks pass, including interrupted
+  attempt retention, null-score bounds and non-fabricated reproducibility.
+- Actual provider outcome: the one Claude Opus 5.5 response used 5,989 input
+  and 24,000 thinking tokens, hit its cap and produced no code. Calculated
+  cost $0.503956; all 80 planned episodes remain unrun/null. No retry or repair.
+  Independent artifact review confirmed exact request, usage, stream and
+  hashes. This leaves transfer performance unknown; no model controller was
+  delivered and no Harbor success is claimed. No prize entry.
+
+### R10 — 14 November — Cross-check teammate Rocks evidence
+
+- Codex independently checked Kristján’s three saved Rocks model runs and KF
+  reference: exact protected rewards, model/session identity, task/source
+  hashes, costs, 147 public calls and 83 model-visible responses. Manh’s auditor
+  reconstructs all four full replays with no infrastructure findings.
+- Model rewards 0.846154, 0.519231 and 0.692308 versus reference 0.769231;
+  all four finish alive/home. Actual model execution belongs to Kristján’s
+  OpenCode/Claude work; this review made no provider calls. His saved model
+  usage totals $1.4873214, tracked separately from the overnight coordinator.
+- Evidence: [reports and explicit limits](lightlag-audits/overnight/team-rocks/README.md).
+  Initial installer failures and pre-outcome map selection remain teammate
+  reports because the missing launch records cannot be reconstructed from
+  these four trials. No prize entry or population-reliability claim.
 
 ## Keep recording with minimal overhead
 
