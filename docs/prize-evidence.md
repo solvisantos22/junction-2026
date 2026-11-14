@@ -853,8 +853,12 @@ agree and the baseline controller exactly matches the local trajectory. All 12
 physics replays, 4,874 commands and 5,052 states independently verify. The original
 SDK cleanup warning is retained; `eb4f9e2` fixed it before production and disabled
 implicit source upload. Modal data app `ap-tctysvmd3CxtowroSpSlM0` is running the
-frozen 2,880 missions, with 97 concurrent workers observed. Training and fresh
-results are pending. No canonical reference change or new LLM-performance claim.
+frozen 2,880 missions; 100 concurrent workers were observed. A local DNS outage
+interrupted the first app after 833 archived outcomes. Codex retained those and
+resumed only missing jobs in `ap-vmIsFVOKPZVhhmunxtJuuB` using a process-local DNS
+workaround. A cross-platform hash discrepancy was traced to a 1e-16 decorative
+terrain value; commands, states and grade match, and the Linux replay is exact.
+Training and fresh results are pending. No canonical reference change or new LLM-performance claim.
 Initial implementation `570c7e5`, production launch source `78cfb5d`.
 [Protocol](learned-portfolio.md), [evidence](learned-portfolio-results/README.md).
 
