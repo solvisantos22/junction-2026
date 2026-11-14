@@ -11,7 +11,7 @@ from helpers import numeric_gradient, some_entries
 from lightlag_ppo_icm.agent import Agent, AgentConfig, Policy
 from lightlag_ppo_icm.envs import FiveTools, finish, make_env, run_target_episode, share
 from lightlag_ppo_icm.nn import log_softmax
-from lightlag_ppo_icm.player import load_player, nearest_target_player
+from lightlag_ppo_icm.player import cluster_target_player, load_player, nearest_target_player
 from lightlag_ppo_icm.targets import (CHECK_WORLDS, DEV_WORLDS, TRAIN_WORLDS, TargetConfig, TargetTask,
                                       check_worlds)
 from lightlag_ppo_icm.train import train
@@ -88,6 +88,13 @@ class TargetMissionTests(unittest.TestCase):
         randoms = [run_target_episode("traverse", w, random_chooser(TargetConfig(), seed=w), TargetConfig())["share"]
                    for w in worlds]
         self.assertGreater(np.mean(scores), np.mean(randoms))
+
+    def test_the_cluster_rule_plays_a_mission(self):
+        env = make_env("traverse", WORLD)
+        cluster_target_player()(FiveTools(env), env)      # a choice the mask forbids would raise
+        result = finish(env)
+        self.assertTrue(result["alive"])
+        self.assertGreater(share(result), 0.0)
 
 
 class CampaignToolTests(unittest.TestCase):
@@ -175,8 +182,12 @@ class TargetTrainingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             out = os.path.join(folder, "run")
             result = train(env="traverse", targets=True, out=out, updates=2, episodes=2, workers=1,
-                           dev_seeds=(420000, 420000), eval_every=1, int_coef=0.5, quiet=True)
+                           dev_seeds=(420000, 420000), eval_every=1, int_coef=0.5, ent_coef=0.1, ent_final=0.1,
+                           quiet=True)
             self.assertEqual(result["updates_done"], 2)
+            with open(os.path.join(out, "log.jsonl")) as handle:
+                bonus = [json.loads(line)["ent_coef"] for line in handle]
+            np.testing.assert_allclose(bonus, [0.1, 0.01])      # the entropy bonus falls to its final share
             with open(os.path.join(out, "summary.json")) as handle:
                 settings = json.load(handle)["settings"]
             self.assertTrue(settings["targets"])
