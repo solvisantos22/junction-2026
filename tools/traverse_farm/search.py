@@ -212,18 +212,21 @@ def search(run_many: RunMany, defaults: Dict[str, Any], *, search_seeds: Sequenc
            confirm_seeds: Sequence[int], generations: int = 6, population: int = 24, block: int = 40, elites: int = 6,
            finalists: int = 3, smoothing: float = 0.7, sigma0: float = 0.25, sigma_min: float = 0.05,
            max_slowdown: float = 2.0, rng_seed: int = 2026, out: Optional[Path] = None,
-           log: Callable[[str], None] = print) -> Dict[str, Any]:
+           mission: Optional[Dict[str, Any]] = None, log: Callable[[str], None] = print) -> Dict[str, Any]:
+    """`mission` searches on changed rules (for example {"sun_margin_ticks": 0}), defaults included."""
     check_space(defaults)
     if len(search_seeds) < generations * block:
         raise ValueError("need {} search worlds, got {}".format(generations * block, len(search_seeds)))
     ledger, rng = Ledger(out), random.Random(rng_seed)
+    rules = {"mission": mission} if mission else {}
     base = {name: defaults[name] for name in SPACE}
     mean, sigma = encode(base), [sigma0] * len(SPACE)
     history, tried = [], {}
     ledger.write("plan.json", {"space": SPACE, "defaults": base, "generations": generations, "population": population,
                                "block": block, "elites": elites, "finalists": finalists, "max_slowdown": max_slowdown,
                                "search_seeds": [search_seeds[0], search_seeds[-1]], "select_seeds": list(select_seeds),
-                               "confirm_seeds": [confirm_seeds[0], confirm_seeds[-1]], "rng_seed": rng_seed})
+                               "confirm_seeds": [confirm_seeds[0], confirm_seeds[-1]], "rng_seed": rng_seed,
+                               "mission": mission or {}})
     for g in range(generations):
         seeds = search_seeds[g * block:(g + 1) * block]
         candidates = {"defaults": base}
@@ -232,7 +235,7 @@ def search(run_many: RunMany, defaults: Dict[str, Any], *, search_seeds: Sequenc
         for i in range(population):
             point = [min(1.0, max(0.0, rng.gauss(m, s))) for m, s in zip(mean, sigma)]
             candidates["g{}-c{}".format(g, i)] = decode(point)
-        rows = ledger.play(run_many, _jobs(candidates, seeds, {"generation": g}))
+        rows = ledger.play(run_many, _jobs(candidates, seeds, {"generation": g, **rules}))
         default_seconds = summarise(rows, "defaults")["seconds"]
         cap = max_slowdown * default_seconds if default_seconds else None
         gains = {name: _gain(rows, name, "defaults", cap) for name in candidates if name != "defaults"}
@@ -256,7 +259,7 @@ def search(run_many: RunMany, defaults: Dict[str, Any], *, search_seeds: Sequenc
     # selection on a fresh block, against the winner's curse
     pool = sorted((n for n in tried if tried[n]["gain"] > -math.inf), key=lambda n: tried[n]["gain"], reverse=True)
     picks = {"defaults": base, **{name: tried[name]["options"] for name in pool[:finalists]}}
-    rows = ledger.play(run_many, _jobs(picks, select_seeds, {"block": "select"}))
+    rows = ledger.play(run_many, _jobs(picks, select_seeds, {"block": "select", **rules}))
     default_seconds = summarise(rows, "defaults")["seconds"]
     cap = max_slowdown * default_seconds if default_seconds else None
     selection = {name: {"gain": _gain(rows, name, "defaults", cap), **summarise(rows, name)} for name in picks}
@@ -267,7 +270,7 @@ def search(run_many: RunMany, defaults: Dict[str, Any], *, search_seeds: Sequenc
     confirmation: Dict[str, Any] = {"chosen": chosen}
     if chosen is not None and selection[chosen]["gain"] > 0:
         final = {"defaults": base, "chosen": picks[chosen]}
-        rows = ledger.play(run_many, _jobs(final, confirm_seeds, {"block": "confirm"}))
+        rows = ledger.play(run_many, _jobs(final, confirm_seeds, {"block": "confirm", **rules}))
         diffs = paired(rows, "chosen", "defaults")
         low, high = bootstrap(diffs)
         confirmation.update({

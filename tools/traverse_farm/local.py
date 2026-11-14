@@ -50,6 +50,7 @@ def main(argv=None) -> int:
     se.add_argument("--confirm", default="600-602")
     se.add_argument("--workers", type=int, default=4)
     se.add_argument("--out", type=Path)
+    se.add_argument("--mission", type=json.loads, help="search on changed rules, as JSON")
     args = parser.parse_args(argv)
 
     run_many = lambda batch: jobs.local_map(batch, workers=args.workers)  # noqa: E731
@@ -66,7 +67,7 @@ def main(argv=None) -> int:
         search.search(run_many, jobs.pilot_defaults(), search_seeds=parse_seeds(args.search_seeds),
                       select_seeds=parse_seeds(args.select), confirm_seeds=parse_seeds(args.confirm),
                       generations=args.generations, population=args.population, block=args.block,
-                      elites=args.elites, out=args.out)
+                      elites=args.elites, out=args.out, mission=args.mission)
     return 0
 
 

@@ -122,8 +122,12 @@ def evaluate(policies: str = "pilot,greedy,straight", seeds: str = "600-799", ou
 
 @app.local_entrypoint()
 def search(out: str = "docs/traverse-farm/search-1", generations: int = 6, population: int = 24, block: int = 40,
-           search_seeds: str = "100-399", select: str = "400-499", confirm: str = "600-799", max_slowdown: float = 2.0):
-    """Cross-entropy search over the pilot's options, then selection and confirmation on unseen worlds."""
+           search_seeds: str = "100-399", select: str = "400-499", confirm: str = "600-799", max_slowdown: float = 2.0,
+           mission: str = ""):
+    """Cross-entropy search over the pilot's options, then selection and confirmation on unseen worlds.
+    `mission` searches on changed rules, as JSON: '{"sun_margin_ticks": 0}'."""
+    import json
+
     from traverse_farm import jobs
     from traverse_farm import search as farm_search
     from traverse_farm.common import parse_seeds
@@ -131,4 +135,4 @@ def search(out: str = "docs/traverse-farm/search-1", generations: int = 6, popul
     farm_search.search(_run_many, jobs.pilot_defaults(), search_seeds=parse_seeds(search_seeds),
                        select_seeds=parse_seeds(select), confirm_seeds=parse_seeds(confirm),
                        generations=generations, population=population, block=block,
-                       max_slowdown=max_slowdown, out=Path(out))
+                       max_slowdown=max_slowdown, out=Path(out), mission=json.loads(mission) if mission else None)
