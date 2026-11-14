@@ -31,8 +31,8 @@ The demo opens on the failing attempt in each (attempt 3 in Deadlines, attempt 1
 Things to point at:
 
 - **Flags** are targets. The bar over each is its deadline running out. Green means sampled, grey means the deadline passed (a late sample is worth a quarter).
-- **The HOME marker on the battery bar** is the battery needed to drive straight home and still be alive at the last tick. It is computed by the page as a lower bound (no slip, no detours). When the bar drops below it, no plan saves the rover, and the bar turns red.
-- **"pt carried"** is what the samples are worth so far. It only counts if the rover ends at base alive: half if alive elsewhere, nothing if the battery is empty.
+- **The HOME marker on the battery bar** is a lower bound on the reserve needed to finish home and alive: remaining idle drain plus a straight drive to the nearest position within the accepted 0.75 m base radius, with no slip or detours. Below it, the bar turns red: there is insufficient reserve to finish home alive. The rover may still reach home earlier or survive elsewhere; staying above the marker does not guarantee a feasible plan.
+- **"pt carried"** is the credited value of the samples so far. At the final tick it counts fully if the rover is at base alive, half if alive elsewhere, and zero if the battery is empty.
 - **"Wheels slipping"** appears when a drive covers less ground than commanded. The hollow ring is where the drive was aimed and the red line is how far short it stopped.
 
 ### Compare view (four runs at once)
@@ -62,11 +62,13 @@ Adding `#auto` to the address starts it automatically and loops, for an unattend
 - **Tick 0:** Claude reads the rules and the map, works out headings in its own shell, and queues nine commands before the rover has moved. Watch them leave Earth in the signal lane.
 - **Tick 6:** first sample. A new target, D2, appears. Mars shows it at once; the Earth screen learns of it three ticks later.
 - **Tick 17:** Claude sends the trip to D2. Its deadline is tick 18, so the sample will be late and worth a quarter: half a point.
-- **Tick 23:** on the Mars screen the battery drops below the HOME marker. On the Earth screen, at the same moment, the battery still reads 30 and looks fine.
-- **Tick 24:** the late sample lands. Every target is taken: 10.5 points carried. The battery reads 12.7, and idling to tick 50 alone costs 13.
+- **Tick 23:** on the Mars screen the battery drops below the HOME marker: insufficient reserve to finish home alive. On the Earth screen, at the same moment, the battery still reads 30 and looks fine. The sample for tick 24 is already queued.
+- **Tick 24:** the late sample lands. Every target is taken: 10.5 points carried. The battery reads 12.7, and idling to tick 50 alone costs 13, so depletion is now unavoidable even without further actions.
 - **Tick 24–50:** the rover sits 4.3 m from base and runs flat on the last tick. Score 0.00. Claude's own explanation appears in the console.
 - **Then press 2:** the same model, same prompt, skips D2 and gets home with 5 battery left: 0.83, the same as the reference (press 4).
 - **Then press M:** all four at once.
+
+Attempt 1 illustrates why the warning concerns the finish: it warns at tick 23, reaches base alive at tick 25, then runs out of battery at tick 49.
 
 **Sand, attempt 1** (press N):
 
@@ -89,7 +91,7 @@ three.js (r187, MIT licence, in `viewer/mars/vendor/`) is the only dependency. T
 ### Limits
 
 - **It shows chosen runs.** Two seeds where the model had failed before, and the failing attempt first. The full record, wins included, is in the overnight evaluation.
-- **The HOME marker is the page's own arithmetic,** not something the simulator reports: idle cost for the ticks left plus drive cost for the straight line to base.
+- **The HOME marker is the page's own arithmetic,** not something the simulator reports or the model predicted. It includes idle drain through the horizon and the shortest distance to the accepted base radius, but excludes slip, detours and other action costs, including queued samples. On Mars it uses true replay positions: a necessary lower bound, not a safe-route forecast. Earth uses the delayed, potentially noisy reported position, so its marker is an estimate and its caption says “low estimated reserve.” The synthetic true-state warning is omitted from Earth; it is a replay annotation, not a telemetry event.
 - **Checked in Chrome only,** on this laptop (about 60 frames a second in Mission view and 35 in Compare), and opened from disk in headless Chrome.
 - **Queued commands are drawn as if the wheels did not slip.** The dashed line is where commands aim, not where they land.
 - **The original seed-7 mission is no longer in this page.** Claude solves it (1.00); that run is still in `docs/lightlag-runs/opencode-opus-5-5-seed7-delay3` and in the 2D page below.

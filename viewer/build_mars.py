@@ -36,7 +36,7 @@ MISSIONS: List[Dict[str, Any]] = [
     {
         "id": "deadlines", "name": "Deadlines", "featured": "claude-3",
         "brief": "Seven samples, each with a deadline. Two appear mid-mission. Every tick drains the battery, "
-                 "and the score only counts if the rover is home and alive at tick 50.",
+                 "and at tick 50 credited samples count fully if home and alive, half if alive elsewhere, zero if dead.",
         "runs": [
             ("claude-1", "overnight-a01-rush-seed501-r1-opus-5-5"),
             ("claude-2", "overnight-a04-rush-seed501-r2-opus-5-5"),

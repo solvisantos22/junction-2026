@@ -278,6 +278,22 @@ These are recommended evidence choices, not newly asserted official entry requir
 - Evidence: code `64fe6db`, [design and verification](superpowers/specs/2026-11-14-lightlag-interface-clarity.md).
   No inference cost, final profile choice or prize entry.
 
+### E10 — 14 November — Correct the 3D reserve explanation
+
+- Codex reviewed Kristján’s new 3D evidence demo and found that its HOME marker
+  charged travel to the base centre although grading accepts a radius. The
+  narrow correction removes a premature red warning and distinguishes finishing
+  home/alive from arriving home, surviving elsewhere, or battery death. Earth’s
+  marker is labelled as a delayed/noisy estimate; synthetic truth annotations
+  stay outside that feed. Kristján’s visual and interaction work is preserved.
+- Verification: actual Chrome counterexample fails before and passes after;
+  all eight complete recorded runs are unchanged, 28 viewer tests pass, generated
+  artifacts match, and independent Chrome/source review approves. No simulator,
+  score, model run or selected mission changed.
+- Evidence: [claim/design and verification](superpowers/specs/2026-11-14-mars-reserve-correction.md),
+  [corrected demo](../viewer/mars-demo.html). Claim `57862d6` preceded edits.
+  No inference cost or prize entry.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.

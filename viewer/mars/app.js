@@ -134,7 +134,7 @@ class Run {
       const from = this.states[i - 1].position, h = rad(c.heading_deg);
       this.drive[i] = { aim: [from[0] + Math.cos(h) * c.metres, from[1] + Math.sin(h) * c.metres], slip: clamp(1 - this.moved[i] / c.metres, 0, 1), sand: this.states[i].terrain === 'sand' };
     }
-    // the first tick from which no plan gets the rover home alive: battery below idle drain to the end plus a straight drive home
+    // first saved tick with too little reserve to finish home alive, even with a straight drive and no slip
     const doomed = this.states.find(s => s.alive && s.battery < this.need(s.tick, s.position[0], s.position[1]));
     this.doomedTick = doomed ? doomed.tick : null;
     if (doomed) this.events.push({ tick: doomed.tick, type: 'doomed' });
@@ -149,8 +149,8 @@ class Run {
     const pad = 4.5;
     this.bounds = { x0: Math.min(...xs) - pad, x1: Math.max(...xs) + pad, y0: Math.min(...ys) - pad, y1: Math.max(...ys) + pad };
   }
-  // Battery needed at tick t and position (x, y) to be home and alive at the end. A lower bound: no slip, no detours.
-  need(t, x, y) { return (this.T - t) * this.cfg.idle_cost + Math.hypot(x - this.world.base[0], y - this.world.base[1]) * this.cfg.drive_cost; }
+  // Lower bound for finishing home alive: remaining idle drain plus a straight drive to the accepted base radius, without slip or detours.
+  need(t, x, y) { return (this.T - t) * this.cfg.idle_cost + Math.max(0, Math.hypot(x - this.world.base[0], y - this.world.base[1]) - this.cfg.base_radius) * this.cfg.drive_cost; }
   carried(t) { let sum = 0; for (const id in this.samples) if (this.samples[id].tick <= t + 1e-6) sum += this.samples[id].credited; return sum; }
   stateAt(t) { return this.states[clamp(Math.floor(t + 1e-6), 0, this.T)]; }
   // Where the rover really is at time t: it turns at the start of a tick, then drives.
@@ -658,7 +658,7 @@ function toastFor(run, e) {
   if (e.type === 'target_discovered') return ['info', `NEW TARGET ${e.target.id.toUpperCase()} · ${e.target.value} PT · DUE T${e.target.deadline_tick}`];
   if (e.type === 'battery_depleted') return ['bad', 'BATTERY EMPTY'];
   if (e.type === 'safety_stop') return ['bad', 'SAFETY STOP · QUEUE CLEARED'];
-  if (e.type === 'doomed') return ['bad', 'NO WAY HOME · BATTERY BELOW RESERVE'];
+  if (e.type === 'doomed') return ['bad', 'CANNOT FINISH HOME ALIVE'];
   return null;
 }
 function verdict(run) {
@@ -739,7 +739,7 @@ function updateScreen(screen, info, t) {
   if (screen.kind !== 'map') {
     const battery = info.pose.battery, need = run.need(tv, info.pose.x, info.pose.y), doomed = info.state.alive && battery < need, max = run.cfg.initial_battery, bat = $('.bat', el);
     setText(screen, 'bat', battery.toFixed(0), $('.row b', bat));
-    setText(screen, 'cap', !info.state.alive ? 'battery empty' : doomed ? 'no way home' : 'battery', $('.cap', bat));
+    setText(screen, 'cap', !info.state.alive ? 'battery empty' : doomed ? (feed ? 'low estimated reserve' : 'cannot finish home alive') : 'battery', $('.cap', bat));
     if (screen.shown.doomed !== (doomed || !info.state.alive)) { screen.shown.doomed = doomed || !info.state.alive; bat.classList.toggle('doomed', screen.shown.doomed); }
     $('.fill', bat).style.width = `${clamp(100 * battery / max, 0, 100)}%`;
     $('.need', bat).style.left = `${clamp(100 * need / max, 0, 100)}%`;
@@ -749,7 +749,7 @@ function updateScreen(screen, info, t) {
   }
   // the latest news on this screen, for a couple of ticks
   let news = [], newsTick = -1;
-  for (const event of run.events) { const age = tv - event.tick; if (age < -1e-6 || age >= 2.4) continue; const text = toastFor(run, event); if (!text) continue; if (event.tick !== newsTick) { news = []; newsTick = event.tick; } news.push(text); }
+  for (const event of run.events) { const age = tv - event.tick; if (age < -1e-6 || age >= 2.4 || (feed && event.type === 'doomed')) continue; const text = toastFor(run, event); if (!text) continue; if (event.tick !== newsTick) { news = []; newsTick = event.tick; } news.push(text); }
   if (screen.kind === 'map' || (t >= run.T - 0.01 && !feed)) news = [];
   const node = $('.toast', el), key = news.map(n => n[1]).join('|');
   if (screen.shown.toast !== key) { screen.shown.toast = key; node.classList.toggle('show', news.length > 0); if (news.length) node.innerHTML = news.map(([tone, text]) => `<div class="${tone}">${esc(text)}</div>`).join(''); }
