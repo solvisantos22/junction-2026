@@ -8,7 +8,10 @@
 
 `fit` runs train.train() in one container (the learner, 2 cores) and sends its rollouts
 to up to MAX_CONTAINERS one-core containers, one mission per call: a target-mode mission takes a
-few seconds, so an update of 128 missions takes about as long as the slowest one. The run folder
+few seconds, so an update of 128 missions on 64 containers, two missions each, takes about as long
+as the slowest pair. Containers stay up (and billed) while the learner updates between rollouts, so
+more of them cost more without being faster: with 100, a 200-update run cost $2.70 (PPO alone)
+and $5.20 (with curiosity, whose learner is slower), measured on 14 November. The run folder
 (log.jsonl, best.npz, policy.npz, summary.json) lives in the Modal volume `lightlag-ppo-icm-runs`,
 committed after every development check, so a run that stops early keeps its best policy, and
 `fit` with the same `--out` continues it from there.
@@ -24,7 +27,7 @@ from pathlib import Path
 
 import modal
 
-MAX_CONTAINERS = 100
+MAX_CONTAINERS = 64
 VOLUME = "lightlag-ppo-icm-runs"
 
 image = (modal.Image.debian_slim(python_version="3.12")
@@ -78,11 +81,12 @@ def episode(job: list) -> dict:
 @app.local_entrypoint()
 def fit(out: str, updates: int = 200, episodes: int = 128, int_coef: float = 0.0, seed: int = 0,
         eval_every: int = 10, max_minutes: float = 240.0, hidden: int = 128, slots: int = 12,
-        ent_coef: float = 0.01, lr: float = 3e-4, gamma: float = 0.999):
+        ent_coef: float = 0.01, ent_final: float = 1.0, lr: float = 3e-4, gamma: float = 0.999):
     """Train the target mode on the traverse; the run folder ends up in the volume under `out`."""
     settings = dict(env="traverse", targets=True, out=out, updates=updates, episodes=episodes,
                     workers=episodes, int_coef=int_coef, seed=seed, eval_every=eval_every,
-                    max_minutes=max_minutes, hidden=hidden, slots=slots, ent_coef=ent_coef, lr=lr, gamma=gamma)
+                    max_minutes=max_minutes, hidden=hidden, slots=slots, ent_coef=ent_coef, ent_final=ent_final,
+                    lr=lr, gamma=gamma)
     result = learn.remote(settings)
     print(json.dumps(result, indent=2))
 

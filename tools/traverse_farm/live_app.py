@@ -34,7 +34,7 @@ PROGRAMS = (("program", "traverse-oneshot-opus-1", "policy.py"),
             ("agent", "traverse-agent-opus-1", "program/auto.py"),
             ("agent", "traverse-agent-opus-3", "program/farm_prepare.py"),
             ("agent", "traverse-agent-sonnet-1", "program/auto.py"))
-PAGE = "world-{}-v2.html"        # v2: eight drivers; the four-driver pages stay in the Volume, unread
+PAGE = "world-{}-v3.html"        # v3: eight drivers, the short title card and story moments that hold the camera; older pages stay unread
 
 
 def _skip(path) -> bool:
@@ -289,7 +289,9 @@ def _problem(message: str) -> str:
     return _page("Lightlag Traverse", body.format(html.escape(message)))
 
 
-@app.function(cpu=0.5, memory=1024, volumes={"/cache": cache}, max_containers=4)
+# One web container is kept running (about $0.03 an hour), so the site and every cached world still answer when
+# other jobs fill the workspace's 100 containers; only new worlds then wait for room.
+@app.function(cpu=0.5, memory=1024, volumes={"/cache": cache}, min_containers=1, max_containers=4)
 @modal.concurrent(max_inputs=20)
 @modal.asgi_app()
 def web():

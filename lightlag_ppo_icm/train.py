@@ -110,8 +110,8 @@ def summary(episodes):
 
 
 def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128, workers=8, delay=3, seed=0,
-          int_coef=0.5, int_final=0.1, lr=3e-4, lr_final=0.3, icm_lr=1e-3, ent_coef=0.005, hidden=128, headings=16,
-          wait_bias=4.0, sample_bias=2.0, eval_every=20, train_seeds=None, dev_seeds=None,
+          int_coef=0.5, int_final=0.1, lr=3e-4, lr_final=0.3, icm_lr=1e-3, ent_coef=0.005, ent_final=1.0,
+          hidden=128, headings=16, wait_bias=4.0, sample_bias=2.0, eval_every=20, train_seeds=None, dev_seeds=None,
           max_minutes=None, quiet=False, metres="auto", home_pull=0.0, home_guard=False,
           targets=False, slots=12, home_bias=-4.0, gamma=None, pool=None, callback=None, resume=False):
     """Train once and return the summary that is also written to <out>/summary.json. `pool`: anything
@@ -119,7 +119,9 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128,
     default a process pool of `workers`. `callback(update, row)` runs after every update's log line.
     With `resume`, a folder that already holds a run continues from its last checkpoint (last.npz,
     written at every development check): the log is cut back to it and the same training draws
-    follow. The optimiser's moments and the minibatch order start afresh."""
+    follow. The optimiser's moments and the minibatch order start afresh. The entropy bonus falls
+    linearly from `ent_coef` to `ent_final` times it by the last update, as the learning rate does
+    to `lr_final` times its own."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     resumed = None
@@ -164,7 +166,7 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128,
     dev = [(s, 0) for s in range(dev_seeds[0], dev_seeds[1] + 1)]
     settings = {"env": env, "delay": delay, "updates": updates, "episodes": episodes, "seed": seed,
                 "int_coef": int_coef, "int_final": int_final, "lr": lr, "lr_final": lr_final, "icm_lr": icm_lr,
-                "ent_coef": ent_coef, "hidden": hidden, "wait_bias": wait_bias, "sample_bias": sample_bias,
+                "ent_coef": ent_coef, "ent_final": ent_final, "hidden": hidden, "wait_bias": wait_bias, "sample_bias": sample_bias,
                 "home_pull": home_pull, "home_guard": home_guard,
                 "metres": list(task.metres) if not targets else None, "targets": targets,
                 "slots": slots if targets else None, "home_bias": home_bias if targets else None,
@@ -183,6 +185,7 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128,
             for update in range(first, updates + 1):
                 progress = (update - 1) / max(1, updates - 1)
                 now_int = int_coef * (1.0 - (1.0 - int_final) * progress)
+                agent.config.ent_coef = ent_coef * (1.0 - (1.0 - ent_final) * progress)
                 seeds = rng.integers(train_seeds[0], train_seeds[1] + 1, size=episodes)
                 draws = rng.integers(0, 2 ** 62, size=episodes)
                 played = rollouts(pool, workers, agent.actor.state(), task, env, delay,
@@ -192,7 +195,8 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128,
                 steps += stats["steps"]    # decisions played so far, all updates together
                 stats["batch_steps"] = stats.pop("steps")
                 row = {"update": update, "steps": steps, "minutes": round((time.time() - started) / 60.0, 2),
-                       "int_coef": round(now_int, 4), **{f"train_{k}": v for k, v in summary(played).items()},
+                       "int_coef": round(now_int, 4), "ent_coef": round(agent.config.ent_coef, 5),
+                       **{f"train_{k}": v for k, v in summary(played).items()},
                        **stats}
                 done = update
                 out_of_time = max_minutes is not None and (time.time() - started) / 60.0 >= max_minutes
@@ -284,7 +288,8 @@ def main(argv=None):
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--lr-final", type=float, default=0.3)
     parser.add_argument("--icm-lr", type=float, default=1e-3)
-    parser.add_argument("--ent-coef", type=float, default=0.005)
+    parser.add_argument("--ent-coef", type=float, default=0.005, help="weight of the entropy bonus")
+    parser.add_argument("--ent-final", type=float, default=1.0, help="share of it left at the last update; 1: constant")
     parser.add_argument("--hidden", type=int, default=128)
     parser.add_argument("--headings", type=int, default=16)
     parser.add_argument("--metres", type=lambda text: text if text == "auto" else tuple(float(m) for m in text.split(",")),

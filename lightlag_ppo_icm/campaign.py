@@ -25,7 +25,7 @@ def campaign_player(name, policy):
         from lightlag_traverse.pilot import fly_campaign
         options = {} if name == "pilot" else {"route": "greedy"}
         return lambda tools: fly_campaign(tools, options)
-    from .player import load_player, nearest_target_player, random_target_player
+    from .player import cluster_target_player, load_player, nearest_target_player, random_target_player
     if name == "ppo_icm":
         play = load_player(policy)
         if play.extra["task"].get("mode") != "targets":
@@ -35,7 +35,10 @@ def campaign_player(name, policy):
         return lambda tools: nearest_target_player()(tools)
     if name == "random_targets":
         return lambda tools: random_target_player()(tools)
-    raise ValueError(f"no campaign player {name!r}: use ppo_icm, pilot, greedy, nearest_targets, random_targets")
+    if name == "cluster_targets":
+        return lambda tools: cluster_target_player()(tools)
+    raise ValueError(f"no campaign player {name!r}: use ppo_icm, pilot, greedy, nearest_targets, cluster_targets, "
+                     "random_targets")
 
 
 def play_campaign(job):

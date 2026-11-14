@@ -18,6 +18,9 @@ Its two players without a network:
 
     random_target_player    a random target among those the mask allows, never home by choice
     nearest_target_player   always the nearest target the mask allows (the first slot)
+    cluster_target_player   the allowed target with the most value per tick of travel, counting a
+                            quarter of what lies near it (a rule picked on development worlds, to
+                            see whether choices beyond the nearest can pay)
 """
 
 import dataclasses
@@ -26,7 +29,7 @@ import math
 import numpy as np
 
 from .agent import load_policy
-from .targets import TargetConfig, TargetTask, is_target_config
+from .targets import GLOBAL as TARGET_GLOBAL, PER_SLOT, TargetConfig, TargetTask, is_target_config
 from .task import BASE, FIRST_DRIVE, GLOBAL, SAMPLE, WAIT, RoverTask, TaskConfig
 
 
@@ -83,6 +86,27 @@ def nearest_target_player(config=None):
 
     def play(tools, env=None):
         TargetTask(tools, config).play(lambda observation, mask: 0 if mask[0] else config.home_action)
+
+    return play
+
+
+def cluster_target_player(config=None):
+    """(what a sample there credits + a quarter of the value of the targets within NEAR_TICKS of it)
+    / (ticks to get there + 5), the highest of the allowed targets. Picked on the development worlds
+    420000-420031 among six such rules, as a check that a choice other than the nearest can pay; it
+    is a baseline, not tuned further."""
+    config = config or TargetConfig()
+
+    def choose(observation, mask):
+        allowed = np.flatnonzero(mask[:config.slots])
+        if not len(allowed):
+            return config.home_action
+        slots = np.asarray(observation[TARGET_GLOBAL:], dtype=np.float64).reshape(config.slots, PER_SLOT)
+        score = (slots[allowed, 3] + slots[allowed, 9]) / (slots[allowed, 1] + 0.05)
+        return int(allowed[np.argmax(score)])
+
+    def play(tools, env=None):
+        TargetTask(tools, config).play(choose)
 
     return play
 

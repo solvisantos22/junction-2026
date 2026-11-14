@@ -37,6 +37,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* the scene */
 #stage { position: relative; min-width: 0; min-height: 0; touch-action: none; cursor: grab; }   /* the 3D view: drag, scroll and pinch move the camera */
 #stage.dragging { cursor: grabbing; }
+#stage.held { cursor: default; }                                      /* story mode is showing a moment: the camera is its */
 #tag { position: absolute; left: calc(16px * var(--s)); top: calc(12px * var(--s)); line-height: 1; text-shadow: 0 2px 0 #000, 0 0 14px rgba(0, 0, 0, .55); }
 #tag b { display: block; font-size: calc(34px * var(--s)); letter-spacing: .16em; }
 #tag span { font-size: calc(16px * var(--s)); letter-spacing: .08em; color: var(--dim); }
@@ -105,35 +106,26 @@ i.kind { font-style: normal; font-weight: 400; font-size: .56em; letter-spacing:
 /* opening card */
 #title { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(11, 8, 7, .86); text-transform: uppercase; transition: opacity .35s; }
 #title.gone { opacity: 0; pointer-events: none; }
-#title .in { width: min(880px, 86vw); }
-#title h1 { margin: 0; font-size: calc(96px * var(--s)); letter-spacing: .2em; line-height: .86; }
+/* everything centred; letter-spaced lines get the same space on their left, so they sit in the middle */
+#title .in { width: min(900px, 90vw); text-align: center; }
+#title .kicker { margin: 0 0 calc(18px * var(--s)); padding-left: .34em; font-size: calc(17px * var(--s)); letter-spacing: .34em; color: var(--dim); }
+#title h1 { margin: 0; padding-left: .2em; font-size: calc(112px * var(--s)); letter-spacing: .2em; line-height: .86; }
 #title h1 span { display: block; color: var(--red); }
-#title .tag { margin: calc(16px * var(--s)) 0 calc(18px * var(--s)); font-size: calc(23px * var(--s)); letter-spacing: .07em; color: var(--ink); line-height: 1.16; }
-#title .tag b { color: var(--gold); font-weight: 700; }
+#title .tag { margin: calc(26px * var(--s)) 0 0; padding-left: .12em; font-size: calc(22px * var(--s)); letter-spacing: .12em; color: var(--ink); }
 #sites:empty { display: none; }
-#sites { display: flex; gap: calc(10px * var(--s)); margin: 0 0 calc(16px * var(--s)); }
-#sites a { flex: 1; display: flex; justify-content: space-between; align-items: baseline; gap: calc(10px * var(--s)); padding: calc(8px * var(--s)) calc(12px * var(--s)) calc(5px * var(--s)); border: 1px solid var(--shade); color: var(--dim); text-decoration: none; font-size: calc(20px * var(--s)); letter-spacing: .1em; }
-#sites a small { font-size: calc(13px * var(--s)); color: var(--faint); letter-spacing: .06em; }
+#sites { display: flex; justify-content: center; gap: calc(10px * var(--s)); margin: calc(26px * var(--s)) 0 0; }
+#sites a { padding: calc(8px * var(--s)) calc(16px * var(--s)) calc(5px * var(--s)); border: 1px solid var(--shade); color: var(--dim); text-decoration: none; font-size: calc(18px * var(--s)); letter-spacing: .14em; }
 #sites a.on { border-color: var(--gold); color: var(--gold); }
 #sites a:hover { color: var(--ink); }
-#cast { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px calc(18px * var(--s)); }
-#cast li { display: flex; justify-content: space-between; align-items: baseline; gap: calc(12px * var(--s)); padding: calc(7px * var(--s)) calc(10px * var(--s)) calc(3px * var(--s)) calc(16px * var(--s)); background: var(--key); position: relative; font-size: calc(21px * var(--s)); letter-spacing: .08em; white-space: nowrap; }
-#cast li::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--shade); }
-#cast li.ref::before { background: var(--gold); }
-#cast li.ref { color: var(--gold); }
-#cast li span { flex: none; }
-#cast li small { min-width: 0; font-size: calc(13px * var(--s)); color: var(--faint); letter-spacing: .06em; overflow: hidden; text-overflow: ellipsis; }
-#cast.many { grid-template-columns: 1fr 1fr 1fr; }
-#cast.many li { font-size: calc(18px * var(--s)); }
-#cast.many li span { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-#cast.many li small { display: none; }
-#title .help { margin: calc(20px * var(--s)) 0 0; font-size: calc(16px * var(--s)); letter-spacing: .08em; color: var(--dim); }
-#title .src { margin: calc(6px * var(--s)) 0 0; font-size: calc(13px * var(--s)); color: var(--faint); text-transform: none; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+#title .go { display: flex; justify-content: center; gap: calc(14px * var(--s)); margin: calc(36px * var(--s)) 0 0; }
+#title .go button { padding: calc(13px * var(--s)) calc(30px * var(--s)) calc(10px * var(--s)); border: 2px solid var(--gold); font-size: calc(24px * var(--s)); letter-spacing: .18em; text-transform: uppercase; }
+#playbtn { background: var(--gold); color: #140f0b; }
+#playbtn:hover { filter: brightness(1.08); }
+#title .help { margin: calc(30px * var(--s)) 0 0; padding-left: .14em; font-size: calc(14px * var(--s)); letter-spacing: .14em; color: var(--faint); }
 
 /* story mode: the caption card for a moment, and the button that starts it */
-#storybtn { display: block; margin: calc(16px * var(--s)) 0 0; padding: calc(10px * var(--s)) calc(16px * var(--s)) calc(7px * var(--s)); background: none; border: 2px solid var(--gold); color: var(--gold); font: inherit; font-size: calc(24px * var(--s)); letter-spacing: .14em; cursor: pointer; text-transform: uppercase; }
+#storybtn { background: none; color: var(--gold); }
 #storybtn[hidden] { display: none; }
-#storybtn small { margin-left: calc(10px * var(--s)); font-size: calc(14px * var(--s)); letter-spacing: .08em; color: var(--dim); }
 #storybtn:hover { background: rgba(255, 178, 36, .12); }
 #moment { position: absolute; left: 50%; bottom: calc(118px * var(--s)); width: min(calc(860px * var(--s)), 88%); transform: translate(-50%, 24px); opacity: 0; pointer-events: none;
   background: rgba(11, 8, 7, .9); border-left: 6px solid var(--red); padding: calc(14px * var(--s)) calc(20px * var(--s)) calc(12px * var(--s)); transition: opacity .35s, transform .35s; z-index: 6; }

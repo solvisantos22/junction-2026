@@ -2,11 +2,13 @@
 
 Shared event and AfterQuery notices for the team. All times are **Helsinki (UTC+2)**. Each entry distinguishes official guidance from unanswered participant questions. Junction Watch publishes new actionable information here on its 30-minute checks, through Sunday 15 November at 17:00; checks with no changes stay in its private log.
 
-## Current actions — presentation guidance checked Sunday 15 November, 00:54
+## Current actions — partial check Sunday 15 November, 01:22
 
 **[Sunday presentation plan](sunday-presentation-plan.md)** collects the confirmed formats, team roles and schedule. The latest full watcher check was at 00:36; the 00:54 follow-up was a targeted organizer/AfterQuery/guide presentation search, not a fresh submission-state check.
 
 - **Submit FINAL by 10:00 today.** Drafts are not reviewed. At the 00:36 check, the saved **Lightlag** entry still showed **Draft**, with demo/source/video/other links and presentation fields empty. This is the platform snapshot, not a statement that the team has not produced those artifacts. Add the chosen artifacts and verify the saved final entry. Final entries remain editable until 10:00, as Samu / Info Team reconfirmed at 00:30; this confirms the existing guide. [Support confirmation](https://discord.com/channels/1268184974784336004/1434816271190458398/threads/1571290592900546631). The public video must be **at most two minutes**. [Guide](https://hackjunction.app/participate/45/guide) · [Saved submissions](https://hackjunction.app/participate/45/submissions).
+- **Check challenge-specific requirements before adding hosting work.** Samu / Info Team called the Project Demo link optional at 01:02 in reply to a hardware project, suggesting its two-minute video can showcase the hardware. Aaron (**Volunteer**) said at 01:09 that deployment is optional unless the challenge requires it. These replies do not waive AfterQuery's reproducibility, Harbor, video or source requirements. [Info Team reply](https://discord.com/channels/1268184974784336004/1434817084570861658/threads/1571287375315734720) · [Volunteer reply](https://discord.com/channels/1268184974784336004/1434817084570861658/threads/1571282949972693012).
+- **Confirm before planning a second AfterQuery entry from the same team.** Aaron (**Volunteer**) said at 01:15 that a team can submit one project per challenge; he suggested a separate team for a second project. The participant's 01:16 question about whether a new team can still be created is unanswered. Treat this as volunteer guidance and resolve that uncertainty with Info Team before changing team structure. Earlier support for multiple main challenges does not establish permission for two entries to the same challenge. [Direct thread](https://discord.com/channels/1268184974784336004/1434817084570861658/threads/1571291600037089411).
 - **Select the team's peer-review table again in Teams.** Organizers reset existing selections on Saturday at 22:36. Use the number on the replacement **A4 sign**, not the old small paper. This watcher has not checked or changed our table selection. [Dashboard](https://hackjunction.app/participate/45) · [Announcements](https://discord.com/channels/1268184974784336004/1562402388017418350).
 - **Be at the selected table by 10:30**, with a working demo, five-minute pitch and a reviewing device. Head over at 10:15. Rounds begin **10:45 and 11:45**; each has **five cycles**. Pitches stop at five minutes. Each following five-minute transition covers both submitting the review and reaching the next table. Allow about ten minutes to swap roles; aim to finish by 12:45 and stay available until 13:00. Reviews are individual, so teammates can receive different assignments. [Guide](https://hackjunction.app/participate/45/guide).
 - **Stay together for our pitching round; choose who speaks.** Samu / Info Team clarified this at 00:46 Sunday, edited 00:47. Reviewing is individual and teammates are assigned different tables. This resolves earlier tentative replies about splitting the team between permanent pitching/reviewing roles. [Direct organizer answer](https://discord.com/channels/1268184974784336004/1571287474703966398).
@@ -14,6 +16,12 @@ Shared event and AfterQuery notices for the team. All times are **Helsinki (UTC+
 - **Prioritize the public demo video.** Ved says it is a large part of AfterQuery judging. Harbor format and OpenCode are expected; judging models are undisclosed. Record the tested model/configuration and timeout in the final package without assuming judges will use that same model. [Verified mentor details](afterquery-judging-clarifications-2026-11-14.md).
 
 The five-minute general peer-review format does **not** resolve the brief's separate ten-minute AfterQuery demo: its slot/location, eligibility and inclusion of Q&A remain unconfirmed. Ved referred these questions to organizers. The older guide body still mentions a 14:00 end; the newer specific peer-review section and organizer announcement say to remain available until 13:00.
+
+## Latest partial watcher check — Sunday 15 November, 01:22
+
+Announcements, AfterQuery, tech-support activity, ask-organizers activity/relevant new threads and the refreshed guide were checked. No new mentor requirement, credit offer or starter URL appeared in AfterQuery; the latest channel post is the already-known 00:43 participant GIF. The new replies below concern submission limits and deployment/demo links. The guide's 10:00 deadline, video plus PDF requirements and presentation formats remain unchanged.
+
+Changing user context in native Chrome prevented verification of the dashboard, full challenge brief, new-entry form and saved submissions. Discovery of newly linked official resources is therefore only partial. Those pages retain their last successful 00:36 checkpoint; the saved Lightlag snapshot above was **not refreshed**. The guide was successfully refreshed and read before navigation failed. This is a monitoring-access gap, with no service outage established. The next check will catch up from the retained checkpoints.
 
 ## Latest targeted follow-up — Sunday 15 November, 00:54
 
@@ -25,7 +33,15 @@ All nine monitored sources were checked, with no outstanding coverage gap. **No 
 
 Coverage includes announcements, AfterQuery, the tech-support activity index, dashboard, full brief, guide, new-entry form, saved submissions and discovery of newly linked official resources. The new final-submission support thread was read in full; unchanged thread bodies and previously checked upstream resources were not re-read. This authenticated source check ran from 00:33 to 00:36. Samu's new reply confirms existing final-editability guidance; no deadline or requirement changed.
 
-## Official update history
+## Official and volunteer update history
+
+### Sunday 15 November, 01:02–01:16 — demo links, deployment and one project per challenge
+
+- **Info Team, 01:02:** Samu says the Project Demo link is optional, replying to a hardware team that cannot provide an interactive link; the hardware can be shown in its two-minute pitch video. The guide still lists demo/source links among final materials. Preserve the context of this specific answer. [Source](https://discord.com/channels/1268184974784336004/1434817084570861658/threads/1571287375315734720).
+- **Volunteer, 01:09:** Aaron says deployment is optional if the challenge does not require it. This is general platform guidance; it does not change AfterQuery's separately stated evaluation or reproducibility requirements. [Source](https://discord.com/channels/1268184974784336004/1434817084570861658/threads/1571282949972693012).
+- **Volunteer, 01:15:** Aaron says one team can submit one project per challenge, in response to a question specifically about two AfterQuery solutions. His suggested route for two projects is another team. At 01:16 the participant asks whether creating another team is possible this late; no answer was observed. No team change was made or recommended as a verified route. [Source](https://discord.com/channels/1268184974784336004/1434817084570861658/threads/1571291600037089411).
+
+Observed during the Sunday 01:16–01:22 check; first repository publication is this commit. The times above are the replies' original Discord timestamps. Aaron's Volunteer role was verified in the parent's prior targeted check; he is not labelled Info Team here.
 
 ### Sunday 15 November, 00:46–00:47 — team pitch and individual peer-review roles
 
