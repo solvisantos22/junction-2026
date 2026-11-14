@@ -64,6 +64,14 @@ The pilot scores higher than every saved Claude program on 288 to 300 of the 300
 
 Read with care: an agent's program was written during its own mission on world 2026 and is replayed here on worlds it never saw, with no agent watching. This measures the program, not the agent, which in a mission could notice trouble and step in. The one-request programs were written without seeing any world, so for them fresh worlds are a fair test.
 
+## Claude's 15 wins on fresh worlds: the battery
+
+Of the 1,800 program-world pairs in the 300-world comparison, the reference is higher in 1,780; 5 are exact ties and 15 are Claude wins, by +0.002 to +0.041 (Sonnet agent 1 on 8 worlds, Opus agent 3 on 5, the one-request Opus program on 2). Each of those 15 missions, and the reference's on the same world, was recorded whole again on Modal (the scores repeat the comparison's rows exactly) and its battery read tick by tick ([`traverse-farm/claude-wins-battery.json`](traverse-farm/claude-wins-battery.json)):
+
+- **5 of the 15 wins came after Claude's rover dipped under 5 of 100** at some point (lowest 1.6–4.9, for 1–10 ticks): Sonnet agent 1 on 605 (3.3 at tick 345), Opus agent 3 on 634 (2.6 at tick 90), 707 (4.9) and 739 (1.6 at tick 394), the one-request Opus program on 749 (2.6 at tick 356). The same programs ran flat on a third (Sonnet agent 1) and a half (Opus agent 3) of the 300 worlds, so these wins are near misses.
+- **The other 10 never went under 8:** narrow, honest wins.
+- **The reference's lowest points come at the end of the mission, on the way home** (2.9–3.2 at ticks 396–403 on five of these worlds): it spends its reserve, as planned, only once the lander is in reach. Its rover is home and alive in all 13 missions.
+
 ## What the reference's parts are worth: a controller ladder
 
 The reference is a robotics stack: an extended Kalman filter over position and heading bias, a graph of the height map searched for the cheapest way to every goal, a beam search over visiting orders with a battery-and-sun forecast, and battery reserves. Taking it apart, rung by rung, on the frozen code (task 0.1.1, the 0.1.0 rules):
