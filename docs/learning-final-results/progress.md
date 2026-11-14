@@ -1,6 +1,6 @@
 # Final Traverse training progress
 
-As of **2026-11-14 22:15:39 UTC** / **2026-11-15 00:15:39 EET**.
+As of **2026-11-14 22:20:39 UTC** / **2026-11-15 00:20:39 EET**.
 
 Stage: **fit**. Supervisor: **monitoring**.
 
@@ -11,9 +11,9 @@ These are reused validation worlds, not the untouched final check. All three see
 | ppo-17 | fit / completed | 8,192 / 8,192 | 8192 | 0.362394 | 32/32 · 32/32 | 0 | 127 min | unknown | 2026-11-14 22:42:06 UTC |
 | ppo-29 | fit / completed | 8,192 / 8,192 | 8192 | 0.375676 | 32/32 · 32/32 | 0 | 118 min | unknown | 2026-11-14 22:42:06 UTC |
 | ppo-43 | fit / completed | 8,192 / 8,192 | 8192 | 0.399862 | 32/32 · 32/32 | 0 | 131 min | unknown | 2026-11-14 22:42:06 UTC |
-| replay-17 | fit / running | 8,160 / 8,192 | 2048 | 0.377607 | 32/32 · 32/32 | 0 | 153 min | 1 min | 2026-11-14 22:42:06 UTC |
-| replay-29 | fit / running | 8,192 / 8,192 | 8192 | 0.355892 | 32/32 · 32/32 | 0 | 153 min | 0 min | 2026-11-14 22:42:06 UTC |
-| replay-43 | fit / running | 5,952 / 8,192 | 2048 | 0.364257 | 32/32 · 32/32 | 0 | 153 min | 58 min | 2026-11-14 22:42:06 UTC |
+| replay-17 | fit / completed | 8,192 / 8,192 | 8192 | 0.364181 | 32/32 · 32/32 | 0 | 155 min | unknown | 2026-11-14 22:42:06 UTC |
+| replay-29 | fit / completed | 8,192 / 8,192 | 8192 | 0.355892 | 32/32 · 32/32 | 0 | 153 min | unknown | 2026-11-14 22:42:06 UTC |
+| replay-43 | fit / running | 6,144 / 8,192 | 2048 | 0.364257 | 32/32 · 32/32 | 0 | 158 min | 53 min | 2026-11-14 22:42:06 UTC |
 
 Method means use the highest checkpoint available for **all three seeds at the same training budget**:
 
