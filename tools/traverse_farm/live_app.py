@@ -1,7 +1,8 @@
 """Lightlag Traverse, live on Modal: pick any world, watch the reference and Claude's autopilots drive it.
 
     modal deploy tools/traverse_farm/live_app.py      # the web page, kept running by Modal
-    modal run tools/traverse_farm/live_app.py --seed 871   # build one world's page here, without the web
+    modal run tools/traverse_farm/live_app.py::main --seed 871   # build one world's page here, without the web
+    modal run tools/traverse_farm/live_app.py::reskin            # cached pages re-rendered with this viewer
 
 A visitor picks a world (a seed). If its page is not cached yet, Modal plays eight drivers on it at
 once, each in its own container: the reference pilot, a textbook controller (terrain graph + Kalman
@@ -354,6 +355,35 @@ def web():
         return JSONResponse({"state": _state(seed_n)}, headers={"Cache-Control": "no-store"})
 
     return api
+
+
+@app.local_entrypoint()
+def reskin():
+    """Re-render every cached page with this checkout's viewer, keeping each page's own runs: no rover is
+    driven again and no container starts, so it works while other jobs fill the workspace. Run it after a
+    viewer change: `modal run tools/traverse_farm/live_app.py::reskin` (then deploy, for pages built later)."""
+    import base64
+    import json
+    import re
+    import sys
+    import tempfile
+
+    sys.path.insert(0, str(REPO / "viewer"))
+    import build_traverse
+
+    suffix = PAGE.split("{}")[1]
+    names = sorted(entry.path for entry in cache.listdir("/") if entry.path.endswith(suffix))
+    with tempfile.TemporaryDirectory() as folder, cache.batch_upload(force=True) as batch:
+        for name in names:
+            page = b"".join(cache.read_file(name)).decode("utf-8")
+            found = re.search(r'<script id="src-data" type="application/octet-stream">([^<]+)</script>', page)
+            if not found:
+                print("skipped", name, "(no data in it)")
+                continue
+            local = Path(folder) / Path(name).name
+            local.write_text(build_traverse.standalone(json.loads(base64.b64decode(found.group(1)))), encoding="utf-8")
+            batch.put_file(str(local), "/" + name)
+            print("re-rendered", name)
 
 
 @app.local_entrypoint()

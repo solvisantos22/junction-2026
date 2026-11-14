@@ -963,8 +963,17 @@ const nextMoment = () => MOMENTS[story.i] || null;
 const tone = m => m.kind.startsWith('ref') ? 'gold' : m.kind === 'close' ? 'warn' : 'bad';
 function showCard(m) {
   card.className = 'on ' + tone(m);
-  card.innerHTML = `<i>${KIND[m.kind]}<span>TICK ${m.t}</span></i><b class="${m.run.ref ? 'ref' : 'on'}">${esc(short(m.run))}</b><p>${esc(m.did)}</p>`
+  card.innerHTML = `<i>${KIND[m.kind]}<span>TICK ${m.t}<button class="skip" title="Skip this moment (click, N or →)">Skip ›</button></span></i><b class="${m.run.ref ? 'ref' : 'on'}">${esc(short(m.run))}</b><p>${esc(m.did)}</p>`
     + (m.better ? `<p class="better"><u>${esc(m.better_title)}</u>${esc(m.better)}</p>` : '');
+}
+// Skip: end the moment being shown, or pass over the one the story is turning to. A click anywhere on the view,
+// N or → does it; the card's button only shows that it can be done.
+function skipMoment() {
+  if (!story.on) return false;
+  if (story.active) { story.hold = 0; return true; }
+  const m = nextMoment();
+  if (m && m.t - state.t < NEAR) { story.i++; return true; }
+  return false;
 }
 function hideCard() { card.className = card.className.replace(/\bon\b/, '').trim(); }
 // a frame for the camera that holds the rover and, when there is one, its way home
@@ -1120,8 +1129,8 @@ window.addEventListener('keydown', event => {
   if (DATA.sites && DATA.sites.some(site => String(site.n) === key) && +key !== DATA.site) { location.search = `?site=${key}`; return; }
   if ((key === 's' || key === 'S') && MOMENTS.length) { if (story.on) stopStory(); else startStory(); return; }
   if (!title.classList.contains('gone')) { if (key === 'Enter' || key === ' ') { event.preventDefault(); showTitle(false); setPlaying(true); } else if (key === 'f' || key === 'F') toggleFull(); return; }
+  if (story.on && (key === 'n' || key === 'N' || key === 'ArrowRight') && skipMoment()) { event.preventDefault(); return; }
   if (key === 'n' || key === 'N') {
-    if (story.on && story.active) { story.hold = 0; return; }
     const m = MOMENTS.find(item => item.t > state.t + 1e-6);
     if (m) { seek(Math.max(0, m.t - NEAR)); if (story.on) story.i = MOMENTS.indexOf(m); }
     return;
@@ -1162,7 +1171,7 @@ stage.addEventListener('wheel', event => {
   zoomAt(viewPoint(event.clientX, event.clientY), Math.exp(amount * (event.ctrlKey ? 0.01 : 0.0015)));   // ctrl: a trackpad pinch
 }, { passive: false });
 stage.addEventListener('pointerdown', event => {
-  if (held()) return;
+  if (held()) { if (event.button === 0) skipMoment(); return; }     // during a story moment a click skips it
   touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
   try { stage.setPointerCapture(event.pointerId); } catch (error) { /* a pointer the browser no longer tracks */ }
   stage.classList.add('dragging');
