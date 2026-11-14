@@ -3,8 +3,9 @@
     python3 -m unittest discover -s tests/viewer -v
 
 The page's looks are checked by opening it in a browser. These tests cover what it
-is fed: that every call shown was really made, and that the committed standalone
-page matches its sources.
+is fed: that every call shown was really made in a saved trial, that the runs put
+side by side are the same mission, and that the committed standalone page matches
+its sources.
 """
 
 import base64
@@ -15,82 +16,113 @@ import unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent.parent
-sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / "viewer"))
 import build_mars  # noqa: E402
 
 DATA = build_mars.gather()
-RUNS = {run["id"]: run for run in DATA["runs"]}
+MISSIONS = {mission["id"]: mission for mission in DATA["missions"]}
+ALL_RUNS = [(mission, run) for mission in DATA["missions"] for run in mission["runs"]]
+PUBLIC_TOOLS = {"rules", "map", "telemetry_log", "uplink", "advance"}
 
 
-def reward(run):
-    result = run["replay"]["result"]
-    return result["raw_score"] / result["max_available_value"]
+def run_of(mission_id, run_id):
+    return next(run for run in MISSIONS[mission_id]["runs"] if run["id"] == run_id)
 
 
-class ModelRun(unittest.TestCase):
-    def setUp(self):
-        self.run_dir = build_mars.MODEL_RUN
-        self.model = RUNS["claude"]
+def events(run, kind):
+    return [(state["tick"], event) for state in run["replay"]["states"] for event in state["events"] if event["type"] == kind]
 
+
+class EveryRun(unittest.TestCase):
     def test_every_simulator_call_in_the_saved_transcript_is_shown_in_order(self):
-        transcript = [
-            json.loads(line)
-            for line in (self.run_dir / "artifacts" / "evaluator" / "transcript.jsonl").read_text(encoding="utf-8").splitlines()
-            if line.strip()
-        ]
-        shown = [c for c in self.model["calls"] if c["kind"] == "mcp"]
-        self.assertEqual(len(shown), len(transcript))
-        for call, record in zip(shown, transcript):
-            self.assertEqual((call["tool"], call["arguments"], call["tick"], call["tick_after"], call["ok"]),
-                             (record["tool"], record["arguments"], record["tick_before"], record["tick_after"], record["ok"]))
+        for _, run in ALL_RUNS:
+            text = (build_mars.RUNS / run["source"] / "artifacts" / "evaluator" / "transcript.jsonl").read_text(encoding="utf-8")
+            transcript = [json.loads(line) for line in text.splitlines() if line.strip()]
+            shown = [call for call in run["calls"] if call["kind"] == "mcp"]
+            self.assertEqual(len(shown), len(transcript), run["source"])
+            for call, record in zip(shown, transcript):
+                self.assertEqual((call["tool"], call["arguments"], call["tick"], call["tick_after"], call["ok"]),
+                                 (record["tool"], record["arguments"], record["tick_before"], record["tick_after"], record["ok"]), run["source"])
 
-    def test_only_the_five_public_tools_and_the_agents_own_shell_appear(self):
-        tools = {c["tool"] for c in self.model["calls"] if c["kind"] == "mcp"}
-        self.assertLessEqual(tools, {"rules", "map", "telemetry_log", "uplink", "advance"})
-        self.assertEqual({c["tool"] for c in self.model["calls"] if c["kind"] == "shell"}, {"bash"})
-
-    def test_the_rejected_command_is_kept_with_its_reason(self):
-        rejected = [c for c in self.model["calls"] if not c["ok"]]
-        self.assertEqual(len(rejected), 1)
-        self.assertEqual(rejected[0]["tool"], "uplink")
-        self.assertIn("metres must be in", rejected[0]["error"])
+    def test_only_the_five_public_tools_reach_the_simulator(self):
+        for _, run in ALL_RUNS:
+            self.assertLessEqual({call["tool"] for call in run["calls"] if call["kind"] == "mcp"}, PUBLIC_TOOLS, run["source"])
+            if run["kind"] == "reference":
+                self.assertTrue(all(call["kind"] == "mcp" for call in run["calls"]), run["source"])
 
     def test_calls_never_go_back_in_time(self):
-        ticks = [c["tick"] for c in self.model["calls"]]
-        self.assertEqual(ticks, sorted(ticks))
-        self.assertEqual(self.model["calls"][-1]["tick_after"], self.model["replay"]["config"]["max_ticks"])
+        for mission, run in ALL_RUNS:
+            ticks = [call["tick"] for call in run["calls"]]
+            self.assertEqual(ticks, sorted(ticks), run["source"])
+            self.assertLessEqual(run["calls"][-1]["tick_after"], mission["ticks"], run["source"])
 
-    def test_the_final_report_and_score_are_the_models_own(self):
-        self.assertIn("The episode has ended", self.model["report"])
-        saved = json.loads((self.run_dir / "verifier" / "reward.txt").read_text(encoding="utf-8"))
-        self.assertEqual(reward(self.model), saved)
-        self.assertEqual(self.model["label"], "Claude Opus 5.5")
+    def test_the_score_shown_is_the_saved_verifier_reward(self):
+        for _, run in ALL_RUNS:
+            saved = float((build_mars.RUNS / run["source"] / "verifier" / "reward.txt").read_text(encoding="utf-8"))
+            result = run["replay"]["result"]
+            self.assertEqual(run["reward"], saved, run["source"])
+            self.assertAlmostEqual(saved, result["raw_score"] / result["max_available_value"], places=5, msg=run["source"])
+
+    def test_model_runs_carry_the_models_own_closing_words(self):
+        for _, run in ALL_RUNS:
+            if run["kind"] == "model":
+                self.assertEqual(run["label"], "Claude Opus 5.5")
+                self.assertGreater(len(run["report"]), 80, run["source"])
+            else:
+                self.assertEqual(run["report"], "")
 
 
-class ScriptedRuns(unittest.TestCase):
-    def test_all_runs_share_the_models_seed_and_delay(self):
-        for run in DATA["runs"]:
-            self.assertEqual(run["replay"]["seed"], DATA["seed"], run["id"])
-            self.assertEqual(run["replay"]["config"]["delay_ticks"], DATA["delay"], run["id"])
-            self.assertEqual(run["replay"]["world"], RUNS["claude"]["replay"]["world"], run["id"])
+class Missions(unittest.TestCase):
+    def test_runs_side_by_side_are_the_same_mission(self):
+        for mission in DATA["missions"]:
+            first = build_mars.mission_definition(mission["runs"][0]["replay"])
+            for run in mission["runs"]:
+                self.assertEqual(build_mars.mission_definition(run["replay"]), first, run["source"])
+            self.assertEqual(first["config"]["delay_ticks"], mission["delay"])
 
-    def test_scripted_scores_match_the_harbor_task(self):
-        self.assertEqual(reward(RUNS["reference"]), 1.0)
-        self.assertEqual(reward(RUNS["stale_telemetry"]), 0.0)
-        self.assertEqual(reward(RUNS["move_and_wait"]), 0.75)
+    def test_each_mission_is_three_model_attempts_in_order_and_the_reference(self):
+        for mission in DATA["missions"]:
+            self.assertEqual([run["id"] for run in mission["runs"]], ["claude-1", "claude-2", "claude-3", "reference"])
+            self.assertEqual([run["kind"] for run in mission["runs"]], ["model", "model", "model", "reference"])
+            for attempt, run in enumerate(mission["runs"][:3], start=1):
+                self.assertIn("-r{}-".format(attempt), run["source"])
+            self.assertIn(mission["featured"], [run["id"] for run in mission["runs"]])
 
-    def test_the_reference_matches_its_saved_harbor_run(self):
-        saved = json.loads((build_mars.RUNS / "reference-seed7-delay3" / "artifacts" / "evaluator" / "replay.json").read_text(encoding="utf-8"))
-        self.assertEqual(RUNS["reference"]["replay"]["states"], saved["states"])
+    def test_the_reference_gets_home_alive_in_both_missions(self):
+        for mission in DATA["missions"]:
+            result = mission["runs"][-1]["replay"]["result"]
+            self.assertTrue(result["alive"] and result["at_base"], mission["id"])
+            self.assertGreater(mission["runs"][-1]["reward"], 0.7, mission["id"])
 
-    def test_scripted_runs_carry_their_calls_and_beliefs(self):
-        for name in ("reference", "stale_telemetry", "move_and_wait"):
-            run = RUNS[name]
-            self.assertTrue(all(c["kind"] == "mcp" for c in run["calls"]), name)
-            self.assertGreater(len(run["belief"]), 3, name)
-        last = len(RUNS["reference"]["replay"]["states"]) - 1
-        self.assertTrue(all(0 <= note["tick"] <= last for note in RUNS["reference"]["belief"]))
+    def test_deadlines_opens_on_the_run_that_took_every_sample_and_died_short_of_base(self):
+        run = run_of("deadlines", MISSIONS["deadlines"]["featured"])
+        result = run["replay"]["result"]
+        self.assertEqual((result["alive"], result["at_base"], run["reward"]), (False, False, 0.0))
+        self.assertEqual(len(result["sampled_targets"]), len(run["replay"]["world"]["targets"]))
+        self.assertEqual(len(events(run, "battery_depleted")), 1)
+        self.assertIn("ran out of energy", run["report"])
+        self.assertEqual(sorted({call["tool"] for call in run["calls"] if call["kind"] != "mcp"}), ["bash", "invalid"])
+
+    def test_sand_opens_on_a_run_that_slips_on_sand_and_misses_samples(self):
+        run = run_of("sand", MISSIONS["sand"]["featured"])
+        states = run["replay"]["states"]
+        self.assertGreaterEqual(len(events(run, "sample_failed")), 2)
+        self.assertGreater(sum(1 for state in states if state["terrain"] == "sand"), 5)
+        self.assertLess(run["reward"], MISSIONS["sand"]["runs"][-1]["reward"])
+        # a commanded drive on sand that came up at least a fifth short
+        executed = {command["execute_tick"]: command["command"] for command in run["replay"]["commands"]}
+        short = []
+        for before, after in zip(states, states[1:]):
+            command = executed.get(after["tick"])
+            if command and command["action"] == "drive" and command["metres"] > 1 and after["terrain"] == "sand":
+                moved = ((after["position"][0] - before["position"][0]) ** 2 + (after["position"][1] - before["position"][1]) ** 2) ** 0.5
+                short.append(1 - moved / command["metres"])
+        self.assertGreater(max(short), 0.2)
+
+    def test_the_other_attempts_are_kept_including_the_ones_that_did_well(self):
+        self.assertEqual([run["reward"] for run in MISSIONS["deadlines"]["runs"][:3]], [0.0, 0.833333, 0.0])
+        sand = [run["reward"] for run in MISSIONS["sand"]["runs"]]
+        self.assertGreater(sand[2], sand[3])     # the third attempt beat the reference, and is shown
 
 
 class StandalonePage(unittest.TestCase):
@@ -113,33 +145,9 @@ class StandalonePage(unittest.TestCase):
             match = re.search(r'<script id="{}" type="application/octet-stream">([^<]+)</script>'.format(element), self.page)
             self.assertEqual(base64.b64decode(match.group(1)), (build_mars.MARS / path).read_bytes(), path)
 
-    def test_the_committed_page_is_up_to_date(self):
-        """Everything but the data must match byte for byte; the data to nine decimals.
-
-        The reference controller's command values differ in the last float digit
-        between Python versions (math.hypot changed in 3.10), so the data cannot be
-        compared as text. The rover states it produces are identical either way.
-        """
-        pattern = re.compile(r'(<script id="src-data" type="application/octet-stream">)([^<]+)(</script>)')
-        committed = (REPO / "viewer" / "mars-demo.html").read_text(encoding="utf-8")
-
-        def split(page):
-            match = pattern.search(page)
-            return page[:match.start(2)] + page[match.end(2):], json.loads(base64.b64decode(match.group(2)))
-
-        def rounded(value):
-            if isinstance(value, float):
-                return round(value, 9)
-            if isinstance(value, list):
-                return [rounded(item) for item in value]
-            if isinstance(value, dict):
-                return {key: rounded(item) for key, item in value.items()}
-            return value
-
-        committed_shell, committed_data = split(committed)
-        rebuilt_shell, rebuilt_data = split(self.page)
-        self.assertEqual(committed_shell, rebuilt_shell, "run: python3 viewer/build_mars.py")
-        self.assertEqual(rounded(committed_data), rounded(rebuilt_data), "run: python3 viewer/build_mars.py")
+    def test_the_committed_page_and_data_are_up_to_date(self):
+        self.assertEqual((REPO / "viewer" / "mars-demo.html").read_text(encoding="utf-8"), self.page, "run: python3 viewer/build_mars.py")
+        self.assertEqual(json.loads((build_mars.MARS / "data.json").read_text(encoding="utf-8")), json.loads(json.dumps(DATA)), "run: python3 viewer/build_mars.py")
 
 
 if __name__ == "__main__":
