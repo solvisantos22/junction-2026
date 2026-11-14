@@ -87,8 +87,10 @@ class TrainingTests(unittest.TestCase):
         out = os.path.join(self.folder.name, "rows.json")
         with contextlib.redirect_stdout(io.StringIO()) as printed:
             rows = check.main(["--policy", os.path.join(self.out, "policy.npz"), "--seeds", "300004-300005",
-                               "--players", "ppo_icm,random,nothing,blind", "--workers", "1", "--out", out])
-        self.assertEqual(len(rows), 8)
+                               "--players", "ppo_icm,plain,random,nothing,blind", "--workers", "1", "--out", out,
+                               "--also", "last=" + os.path.join(self.out, "last.npz")])
+        self.assertEqual(len(rows), 12)
+        self.assertEqual([row["player"] for row in rows[::2]], ["ppo_icm", "last", "plain", "random", "nothing", "blind"])
         self.assertTrue(all(row["crash"] is None for row in rows))
         text = printed.getvalue()
         self.assertIn("max, delay 3, seeds 300004-300005", text)
@@ -96,7 +98,7 @@ class TrainingTests(unittest.TestCase):
         with open(out) as handle:
             saved = json.load(handle)
         self.assertEqual(saved["env"], "max")
-        self.assertEqual(len(saved["rows"]), 8)
+        self.assertEqual(len(saved["rows"]), 12)
         with self.assertRaises(ValueError):
             check.player("teleport", None, "max")
 

@@ -3,10 +3,13 @@
     python3 -m lightlag_ppo_icm.check --policy lightlag_ppo_icm/policies/max.npz --seeds 2700-2739
     python3 -m lightlag_ppo_icm.check --policy lightlag_ppo_icm/policies/rush.npz --seeds 2700-2739 \
         --players ppo_icm,kf_mpc,blind,random,nothing
+    python3 -m lightlag_ppo_icm.check --policy lightlag_ppo_icm/policies/max.npz \
+        --also ppo_alone=lightlag_ppo_icm/policies/max-ppo-alone.npz           # a second policy in the same table
 
 The environment and the delay are the ones the policy was trained on unless --env says
-otherwise. Players: ppo_icm (greedy), ppo_icm_sampled (actions drawn as in training), random
-(the same adapter with random actions), nothing, and the scripted players of the environment:
+otherwise. Players: ppo_icm (greedy), ppo_icm_sampled (actions drawn as in training), plain
+(a hand-written rule on the same observation), random (the same adapter with random actions),
+nothing, and the scripted players of the environment:
 max_navigator, fused, c37, kf_mpc, blind on the max env; kf_mpc, blind, reference, leg_and_wait on
 a profile or biome; pilot, pilot_fast, greedy, straight on the traverse.
 
@@ -21,7 +24,7 @@ from multiprocessing import Pool
 from lightlag_dynamic.biomes.max_check import seed_range, table
 
 from .envs import FiveTools, finish, make_env, share
-from .player import load_player, random_player
+from .player import load_player, plain_player, random_player
 
 
 def scripted(spec):
@@ -47,18 +50,20 @@ def player(name, policy, spec):
         return load_player(policy, sample_seed=0)
     if name == "random":
         return random_player()
+    if name == "plain":
+        return plain_player()
     if name == "nothing":
         return lambda tools, env=None: None
     players = scripted(spec)
     if name not in players:
-        raise ValueError(f"no player {name!r} for {spec}; there are ppo_icm, ppo_icm_sampled, random, nothing, "
+        raise ValueError(f"no player {name!r} for {spec}; there are ppo_icm, ppo_icm_sampled, plain, random, nothing, "
                          + ", ".join(players))
     return players[name]
 
 
 def episode(job):
     """One episode: {player, seed, delay, share, alive, at_base, crash}."""
-    name, policy, spec, seed, delay = job
+    label, name, policy, spec, seed, delay = job
     env = make_env(spec, seed, delay)
     crash = None
     try:
@@ -66,7 +71,7 @@ def episode(job):
     except Exception as error:  # a player's error is a result, not a harness failure
         crash = f"{type(error).__name__}: {error}"[:160]
     result = finish(env)
-    return {"player": name, "seed": seed, "delay": delay, "share": share(result), "alive": result["alive"],
+    return {"player": label, "seed": seed, "delay": delay, "share": share(result), "alive": result["alive"],
             "at_base": result["at_base"], "crash": crash}
 
 
@@ -76,7 +81,9 @@ def main(argv=None):
     parser.add_argument("--seeds", default="2700-2739", help="e.g. 2700-2739")
     parser.add_argument("--env", help="default: the environment the policy was trained on")
     parser.add_argument("--delay", type=int, help="default: the delay the policy was trained with")
-    parser.add_argument("--players", help="default: ppo_icm, random, nothing and every scripted player")
+    parser.add_argument("--players", help="default: ppo_icm, plain, random, nothing and every scripted player")
+    parser.add_argument("--also", action="append", default=[], metavar="NAME=POLICY",
+                        help="another trained policy to play (greedy) under this name; may be repeated")
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--out", help="write the rows as JSON here")
     args = parser.parse_args(argv)
@@ -84,8 +91,14 @@ def main(argv=None):
     spec = args.env or extra["env"]
     delay = extra["delay"] if args.delay is None else args.delay
     names = (args.players.split(",") if args.players
-             else ["ppo_icm", "random", "nothing"] + [n for n in scripted(spec) if n != "pilot"])
-    jobs = [(name, args.policy, spec, seed, delay) for name in names for seed in seed_range(args.seeds)]
+             else ["ppo_icm", "plain", "random", "nothing"] + [n for n in scripted(spec) if n != "pilot"])
+    entries = [(name, name, args.policy) for name in names]
+    for extra_policy in args.also:
+        label, _, path = extra_policy.partition("=")
+        if not label or not path or label in names:
+            raise ValueError("--also takes NAME=POLICY with a name no other player has")
+        entries.insert(1, (label, "ppo_icm", path))
+    jobs = [(label, name, path, spec, seed, delay) for label, name, path in entries for seed in seed_range(args.seeds)]
     with Pool(args.workers) as pool:
         rows = pool.map(episode, jobs, chunksize=1)
     if args.out:
