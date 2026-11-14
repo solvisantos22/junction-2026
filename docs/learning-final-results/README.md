@@ -1,6 +1,6 @@
 # Final Traverse learning campaign
 
-**All six fresh runs are running on Modal**, launched 2026-11-14 19:42 UTC. [Live app](https://modal.com/apps/solvisantos22/main/ap-GGkMI4eQi8N9MVVuTef5Au). The launch snapshot confirms six running wrappers, no returned errors and no stop marker. It is a timestamped snapshot, not a live results table.
+**Training has settled; final evaluation is running.** Five runs completed 8,192 missions; replay seed 43 stopped at its deadline after 6,880. Neither method qualified for continuation. The [all-seed policy freeze](policy-freeze.json) reached main in `d81fa88` before any final world was opened. [Terminal evidence](fit/README.md) · [evaluation and exact-campaign plan](evaluation-plan.md). The operational notes below retain the earlier monitoring history and will be closed in the final handoff.
 
 - [Protocol](../learning-final.md), [campaign manifest](campaign.json), [source/runtime freeze](freeze.json), [fit receipt](fit-receipt.json), [launch status](launch-status.json).
 - Training source and supervisor commit **`becbf3e`**; freeze published in **`2257871`** before launch. Fixed local checkout: `/tmp/junction-learning-final-frozen`; runtime: `/tmp/junction-learning-venv`.
