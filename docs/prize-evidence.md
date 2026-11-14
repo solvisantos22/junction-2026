@@ -124,6 +124,43 @@ These are recommended evidence choices, not newly asserted official entry requir
   experiment, verification, interpretation and repo handoff. All mixed outcomes
   are retained; final rules/project choice and prize entry remain team decisions.
 
+### R04 — 14 November — Independent overnight challenge review
+
+- The user asked Codex to continue autonomously, broaden the research and
+  challenge the team's direction while they slept. Two independent Codex
+  research passes examined current primary literature, real operations,
+  alternative ideas and the complete mixed eight-attempt evidence.
+- Delivered [evaluation review](research/2026-11-14-lightlag-evaluation-review.md)
+  and [direction review](research/2026-11-14-lightlag-direction-review.md).
+  They recommend a rule-equivalent accounting aid, separate reference testing,
+  fresh confirmation and narrower claims; no final project/rules decision.
+- Verification: researchers opened the cited primary sources, checked local
+  links and recomputed the score/energy decomposition. Root checked the
+  decisive energy contract and sampled primary-source claims. These are
+  critical reviews and proposed experiments, not new model results.
+- Research used Codex and web sources, with no Claude inference, Modal or
+  Gemini usage. Actual paid overnight attempts are tracked separately in the
+  [protocol and run ledger](lightlag-overnight-evaluation.md).
+
+### R05 — 14 November — Failure-selected overnight repetitions
+
+- Under the user's overnight credit authorization, Codex declared nine fresh
+  attempts at `253b263`, kept original tasks/model/harness fixed, and retained
+  every result. The playing agent is **OpenCode 1.19.5 / Claude Opus 5.5**;
+  Codex orchestrates and checks it using Manh's delivered auditor.
+- First four attempts: rewards **0, 0.461538, 0.75, 0.833333**; reported cost
+  **$1.849386**. These are selected-case repeats, not a map-wide failure rate.
+  A battery failure recurs, and two later runs match or beat the reference.
+- Independent Codex review reproduced all four audits, confirmed fresh task
+  identity and sanitized exports, and challenged a heuristic intended-target
+  diagnosis. The report preserves that caveat rather than turning a tag into
+  a claim about model intent. No simulator or canonical task changed.
+- Evidence: [protocol and checkpoint](lightlag-overnight-evaluation.md),
+  [machine-readable ledger](lightlag-runs/overnight-a-summary.json),
+  [audit index](lightlag-audits/overnight/README.md). Five attempts remain in
+  this declared block at this checkpoint; subsequent increments extend it.
+- Usage reports are not verified balances. No Modal/Gemini use or prize entry.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
