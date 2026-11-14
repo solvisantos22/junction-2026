@@ -1,0 +1,348 @@
+{
+  "definitions": {
+    "aggregation": "Decision and consecutive-pair statistics pool episodes and weight each decision/pair equally. Update entropies use each update's own contexts, not matched states. No cross-episode consecutive pair is formed.",
+    "before_prior_eta": "The planned decision-tick interval is strictly less than the previous ETA, with 1e-9 tolerance.",
+    "decision_time": "Planned execution tick reconstructed as round(420 * (1 - features[0][1]), 6), using public time_remaining. This is not necessarily command-send time.",
+    "entropy": "Pure-Python evaluation of saved tanh MLP/softmax; H = -sum(p*ln(p)), normalized by ln(candidate_count); one-candidate decisions excluded. Update 1 uses checkpoint 0; update 16 uses checkpoint 15, because those policies generated the corresponding batches.",
+    "prior_eta": "420 * previous.features[previous.action][4], the public outbound-time estimate at the earlier decision.",
+    "prior_non_home_available": "A consecutive pair in the same episode where previous ids[action] != base and that ID is present in current ids.",
+    "switch": "Current ids[action] differs from previous ids[action]."
+  },
+  "followup_hypothesis": "Frequent intention reselection before estimated arrival may make sustained pursuit and terminal-reward credit assignment difficult. This is a grounded hypothesis about the scheduler/action interface, not evidence of a learning-math defect or a demonstrated cause of low scores. Any persistence experiment should be separately declared, use identical navigation and observations across its controls, and retain this completed run unchanged.",
+  "input_file_sha256": {
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0001.json.gz": "45c0303f733bbf82f28b7327c39561933c0cad6f735436fd34e41de7fa65c897",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0002.json.gz": "15b75c906b7f276a4af20fafdac5d891ada3633ea661a66c7b01e784b35e7190",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0003.json.gz": "83d873322cd3e18f8a06c87c0108980176daff21e5f5f7660c6dc2a5666bd0dc",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0004.json.gz": "7797e6e0ebdaa7147c79e76930eadb4b09c1aab0c5855c404e17588b1f108045",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0005.json.gz": "d28b9e1e16ba8da3f6f76a80a5384d5a3b16f3a492cbaff3247f39703a7e7f64",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0006.json.gz": "4736aab569f4e84da9bba100dc80cc07fdc59abcb25519664ec37855d738674f",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0007.json.gz": "bdbf08e8a8a2338177ce3542542c4a99e462db98ed59497cc15c6bd61bab0fd7",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0008.json.gz": "dee081e7f00c5cab870afb2806d665aba2c9196f3263f295399633606d757742",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0009.json.gz": "7176f9d336e62959d2b40cb3da3400c3e49f4c024278ecc18800a84a0900f067",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0010.json.gz": "6d2dfe14500cde28f4e744e9f67b9c9979d7b23b451ca8b425b86b52a2cf6f8e",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0011.json.gz": "ea001d701098fc3fa5cdf2ad143436a8dbe84a873d61bc47abedff2a86f58920",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0012.json.gz": "026a2396b40da48578fd7c70efb29bdd038965fd3b83f32fd658b3765646f1cd",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0013.json.gz": "b1ea29757559a40d76eeb6f40d76abd51bb358e89b59d350cb076245901c2827",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0014.json.gz": "cc24f8a198db5a1a2970717439eb52dd3c73bd5ad4c17bf4bbd18af8f50f0027",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0015.json.gz": "b76ce955a7185e5085715f6f36f6997461818ad3e0706fb638c8dfc4f45348eb",
+    "docs/lightlag-rl-results/modal/pilot-01/training/batches/update-0016.json.gz": "1b1cb798fb5e18565dea51d3565c8464420f82fc811a2a4b0a55b62c42eacb67",
+    "docs/lightlag-rl-results/modal/pilot-01/training/checkpoint-0000.json": "c723f1305b8a77ecbb9e4febfab8898161e82630e0ce0319e8fc4174c9e24b60",
+    "docs/lightlag-rl-results/modal/pilot-01/training/checkpoint-0015.json": "e389deea42fefa3134a8e4d643e0eec9d64b3182be678b78a840534a89cabafd",
+    "docs/lightlag-rl-results/modal/pilot-01/training/training.json": "67256197108905c3b47075ce247f1321e4dde59cc3671f48379894ea681ea06d"
+  },
+  "limitations": [
+    "Observational post hoc analysis of training data from one fixed-seed training run; not a causal intervention or an independent evaluation.",
+    "A target being offered again does not prove the rover never reached it: sampling could have failed or later replanning events could intervene.",
+    "Actor intentions are not executed commands. The unchanged navigator can force home, drop a newly infeasible target, or wait to charge; these records do not establish actual trajectory reversals.",
+    "ETAs come from the public estimated position/map, not true state. Comparing a decision interval with its prior ETA does not prove real arrival was impossible.",
+    "First/last entropy values use different maps and states. They describe action concentration on their own recorded contexts, not a matched-state causal change.",
+    "Many decisions within each trajectory are dependent; pooled fractions are descriptive and have no independent-sample confidence interpretation.",
+    "This artifact does not replace the frozen fresh-check outcome or establish a frontier-model capability gap.",
+    "The cloud training report has source_commit null; the exact source closure is identified by the recorded SHA-256 manifest and its digest."
+  ],
+  "mechanism_observed_in_frozen_code": [
+    "RLPilot._plan replaces the current route with the newly sampled singleton target (or empty route for base) at each invocation.",
+    "Pilot._decide invokes replanning after twelve planned ticks or need_plan events; event-triggered decisions can be more frequent.",
+    "The fourteen actor features contain no explicit previous-target or commitment indicator.",
+    "The training gradient applies the same terminal within-map-pair advantage to every decision of that trajectory; no intermediate reward identifies which target selections produced later samples."
+  ],
+  "relevant_frozen_source_sha256": {
+    "lightlag_rl/adapter.py": "4113253c465f8bc8ca0d9745e563c37198cc7f7e0937e024e664240df4475279",
+    "lightlag_rl/model.py": "d263c69be352ea8d536c65871ed47e9df24f0b3c6e4c18d12f1b3470b3706b93",
+    "lightlag_rl/train.py": "0034df7df59ba6971d3f6f5a2cd2aa4eff2dfb3b71a42f116efcd0aad88c80b9",
+    "lightlag_traverse/pilot.py": "1bb90ba1e78ba1d2ff0f54bc5bf906b919070865bc08a9d1ce60f281d9a8d198"
+  },
+  "reproduction": {
+    "code_sha256": "42be8c79355d5187a174478efc892e11e30be182841d46146daa1fd6d9f07820",
+    "python_code": "import gzip, hashlib, json, math, statistics\nfrom pathlib import Path\nfrom collections import Counter\n\nROOT = Path('.')\nBASE = ROOT / 'docs/lightlag-rl-results/modal/pilot-01/training'\nINPUT_HASHES = {}\ndef load(path, compressed=False):\n    raw = path.read_bytes()\n    INPUT_HASHES[str(path)] = hashlib.sha256(raw).hexdigest()\n    return json.loads(gzip.decompress(raw) if compressed else raw)\ndef mean(values):\n    return round(statistics.fmean(values), 12) if values else None\ndef fraction(a, b):\n    return round(a / b, 12) if b else None\ndef distribution(values):\n    return {'count': len(values), 'mean': mean(values),\n            'median': statistics.median(values), 'min': min(values), 'max': max(values)}\ndef analyze(rows):\n    counts = Counter()\n    candidates, intervals, rewards, travel = [], [], [], []\n    for row in rows:\n        counts['episodes'] += 1\n        rewards.append(row['reward'])\n        counts['invalid_public_calls'] += len(row['episode']['invalid_calls'])\n        counts['home_episodes'] += bool(row['episode']['result']['at_base'])\n        counts['alive_episodes'] += bool(row['episode']['result']['alive'])\n        trace = row['trajectory']\n        assert len(trace) == row['episode']['decision_count']\n        previous = None\n        for decision in trace:\n            ids, features, action = decision['ids'], decision['features'], decision['action']\n            assert ids[0] == 'base' and len(ids) == len(set(ids))\n            assert len(features) == len(ids) and all(len(x) == 14 for x in features)\n            assert all(math.isfinite(v) for x in features for v in x)\n            assert type(action) is int and 0 <= action < len(ids)\n            tick = round(420 * (1 - features[0][1]), 6)\n            assert all(abs(420 * (1-x[1]) - tick) < 1e-5 for x in features)\n            goal, eta = ids[action], 420 * features[action][4]\n            counts['decisions'] += 1\n            candidates.append(len(ids))\n            counts['single_candidate_decisions'] += len(ids) == 1\n            if goal != 'base':\n                counts['non_home_choices'] += 1\n                counts['non_home_choices_eta_over_12'] += eta > 12 + 1e-9\n                travel.append(eta)\n            if previous is not None:\n                prior_tick, prior_goal, prior_eta = previous\n                interval = round(tick - prior_tick, 6)\n                assert interval >= 0\n                intervals.append(interval)\n                switched = prior_goal != goal\n                counts['consecutive_pairs'] += 1\n                counts['all_goal_switches'] += switched\n                if prior_goal != 'base' and prior_goal in ids:\n                    counts['prior_non_home_still_available_pairs'] += 1\n                    counts['switches_with_prior_non_home_still_available'] += switched\n                    counts['switches_with_prior_available_before_prior_eta'] += switched and interval < prior_eta - 1e-9\n            previous = tick, goal, eta\n    return {'counts': dict(sorted(counts.items())),\n            'all_goal_switch_fraction': fraction(counts['all_goal_switches'], counts['consecutive_pairs']),\n            'switch_fraction_given_prior_non_home_available': fraction(counts['switches_with_prior_non_home_still_available'], counts['prior_non_home_still_available_pairs']),\n            'before_prior_eta_fraction_of_those_switches': fraction(counts['switches_with_prior_available_before_prior_eta'], counts['switches_with_prior_non_home_still_available']),\n            'non_home_eta_over_12_fraction': fraction(counts['non_home_choices_eta_over_12'], counts['non_home_choices']),\n            'candidate_count_per_decision': distribution(candidates),\n            'planned_tick_interval': distribution(intervals),\n            'planned_tick_interval_counts': dict(sorted(Counter(str(v) for v in intervals).items())),\n            'non_home_selected_eta': distribution(travel),\n            'terminal_reward': distribution(rewards)}\ndef action_entropy(rows, policy):\n    normalized, max_probability, entropies = [], [], []\n    forced = 0\n    for row in rows:\n        for decision in row['trajectory']:\n            xs = decision['features']\n            if len(xs) == 1:\n                forced += 1\n                continue\n            logits = [sum(math.tanh(sum(x[k] * policy['W'][k][j] for k in range(14)) + policy['b'][j]) * policy['v'][j] for j in range(len(policy['b']))) for x in xs]\n            weights = [math.exp(z - max(logits)) for z in logits]\n            total = sum(weights)\n            p = [w / total for w in weights]\n            entropy = -sum(v * math.log(v) for v in p)\n            normalized.append(entropy / math.log(len(p)))\n            entropies.append(entropy)\n            max_probability.append(max(p))\n    return {'nonforced_decisions': len(normalized), 'single_candidate_decisions_excluded': forced,\n            'mean_normalized_entropy': mean(normalized), 'mean_entropy_nats': mean(entropies),\n            'mean_max_action_probability': mean(max_probability)}\n\nreport = load(BASE / 'training.json')\nassert report['status'] == 'complete' and report['updates_completed'] == 16 and report['episodes_completed'] == 512\nassert report['config']['smoke'] is False\nall_rows, per_update, entropy_updates = [], [], {}\nfor update in range(1, 17):\n    batch = load(BASE / 'batches' / f'update-{update:04d}.json.gz', True)\n    assert batch['update'] == update and len(batch['rows']) == 32\n    rows = batch['rows']\n    assert all(71000 <= r['seed'] <= 71127 for r in rows)\n    assert len(set((r['seed'], r['policy_seed']) for r in rows)) == 32\n    all_rows.extend(rows)\n    metrics = analyze(rows)\n    per_update.append({'update': update, 'episodes': len(rows),\n        'decisions': metrics['counts']['decisions'],\n        'prior_non_home_still_available_pairs': metrics['counts']['prior_non_home_still_available_pairs'],\n        'switches_with_prior_non_home_still_available': metrics['counts']['switches_with_prior_non_home_still_available'],\n        'switches_with_prior_available_before_prior_eta': metrics['counts']['switches_with_prior_available_before_prior_eta'],\n        'switch_fraction_given_prior_non_home_available': metrics['switch_fraction_given_prior_non_home_available'],\n        'mean_candidate_count': metrics['candidate_count_per_decision']['mean'],\n        'mean_planned_tick_interval': metrics['planned_tick_interval']['mean'],\n        'mean_terminal_reward': metrics['terminal_reward']['mean']})\n    if update in (1, 16):\n        checkpoint = load(BASE / f'checkpoint-{update-1:04d}.json')\n        policy = checkpoint['policy']\n        assert hashlib.sha256(json.dumps(policy, sort_keys=True).encode()).hexdigest() == batch['policy_sha256']\n        entropy_updates[str(update)] = {'generating_checkpoint': update - 1,\n            'policy_sha256': batch['policy_sha256'], **action_entropy(rows, policy)}\nSTATISTICS = {'aggregate': analyze(all_rows), 'per_update': per_update,\n              'entropy_by_update_on_own_recorded_contexts': entropy_updates,\n              'unique_training_maps_observed': len(set(row['seed'] for row in all_rows)),\n              'trajectory_validation': 'All stored actions are valid candidate indices; candidate IDs unique, base first, features finite with fourteen columns; decision counts agree with episode summaries.'}\nSOURCE_MANIFEST_SHA256 = hashlib.sha256(json.dumps(report['source_sha256'], sort_keys=True, separators=(',', ':')).encode()).hexdigest()\n",
+    "requirements": "Python 3 standard library; only existing JSON/gzip files are read. No simulator or training module imports.",
+    "verification_command": "python3 - <<'PY'\nimport hashlib,json\nfrom pathlib import Path\na=json.loads(Path('docs/lightlag-rl-results/diagnosis.json').read_text())\nc=a['reproduction']['python_code']\nassert hashlib.sha256(c.encode()).hexdigest()==a['reproduction']['code_sha256']\nns={}\nexec(c,ns)\nassert ns['INPUT_HASHES']==a['input_file_sha256']\nassert ns['STATISTICS']==a['statistics']\nassert ns['SOURCE_MANIFEST_SHA256']==a['training_source_manifest_sha256']\nprint('Diagnosis reproduced from pinned saved artifacts; no episodes run.')\nPY",
+    "working_directory": "repository root"
+  },
+  "schema": "lightlag-rl-observational-diagnosis-v1",
+  "scope": "Post hoc read-only analysis of all 512 saved production training trajectories; no new missions, training, policy edits, or fresh evaluation access.",
+  "source_commit_as_recorded": null,
+  "statistics": {
+    "aggregate": {
+      "all_goal_switch_fraction": 0.884275017018,
+      "before_prior_eta_fraction_of_those_switches": 0.994271785497,
+      "candidate_count_per_decision": {
+        "count": 21078,
+        "max": 47,
+        "mean": 30.651105417971,
+        "median": 39.0,
+        "min": 1
+      },
+      "counts": {
+        "alive_episodes": 512,
+        "all_goal_switches": 18186,
+        "consecutive_pairs": 20566,
+        "decisions": 21078,
+        "episodes": 512,
+        "home_episodes": 376,
+        "invalid_public_calls": 0,
+        "non_home_choices": 18449,
+        "non_home_choices_eta_over_12": 17104,
+        "prior_non_home_still_available_pairs": 17265,
+        "single_candidate_decisions": 1695,
+        "switches_with_prior_available_before_prior_eta": 16316,
+        "switches_with_prior_non_home_still_available": 16410
+      },
+      "non_home_eta_over_12_fraction": 0.927096319584,
+      "non_home_selected_eta": {
+        "count": 18449,
+        "max": 140.2669344447029,
+        "mean": 48.988181308609,
+        "median": 47.973437930807705,
+        "min": 0.023310738596475505
+      },
+      "planned_tick_interval": {
+        "count": 20566,
+        "max": 12.0,
+        "mean": 10.213021491783,
+        "median": 12.0,
+        "min": 1.0
+      },
+      "planned_tick_interval_counts": {
+        "1.0": 565,
+        "10.0": 426,
+        "11.0": 398,
+        "12.0": 14692,
+        "2.0": 640,
+        "3.0": 535,
+        "4.0": 560,
+        "5.0": 512,
+        "6.0": 519,
+        "7.0": 400,
+        "8.0": 936,
+        "9.0": 383
+      },
+      "switch_fraction_given_prior_non_home_available": 0.950477845352,
+      "terminal_reward": {
+        "count": 512,
+        "max": 0.10416666666666667,
+        "mean": 0.016397399069,
+        "median": 0.011270491803278689,
+        "min": 0.0
+      }
+    },
+    "entropy_by_update_on_own_recorded_contexts": {
+      "1": {
+        "generating_checkpoint": 0,
+        "mean_entropy_nats": 3.355193299823,
+        "mean_max_action_probability": 0.057131402486,
+        "mean_normalized_entropy": 0.999685147606,
+        "nonforced_decisions": 1203,
+        "policy_sha256": "6275c75a54aecdad43245694f7bde5067d168843d6e5d45d32b85bf2dcb75c11",
+        "single_candidate_decisions_excluded": 105
+      },
+      "16": {
+        "generating_checkpoint": 15,
+        "mean_entropy_nats": 3.257430089578,
+        "mean_max_action_probability": 0.089337920011,
+        "mean_normalized_entropy": 0.983099196378,
+        "nonforced_decisions": 1217,
+        "policy_sha256": "131631ee42f9cc03c35ca5dcb965162fb39e8fb93236ffcd3769f70d33ab3844",
+        "single_candidate_decisions_excluded": 117
+      }
+    },
+    "per_update": [
+      {
+        "decisions": 1308,
+        "episodes": 32,
+        "mean_candidate_count": 31.072629969419,
+        "mean_planned_tick_interval": 10.275862068966,
+        "mean_terminal_reward": 0.014304309486,
+        "prior_non_home_still_available_pairs": 1068,
+        "switch_fraction_given_prior_non_home_available": 0.957865168539,
+        "switches_with_prior_available_before_prior_eta": 1019,
+        "switches_with_prior_non_home_still_available": 1023,
+        "update": 1
+      },
+      {
+        "decisions": 1290,
+        "episodes": 32,
+        "mean_candidate_count": 30.748062015504,
+        "mean_planned_tick_interval": 10.434817170111,
+        "mean_terminal_reward": 0.014597129825,
+        "prior_non_home_still_available_pairs": 1063,
+        "switch_fraction_given_prior_non_home_available": 0.952963311383,
+        "switches_with_prior_available_before_prior_eta": 1011,
+        "switches_with_prior_non_home_still_available": 1013,
+        "update": 2
+      },
+      {
+        "decisions": 1331,
+        "episodes": 32,
+        "mean_candidate_count": 31.04132231405,
+        "mean_planned_tick_interval": 10.119322555812,
+        "mean_terminal_reward": 0.014051860053,
+        "prior_non_home_still_available_pairs": 1091,
+        "switch_fraction_given_prior_non_home_available": 0.958753437214,
+        "switches_with_prior_available_before_prior_eta": 1042,
+        "switches_with_prior_non_home_still_available": 1046,
+        "update": 3
+      },
+      {
+        "decisions": 1315,
+        "episodes": 32,
+        "mean_candidate_count": 31.266920152091,
+        "mean_planned_tick_interval": 10.226032735776,
+        "mean_terminal_reward": 0.010850471041,
+        "prior_non_home_still_available_pairs": 1096,
+        "switch_fraction_given_prior_non_home_available": 0.950729927007,
+        "switches_with_prior_available_before_prior_eta": 1033,
+        "switches_with_prior_non_home_still_available": 1042,
+        "update": 4
+      },
+      {
+        "decisions": 1317,
+        "episodes": 32,
+        "mean_candidate_count": 30.580865603645,
+        "mean_planned_tick_interval": 10.214785992218,
+        "mean_terminal_reward": 0.017560340168,
+        "prior_non_home_still_available_pairs": 1081,
+        "switch_fraction_given_prior_non_home_available": 0.959296947271,
+        "switches_with_prior_available_before_prior_eta": 1036,
+        "switches_with_prior_non_home_still_available": 1037,
+        "update": 5
+      },
+      {
+        "decisions": 1327,
+        "episodes": 32,
+        "mean_candidate_count": 30.596081386586,
+        "mean_planned_tick_interval": 10.156756756757,
+        "mean_terminal_reward": 0.012098558493,
+        "prior_non_home_still_available_pairs": 1092,
+        "switch_fraction_given_prior_non_home_available": 0.952380952381,
+        "switches_with_prior_available_before_prior_eta": 1035,
+        "switches_with_prior_non_home_still_available": 1040,
+        "update": 6
+      },
+      {
+        "decisions": 1316,
+        "episodes": 32,
+        "mean_candidate_count": 30.451367781155,
+        "mean_planned_tick_interval": 10.229750778816,
+        "mean_terminal_reward": 0.010999889777,
+        "prior_non_home_still_available_pairs": 1109,
+        "switch_fraction_given_prior_non_home_available": 0.935978358882,
+        "switches_with_prior_available_before_prior_eta": 1032,
+        "switches_with_prior_non_home_still_available": 1038,
+        "update": 7
+      },
+      {
+        "decisions": 1318,
+        "episodes": 32,
+        "mean_candidate_count": 30.874810318665,
+        "mean_planned_tick_interval": 10.204510108865,
+        "mean_terminal_reward": 0.020651308555,
+        "prior_non_home_still_available_pairs": 1091,
+        "switch_fraction_given_prior_non_home_available": 0.953253895509,
+        "switches_with_prior_available_before_prior_eta": 1036,
+        "switches_with_prior_non_home_still_available": 1040,
+        "update": 8
+      },
+      {
+        "decisions": 1306,
+        "episodes": 32,
+        "mean_candidate_count": 30.770290964778,
+        "mean_planned_tick_interval": 10.302197802198,
+        "mean_terminal_reward": 0.016398441918,
+        "prior_non_home_still_available_pairs": 1097,
+        "switch_fraction_given_prior_non_home_available": 0.953509571559,
+        "switches_with_prior_available_before_prior_eta": 1040,
+        "switches_with_prior_non_home_still_available": 1046,
+        "update": 9
+      },
+      {
+        "decisions": 1304,
+        "episodes": 32,
+        "mean_candidate_count": 30.480061349693,
+        "mean_planned_tick_interval": 10.315251572327,
+        "mean_terminal_reward": 0.012377688393,
+        "prior_non_home_still_available_pairs": 1064,
+        "switch_fraction_given_prior_non_home_available": 0.947368421053,
+        "switches_with_prior_available_before_prior_eta": 1000,
+        "switches_with_prior_non_home_still_available": 1008,
+        "update": 10
+      },
+      {
+        "decisions": 1321,
+        "episodes": 32,
+        "mean_candidate_count": 30.109765329296,
+        "mean_planned_tick_interval": 10.182311869666,
+        "mean_terminal_reward": 0.020430739494,
+        "prior_non_home_still_available_pairs": 1064,
+        "switch_fraction_given_prior_non_home_available": 0.93045112782,
+        "switches_with_prior_available_before_prior_eta": 980,
+        "switches_with_prior_non_home_still_available": 990,
+        "update": 11
+      },
+      {
+        "decisions": 1329,
+        "episodes": 32,
+        "mean_candidate_count": 30.327313769752,
+        "mean_planned_tick_interval": 10.11565150347,
+        "mean_terminal_reward": 0.023210705811,
+        "prior_non_home_still_available_pairs": 1063,
+        "switch_fraction_given_prior_non_home_available": 0.952963311383,
+        "switches_with_prior_available_before_prior_eta": 1008,
+        "switches_with_prior_non_home_still_available": 1013,
+        "update": 12
+      },
+      {
+        "decisions": 1310,
+        "episodes": 32,
+        "mean_candidate_count": 30.751908396947,
+        "mean_planned_tick_interval": 10.266823161189,
+        "mean_terminal_reward": 0.018074825717,
+        "prior_non_home_still_available_pairs": 1059,
+        "switch_fraction_given_prior_non_home_available": 0.947119924457,
+        "switches_with_prior_available_before_prior_eta": 998,
+        "switches_with_prior_non_home_still_available": 1003,
+        "update": 13
+      },
+      {
+        "decisions": 1337,
+        "episodes": 32,
+        "mean_candidate_count": 30.242333582648,
+        "mean_planned_tick_interval": 10.051340996169,
+        "mean_terminal_reward": 0.017753702301,
+        "prior_non_home_still_available_pairs": 1083,
+        "switch_fraction_given_prior_non_home_available": 0.950138504155,
+        "switches_with_prior_available_before_prior_eta": 1013,
+        "switches_with_prior_non_home_still_available": 1029,
+        "update": 14
+      },
+      {
+        "decisions": 1315,
+        "episodes": 32,
+        "mean_candidate_count": 30.955133079848,
+        "mean_planned_tick_interval": 10.247077162899,
+        "mean_terminal_reward": 0.019601271868,
+        "prior_non_home_still_available_pairs": 1085,
+        "switch_fraction_given_prior_non_home_available": 0.952995391705,
+        "switches_with_prior_available_before_prior_eta": 1032,
+        "switches_with_prior_non_home_still_available": 1034,
+        "update": 15
+      },
+      {
+        "decisions": 1334,
+        "episodes": 32,
+        "mean_candidate_count": 30.167916041979,
+        "mean_planned_tick_interval": 10.079877112135,
+        "mean_terminal_reward": 0.019397142202,
+        "prior_non_home_still_available_pairs": 1059,
+        "switch_fraction_given_prior_non_home_available": 0.951841359773,
+        "switches_with_prior_available_before_prior_eta": 1001,
+        "switches_with_prior_non_home_still_available": 1008,
+        "update": 16
+      }
+    ],
+    "trajectory_validation": "All stored actions are valid candidate indices; candidate IDs unique, base first, features finite with fourteen columns; decision counts agree with episode summaries.",
+    "unique_training_maps_observed": 109
+  },
+  "training_directory": "docs/lightlag-rl-results/modal/pilot-01/training",
+  "training_source_manifest_sha256": "30b4d3738900c0d62b4d61ee4b9f72b2e053db52d62c96c0a6a51dac94ef9db5"
+}
