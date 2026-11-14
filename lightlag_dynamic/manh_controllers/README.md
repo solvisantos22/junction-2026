@@ -21,7 +21,7 @@ python3 -m lightlag_dynamic.manh_controllers --list                             
 python3 -m lightlag_dynamic.manh_controllers --suite base  --seeds 0-19              # every controller, 4 profiles x delays 0/3/5
 python3 -m lightlag_dynamic.manh_controllers --suite noise --controllers 1 20 team   # names, numbers or kinds (manh, bound, team)
 python3 -m lightlag_dynamic.manh_controllers --suite partb --controllers 22 --append  # add a new controller to existing results
-python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                     # 8 tests, about 10 seconds
+python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                     # 15 tests, about 10 seconds
 ```
 
 - Results go to `~/lightlag-manh-results/<suite>/`, outside the repository; use `--out` to change this, and do not commit result rows.
@@ -51,13 +51,14 @@ python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                
 | 24 | `EKF_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_24` | 19 plus 22 and 23 | The odometer fixes legs once a patch is found; the stay-alive rule covers a patch found too late. **Best on held-out seeds:** +1.9 over controller 1 (+1.6 to +2.3), +0.2 over 19 (+0.1 to +0.4); identical to 19 on the published profiles. |
 | 25 | `EKF_sandodo_mapdoubt_stayalive_aimdisc_turncost_window_MPC_manh_controller_25` | 24 plus map doubt: once the map is shown wrong, undriven bedrock on the way home is budgeted at the unmapped-sand rate seen so far | The remaining deaths of 24 come from the patch on the last route home. Cuts deaths with two patches from 20% to 12% but gains only 1 point there, and loses 0.4 points elsewhere: rare false odometer patches on clean maps switch the doubt on. |
 | 26 | `EKF_sandodo_bayessand_stayalive_aimdisc_turncost_window_MPC_manh_controller_26` | 24 plus a Bayesian belief about unmapped sand (Beta prior in metres, updated by the odometer), priced on every way home | Sölvi's static robust plan still won on `noisy` with hidden sand; adaptive robust routing says price a belief, not the worst case. Hidden sand on `noisy` 69% / 54% → 71% / 70% (one / two patches, held-out), no deaths, but clean `noisy` 90% → 75%: −2.5 points vs 1 overall. Traces then showed the estimator, not the budget, failing. |
-| 27 | `EKF_fading_sandfilter_sandodo_guarded_aimdisc_turncost_window_MPC_manh_controller_27` | 24 with the filter fixed for unmodelled ground (sand-aware propagation, adaptive fading) and guarded moves instead of the stay-alive rule | **Best overall, and ahead of Sölvi's reference on every front.** Held-out: +2.7 over 1 (+2.2 to +3.4), +0.8 over 24 (+0.5 to +1.2); hidden sand on `noisy` 80% / 71% vs Sölvi's 73% / 68%, never dead there. **On plain `rush` / `rush_noisy`, 24 is better:** the guarded moves cost 2–3.5 points at delay 3 there (see "Plain-profile check" below). See "Literature round" below. |
+| 27 | `EKF_fading_sandfilter_sandodo_guarded_aimdisc_turncost_window_MPC_manh_controller_27` | 24 with the filter fixed for unmodelled ground (sand-aware propagation, adaptive fading) and guarded moves instead of the stay-alive rule | **Ahead of Sölvi's reference on every front; superseded by 34**, which keeps its hidden-sand survival without the plain-rush cost. Held-out: +2.7 over 1 (+2.2 to +3.4), +0.8 over 24 (+0.5 to +1.2); hidden sand on `noisy` 80% / 71% vs Sölvi's 73% / 68%, never dead there. **On plain `rush` / `rush_noisy`, 24 is better:** the guarded moves cost 2–3.5 points at delay 3 there (see "Plain-profile check" below). See "Literature round" below. |
 | 28 | `EKF_fading_sandfilter_sandodo_bayessand_guarded_aimdisc_turncost_window_MPC_manh_controller_28` | 27 plus 26's Bayesian pricing | The cautious twin: 75% and home in every held-out `noisy` episode, with or without hidden sand, but 75% instead of 92% on clean `noisy`, so about 5 points below 27 overall. |
 | 29 | `EKF_latencyaware_MPC_manh_controller_29` | 1 for the real-time clock (`lightlag_dynamic/kf_mpc_rt.py`): measures its own lag (median of the last five uplinks' `sent_tick` minus its decision tick) and decides that much earlier | On the real-time clock ticks pass while a controller thinks, and 1 then lets the queue run empty. **Turn-based, as the swarm plays, it equals 1 exactly**; the gain shows only on the real-time clock: fresh seeds 600–639 at 1 tick of thinking per call, +4.0 points on `rush_noisy` and +8.9 on `rush`, never worse. An optional extra, not adopted: [how to adopt or decline it](../../docs/lightlag-dynamic-pilot.md#real-time-aware-reference-optional-extra-awaiting-team-decision). |
 | 30 | `EKF_slipaware_MPC_manh_controller_30` | 1 plus the slip-check-aware layer (`mars.py`): a Bayesian trip chance per terrain from the filter's slip belief and every slip stop seen; routes around terrain above 10%, drops targets reachable only through terrain above 30% | Built for the Mars sandbox's onboard slip check, where 1 replans straight back into the sand that stopped it. **Without a slip check, as the swarm plays, it equals 1 exactly.** Fresh seeds 800–879, `noisy` at limit 0.35: 54.1% → 75.0%, home 51 → 80 of 80. |
 | 31 | `EKF_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_31` | 24 plus the same layer | Fresh seeds 800–879, `noisy`: limit 0.40 74.8% → 78.8%, 0.35 55.3% → 75.0%. Equals 24 without a slip check. |
 | 32 | `EKF_executive_slipaware_MPC_manh_controller_32` | 30 plus an executive: explicit modes switched by telemetry events. `recover` backs out of sand by one-segment drives, each sent after the previous one executed, when that beats driving on; `nominal` drops a target only with evidence about its terrain | The layer alone still crawled along sand edges and wrote off sand targets on the prior. Fresh seeds 900–979, `noisy`: limit 0.40 78.1% → 86.6%, 0.35 75.0% → 85.0%, home 80 of 80. Equals 1 without a slip check. |
 | 33 | `EKF_executive_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_33` | 31 plus the executive | **Best on the slip check.** Fresh seeds 900–979, `noisy`: limit 0.40 80.3% → 88.8% (home 77 → 80 of 80), 0.35 75.0% → 85.9%; never below 31. Equals 24 without a slip check. [Details](../../docs/lightlag-dynamic-pilot.md#mars-operations-tweaks-sandbox-off-by-default). |
+| 34 | `EKF_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC_manh_controller_34` | 27 with the guarded moves run only when a probe is free: one telemetry round trip of delay costs the current plan no value and still fits the horizon (always so on the way home). Otherwise 24's stay-alive rule | **Best overall.** Keeps 24's score on the published profiles and 27's survival on hidden sand. Fresh seeds 5000–5259: +3.2 over 1 (+2.7 to +3.8), +1.2 over 24, +0.5 over 27; plain `rush` / `rush_noisy` +0.2 over 24 (a tie) and +1.8 over 27. Not ahead in every cell: see "Controller 34" below. |
 
 **Bounds** use privileged information through `scenarios.ScenarioEnvironment`. They are yardsticks, not entries.
 
@@ -82,6 +83,7 @@ Share of the maximum score, averaged over every cell of each suite:
 |---|---|---|---|---|---|
 | Bound 17 (no delay) | 95.9% | 93.8% | 78.1% | 89.3% | 95% |
 | Bound 16 | 90.4% | 86.2% | 69.5% | 82.0% | 94% |
+| **34** 27 with the guard run only when a probe is free | 86.9% | 77.3% | 71.7% | **78.6%** | 98% |
 | **20** CKF + aim at disc + turn cost + windows | 86.7% | 77.0% | 68.7% | **77.5%** | 97% |
 | **27** EKF + filter fixes + guarded moves + the same | 85.9% | 76.7% | 71.1% | **77.9%** | 98% |
 | 24 EKF + the same + sand odometer + stay alive | 86.5% | 76.5% | 68.8% | 77.3% | 97% |
@@ -119,6 +121,7 @@ Share of the maximum score, averaged over every cell of each suite:
 - **24 vs 19 on held-out seeds:** +0.2 points (+0.1 to +0.4), +0.6 on Part B (+0.3 to +0.9), and the same score on every published-profile episode. Its two additions are pure Python, like 19's.
 - **Candidate for the repository reference:** 19, or 24 if the team wants the hidden-sand fixes too. It is `kf_mpc` plus three pure-Python mixins, so it needs no numpy and could run inside the Harbor task image.
 - **Where 19–20 gain on held-out seeds:** turn cost +21 points; uplink windows +5 to +8. Where they lose: hidden sand, −2 to −4. Aiming at the disc removes slack that unmapped sand then needs.
+- **34 is not in the held-out table.** The ablation behind it had already used seeds 400–419, so it got its own fresh seeds (5000–5259). There it is +3.2 over controller 1 (+2.7 to +3.8), against +2.7 for 27 and +2.0 for 24 on the same seeds; on development seeds it is +3.3 (+2.8 to +3.8). See "Controller 34" below.
 
 The suites:
 - **base:** `static`, `noisy`, `rush` and `rush_noisy` as published.
@@ -247,10 +250,77 @@ Sölvi's supplement (`docs/lightlag-runs/overnight-reference27-study/`) found 27
 **What this means:**
 - The published profiles have no hidden patches. On them, **24 is the best Manh controller**: +0.9 over `kf_mpc`, +1.7 on plain `rush` at delay 3, and a tie on `rush_noisy`.
 - 27 is the controller for the sandbox, where hidden sand is not published.
-- **Next candidate (not built):** guard only when it pays.
-  - Either after the battery odometer has seen unmapped sand,
-  - or when a probe's round trip is cheap against the time left.
-  - Caveat for the first trigger: the sand-aware filter also relabels about 2 drive pieces per plain `rush_noisy` episode (position noise near mapped sand edges). A relabel alone is not evidence of hidden sand.
+- **Next candidate: guard only when it pays.** Built as controller 34, in the next section.
+
+### Controller 34: guard only when a probe is free (Saturday about 12:30 Helsinki)
+
+**The rule** (`_ArmedGuard`). Before a batch goes up, 34 asks: if the current plan started one telemetry round trip later, would it still collect the same value and still end in time to be home? A round trip is 2k + 2 ticks, plus the wait for an uplink window.
+- **Yes:** the probe is free, and 27's guarded moves run.
+- **No:** the batch goes as planned under 24's stay-alive rule.
+- On the way home no target is left in the plan, so a probe is always free there. That is where hidden sand kills.
+- The rule has no parameter of its own.
+- Sources: dual control, which weighs what a command teaches against what it costs (Feldbaum 1960; Bar-Shalom & Tse 1974; Mesbah 2018); value of information (Howard 1966); safe exploration that keeps a way back (Moldovan & Abbeel 2012).
+
+**Choosing it.** Development data only: the suites on seeds 0–19 and the plain rush profiles on seeds 700–899. Share of the maximum, with deaths in brackets:
+
+| When the guard runs | Plain rush | Suites | Hidden sand |
+|---|---|---|---|
+| Never (27 without the guard) | 76.8% | 75.0% | 55.4% (17% dead) |
+| On the way home only | 76.8% | 75.4% | 61.6% (2%) |
+| Way home, or unmapped sand proven | 76.8% | 75.4% | 61.8% (3%) |
+| **When a probe is free (34)** | **77.0%** | **76.0%** | **62.6% (2%)** |
+| Free probe, or unmapped sand proven | 77.0% | 75.9% | 62.3% (2%) |
+| Always (27) | 74.8% | 75.3% | 62.0% (2%) |
+| 24, for comparison | 76.8% | 74.5% | 51.4% (18%) |
+
+- **The way home alone gives most of the gain.** It recovers 24's plain-rush score and nearly all of 27's hidden-sand survival.
+- **Free probes add the rest.** They also run the guard before a target when the wait is harmless, as on `noisy`, which has no deadlines.
+- **A trigger on proven unmapped sand added nothing, so it was left out.** It counted sand the battery showed beyond what mapped sand within 3 position standard deviations of the drive could explain, with 0.2 m of tolerance.
+  - As a detector it works: it fired in 4 of 1,200 plain rush episodes and in 194 of 240 hidden-sand episodes. The raw odometer of 24 fires in 90 and 200.
+  - It is not in the repository. Rebuild it from this description if a later controller needs to know that the map is wrong.
+
+**Final check, once, on fresh seeds.** Suites on seeds 5000–5059 (11,520 episodes per controller) and plain rush profiles on seeds 5060–5259 (1,200 per controller). The registered class was run, after it matched the development prototype on 540 episodes. Seeds 900–979 were avoided because the Mars sandbox had used them.
+
+| Fresh seeds | `kf_mpc` | 24 | 27 | **34** | Sölvi |
+|---|---|---|---|---|---|
+| Plain rush profiles | 73.5% | 74.7% | 73.1% | **74.9%** | 41.5% |
+| Suites, all cells | 72.2% | 74.2% | 74.8% | **75.4%** | 47.7% |
+| Hidden sand | 52.2% | 51.8% | 63.2% | **63.3%** | 51.5% |
+| Dead, hidden sand | 17% | 17% | 3% | 4% | 1% |
+| Home, suites | 95.8% | 96.9% | 97.9% | 97.7% | 83.5% |
+| Dead, suites | 2.5% | 1.3% | 0.3% | 0.3% | 4.2% |
+
+Paired by episode, in points of share, with a 95% bootstrap over seeds:
+
+| 34 against | Plain rush | Plain rush, delay 3 | Suites | Hidden sand |
+|---|---|---|---|---|
+| `kf_mpc` | +1.4 (+1.0 to +1.8) | +1.6 (+0.9 to +2.3) | +3.2 (+2.7 to +3.8) | +11.1 (+8.6 to +13.5) |
+| 24 | +0.2 (−0.0 to +0.5) | +0.4 (−0.1 to +0.9) | +1.2 (+0.9 to +1.4) | +11.5 (+9.7 to +13.3) |
+| 27 | +1.8 (+1.5 to +2.1) | +2.2 (+1.6 to +2.9) | +0.5 (+0.4 to +0.7) | +0.1 (−0.4 to +0.5) |
+| `solvi_reference` | +33.4 (+32.3 to +34.7) | +34.4 (+32.8 to +36.2) | +27.7 (+26.6 to +28.8) | +11.8 (+9.2 to +14.4) |
+
+- **The development result held:** +3.3 over `kf_mpc` on development seeds, +3.2 on fresh ones.
+- **Plain rush:** 34 ties 24 and is 1.8 points above 27. The cost Sölvi's supplement found is gone.
+- **Hidden sand:** 34 equals 27. On `noisy` with hidden sand it plays exactly as 27 does: 78% with one patch, 69% with two, 1% dead (91% on the clean map). Sölvi's reference: 74% / 70%, up to 4% dead (75% clean).
+
+**Where 34 is not ahead** (192 suite cells of 60 seeds; 6 plain cells of 200 seeds):
+
+| 34 against | Suite cells higher / equal / lower | Worst cell | Plain cells higher / lower |
+|---|---|---|---|
+| `kf_mpc` | 172 / 4 / 16 | −2.9 (`noisy`, all noise halved, delay 3) | 6 / 0 |
+| 24 | 114 / 27 / 51 | −3.3 (`noisy`, all noise tripled, delay 3) | 5 / 1 (−0.1) |
+| 27 | 63 / 118 / 11 | −2.2 (`rush_noisy`, two hidden patches, delay 5) | 6 / 0 |
+| `solvi_reference` | 190 / 0 / 2 | −5.0 (`noisy`, two hidden patches, delay 0) | 6 / 0 |
+
+- **Against 24** it is ahead on average on every profile except `rush` in the suites (−0.05 over 3 cells). It is behind in 51 single cells: 25 on `noisy`, 25 on `rush_noisy`, 1 on `rush`.
+  - On `noisy` a probe is nearly always free, so 34 plays as 27 does (the same score in 86 of 93 cells) and pays what 27 pays.
+  - The rule checks one round trip at a time. Several probes in a row can add up, and a target discovered later was not in the plan the check priced.
+- **Against Sölvi** the two cells are `noisy` with two hidden patches at delays 0 and 3. That is the limit described under "What remains" above: no policy can win both those cells and the clean map.
+
+**Pitfall found on the way.** The first development run was invalid. The draft mixin had a class constant `SIGMAS`, which silently replaced `_AimDisc.SIGMAS` through the method resolution order and changed where every variant aimed.
+- It was caught because "guard never armed" did not reproduce 27 without the guard, episode by episode.
+- `test_mixin_constants_do_not_shadow_each_other` now checks every registered controller for it.
+- Check every new mixin against its two limits (always on, always off) before trusting a run.
 
 ## Discriminative seeds
 
@@ -369,7 +439,9 @@ Failure labels, per episode:
 ## Adding a controller
 
 1. Combine existing pieces, or write a new estimator or mixin, in `controllers.py`.
-2. Register it under the next free number. Give it a `note`, a `why` and a `built` date.
+   - Give a mixin's class constants names no other mixin uses. A shared name is silently replaced through the class order (see the pitfall under "Controller 34"); a test checks every registered controller.
+   - If a mixin switches another one on and off, first check its two limits: always on and always off must reproduce the controllers they stand for, episode by episode.
+2. Register it under the next free number (35 as of Saturday 12:35 Helsinki). Give it a `note`, a `why` and a `built` date.
 3. Run all three suites with `--controllers <N> --append` into your existing results.
 4. Add its row to the two tables above, with what it showed.
 5. Run the tests, then pull and push.

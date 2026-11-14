@@ -997,6 +997,74 @@ class _GuardedMove(_StayAlive):
         return prefix
 
 
+class _ArmedGuard(_GuardedMove):
+    """Guarded moves, armed only when a probe is free (needs what _GuardedMove needs).
+
+    _GuardedMove asks before every batch whether the rover survives if all unverified bedrock in
+    it is sand, and if not it probes: it sends a prefix and waits a round trip of telemetry. A
+    published map has no hidden sand, yet in the 50-tick rush missions energy is tight, the check
+    fails in 50-80% of episodes, and each probe costs 2k + 2 ticks. That wait was the whole
+    plain-profile cost of 27 (-3.3 points at delay 3; ablation in the README), while on hidden
+    sand the same guard is worth +6.4 points.
+
+    Here the guard runs only when the wait costs nothing the plan counts on: started one round
+    trip later, the current plan still collects the same value (no deadline is passed) and still
+    ends in time to be home. On the way home, with no target left in the plan, that always holds
+    (the guard itself checks that the round trip fits the horizon). Otherwise the batch goes as
+    planned under 24's stay-alive rule. The rule has no parameter of its own.
+
+    Literature: probing pays only while the information can still change a decision at an
+    acceptable price. Dual control weighs the probing effect of a command against its control
+    cost (Feldbaum 1960; Bar-Shalom & Tse 1974; Mesbah 2018, survey of dual MPC); the value of
+    information is the expected gain from deciding after the observation instead of before
+    (Howard 1966); safe exploration keeps a way back to a safe state (Moldovan & Abbeel 2012).
+
+    Mixin attribute names must be unique along the MRO: a first draft's class constant SIGMAS
+    silently replaced _AimDisc.SIGMAS and changed where every variant aimed."""
+
+    def send(self, commands):
+        if commands and self._probe_is_free():
+            return super().send(commands)                # guarded moves, as in 27
+        return super(_GuardedMove, self).send(commands)  # the stay-alive rule, as in 24
+
+    def _guard_round_trip(self):
+        windows = self._windows() if hasattr(self, "_windows") else None
+        return 2 * self.k + 2 + (windows[0] - windows[1] if windows else 0)
+
+    def _probe_is_free(self):
+        plan = getattr(self, "plan", ())
+        if not plan:
+            return True  # the way home
+        slot = self.next_slot()
+        if slot > self.horizon:
+            return False
+        state = self.predict(slot)
+        now = self._plan_outcome(plan, state, slot)
+        late = self._plan_outcome(plan, state, slot + self._guard_round_trip())
+        return late[0] >= now[0] - 1e-9 and late[1] <= self.horizon - self.home_slack()
+
+    def _plan_outcome(self, plan, state, slot):
+        """Value and end tick of the plan if it starts at slot (the planner's tick accounting)."""
+        tick, value, here = slot, 0.0, (state["x"], state["y"])
+        for i, target in enumerate(plan):
+            point = (target["x"], target["y"])
+            hop = self.leg(here, point)
+            if hop is None:
+                return -math.inf, math.inf
+            if i:
+                tick += self.wait_per_leg()
+            tick += len(hop.commands)
+            if self.needs_confirmation(hop):
+                tick += self.confirmation_ticks(hop)
+            value += self.value_at(target, tick)
+            tick += 1
+            here = point
+        home = self.leg(here, self.base)
+        if home is None:
+            return -math.inf, math.inf
+        return value, tick + self.wait_per_leg() + len(home.commands) - 1
+
+
 class EKF_fading_sandfilter_sandodo_guarded_aimdisc_turncost_window_MPC(
         _GuardedMove, _WindowAware, _AimDisc, _TurnCost, _Unverified, _FadingFilter, _SandAwareFilter,
         _SandOdometer, EKF_MPC):
@@ -1010,6 +1078,14 @@ class EKF_fading_sandfilter_sandodo_bayessand_guarded_aimdisc_turncost_window_MP
         _SandOdometer, EKF_MPC):
     """28: 27 plus 26's Bayesian unmapped-sand belief priced on the way home: the cautious twin,
     which gives up the thin third target unless clean ground driven so far makes it safe."""
+
+
+class EKF_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC(
+        _ArmedGuard, _WindowAware, _AimDisc, _TurnCost, _Unverified, _FadingFilter, _SandAwareFilter,
+        _SandOdometer, EKF_MPC):
+    """34: 27 whose guarded moves run only when a probe is free (a round trip of delay costs the
+    plan no value and still fits the horizon, as on every way home); otherwise 24's stay-alive
+    rule. Keeps 24's score on the published profiles and 27's survival on hidden sand."""
 
 # =============================================================================================
 # Bounds: same planner, privileged information
@@ -1317,6 +1393,23 @@ register("EKF_executive_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC_
          note="31 plus the executive (as 32)",
          why="Best on the slip check. Fresh seeds 900-979, noisy: limit 0.40 80.3% -> 88.8% (home 77 -> 80 of 80), "
              "0.35 75.0% -> 85.9%; rush_noisy +0.6 to +0.7 at 0.35-0.42; never below 31." + _SWARM_NOTE)
+_R6 = "2026-11-14, armed guard (27's guarded moves only when a probe is free)"
+register("EKF_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC_manh_controller_34",
+         _ours(EKF_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC), built=_R6,
+         note="27 with the guarded moves armed only when a probe is free: one telemetry round trip of delay "
+              "costs the current plan no value and still fits the horizon (always so on the way home); "
+              "otherwise 24's stay-alive rule",
+         why="The ablation of 27 showed its guarded moves are the whole plain-profile cost (-3.3 points at "
+             "delay 3 on plain rush: every probe waits a round trip) while being worth +6.4 with hidden sand. "
+             "Running the guard only when the wait costs the plan no value keeps both. Chosen on development "
+             "data (suites on seeds 0-19, plain rush on 700-899) over 'way home only' and over an extra "
+             "proven-unmapped-sand trigger, which added nothing. One final check on fresh seeds (suites "
+             "5000-5059, plain rush 5060-5259): suites +3.2 over controller 1 (+2.7 to +3.8), +1.2 over 24 "
+             "(+0.9 to +1.4), +0.5 over 27 (+0.4 to +0.7), +27.7 over solvi_reference; plain rush +0.2 over 24 "
+             "(-0.0 to +0.5, a tie), +1.8 over 27 (+1.5 to +2.1), +1.4 over controller 1; hidden sand 63.3% "
+             "against 63.2% for 27 and 51.8% for 24 (dead 4% / 3% / 17%). Not ahead in every cell: below 24 in "
+             "51 of 192 suite cells (worst -3.3) and below solvi_reference in the two noisy cells with two "
+             "hidden patches, the limit described in the README.")
 for _name in ("solvi_reference", "kristjan_reference", "blind", "cautious"):
     register(_name, _team(_name), kind="team", logged=False, note="team controller, imported unchanged",
              why="comparison only")

@@ -160,6 +160,61 @@ class LiteratureRoundTest(unittest.TestCase):
 
 
 @unittest.skipUnless(HAVE_NUMPY, "the Manh controllers need numpy")
+class ArmedGuardTest(unittest.TestCase):
+    """Controller 34: 27's guarded moves, run only when a probe is free (delay 3)."""
+
+    def test_probes_on_the_way_home(self):
+        # Hidden-sand seed 5: the patch is on the last way home, where a probe costs no sample.
+        # 34 probes there as 27 does and stops alive with all three samples (24 dies at base).
+        from lightlag_dynamic.manh_controllers.swarm import resolve, run_one
+        row, _ = run_one((resolve(["34"])[0], LiteratureRoundTest.HIDDEN, 3, 5, False))
+        self.assertTrue(row["alive"])
+        self.assertAlmostEqual(row["share"], 0.5)
+
+    def test_no_probe_when_the_wait_costs_a_target(self):
+        # Plain rush, development seed 753: no hidden sand, deadlines, a 50-tick horizon. 27 probes
+        # unverified ground, waits a round trip and loses 3 of 11 points; 34 sends the batch under
+        # the stay-alive rule and scores what 24 does.
+        from lightlag_dynamic.manh_controllers.swarm import resolve, run_one
+        scn = {"name": "default", "profile": "rush"}
+        n24, n27, n34 = resolve(["24", "27", "34"])
+        share = {n: run_one((n, scn, 3, 753, False))[0]["share"] for n in (n24, n27, n34)}
+        self.assertAlmostEqual(share[n24], 1.0)
+        self.assertLess(share[n27], 0.8)
+        self.assertAlmostEqual(share[n34], share[n24])
+
+    def test_mixin_constants_do_not_shadow_each_other(self):
+        # A class constant defined by two unrelated mixins of one controller silently takes the
+        # value of whichever comes first in the MRO. A draft of 34 replaced _AimDisc.SIGMAS that
+        # way and changed where every variant aimed. A subclass overriding its own parent is fine.
+        from lightlag_dynamic.manh_controllers import controllers as mc
+
+        def clashes(cls):
+            owners = {}
+            for klass in cls.__mro__:
+                for attr, value in vars(klass).items():
+                    if attr.isupper() and not callable(value):
+                        owners.setdefault(attr, []).append((klass, value))
+            return [(a.__name__, b.__name__, attr) for attr, defs in owners.items()
+                    for i, (a, va) in enumerate(defs) for b, vb in defs[i + 1:]
+                    if va != vb and not issubclass(a, b)]
+
+        checked = 0
+        for name in mc.REGISTRY:
+            cls = getattr(mc, name.rpartition("_manh_controller_")[0], None)
+            if isinstance(cls, type):
+                checked += 1
+                self.assertEqual(clashes(cls), [], name)
+        self.assertGreaterEqual(checked, 28)
+
+        class Draft(mc._GuardedMove):
+            SIGMAS = 3.0
+
+        bad = type("bad", (Draft, mc._AimDisc, mc._Unverified, mc._SandOdometer, mc.EKF_MPC), {})
+        self.assertEqual(clashes(bad), [("Draft", "_AimDisc", "SIGMAS")])
+
+
+@unittest.skipUnless(HAVE_NUMPY, "the Manh controllers need numpy")
 class SwarmTest(unittest.TestCase):
     def test_run_and_report(self):
         from lightlag_dynamic.manh_controllers import swarm
