@@ -100,51 +100,118 @@ def build_page(seed: int) -> str:
     return "world-{}.html".format(seed)
 
 
-STYLE = """<style>
-body{margin:0;background:#14161B;color:#EDE9E1;font:18px/1.5 Inter,Arial,sans-serif}
-main{max-width:860px;margin:0 auto;padding:48px 24px}
-h1{font:700 48px/1.1 'Space Grotesk',Arial,sans-serif;margin:0 0 8px}
-.eyebrow{color:#E0663A;letter-spacing:3px;font-weight:600;font-size:14px}
-.ref{color:#E8B84A}.claude{color:#8CC6E8}
-a{color:#8CC6E8}
-form{display:flex;gap:12px;margin:24px 0}
-input{flex:1;font:inherit;padding:12px 14px;border-radius:10px;border:1px solid #3A3F49;background:#1D2027;color:#EDE9E1}
-button{font:inherit;font-weight:600;padding:12px 20px;border-radius:10px;border:0;background:#E8B84A;color:#1A1C21;cursor:pointer}
-.worlds{display:flex;flex-wrap:wrap;gap:10px}
-.worlds a{padding:8px 14px;border-radius:999px;background:#22262E;text-decoration:none}
-.note{color:#9C978E;font-size:15px}
-</style>"""
+HEAD = """<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#121418;--panel:#1B1E25;--line:#2C313B;--text:#EDE9E1;--soft:#A9A49A;--gold:#E8B84A;--ice:#8CC6E8;--rust:#E0663A;--grey:#8E949E}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);font:17px/1.55 Inter,Arial,sans-serif;
+ background:radial-gradient(1200px 600px at 85% -10%,#3A1E14 0%,rgba(58,30,20,0) 60%),var(--bg)}
+a{color:var(--ice)}
+.wrap{max-width:1100px;margin:0 auto;padding:56px 28px 40px}
+.eyebrow{margin:0 0 18px;color:var(--rust);font:600 13px/1 Inter,Arial,sans-serif;letter-spacing:.24em;text-transform:uppercase}
+h1{margin:0;font:700 clamp(44px,7vw,84px)/1.0 'Space Grotesk',Arial,sans-serif;letter-spacing:-.02em}
+.sub{margin:14px 0 0;font:500 clamp(22px,2.6vw,30px)/1.2 'Space Grotesk',Arial,sans-serif;color:var(--gold)}
+.lead{max-width:520px;margin:22px 0 0;color:#D6D1C7;font-size:18px}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.hero svg{width:100%;height:auto}
+form{display:flex;gap:10px;margin:30px 0 0;max-width:520px}
+form label{position:absolute;left:-9999px}
+input{flex:1;min-width:0;padding:15px 18px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);
+ font:600 20px/1 'Space Grotesk',Arial,sans-serif;letter-spacing:.04em}
+input:focus{outline:2px solid var(--gold);outline-offset:2px}
+button{padding:15px 26px;border:0;border-radius:12px;background:var(--gold);color:#1A1C21;font:700 18px/1 'Space Grotesk',Arial,sans-serif;cursor:pointer}
+button:hover{filter:brightness(1.08)}
+.drivers{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:56px 0 0}
+.driver{padding:18px 18px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(27,30,37,.7)}
+.driver b{display:flex;align-items:center;gap:10px;font:600 16px/1.2 'Space Grotesk',Arial,sans-serif}
+.driver p{margin:8px 0 0;color:var(--soft);font-size:14.5px;line-height:1.45}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.gold{background:var(--gold)}.grey{background:var(--grey)}.ice{background:var(--ice)}.ring{border:3px solid var(--ice);background:transparent}
+h2{margin:52px 0 16px;font:600 14px/1 Inter,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--soft)}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.card{display:block;padding:18px;border-radius:14px;background:var(--panel);border:1px solid var(--line);color:var(--text);text-decoration:none;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.card .n{font:700 30px/1 'Space Grotesk',Arial,sans-serif}
+.card .tag{margin:8px 0 0;color:var(--rust);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.card p{margin:8px 0 0;color:var(--soft);font-size:14.5px;line-height:1.4}
+footer{margin:56px 0 0;padding:20px 0 0;border-top:1px solid var(--line);color:var(--soft);font-size:14px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+kbd{padding:1px 7px;border-radius:6px;border:1px solid var(--line);background:var(--panel);font:600 13px/1.6 Inter,Arial,sans-serif;color:var(--text)}
+.lanes{max-width:620px;margin:36px 0 0;display:grid;gap:16px}
+.lane{position:relative;height:2px;background:var(--line);border-radius:2px}
+.lane i{position:absolute;top:-5px;left:0;width:12px;height:12px;border-radius:50%;animation:drive 3.2s ease-in-out infinite alternate}
+.lane:nth-child(2) i{animation-duration:2.6s}.lane:nth-child(3) i{animation-duration:3.8s}.lane:nth-child(4) i{animation-duration:2.9s}
+@keyframes drive{from{left:0}to{left:calc(100% - 12px)}}
+.small{color:var(--soft);font-size:14px;margin:28px 0 0}
+@media (max-width:860px){.hero{grid-template-columns:1fr}.hero svg{max-width:420px}.drivers{grid-template-columns:1fr 1fr}.cards{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.drivers,.cards{grid-template-columns:1fr}form{flex-direction:column}}
+@media (prefers-reduced-motion:reduce){.lane i{animation:none;left:50%}.card{transition:none}}
+</style></head><body><main class="wrap">"""
+
+CRATER = """<svg viewBox="0 0 760 640" role="img" aria-label="Two rover tracks around craters: a gold one that returns to the lander, a blue one that stops short">
+<circle cx="420" cy="250" r="150" fill="#4A2618" stroke="#6B3622" stroke-width="10"/><circle cx="420" cy="250" r="96" fill="#2A160F"/>
+<circle cx="170" cy="470" r="80" fill="#4A2618" stroke="#6B3622" stroke-width="8"/><circle cx="640" cy="520" r="56" fill="#4A2618" stroke="#6B3622" stroke-width="6"/>
+<path d="M120 300 C 200 120, 300 60, 420 70 S 640 150, 660 300 S 560 470, 420 450 S 200 360, 120 300" fill="none" stroke="#E8B84A" stroke-width="8" stroke-linecap="round"/>
+<path d="M120 300 C 180 380, 300 560, 470 580 S 600 600, 690 420" fill="none" stroke="#8CC6E8" stroke-width="8" stroke-linecap="round" stroke-dasharray="2 18"/>
+<rect x="100" y="282" width="40" height="36" rx="6" fill="#EDE9E1"/>
+<path d="M674 404 L706 436 M706 404 L674 436" stroke="#8CC6E8" stroke-width="8" stroke-linecap="round"/></svg>"""
+
+DRIVERS = [("gold", "Our planner", "Plans the whole route against the battery and the sun."),
+           ("grey", "Textbook A* + Kalman", "Finds the cheapest path, then takes the best next target."),
+           ("ice", "Claude, one request", "An autopilot Opus wrote in a single answer."),
+           ("ring", "Claude, agent run", "The autopilot an Opus agent wrote during a mission.")]
+WORLDS = [(2027, "Judged site 1", "Claude's agent autopilot runs its battery flat."),
+          (2028, "Judged site 2", "The closest race: 0.457 against our 0.508."),
+          (2029, "Judged site 3", "Another flat battery for Claude."),
+          (871, "Fresh world", "Claude holds 19 samples. Then the battery dies."),
+          (610, "Fresh world", "We bring 28 samples home. Claude's rover dies at tick 166.")]
+
+
+def _page(title: str, body: str) -> str:
+    return HEAD.replace("__TITLE__", html.escape(title)) + body + "</main></body></html>"
 
 
 def _landing() -> str:
-    worlds = [(2027, "campaign site 1"), (2028, "campaign site 2"), (2029, "campaign site 3"),
-              (871, "level at tick 244, then lost"), (610, "two rovers lost early")]
-    links = "".join('<a href="/world/{0}">{0} · {1}</a>'.format(seed, html.escape(note)) for seed, note in worlds)
-    return """<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lightlag Traverse, live</title>{style}</head><body><main>
-<p class="eyebrow">JUNCTION 2026 · AFTERQUERY: BREAK THE AGENT</p>
-<h1>Lightlag Traverse, live on Modal</h1>
-<p>A rover on 600 by 400 metres of Mars-like ground: craters, sand, rock fields, a battery charged by the sun, every command arriving three ticks late.
-Pick any world. Modal drives it four times at once: the <span class="ref">reference planner</span>, a textbook controller (A*-style terrain search and a Kalman filter, greedy targets),
-and two <span class="claude">autopilots Claude wrote</span>, replayed without their agents. About a minute later you watch all four.</p>
+    drivers = "".join('<div class="driver"><b><span class="dot {0}"></span>{1}</b><p>{2}</p></div>'.format(
+        css, html.escape(name), html.escape(text)) for css, name, text in DRIVERS)
+    cards = "".join('<a class="card" href="/world/{0}"><div class="n">{0}</div><div class="tag">{1}</div><p>{2}</p></a>'.format(
+        seed, html.escape(tag), html.escape(text)) for seed, tag, text in WORLDS)
+    body = """<section class="hero"><div>
+<p class="eyebrow">Lightlag Traverse · live on Modal</p>
+<h1>One world.<br>Four rovers.</h1>
+<p class="sub">Only one always makes it home.</p>
+<p class="lead">Mars-like ground, a battery the sun refills, and every command lands three ticks late.
+Pick a world and Modal drives it four times at once. About a minute later you can watch every run.</p>
 <form onsubmit="location.href='/world/'+encodeURIComponent(this.seed.value);return false;">
-<input name="seed" type="number" min="{lo}" max="{hi}" placeholder="a world number, {lo} to {hi}" required>
-<button type="submit">Drive it</button></form>
-<div class="worlds">{links}</div>
-<p class="note">The rules are the frozen Lightlag Traverse 0.1.0 rules; worlds you open are kept, so the second visit is instant.
-On the page: Enter starts, Tab or a click follows a rover, S plays story mode, = speeds up.
-Code and results: the team's repository, tools/traverse_farm/ and docs/traverse-farm.md.</p>
-</main></body></html>""".format(style=STYLE, lo=LOWEST, hi=HIGHEST, links=links)
+<label for="seed">World number</label>
+<input id="seed" name="seed" type="number" min="__LO__" max="__HI__" placeholder="World 1 to 1,000,000" required>
+<button type="submit">Launch</button></form>
+</div>__CRATER__</section>
+<section class="drivers">__DRIVERS__</section>
+<h2>Worlds worth a look</h2>
+<section class="cards">__CARDS__</section>
+<footer><span>On a replay: <kbd>Enter</kbd> starts · <kbd>Tab</kbd> follows a rover · <kbd>S</kbd> tells the story · <kbd>=</kbd> speeds up</span>
+<span>Junction 2026 · AfterQuery: Break the Agent</span></footer>"""
+    body = (body.replace("__LO__", str(LOWEST)).replace("__HI__", str(HIGHEST)).replace("__CRATER__", CRATER)
+            .replace("__DRIVERS__", drivers).replace("__CARDS__", cards))
+    return _page("Lightlag Traverse · live", body)
 
 
 def _waiting(seed: int, since: float) -> str:
-    return """<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="refresh" content="5">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Driving world {seed}</title>{style}</head><body><main>
-<p class="eyebrow">WORLD {seed}</p><h1>Driving it now</h1>
-<p>Four rovers are crossing world {seed} on Modal, each in its own container: the <span class="ref">reference</span>, the textbook controller,
-and two <span class="claude">Claude-written autopilots</span>. A mission is 420 ticks; this takes about a minute. The page reloads by itself.</p>
-<p class="note">Started {ago:.0f} s ago. <a href="/">Back</a></p></main></body></html>""".format(
-        seed=seed, style=STYLE, ago=max(0.0, time.time() - since))
+    lanes = "".join('<div class="lane"><i class="{}"></i></div>'.format(css) for css, _, _ in DRIVERS)
+    body = """<p class="eyebrow">World __SEED__</p>
+<h1>Rovers on<br>the ground.</h1>
+<p class="lead">Four rovers are driving world __SEED__ right now, each in its own Modal container.
+A mission is 420 ticks. It takes about a minute, and this page refreshes on its own.</p>
+<div class="lanes">__LANES__</div>
+<p class="small">Started __AGO__ s ago · <a href="/">Pick another world</a></p>"""
+    body = (body.replace("__SEED__", str(seed)).replace("__LANES__", lanes)
+            .replace("__AGO__", "{:.0f}".format(max(0.0, time.time() - since))))
+    page = _page("World {} · driving".format(seed), body)
+    return page.replace('<meta charset="utf-8">', '<meta charset="utf-8"><meta http-equiv="refresh" content="4">', 1)
 
 
 def _forget(seed: int) -> None:
@@ -155,9 +222,8 @@ def _forget(seed: int) -> None:
 
 
 def _problem(message: str) -> str:
-    return """<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Lightlag Traverse</title>{style}</head>
-<body><main><h1>Not this time</h1><p>{message}</p><p><a href="/">Back</a></p></main></body></html>""".format(
-        style=STYLE, message=html.escape(message))
+    body = '<p class="eyebrow">Lightlag Traverse</p><h1>That didn\'t work.</h1><p class="lead">{}</p><p class="small"><a href="/">Back to the worlds</a></p>'
+    return _page("Lightlag Traverse", body.format(html.escape(message)))
 
 
 @app.function(cpu=0.5, memory=1024, volumes={"/cache": cache}, max_containers=4)
@@ -176,7 +242,7 @@ def web():
     @api.get("/world/{seed}")
     def world(seed: str):
         if not seed.isdigit() or not LOWEST <= int(seed) <= HIGHEST:
-            return HTMLResponse(_problem("A world is a whole number from {} to {}.".format(LOWEST, HIGHEST)), 400)
+            return HTMLResponse(_problem("A world is a whole number from {:,} to {:,}.".format(LOWEST, HIGHEST)), 400)
         seed_n = int(seed)
         page = Path("/cache/world-{}.html".format(seed_n))
         cache.reload()
@@ -191,7 +257,7 @@ def web():
                 return HTMLResponse(_waiting(seed_n, entry["since"]))
             except Exception:                  # the build failed: forget it, so a reload tries again
                 _forget(seed_n)
-                return HTMLResponse(_problem("Something went wrong driving world {}. Reload to try again.".format(seed_n)), 500)
+                return HTMLResponse(_problem("Driving world {} failed. Reload to try again.".format(seed_n)), 500)
             _forget(seed_n)
             return RedirectResponse("/world/{}".format(seed_n), status_code=303)
         call = build_page.spawn(seed_n)
