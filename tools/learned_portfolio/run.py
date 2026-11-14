@@ -111,7 +111,8 @@ def collect(stage):
     print(f"{stage}: {len(todo)} jobs, up to 100 parallel containers", flush=True)
     with modal.enable_output(), app.run():
         write(OUT / stage / "app.json", {"app_id": app.app_id, "started_utc": utc(), "jobs": len(todo)})
-        for job, result in zip(todo, mission.map(todo, order_outputs=True, return_exceptions=True)):
+        for index, result in enumerate(mission.map(todo, order_outputs=True, return_exceptions=True)):
+            job = todo[index]  # Exhaust the remote iterator so the SDK can close its stream cleanly.
             if isinstance(result, BaseException):
                 write(OUT / stage / ("failure-" + str(job["seed"]) + "-" + job["name"] + ".json"),
                       {"job": {k:v for k,v in job.items() if k != "source"}, "error": repr(result), "time": utc()})

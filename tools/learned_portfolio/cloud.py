@@ -27,7 +27,7 @@ app = modal.App(APP_NAME, image=image)
 _models = {}
 
 
-@app.function(cpu=1., memory=1024, timeout=600, max_containers=100, retries=0, scaledown_window=10)
+@app.function(cpu=1., memory=1024, timeout=600, max_containers=100, retries=0, scaledown_window=10, include_source=False)
 def mission(job):
     from lightlag_learned_portfolio.worker import load_model, run_episode
     model = None
@@ -42,7 +42,7 @@ def mission(job):
     return result
 
 
-@app.function(cpu=2., memory=4096, timeout=1800, max_containers=3, retries=0, scaledown_window=10)
+@app.function(cpu=2., memory=4096, timeout=1800, max_containers=3, retries=0, scaledown_window=10, include_source=False)
 def train(algorithm, data):
     from lightlag_learned_portfolio.model import fit
     result = fit(algorithm, data)
