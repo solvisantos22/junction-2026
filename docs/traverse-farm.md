@@ -62,6 +62,25 @@ The pilot scores higher than every saved Claude program on 288 to 300 of the 300
 
 Read with care: an agent's program was written during its own mission on world 2026 and is replayed here on worlds it never saw, with no agent watching. This measures the program, not the agent, which in a mission could notice trouble and step in. The one-request programs were written without seeing any world, so for them fresh worlds are a fair test.
 
+## Where the way home closed: the point of no return
+
+Every program's missions on worlds 600–899 again (the 0.1.0 rules, Modal app `ap-HeqHK3dHG5bKO0hFzbv9lU`, rows and `analysis.json` in [`traverse-farm/home-analysis/`](traverse-farm/home-analysis/)), now with `--analyse`: at every tick of a mission, from where the rover really was and with the battery it really had, could a drive over the cheapest ground still have reached the lander by the last tick, waiting for the sun when short? The drive model is the reference planner's own (`lightlag_traverse.planning.Ground`), fed the hidden truth (each terrain's true slip, the panel's true efficiency), and the check leans in the rover's favour: it ignores the 3-tick command delay and checks the battery only at the end of the drive home. The tick after the last "yes" is the point of no return ([`analysis.py`](../tools/traverse_farm/analysis.py)).
+
+| Player | At the lander | Lost: way home still open (median metres out) | Lost after the point (median ticks to the end of the battery, drives after the point) | Stranded (median tick of the point, ticks then left) |
+|---|---:|---|---|---|
+| Reference pilot | 300 | 0 | 0 | 0 |
+| One-request Opus 1 | 299 | 1 (184 m) | 0 | 0 |
+| Opus agent 1 | 209 | 1 (412 m) | 0 | 90 (tick 418, 2 left) |
+| Sonnet agent 1 | 180 | 90 (213 m) | 1 (14 ticks, 14 drives) | 29 (tick 378, 42 left) |
+| Opus agent 3 | 143 | 140 (194 m) | 17 (24 ticks, 17 drives) | 0 |
+| One-request Sonnet 1 | 140 | 0 | 0 | 160 (tick 408, 12 left) |
+| One-request Haiku 1 | 48 | 25 (69 m) | 19 (11 ticks, 9 drives) | 208 (tick 397, 23 left) |
+
+- **Of all 294 Claude rovers lost, 257 (87%) ran flat while the way home was still open.** Under these rules the sun out-charges the idle drain at every tick of the mission (checked on all 2100 missions), so a rover that stops never runs flat: every one of these deaths was avoidable by waiting.
+- **Stranded rovers lose the way home late.** Opus agent 1's 90 stranded rovers passed the point of no return a median 2 ticks before the end, the one-request Sonnet program's 160 a median 12 ticks before: a time budget for the trip home, not a far-off detour, is what they lacked. None took a sample after the point (median 0).
+- **The reference never reaches the point of no return**: 300 of 300 at the lander.
+- The deterministic players repeat the comparison's rows exactly (the pilot, Opus agent 3, Sonnet agent 1, the one-request Sonnet and Haiku programs); Opus agent 1's program varies from run to run (see Demo worlds), as do 7 of the one-request Opus program's 300 missions, so their counts here differ slightly from the comparison table (90 stranded here against 93 there for Opus agent 1).
+
 ## The campaign's worlds, 2027–2029
 
 At the Traverse owner's request, for its three-mission campaign task (`harbor/lightlag-traverse-campaign/` 0.1.0, commit `3bff7b2` on the Traverse branch): the pilot and the six saved programs on exactly the campaign's worlds, each world as a single mission under the unchanged 0.1.0 rules, played with that commit's Traverse code (Modal app `ap-EBzft92juMbdAafja7f7U1`, rows in [`traverse-farm/campaign-worlds/`](traverse-farm/campaign-worlds/)). "Campaign" is the campaign's own score: the value credited in all three missions over the value there was in all three.
