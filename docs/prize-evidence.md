@@ -462,6 +462,15 @@ These are recommended evidence choices, not newly asserted official entry requir
   but its raw mean 7.17031 remains below the old 7.68594; its no-probe control is
   7.12344. Both versions, full transcripts and replays are retained. The sealed
   six-region runner has 10 tests and independent review; no paid model claim.
+- Completed free study: 576 development episodes establish six competitive
+  regions and select fixed r5+r6; source/selection seal pushed in
+  [`6760d3c`](https://github.com/solvisantos22/junction-2026/commit/6760d3c)
+  before the 128 held-out episodes. The check fails every aggregate acquisition
+  margin: adaptive 9.96250 versus no-probe 9.79219, entropy 10.09687 and fixed 9.80156.
+  All 704 survey episodes return alive/home and reconstruct; all negative outcomes
+  retained. Human-approved harder-task direction remains provisional; Codex's
+  evidence does not justify a paid call under this protocol. No new API spending.
+  [Decision and handoff](lightlag-survey-handoff.md).
 
 ## Keep recording with minimal overhead
 

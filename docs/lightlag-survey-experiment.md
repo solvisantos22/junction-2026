@@ -1,5 +1,8 @@
 # Six regions, two inspections
 
+**Free experiment complete; advancement gate failed.** No six-region model run
+or canonical promotion. [Decision and handoff](lightlag-survey-handoff.md).
+
 Sölvi approved the next experiment after the three-region pilot failed to show a
 convincing strong-model gap. This is a new experimental package, not a final
 project/rules decision. The frozen expedition, shared physics and teammate work
@@ -180,7 +183,7 @@ one-second target. No cases or settings were selected from that score.
 
 The [576-episode development matrix](lightlag-runs/survey-development-v1/summary.json)
 completes without errors; all replays reconstruct and source hashes are unchanged.
-All six regions satisfy the competitive two-target/home criterion on maps0,1,3;
+All six regions satisfy the competitive two-target/home criterion on maps 0, 1 and 3;
 the adaptive reference physically samples every region across cases and uses
 two different nonempty inspection sets (r2+r6, r4+r6). The structural gate passes.
 
@@ -201,3 +204,73 @@ check after structural passage; it will test all four policies on the full
 freeze the selected r5+r6 pair, source hashes and settings before any check
 rollout. Preparation executes zero check policies. This freeze is pushed before
 running the check. No model API calls have been made.
+
+## Held-out result and decision
+
+The [128-episode held-out check](lightlag-runs/survey-check-v1/summary.json) ran
+only after seal commit `6760d3c` was pushed. All cases complete, replay/grade
+reconstruction passes, source hashes are unchanged, and every policy returns
+home alive in all 32 cases. These inputs are now used; they cannot validate a
+tuned revision.
+
+| Check policy | Mean raw score | Adaptive minus policy | Required gain |
+|---|---:|---:|---:|
+| Adaptive | 9.96250 | — | — |
+| No inspection | 9.79219 | +0.17031 | +1.0 |
+| Entropy | 10.09687 | −0.13437 | +0.5 |
+| Development-selected fixed r5+r6 | 9.80156 | +0.16094 | +0.5 |
+
+**The check fails every aggregate gain threshold.** Adaptive also beats or ties
+no inspection on only two of four maps, below the required three. Against entropy
+and the fixed pair it has nonnegative means on three maps but a larger loss on
+map 4. Its raw map gains over no inspection are −.8125, −.20625, +1.5, +.2.
+Safety passes; information-allocation gains do not. No paid call follows this
+protocol. No stronger-model failure is claimed: no model played this survey.
+
+Across all check cases the adaptive reference chooses the same inspection pair,
+r2+r6; entropy chooses r3+r6 and the fixed control r5+r6. The larger map stops
+the old opening from observing every region, but does not itself make adaptive
+acquisition demonstrably necessary. All six areas being competitive is a useful
+structural property, not sufficient evidence of a reasoning challenge.
+
+This does not prove an optimal adaptive policy cannot win: the public comparator
+has explicit planning approximations, and the check crosses only four maps with
+eight quality/noise draws. It does show that this implementation has not earned
+scarce model credits or replacement of the team's task. The next design should
+test consequential, context-dependent information choices before adding regions.
+[Handoff](lightlag-survey-handoff.md) records preserved inputs, limits and next work.
+
+### Saved-trace diagnosis (no reruns)
+
+Every adaptive launch in both matrices sends two inspections with no productive
+sample prefix, despite the planner supporting overlap candidates. In the check,
+no-probe physically samples 4.0 distinct regions per episode on average versus
+3.71875 for adaptive. Physical samples reveal quality while earning science.
+Adaptive has 9 failed samples and 9 late samples across 32 cases, versus 3 and 3
+for no-probe; entropy has 5 and 4. These are realized trace counts, not a causal
+ablation: choices, travel and outcomes all differ. They identify navigation,
+scheduling and planning approximations as confounds in the weak acquisition gain.
+
+Thus the result is not proof that information is useless or that an optimal
+policy cannot benefit. A stronger public decision oracle could improve this
+comparison. Future work should isolate the acquisition/commitment tradeoff and
+require a material advantage over matched simple policies before model testing.
+
+The saved decision logs make the reference issue more specific: adaptive's first
+physical sample averages tick 13.25, versus 5.75 for no-probe and 7.25 for entropy
+and the fixed control. On maps 4–6 the initial heuristic favors waiting over its
+best overlap by only .049–.056 raw. Prefix samples have hit/miss branches while
+continuation samples assume planned success, so these close modeled choices
+should not be treated as reliable value estimates.
+
+Initial standalone region values are identical across all check cases: r1=3.68,
+r2=2.88, r3=2.4, r4=2.4, r5=3.04, r6=3.36. Initial direct value is 7.04 from r1+r6.
+The geometry variation preserved feasibility without changing these rankings.
+Varying the public decision context and making exploration compete with a
+consequential commitment is a better next hypothesis than increasing choice count.
+
+Independent artifact audits confirm all 704 survey cases, their paired worlds,
+full source/artifact hashes, sample-credit/safety arithmetic, fixed-pair selection,
+structural plans and check margins. The check seal matches its published pre-run
+commit exactly. Additive `independent-audit.json` reports sit with the original
+evidence; no outcomes or frozen protocols were rewritten.

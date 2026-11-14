@@ -7,12 +7,18 @@ too. The original expedition, shared physics and canonical task are unchanged.
 [Contract and current results](../docs/lightlag-survey-experiment.md) ·
 [Predeclared free gate](../docs/lightlag-survey-gate.md)
 
-This package is experimental. The first comparator repair regressed on some
-three-region development cases; its results are retained while energy forecasting
-is corrected. Extra regions or lower normalized scores alone do not prove model
-difficulty. No six-region model result or final task choice is claimed.
+This package is experimental. The completed free study has 576 development and
+128 held-out episodes, all alive and home. The structural gate passes, but the
+information-value check fails: adaptive raw 9.9625 versus no inspection 9.79219,
+entropy 10.09687 and the development-selected fixed pair 9.80156. No paid model
+call follows this protocol. Extra regions or lower normalized scores alone do
+not prove difficulty. [Decision and handoff](../docs/lightlag-survey-handoff.md).
 
 ## Free development and separate check
+
+The commands below reproduce the published experiment; they do not create fresh
+validation data. Maps 0–7 and the declared episode seeds are now used. Any tuned
+revision needs a new protocol and unused check inputs.
 
 Run from the repository root. Choose new output directories; existing evidence
 is never overwritten. Workers can be 1, 2 or 3.
