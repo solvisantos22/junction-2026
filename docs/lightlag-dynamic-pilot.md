@@ -2,13 +2,57 @@
 
 14 November 2026. First increment about 01:45 Helsinki, second increment (noisy sensing, Kalman filter + MPC) about 02:20, third increment (Manh controllers and swarm testing) about 03:30. Owner: Manh / Claude Code. Code: [`lightlag_dynamic/`](../lightlag_dynamic/README.md), tests: `tests/lightlag_dynamic/`. Runs on Sölvi's simulator in [`lightlag/`](../lightlag/README.md) and changes nothing in it, nor in `lightlag_controllers/` or `lightlag_mcp/`.
 
-**No real agent has been run.** Everything below compares scripted controllers. It shows how the environment behaves under different rules, not whether a frontier agent struggles.
+**This pilot's own comparisons are all scripted controllers.** They show how the environment behaves under different rules, not whether a frontier agent struggles. The only real agent runs so far are Sölvi's [Harbor experiments](lightlag-experiments.md), which serve this package's `rush` profile: Claude Opus 5.5 scored 1.000 on seed 500 at delay 3, both on `rush` and on `rush_noisy`. The [Harbor reward check](#harbor-reward-check-what-the-model-is-graded-on) below confirms how that number is computed.
 
 ## Submission format: Harbor is required
 
 AfterQuery's 14 November update ([summary](afterquery-update-2026-11-14.md)): every environment must be a [Harbor](https://github.com/harbor-framework/harbor) task (the `laude-institute/harbor` link redirects there), played with the OpenCode harness, writing one reward between 0 and 1 to `/logs/verifier/reward.txt`, with at least one Harbor run log of a real model and a short README. AfterQuery provides no inference credits.
 
 For this pilot, that means nothing here reaches the submission except through Kristján's Harbor task ([`harbor/lightlag/`](../harbor/lightlag/), [notes](lightlag-harbor.md)). `python3 -m lightlag_dynamic.serve` is a drop-in for that task's simulator command: it accepts the same settings, including `LIGHTLAG_TOKEN_FILE`, answers `/healthz`, and was graded by `python -m lightlag_mcp.finish` over HTTP in a local test (`rush_noisy`, seed 7; result and replay written). Switching the task to a dynamic profile is a team rules decision and the task owner's change; nothing under `harbor/` is edited here.
+
+## Harbor reward check: what the model is graded on
+
+This was checked against Harbor's own documentation ([docs.harborframework.com](https://docs.harborframework.com/tasks/verifier)) and every recorded run, at commit ad406ae. Nothing has been tweaked.
+
+- **The task follows Harbor's conventions.** It uses only documented features:
+  - one number written to `/logs/verifier/reward.txt`;
+  - a separate verifier container (`environment_mode = "separate"`), so the agent cannot touch the grader;
+  - the evaluator's files collected from the `lightlag` service through `artifacts` and a `[[verifier.collect]]` hook;
+  - the game server declared under `[[environment.mcp_servers]]`.
+- **The grader is unchanged** since Kristján's first commit (d2dee96).
+  - reward = raw_score / max_available_value, clamped to 0–1.
+  - A malformed result fails the verifier instead of scoring zero.
+  - The simulator and MCP copies inside the task match their originals (`python3 harbor/sync_task.py --check`).
+- **Sölvi's rush experiments are graded through this package.**
+  - `tools/lightlag_experiments/prepare.py` builds a copy of the task outside the checkout. The copy serves `python -m lightlag_dynamic.serve`; the grader is not edited.
+  - The rush reward therefore comes from `DynamicEnvironment.evaluate`. A late sample earns 0.25 of its value, and discovered targets count in the maximum.
+  - All five rush runs were prepared from a clean checkout at 0bc0d43, and every source file they used is byte-identical to today's.
+- **Every recorded reward reproduces exactly.** Re-sending each run's logged commands to a fresh `DynamicEnvironment` gives the same true trajectory and the same reward:
+
+  | Run | Reward |
+  |---|---|
+  | `kf_mpc` | 1.000 |
+  | Opus 5.5 | 1.000 |
+  | Open loop | 0.571 |
+  | Leg and wait | 0.536 |
+  | Do nothing | 0.000 |
+
+  The decision auditor (`python3 -m lightlag_audit`) makes the same check from the agent's transcript. It flags `INFRA_REWARD_MISMATCH` if `reward.txt` ever disagrees with the evaluator.
+- **Our controllers optimise the graded number.**
+  - The swarm's `share` equals `grade.py`'s reward on all 13 recorded runs (seed 7, `rush` and `rush_noisy` seed 500) and on a fresh `rush_noisy` episode. `tests/lightlag_dynamic/test_harbor_reward.py` fails if the two drift apart.
+  - The swarm plays the experiment's settings: horizon 50, noise level 1, bumpiness 0.
+- **The noisy pilot matched the offline prediction** (`rush_noisy`, seed 500, delay 3).
+  - Before Sölvi's container results were pushed (db11c45), the swarm played the same episode offline through the public tools. `kf_mpc` (controller 1), controllers 18–21 and bound 16 were each predicted to score 1.000.
+  - The container runs then scored exactly as predicted:
+
+    | Policy | Predicted offline | Harbor |
+    |---|---|---|
+    | `kf_mpc` | 1.000 | 1.000 |
+    | Blind plan | 0.571 | 0.571 |
+    | Whole leg, then wait | 0.268 | 0.268 |
+
+    Claude Opus 5.5 also scored 1.000.
+  - So the container path adds nothing to the score. This is one seed, so it says nothing general about noise.
 
 ## Third increment: Manh controllers and swarm testing
 
