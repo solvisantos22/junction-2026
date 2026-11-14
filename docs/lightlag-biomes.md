@@ -197,7 +197,7 @@ Controller 36's share by delay, and the difference from Main Mars at the same de
 
 ## No GPS: a prototype where the position has to be worked out
 
-*Added Saturday about 15:40 Helsinki, at Manh's suggestion. A sandbox prototype: not in the catalog, the trial or the demo page, and not a rules decision. Scripted players only.*
+*Added Saturday about 14:40 Helsinki, at Manh's suggestion. A sandbox prototype: not in the catalog, the trial or the demo page, and not a rules decision. Scripted players only.*
 
 ```sh
 python3 -m lightlag_dynamic.biomes.nogps_players --seeds 0-19                 # every player, about 5 seconds (needs numpy)
@@ -291,7 +291,7 @@ The beacon's noise (0.05 to 1 m) and the number of particles (300 to 3,000) chan
 
 ### With a very noisy GPS kept
 
-*Added Saturday about 16:30 Helsinki, after Manh's point that a GPS may stay as long as it is very noisy next to the rest.*
+*Added Saturday about 15:00 Helsinki, after Manh's point that a GPS may stay as long as it is very noisy next to the rest.*
 
 `navigation=WEAK_GPS`, or `--weak-gps` on the runner, the MCP entry and the probe: the position fix is back in every packet with **2 m of noise per axis**, about seven times today's 0.3 m, and the compass is twice as coarse (**12°**). Both are published like everything else. The fix is then far too coarse to drive by and the compass too coarse to steer by.
 
@@ -346,11 +346,83 @@ Share of the maximum, and rovers home, on the same seeds:
 ### What it does not show
 
 - **No model has played it.** Claude writes code, and averaging the compass error is ten lines that already reach 37–47%. A careful agent could write the particle filter too. What the prototype adds for certain is that reading the rover's position off a packet no longer works, and that the last drive home has to be checked against the beacon.
-- **The tool descriptions still promise a position.** `lightlag_mcp/server.py` describes telemetry as it is today; it belongs to another owner and is unchanged. It has to say "no position" before any model run, or the run tests the wording.
+- **The stock tool descriptions still promise a position.** `lightlag_mcp/server.py` describes telemetry as it is today; it belongs to another owner and is unchanged. The biome MCP entry now serves corrected texts in its place ([below](#ready-for-a-model-run-the-weak-gps-option-as-a-harbor-task)). A run through any other entry would test the wording.
 - **The demo page cannot show it.** Its Earth view draws the reported position, which is null here.
 - **The reference needs numpy**, like every Manh controller built on the particle filter, so it cannot run inside the Harbor task image as it is.
 - **There is no bound** for this setting, so "56%" is the best known player, not the best possible.
 - **Seeds:** 0–19 for the sensitivity tables and the grid, 2100–2139 for the probe, 2200–2239 for the no-GPS result, 2300–2339 for the weak-GPS result. All now used.
+
+## Ready for a model run: the weak-GPS option as a Harbor task
+
+*Added Saturday about 15:40 Helsinki, after Manh's go-ahead to prepare it.*
+
+**Prepared, not run.** No model has played it. Nothing was built or run in Docker: this machine has no Docker, Harbor or OpenCode, and `harbor lint` has not been run on the output. The run costs API credit and is a team decision.
+
+### What was missing, and what is there now
+
+1. **The tool texts now match the sensors.** The biome MCP entry (`python3 -m lightlag_dynamic.biomes.serve`) swaps four of `lightlag_mcp`'s texts in its own process while it builds the server: the server instructions and the descriptions of `rules`, `map` and `telemetry_log`.
+   - With `--weak-gps`, telemetry is described as "position [x, y] (a noisy fix, see `rules`), beacon_range_m (measured distance to the base), sun_heading_deg (measured heading of the drive executed in that tick, or null)".
+   - With `--no-gps`, it says the position is null after the launch briefing.
+   - In a biome, the texts point at `rules()["biome"]` and at the map's extra layers.
+   - With Main Mars and today's fix nothing changes.
+   - No file of `lightlag_mcp` is edited, and the swap fails loudly if that wording ever changes. Every sentence says what telemetry reports, never what to do with it. The sentences are in `lightlag_dynamic/biomes/wording.py`.
+2. **A task generator,** `tools/biome_experiments/prepare.py`. It follows Sölvi's `tools/lightlag_experiments/prepare.py`: the task is written outside the checkout, an existing directory is never overwritten, and `experiment.json` records the hash of every source and generated file. It takes `--biome`, `--profile`, `--seed`, `--delay`, `--policy` and `--navigation gps | weak_gps | no_gps`.
+   - **With today's fix in Main Mars the agent gets the dynamic experiment's task.** `instruction.md` is byte for byte the one Sölvi's generator writes, and so is every other file except the simulator's entry point, its settings and the task name. A test compares the two outputs.
+   - **A navigation setting adds one section to the instruction, "Where the rover is", and rewrites nothing.** Without a fix, one clause changes too: "position and visual odometry are noisy" becomes "visual odometry is noisy".
+   - **The oracle solution is the frozen reference `kf_mpc`,** played through the five tools. It checks the pipeline; it is not the reference for the setting. The fusing reference needs numpy, which neither image has, so its scores below are direct runs.
+3. **A dry run without Docker,** as tests (`python3 -m unittest discover -s tests/biome_experiments`, 11 tests, about 15 seconds). They start the generated simulator with its Dockerfile's own command and its compose settings, with numpy blocked, on the loopback interface. They read the tool texts through a real MCP client, play `solve.sh`, then run the collect hook and the verifier.
+   - The reward equals a direct run to the verifier's six decimals: for weak GPS (`kf_mpc`), for no GPS (the blind plan) and for doing nothing (0 after the full 50 ticks).
+   - The fusing reference, played through that HTTP server, scores exactly what it scores directly. It uses the five tools and nothing else.
+   - Replays are identical under Python 3.12, the image's version, and under 3.14, this machine's: eight episodes compared by replay hash.
+
+### Proposed pilot, fixed before any model run
+
+`rush_noisy`, delay 3, seeds **2400, 2401, 2402 and 2403** (the next unused block), each in two arms: today's fix and weak GPS. Eight model runs, one attempt each, no retries, and no seed is replaced whatever it scores.
+
+Scripted scores on those seeds, as share of the maximum. They are direct runs, and every rover in the table ends alive at base:
+
+| Seed | Today's fix: `kf_mpc` (the oracle) | controller 36 | blind | Weak GPS: `fused` | `kf_mpc` (the oracle) | `fix_only` | blind |
+|---|---|---|---|---|---|---|---|
+| 2400 | 0.625000 | 0.675 | 0.600 | 0.500 | 0.350000 | 0.350 | 0.200 |
+| 2401 | 0.833333 | 0.833 | 0.667 | 0.750 | 0.416667 | 0.500 | 0.444 |
+| 2402 | 0.833333 | 0.583 | 0.556 | 0.333 | 0.222222 | 0.361 | 0.333 |
+| 2403 | 0.694444 | 0.694 | 0.667 | 0.556 | 0.555556 | 0.472 | 0.667 |
+| Mean | 0.747 | 0.697 | 0.622 | 0.535 | 0.386 | 0.421 | 0.411 |
+
+- **The two oracle columns are the check on the containers.** `harbor run -a oracle` must give exactly these rewards. If it does not, the container is not playing the same episode: stop before spending on a model.
+- **Four seeds are a pilot, not a ranking.** With weak GPS the fusing reference averages 0.53 here, the blind plan 0.41 and the frozen reference 0.39. On seed 2403 the blind plan is ahead of the fusing reference, and on 2402 it ties it. The ordering rests on the 40 seeds above (42% against 25% at delay 3), not on these four.
+- **With today's fix, controller 36 is behind `kf_mpc` on seed 2402** and level with it or ahead on the other three.
+- **What the pilot can show:** whether the model keeps its level from the first arm when the fix turns coarse, and where it lands next to the fusing reference on the same four episodes. Eight single attempts cannot show a general gap. If the model matches or beats `fused`, the pilot shows no gap, and the first thing to doubt is the reference: there is no bound for this setting.
+- **It is a separate question from the expedition.** Sölvi's [expedition handoff](lightlag-expedition-handoff.md) asks which uncertainty an agent chooses to investigate. This pilot only asks whether an agent combines noisy readings. Keep the two apart, as that handoff says: do not merge both changes into one experiment.
+
+From the repository root, with Docker running and Harbor available:
+
+```sh
+for seed in 2400 2401 2402 2403; do for nav in gps weak_gps; do
+  python3 tools/biome_experiments/prepare.py /tmp/lightlag-nav-$nav-$seed \
+    --navigation $nav --profile rush_noisy --seed $seed --delay 3
+done; done
+
+harbor lint /tmp/lightlag-nav-weak_gps-2400
+harbor run -p /tmp/lightlag-nav-weak_gps-2400 -a oracle \
+  --jobs-dir /tmp/lightlag-nav-jobs --job-name weak-2400-oracle --n-concurrent 1   # expect 0.350000
+harbor run -p /tmp/lightlag-nav-weak_gps-2400 -a nop \
+  --jobs-dir /tmp/lightlag-nav-jobs --job-name weak-2400-nop --n-concurrent 1      # expect 0.000000
+harbor run -p /tmp/lightlag-nav-weak_gps-2400 -a opencode \
+  -m anthropic/claude-opus-5-5 --ak version=1.19.5 --env-file .env \
+  --jobs-dir /tmp/lightlag-nav-jobs --job-name weak-2400-opus --n-concurrent 1
+```
+
+- The Harbor commands are the ones in [the dynamic experiment](lightlag-experiments.md), with the same OpenCode and model identifiers. They were not run here. `.env` is an example path for a Git-ignored credentials file.
+- **Cost:** the team's first Opus run reported $0.48 and about four minutes ([same page](lightlag-experiments.md)), and the three expedition sessions reported $1.56 together ([expedition handoff](lightlag-expedition-handoff.md)). At about $0.50 a session, eight runs are about $4 and the weak-GPS arm alone about $2. Both are above the $1.50 launch guard the expedition pilot used. A harder episode may keep the agent busy longer, and no cap is claimed. Nothing is started here.
+- The same generator packs any biome (`--biome troy_crust`), alone or with a navigation setting. No biome pilot is proposed here.
+
+### What was not checked
+
+- **No container was built or started**, `harbor lint` was not run, and no model has played.
+- The dry runs use this machine's Python 3.14 with `mcp` 2.3.0. Under Python 3.12 only direct episodes and the generator were checked, because that interpreter has no `mcp` here.
+- Image digests are not pinned: the task inherits the canonical `python:3.12-slim` tag, like the dynamic experiments.
+- The fusing reference has no Harbor run and cannot have one as it is: it needs numpy.
 
 ## Limits
 
@@ -359,14 +431,15 @@ Share of the maximum, and rovers home, on the same seeds:
 - **Bound 16 is not a bound in the biomes.** Its planner ignores their rules. On Relay Pass at delay 0 it scores below controller 36.
 - **40 seeds, one draw each.** Differences under about one point are noise.
 - **Mixed biomes** work and have one test; they were not part of the trial.
-- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting and position probes; 2200–2239 and 2300–2339 for the no-GPS and weak-GPS results. All now used.
+- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting and position probes; 2200–2239 and 2300–2339 for the no-GPS and weak-GPS results. All now used. 2400–2403 are set aside for the proposed model run; the scripted players have already played them.
 
 ## Suggested next steps (not done)
 
 1. Biome-aware layers for the 24 family, each inactive when its rule is absent: expected-cost pricing of crust at the published rate, a guard that only doubts ground inside crust regions, a wear count that shortens planned drives, a fit of the dune slope line.
 2. With those, a second calibration: stronger settings should then pass the keep rule.
-3. One model run in one biome at delay 0 and delay 3. This is the delay-relevance test with a real agent, it costs API credit, and it is a team decision.
-4. A team decision on whether any biome ever joins a graded profile. The brainstorm's advice stands: at most one or two, Relay Pass first, and only after a model has played it.
+3. The weak-GPS pilot prepared above: eight model runs on four fixed seeds. It costs API credit, and it is a team decision.
+4. One model run in one biome at delay 0 and delay 3. This is the delay-relevance test with a real agent; the same generator packs it, and it is a team decision too.
+5. A team decision on whether any biome ever joins a graded profile. The brainstorm's advice stands: at most one or two, Relay Pass first, and only after a model has played it.
 
 ## The biome edition of the 3D demo
 

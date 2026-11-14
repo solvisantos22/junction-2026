@@ -8,11 +8,17 @@ The same five tools, evaluator-only finish, artifacts and settings as
 `python3 -m lightlag_dynamic.serve` (LIGHTLAG_SEED, LIGHTLAG_DELAY, LIGHTLAG_TICKS,
 LIGHTLAG_PROFILE, LIGHTLAG_NOISE_LEVEL, LIGHTLAG_ARTIFACT_DIR, LIGHTLAG_EVALUATOR_TOKEN,
 LIGHTLAG_TOKEN_FILE), plus --biome / LIGHTLAG_BIOME and, for the no-GPS prototype, --no-gps /
-LIGHTLAG_NO_GPS=1. With the default biome, main_mars, and a position fix, the episode is the
-one `lightlag_dynamic.serve` plays.
+LIGHTLAG_NO_GPS=1 or --weak-gps / LIGHTLAG_WEAK_GPS=1. With the default biome, main_mars, and
+today's position fix, the episode is the one `lightlag_dynamic.serve` plays.
+
+The tool descriptions are made true for the episode (wording.py): with --no-gps or --weak-gps
+they say what telemetry reports instead of a trustworthy position, and in a biome they point
+at rules()["biome"] and the map's extra layers. With main_mars and today's fix they are
+lightlag_mcp's own, unchanged.
 
 A separate module, so `lightlag_dynamic/serve.py`, which the Harbor experiments copy and hash,
-stays unchanged; nothing under harbor/ uses this. Like that module it swaps the episode inside
+stays unchanged; nothing under harbor/ uses this (tools/biome_experiments/prepare.py packs it
+as an isolated Harbor task outside the checkout). Like that module it swaps the episode inside
 lightlag_mcp's EpisodeService (`_env`, `_max_ticks`, `_max_advance`). Serving needs the `mcp`
 package (2.x, Python 3.10+); BiomeEpisodeService itself is standard library only.
 """
@@ -60,6 +66,20 @@ class BiomeEpisodeService(EpisodeService):
         self.no_gps = bool(no_gps or weak_gps or gps_noise is not None)
 
 
+def build_biome_server(service, evaluator_token=None):
+    """lightlag_mcp's server for `service`, with tool texts that are true for its episode.
+
+    The stock texts promise a position in every packet and know nothing of biomes. They are
+    swapped (wording.py) only while this server is built, so nothing else in the process
+    changes and no file of lightlag_mcp is edited.
+    """
+    import lightlag_mcp.server as server_module  # late: needs the mcp package
+
+    from .wording import patched
+    with patched(server_module, service._env.rules()):
+        return server_module.build_server(service, evaluator_token=evaluator_token)
+
+
 def _env_int(name, default):
     value = os.environ.get(name)
     return default if value in (None, "") else int(value)
@@ -101,8 +121,6 @@ def main(argv=None):
     except ValueError as error:
         parser.error(str(error))
 
-    from lightlag_mcp.server import build_server  # late: --help works without the mcp package
-
     ticks = PROFILES[args.profile][4] if args.ticks is None else args.ticks
     service = BiomeEpisodeService(seed=args.seed, biome=args.biome, profile=args.profile,
                                   config=Config(delay_ticks=args.delay, max_ticks=ticks),
@@ -115,7 +133,7 @@ def main(argv=None):
         descriptor = os.open(args.token_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
         with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
             stream.write(token)
-    server = build_server(service, evaluator_token=token)
+    server = build_biome_server(service, evaluator_token=token)  # late import: --help works without mcp
 
     def finish():
         result = service.finish()

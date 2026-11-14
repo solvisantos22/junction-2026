@@ -5,12 +5,14 @@ The environment tests are standard library only. The player tests need numpy; ab
 
 import math
 import statistics
+import types
 import unittest
 
 from lightlag import Config
 from lightlag_dynamic.biomes import make_biome_env
 from lightlag_dynamic.biomes.nogps import NAVIGATION, WEAK_GPS, NoGpsEnvironment, make_nogps_env
-from lightlag_dynamic.biomes.serve import BiomeEpisodeService
+from lightlag_dynamic.biomes.serve import BiomeEpisodeService, build_biome_server
+from lightlag_dynamic.biomes.wording import brief, patched, reworded, tool_wording
 from lightlag_dynamic.controllers import POLICIES
 from lightlag_dynamic.missions import SENSING
 from lightlag_dynamic.tools import PublicTools
@@ -216,6 +218,94 @@ class PlayerTest(unittest.TestCase):
         result = finish(env).evaluate()
         self.assertTrue(result["alive"] and result["at_base"])
         self.assertGreater(result["raw_score"], 0)
+
+
+def service(**kw):
+    return BiomeEpisodeService(seed=3, profile="rush_noisy", config=Config(delay_ticks=3, max_ticks=50), **kw)
+
+
+class WordingTest(unittest.TestCase):
+    """What an agent is told about an episode follows that episode's published rules."""
+
+    def test_todays_fix_in_main_mars_changes_no_text(self):
+        rules = service()._env.rules()
+        self.assertEqual(tool_wording(rules), {})
+        self.assertEqual(brief(rules), "")
+
+    def test_the_texts_say_what_telemetry_reports_with_the_published_numbers(self):
+        for kw, present, absent in [({"weak_gps": True}, "noise of 2 m per axis", "position is null"),
+                                    ({"gps_noise": 1.5}, "noise of 1.5 m per axis", "position is null"),
+                                    ({"no_gps": True}, "position is null", "per axis")]:
+            rules = service(**kw)._env.rules()
+            changes = tool_wording(rules)
+            self.assertEqual(sorted(changes), ["INSTRUCTIONS", "RULES_DESCRIPTION", "TELEMETRY_DESCRIPTION"])
+            for text in (changes["INSTRUCTIONS"][0][1], brief(rules)):
+                self.assertIn(present, text)
+                self.assertNotIn(absent, text)
+                for field in ("beacon_range_m", "sun_heading_deg", "navigation"):
+                    self.assertIn(field, text)
+            fields = changes["TELEMETRY_DESCRIPTION"][0][1]
+            self.assertIn("beacon_range_m (measured distance to the base), sun_heading_deg", fields)
+            self.assertEqual("position (null" in fields, rules["navigation"]["position_noise_m"] is None)
+            self.assertIn("## Where the rover is", brief(rules))
+            self.assertNotIn("Where this mission is set", brief(rules))
+
+    def test_a_biome_is_pointed_at_and_its_published_rule_is_quoted(self):
+        rules = service(biome="troy_crust+relay_pass")._env.rules()
+        changes = tool_wording(rules)
+        self.assertEqual(sorted(changes), ["INSTRUCTIONS", "MAP_DESCRIPTION", "RULES_DESCRIPTION"])
+        self.assertIn("Troy Crust + Relay Pass Schedule", changes["INSTRUCTIONS"][0][1])
+        self.assertIn("crust_regions", changes["MAP_DESCRIPTION"][0][1])
+        text = brief(rules)
+        for entry in rules["biome"]:
+            self.assertIn("- {}: {}.".format(entry["name"], entry["rule"]), text)
+        self.assertNotIn("Where the rover is", text)
+        both = tool_wording(service(biome="troy_crust", weak_gps=True)._env.rules())
+        self.assertEqual(sorted(both), ["INSTRUCTIONS", "MAP_DESCRIPTION", "RULES_DESCRIPTION", "TELEMETRY_DESCRIPTION"])
+        self.assertIn("under `navigation`", both["RULES_DESCRIPTION"][0][1])
+        self.assertIn("under `biome`", both["RULES_DESCRIPTION"][0][1])
+
+    def test_a_change_in_the_stock_wording_fails_loudly_and_swaps_nothing(self):
+        rules = service(weak_gps=True)._env.rules()
+        moved = types.SimpleNamespace(INSTRUCTIONS="Begin with `rules`.", RULES_DESCRIPTION="and command limits.",
+                                      TELEMETRY_DESCRIPTION="position [x, y], heading_deg (commanded heading)")
+        with self.assertRaises(RuntimeError):
+            reworded(moved, rules)
+        with self.assertRaises(RuntimeError):
+            with patched(moved, rules):
+                self.fail("a server must not be built on half-swapped texts")
+        self.assertEqual(moved.TELEMETRY_DESCRIPTION, "position [x, y], heading_deg (commanded heading)")
+
+    def test_a_real_client_is_told_the_truth_and_the_stock_texts_survive(self):
+        try:
+            import asyncio
+
+            import lightlag_mcp.server as stock
+            from lightlag_mcp.client import connect
+        except ImportError:
+            self.skipTest("the mcp package is not installed")
+        names = ("INSTRUCTIONS", "RULES_DESCRIPTION", "MAP_DESCRIPTION", "TELEMETRY_DESCRIPTION")
+        before = {name: getattr(stock, name) for name in names}
+
+        def told(episode):
+            with connect(build_biome_server(episode)) as tools:
+                listed = asyncio.run_coroutine_threadsafe(tools._client.list_tools(), tools._loop).result(timeout=30)
+                return tools._client.instructions, {tool.name: tool.description for tool in listed.tools}
+
+        episode = service(biome="troy_crust", weak_gps=True)
+        instructions, described = told(episode)
+        self.assertEqual(sorted(described), ["advance", "map", "rules", "telemetry_log", "uplink"])
+        self.assertIn("this episode is set in Troy Crust", instructions)
+        self.assertIn("noise of 2 m per axis", instructions)
+        self.assertIn("Start with `rules` and `map`.", instructions)
+        self.assertIn("position [x, y] (a noisy fix, see `rules`), beacon_range_m", described["telemetry_log"])
+        self.assertNotIn("position [x, y], heading_deg", described["telemetry_log"])
+        self.assertIn("crust_regions", described["map"])
+        self.assertEqual({name: getattr(stock, name) for name in names}, before, "the swap must not outlive the build")
+        self.assertEqual(episode.finish()["tool_calls"], 0, "reading the texts is not a move")
+        instructions, described = told(service())
+        self.assertEqual(instructions, before["INSTRUCTIONS"])
+        self.assertEqual(described["telemetry_log"], before["TELEMETRY_DESCRIPTION"])
 
 
 if __name__ == "__main__":
