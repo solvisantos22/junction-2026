@@ -918,6 +918,78 @@ class _FadingFilter:
         finally:
             del f.update_position
 
+
+class _GapGate:
+    """Keep the filter right when telemetry goes missing or a position fix is grossly wrong.
+
+    1. Bridge gaps. The filter applies a drive only when that drive's packet arrives. When a packet
+       is lost, the drive never enters the state, the next fix lands metres from the prediction,
+       and the filter explains the jump as heading bias and slip. Before a packet is filtered, every
+       acknowledged, not-cancelled drive whose execute tick fell in the gap is applied with its
+       commanded metres.
+    2. Gate position fixes in front of the controller's own update (so also in front of
+       _FadingFilter, which would read an outlier as model error and inflate towards it). The fix
+       is compared with a prior that includes this packet's drive. A fix beyond the 99.9% chi-square
+       level (2 degrees of freedom) is held back: the packet is filtered with the fix given no
+       weight. If the next rejected fix tells the same story (innovation within 3 fix sigmas +
+       0.3 m of the held one), or the rejection comes right after a bridged gap, the prediction is
+       what is wrong: the position variance is inflated by the squared innovation and the fix is
+       accepted, so bias and slip are not dragged along. Two outliers in a row point in different
+       directions, so both are held back.
+
+    On the published profiles nothing is lost and a gross fix is rare, so this is idle there.
+    Literature: Kalman filtering with intermittent observations (Sinopoli et al., IEEE TAC 2004);
+    validation gates for data association (Bar-Shalom & Fortmann 1988); innovation-based outlier
+    rejection in navigation filters (Groves, Principles of GNSS, Inertial and Multisensor
+    Integrated Navigation Systems, 2013)."""
+    GAP_GATE_CHI2 = 13.8  # chi-square, 2 degrees of freedom, 99.9%
+
+    def _filter(self, packet):
+        f = self.filter
+        last = self.__dict__.get("_gate_seen_tick", 0)
+        bridged = False
+        acks = {a["command_id"]: a for a in self.acks}
+        by_tick = {a["execute_tick"]: a for a in self.acks}
+        for t in range(last + 1, packet["tick"]):
+            a = by_tick.get(t)
+            if a and a["command"]["action"] == "drive" and a["command_id"] not in self.cancelled:
+                f.mean, f.cov, _ = f.propagate(f.mean, f.cov, a["command"]["heading_deg"],
+                                               a["command"]["metres"], self.terrain_at)
+                bridged = True
+                self.bridged_drives = getattr(self, "bridged_drives", 0) + 1
+        self._gate_seen_tick = packet["tick"]
+
+        mean, cov = list(f.mean), [row[:] for row in f.cov]
+        executed = [e["command_id"] for e in packet["events"] if e["type"] == "command_executed"]
+        ack = acks.get(executed[0]) if executed else None
+        if ack is not None and ack["command"]["action"] == "drive" and packet["wheel_odometry"] > 0:
+            mean, cov, _ = f.propagate(mean, cov, ack["command"]["heading_deg"], packet["wheel_odometry"],
+                                       self.terrain_at)
+        z = packet["position"]
+        dx, dy = z[0] - mean[0], z[1] - mean[1]
+        s00, s11, s01 = cov[0][0] + f.r_pos, cov[1][1] + f.r_pos, cov[0][1]
+        det = s00 * s11 - s01 * s01
+        d2 = (s11 * dx * dx - 2 * s01 * dx * dy + s00 * dy * dy) / det if det > 0 else math.inf
+        if d2 <= self.GAP_GATE_CHI2:
+            self._gate_held = None
+            return super()._filter(packet)
+        self.gate_log = getattr(self, "gate_log", []) + [(packet["tick"], round(d2, 1))]
+        held = self.__dict__.get("_gate_held")
+        tolerance = 3.0 * math.sqrt(2.0 * f.r_pos) + 0.3
+        if bridged or (held is not None and math.hypot(dx - held[0], dy - held[1]) <= tolerance):
+            f.cov[0][0] += dx * dx + dy * dy
+            f.cov[1][1] += dx * dx + dy * dy
+            self._gate_held = None
+            return super()._filter(packet)
+        self._gate_held = (dx, dy)
+        saved = f.r_pos
+        f.r_pos = 1e12  # the fix gets no weight; drive, odometry and events are still filtered
+        try:
+            return super()._filter(packet)
+        finally:
+            f.r_pos = saved
+
+
 class _GuardedMove(_StayAlive):
     """Worst-case energy sufficiency with guarded moves (needs _Unverified and _SandOdometer).
 
@@ -1086,6 +1158,12 @@ class EKF_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC(
     """34: 27 whose guarded moves run only when a probe is free (a round trip of delay costs the
     plan no value and still fits the horizon, as on every way home); otherwise 24's stay-alive
     rule. Keeps 24's score on the published profiles and 27's survival on hidden sand."""
+
+
+class EKF_gapgate_sandodo_stayalive_aimdisc_turncost_window_MPC(
+        _GapGate, EKF_sandodo_stayalive_aimdisc_turncost_window_MPC):
+    """35: 24 whose filter survives lost telemetry packets (acknowledged drives are applied across
+    the gap) and gross position-fix outliers (chi-square gate). Idle on the published profiles."""
 
 # =============================================================================================
 # Bounds: same planner, privileged information
@@ -1410,6 +1488,20 @@ register("EKF_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC_m
              "against 63.2% for 27 and 51.8% for 24 (dead 4% / 3% / 17%). Not ahead in every cell: below 24 in "
              "51 of 192 suite cells (worst -3.3) and below solvi_reference in the two noisy cells with two "
              "hidden patches, the limit described in the README.")
+_R7 = "2026-11-14, stress tests (lost packets and outlier fixes)"
+register("EKF_gapgate_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_35",
+         _ours(EKF_gapgate_sandodo_stayalive_aimdisc_turncost_window_MPC), built=_R7,
+         note="24 + gap bridging (acknowledged drives applied across lost telemetry packets) + a chi-square "
+              "gate on position fixes in front of the filter",
+         why="Stress tests (vault note 23) found the filter's two blind spots: a drive is applied only when its "
+             "packet arrives, so one lost packet is explained as heading bias and slip (rush_noisy, 25% loss: "
+             "kf_mpc 0.19, 21 of 40 dead, below the blind plan), and position fixes have no gate, so a 3 m "
+             "outlier is believed (rush, 15% outliers: kf_mpc 0.19). 27 and 34's fading leans towards an "
+             "outlier. Designed on seeds 7000-7039. One final check on fresh seeds 8000-8059, delays 0/3/5: "
+             "published profiles +0.02 over 24 (-0.04 to +0.12; 2 of 720 episodes differ), +1.7 over "
+             "controller 1, -0.2 against 34 (a tie); faults suite (packet loss 10/25/50%, outliers 5/15%, "
+             "both) +24.7 over 24 (+23.1 to +26.4), +17.1 over 34, +31.9 over controller 1, 2 deaths in 2160 "
+             "episodes against 75 for 24. Bound 16 shares the gap flaw, so 35 beats it under packet loss.")
 for _name in ("solvi_reference", "kristjan_reference", "blind", "cautious"):
     register(_name, _team(_name), kind="team", logged=False, note="team controller, imported unchanged",
              why="comparison only")

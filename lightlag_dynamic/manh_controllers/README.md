@@ -21,7 +21,8 @@ python3 -m lightlag_dynamic.manh_controllers --list                             
 python3 -m lightlag_dynamic.manh_controllers --suite base  --seeds 0-19              # every controller, 4 profiles x delays 0/3/5
 python3 -m lightlag_dynamic.manh_controllers --suite noise --controllers 1 20 team   # names, numbers or kinds (manh, bound, team)
 python3 -m lightlag_dynamic.manh_controllers --suite partb --controllers 22 --append  # add a new controller to existing results
-python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                     # 15 tests, about 10 seconds
+python3 -m lightlag_dynamic.manh_controllers --suite faults --controllers 1 24 35      # lost packets and outlier fixes on rush / rush_noisy
+python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                     # 21 tests, about 15 seconds
 ```
 
 - Results go to `~/lightlag-manh-results/<suite>/`, outside the repository; use `--out` to change this, and do not commit result rows.
@@ -59,6 +60,7 @@ python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                
 | 32 | `EKF_executive_slipaware_MPC_manh_controller_32` | 30 plus an executive: explicit modes switched by telemetry events. `recover` backs out of sand by one-segment drives, each sent after the previous one executed, when that beats driving on; `nominal` drops a target only with evidence about its terrain | The layer alone still crawled along sand edges and wrote off sand targets on the prior. Fresh seeds 900–979, `noisy`: limit 0.40 78.1% → 86.6%, 0.35 75.0% → 85.0%, home 80 of 80. Equals 1 without a slip check. |
 | 33 | `EKF_executive_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_33` | 31 plus the executive | **Best on the slip check.** Fresh seeds 900–979, `noisy`: limit 0.40 80.3% → 88.8% (home 77 → 80 of 80), 0.35 75.0% → 85.9%; never below 31. Equals 24 without a slip check. [Details](../../docs/lightlag-dynamic-pilot.md#mars-operations-tweaks-sandbox-off-by-default). |
 | 34 | `EKF_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC_manh_controller_34` | 27 with the guarded moves run only when a probe is free: one telemetry round trip of delay costs the current plan no value and still fits the horizon (always so on the way home). Otherwise 24's stay-alive rule | **Best overall.** Keeps 24's score on the published profiles and 27's survival on hidden sand. Fresh seeds 5000–5259: +3.2 over 1 (+2.7 to +3.8), +1.2 over 24, +0.5 over 27; plain `rush` / `rush_noisy` +0.2 over 24 (a tie) and +1.8 over 27. Not ahead in every cell: see "Controller 34" below. |
+| 35 | `EKF_gapgate_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_35` | 24 with gap bridging (acknowledged drives applied across lost telemetry packets) and a chi-square gate on position fixes in front of the filter | **Most robust to link and localiser faults; identical to 24 on the published profiles.** Fresh seeds 8000–8059: published profiles +0.02 over 24 (2 of 720 episodes differ); faults suite +24.7 over 24, +17.1 over 34, +31.9 over 1, 2 deaths in 2160 episodes against 75 for 24. See "Controller 35" below. |
 
 **Bounds** use privileged information through `scenarios.ScenarioEnvironment`. They are yardsticks, not entries.
 
@@ -322,6 +324,42 @@ Paired by episode, in points of share, with a 95% bootstrap over seeds:
 - `test_mixin_constants_do_not_shadow_each_other` now checks every registered controller for it.
 - Check every new mixin against its two limits (always on, always off) before trusting a run.
 
+### Controller 35: lost packets and outlier fixes (Saturday about 14:00 Helsinki)
+
+**Why.** A stress test in the brainstorm vault (note 23, "Stress Tests and the Gauntlet") injected things that go wrong on a real rover. Two broke every filter-based controller, the frozen `kf_mpc` included:
+- **Lost telemetry packets.** The filter applies a drive only when that drive's packet arrives (`kf_mpc._filter`). After a lost packet, the next fix lands metres from the prediction and the filter explains the jump as heading bias and slip. Bound 16 has the same flaw: with exact fixes, a tiny prior variance against a tiny fix variance moves it only halfway each time.
+- **Outlier position fixes.** Odometry has a 3-sigma gate; position fixes have none. On `rush` the rules make fixes exact, so one bad fix is believed completely. The adaptive fading of 27 and 34 makes this worse: an outlier raises the innovation statistic, so fading inflates the covariance towards it.
+
+**The fix** (`_GapGate`, in front of 24's filter):
+1. Before a packet is filtered, every acknowledged, not-cancelled drive whose execute tick fell in the gap is applied with its commanded metres.
+2. Each fix is compared with a prior that includes this packet's drive. A fix beyond the 99.9% chi-square level (2 degrees of freedom) is held back. If the next rejected fix tells the same story, or the rejection comes right after a bridged gap, the position variance is inflated and the fix accepted (re-localise without dragging bias and slip along). Two outliers in a row point in different directions, so both are held back.
+
+**Two fault factors** in `scenarios.py`, published in `rules()` and off unless named: `packet_loss {"p": P}` and `fix_outliers {"p": P, "sigma": S}` (never applied with exact telemetry). The suite `--suite faults` runs both on `rush` and `rush_noisy`.
+
+**Design** on seeds 7000–7039 (vault lab). **One final check** on fresh seeds 8000–8059, delays 0/3/5 (`--suite base` and `--suite faults`, controllers 1, 16, 24, 34, 35, blind):
+
+| Delay 3, mean share (deaths of 60) | `kf_mpc` | 24 | 34 | **35** | Bound 16 | Blind |
+|---|---|---|---|---|---|---|
+| `rush`, no fault | 0.78 | 0.80 | 0.80 | 0.80 | 0.83 | 0.60 |
+| `rush_noisy`, no fault | 0.69 | 0.69 | 0.70 | 0.69 | 0.78 †1 | 0.54 |
+| `rush`, 25% packets lost | 0.52 †13 | 0.59 †2 | 0.72 | **0.78** | 0.65 †10 | 0.60 |
+| `rush_noisy`, 25% packets lost | 0.20 †29 | 0.26 †5 | 0.51 †1 | **0.68** | 0.58 †13 | 0.54 |
+| `rush_noisy`, 50% packets lost | 0.08 †43 | 0.19 †9 | 0.37 †3 | **0.64** | 0.52 †14 | 0.54 |
+| `rush`, 15% outlier fixes | 0.36 †25 | 0.49 †2 | 0.49 | **0.80** | 0.83 | 0.60 |
+| `rush_noisy`, 15% outlier fixes | 0.58 †3 | 0.59 | 0.47 †1 | **0.69** | 0.78 †1 | 0.54 |
+| `rush_noisy`, 25% lost + 5% outliers | 0.18 †31 | 0.25 †5 | 0.46 | **0.67** | 0.58 †13 | 0.54 |
+
+| 35 against (delays 0/3/5) | Published profiles (720 paired episodes) | Every fault cell (2160) |
+|---|---|---|
+| 24 | +0.02 (−0.04 to +0.12); 2 episodes differ | **+24.7 (+23.1 to +26.4)** |
+| 34 | −0.2 (−0.5 to +0.1), a tie | +17.1 (+15.8 to +18.6) |
+| controller 1 (`kf_mpc`) | +1.7 (+1.2 to +2.2) | +31.9 (+29.9 to +34.1) |
+
+- **Idle on the published profiles**, as intended: no packet is lost there and a gross fix is rare.
+- **Lost packets:** `kf_mpc` falls below the blind plan from 10% loss on `rush_noisy`; 35 loses at most 0.06 up to 50% loss. Deaths in all 2160 fault episodes: 35 has 2, 24 has 75, `kf_mpc` 584.
+- **Outliers:** 35 keeps its fault-free score. 34 is at or below 24 there, because of the fading.
+- **Not covered:** hidden sand (35 is built on 24, not 34, so it has 24's hidden-sand limit), and the faults the gate cannot see (lost uplinks, safe mode, battery fade), which the vault note measures separately. Bound 16 is not a bound under packet loss.
+
 ## Discriminative seeds
 
 On seed 500, the Harbor reference (`kf_mpc`) and Claude Opus 5.5 both score 1.000, on `rush` and on `rush_noisy`. That seed cannot show a gap between a model and the reference. `seeds.py` looks for seeds that a feedback controller using only the five public tools nearly solves, while each shortcut an agent might take falls well short.
@@ -413,7 +451,7 @@ Caveats:
 |---|---|
 | `controllers.py` | Every controller, the mixins they combine (`_AimDisc`, `_TurnCost`, `_WindowAware`, `_Tight`), `REGISTRY`, `RETIRED` |
 | `estimators.py` | Particle filter, cubature drive prediction, RTS smoother (numpy) |
-| `scenarios.py` | `ScenarioEnvironment`: the dynamic environment plus separate noise dials, exact telemetry and a truth tap for bounds, and the Part B factors |
+| `scenarios.py` | `ScenarioEnvironment`: the dynamic environment plus separate noise dials, exact telemetry and a truth tap for bounds, the Part B factors, and two fault factors (`packet_loss`, `fix_outliers`; off unless named) |
 | `superlog.py` | Per-decision, per-packet and per-episode logging, with failure labels |
 | `swarm.py` | Suites, the parallel runner, the report, the command line |
 | `seeds.py` | Discriminative-seed finder: the declared criteria, the players and a ranked report |
@@ -442,7 +480,7 @@ Failure labels, per episode:
 1. Combine existing pieces, or write a new estimator or mixin, in `controllers.py`.
    - Give a mixin's class constants names no other mixin uses. A shared name is silently replaced through the class order (see the pitfall under "Controller 34"); a test checks every registered controller.
    - If a mixin switches another one on and off, first check its two limits: always on and always off must reproduce the controllers they stand for, episode by episode.
-2. Register it under the next free number (35 as of Saturday 12:35 Helsinki). Give it a `note`, a `why` and a `built` date.
+2. Register it under the next free number (36 as of Saturday 14:00 Helsinki). Give it a `note`, a `why` and a `built` date.
 3. Run all three suites with `--controllers <N> --append` into your existing results.
 4. Add its row to the two tables above, with what it showed.
 5. Run the tests, then pull and push.

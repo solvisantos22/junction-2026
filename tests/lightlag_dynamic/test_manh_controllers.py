@@ -215,6 +215,72 @@ class ArmedGuardTest(unittest.TestCase):
 
 
 @unittest.skipUnless(HAVE_NUMPY, "the Manh controllers need numpy")
+class FaultFactorTest(unittest.TestCase):
+    def _played(self, profile, factors, **kw):
+        from lightlag_dynamic.manh_controllers.scenarios import make_env
+        env = make_env(7001, 3, profile, factors=factors, **kw)
+        while not env.advance(5)["episode_complete"]:
+            pass
+        return env
+
+    def test_packet_loss_drops_packets_and_is_published(self):
+        env = self._played("rush_noisy", {"packet_loss": {"p": 0.25}})
+        lost = {e["tick"] for e in env.fault_events if e["fault"] == "packet_lost"}
+        received = {p["tick"] for p in env.telemetry_log()}
+        self.assertTrue(lost)
+        self.assertIn(0, received)  # the briefing is never lost
+        self.assertFalse(lost & received)
+        deliverable = set(range(0, 48))  # a packet from tick t arrives at t + 3; the horizon is 50
+        self.assertEqual((lost | received) & deliverable, deliverable)
+        self.assertEqual(env.rules()["telemetry_packet_loss"]["probability"], 0.25)
+
+    def test_outliers_move_fixes_but_never_exact_telemetry(self):
+        clean = {p["tick"]: p["position"] for p in self._played("rush", {}).telemetry_log()}
+        env = self._played("rush", {"fix_outliers": {"p": 0.15, "sigma": 3.0}})
+        hit = {e["tick"] for e in env.fault_events}
+        self.assertTrue(hit)
+        moved = {p["tick"] for p in env.telemetry_log() if p["position"] != clean[p["tick"]]}
+        self.assertEqual(moved, hit)
+        exact = self._played("rush", {"fix_outliers": {"p": 0.15, "sigma": 3.0}}, exact_telemetry=True)
+        self.assertEqual(exact.fault_events, [])
+
+    def test_no_factor_no_change(self):
+        a = self._played("rush_noisy", {}).replay()
+        b = self._played("rush_noisy", {"packet_loss": {"p": 0.0}}).replay()
+        self.assertEqual(a["received_telemetry"], b["received_telemetry"])
+
+
+@unittest.skipUnless(HAVE_NUMPY, "the Manh controllers need numpy")
+class GapGateTest(unittest.TestCase):
+    """35 = 24 + gap bridging + fix gate. Seed 7001 is a development seed (vault note 23)."""
+
+    def _row(self, number, profile, factors):
+        from lightlag_dynamic.manh_controllers.swarm import resolve, run_one
+        row, _ = run_one((resolve([number])[0], {"name": "t", "profile": profile, "factors": factors},
+                          3, 7001, False))
+        return row
+
+    def test_identical_to_24_without_faults(self):
+        for profile in ("rush", "rush_noisy"):
+            a, b = self._row("24", profile, {}), self._row("35", profile, {})
+            for key in ("score", "share", "alive", "at_base", "samples_taken", "battery_end"):
+                self.assertEqual(a[key], b[key], (profile, key))
+
+    def test_lost_packets_no_longer_kill(self):
+        loss = {"packet_loss": {"p": 0.25}}
+        self.assertFalse(self._row("24", "rush_noisy", loss)["alive"])
+        row = self._row("35", "rush_noisy", loss)
+        self.assertTrue(row["alive"] and row["at_base"])
+        self.assertEqual(row["share"], 1.0)
+
+    def test_outlier_fixes_are_held_back(self):
+        outliers = {"fix_outliers": {"p": 0.15, "sigma": 3.0}}
+        nominal = self._row("35", "rush", {})["share"]
+        self.assertLess(self._row("24", "rush", outliers)["share"], nominal - 0.3)
+        self.assertEqual(self._row("35", "rush", outliers)["share"], nominal)
+
+
+@unittest.skipUnless(HAVE_NUMPY, "the Manh controllers need numpy")
 class SwarmTest(unittest.TestCase):
     def test_run_and_report(self):
         from lightlag_dynamic.manh_controllers import swarm

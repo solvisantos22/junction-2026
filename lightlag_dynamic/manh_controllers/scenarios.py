@@ -11,6 +11,11 @@ Adds, on top of lightlag_dynamic.environment.DynamicEnvironment (unchanged):
       hidden_patches    soft sand under ground the map calls bedrock; NOT published
       slip_change       slip coefficients jump once mid-mission; that it can happen is published
       turn_cost         energy per degree of heading change; published
+      packet_loss       {"p": P}: each telemetry packet is lost with probability P and never
+                        arrives (the tick-0 briefing never is); published
+      fix_outliers      {"p": P, "sigma": S}: with probability P a delivered position fix carries
+                        an extra Gaussian error of S metres per axis; published; never applied with
+                        exact telemetry (the bounds keep perfect fixes)
 
 None of this is a rules decision: it is a test bench for controllers.
 """
@@ -58,6 +63,7 @@ class ScenarioEnvironment(DynamicEnvironment):
         self._last_drive_terrains = None
         self._turn_spent = 0.0
         self._slip_changed_at = None
+        self.fault_events = []
         if self.factors.get("hidden_patches"):
             self._world = _HiddenTerrainWorld(self._world, self._patches(seed, self.factors["hidden_patches"]))
         self.true_slip_initial = dict(self._slip)
@@ -81,6 +87,14 @@ class ScenarioEnvironment(DynamicEnvironment):
             rules["slip_may_change"] = "slip coefficients may change once during the mission"
         if "turn_cost" in f:
             rules["turn_cost_per_degree"] = f["turn_cost"]
+        if "packet_loss" in f:
+            rules["telemetry_packet_loss"] = {"probability": f["packet_loss"]["p"],
+                                              "rule": "a lost packet never arrives; later packets still do"}
+        if "fix_outliers" in f:
+            rules["position_fix_outliers"] = {"probability": f["fix_outliers"]["p"],
+                                              "sigma_m": f["fix_outliers"]["sigma"],
+                                              "rule": "an outlier fix carries an extra Gaussian error of "
+                                                      "sigma_m per axis on top of the usual noise"}
         return rules
 
     # ---- privileged access (bounds only; never given to a real controller) ------------------
@@ -139,6 +153,26 @@ class ScenarioEnvironment(DynamicEnvironment):
                 self._slip[terrain] = min(0.9, max(0.0, self._slip[terrain] + delta))
             self._slip_changed_at = self._tick + 1
         super()._step()
+        self._faults(self._tick)
+
+    def _faults(self, t):
+        """Outlier fixes, then lost packets, for the packet of tick t. Seeded by (seed, tick)."""
+        f = self.factors
+        if not (f.get("fix_outliers") or f.get("packet_loss")) or not self._pending_packets:
+            return
+        packet = self._pending_packets[-1]
+        out = f.get("fix_outliers")
+        if out and not self._exact and random.Random(f"scenario-outlier:{self._seed}:{t}").random() < out["p"]:
+            rng = random.Random(f"scenario-outlier-xy:{self._seed}:{t}")
+            x, y = packet["position"]
+            x = min(self._world.width, max(0.0, x + rng.gauss(0.0, out["sigma"])))
+            y = min(self._world.height, max(0.0, y + rng.gauss(0.0, out["sigma"])))
+            self._pending_packets[-1] = {**packet, "position": [round(x, 10), round(y, 10)]}
+            self.fault_events.append({"tick": t, "fault": "fix_outlier"})
+        loss = f.get("packet_loss")
+        if loss and random.Random(f"scenario-loss:{self._seed}:{t}").random() < loss["p"]:
+            self._pending_packets.pop()
+            self.fault_events.append({"tick": t, "fault": "packet_lost"})
 
     def _drive(self, command, events):
         start = self._world.terrain_at(self._x, self._y)
@@ -170,7 +204,7 @@ class ScenarioEnvironment(DynamicEnvironment):
         replay = self.replay()
         replay["scenario"] = {"factors": self.factors, "true_slip_initial": self.true_slip_initial,
                               "true_slip_final": dict(self._slip), "slip_changed_at": self._slip_changed_at,
-                              "turn_energy": self._turn_spent,
+                              "turn_energy": self._turn_spent, "fault_events": list(self.fault_events),
                               "hidden_patches": getattr(self._world, "patches", None)}
         return replay
 

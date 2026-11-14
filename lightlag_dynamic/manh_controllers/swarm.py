@@ -77,7 +77,20 @@ def suite_partb():
     return [dict(s, profile=p) for s in out for p in ("noisy", "rush_noisy")]
 
 
-SUITES = {"base": suite_base, "noise": suite_noise, "partb": suite_partb}
+def suite_faults():
+    """Things that go wrong on the link and the localiser: lost telemetry packets, outlier fixes."""
+    out = [{"name": "default", "factors": {}},
+           {"name": "packet_loss_10", "factors": {"packet_loss": {"p": 0.10}}},
+           {"name": "packet_loss_25", "factors": {"packet_loss": {"p": 0.25}}},
+           {"name": "packet_loss_50", "factors": {"packet_loss": {"p": 0.50}}},
+           {"name": "outliers_5", "factors": {"fix_outliers": {"p": 0.05, "sigma": 3.0}}},
+           {"name": "outliers_15", "factors": {"fix_outliers": {"p": 0.15, "sigma": 3.0}}},
+           {"name": "loss_25_outliers_5", "factors": {"packet_loss": {"p": 0.25},
+                                                      "fix_outliers": {"p": 0.05, "sigma": 3.0}}}]
+    return [dict(s, profile=p) for s in out for p in ("rush", "rush_noisy")]
+
+
+SUITES = {"base": suite_base, "noise": suite_noise, "partb": suite_partb, "faults": suite_faults}
 
 
 def _factors(scn, horizon):
