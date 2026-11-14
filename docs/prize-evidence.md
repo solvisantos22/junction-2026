@@ -802,3 +802,18 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
 - **Verification:** 60 tests (the 47 earlier ones and 13 for the guard: it is off by default, brings rovers home, fires when the slack is down to about one more drive out and not at the start, never lengthens the way home with its own drives, keeps the rewards adding up to the official score, leaves a rover waiting at base alone, changes only the two margins in the observation, and plans around hazards and sand) pass on Python 3.14 with numpy 2.5 and Python 3.12 with numpy 1.26. With the guard off, the 120 earlier check rows of `max.npz`, `plain` and `random` on seeds 2700-2739 replay exactly, and the final code reproduces the 320 rows of the new check exactly.
 - **Evidence:** [guard](../lightlag_ppo_icm/home.py), [tests](../tests/lightlag_ppo_icm/), [policies, run logs and check rows](../lightlag_ppo_icm/policies/).
 - **Scope and limits:** a sandbox baseline, not a rules or reference decision. No model or API call, no cloud compute. Flat 40 m family only. The guard trusts the belief, which can be off by more than the base radius at the end; crust, which hides soft cells, is only priced at twice its cost. Training with the guard did not teach the agent to pace itself: the guard does the pacing.
+
+### Kristján / Codex — reference component ablations (14 November)
+
+Kristján asked Codex to modify each part of the reference a little and collect
+more numbers. Codex implemented an isolated 15-configuration sweep, including
+cubature heading propagation, with pinned sources, paired maps, a predeclared
+selection/fresh-confirmation protocol and replay audits. The baseline pilot and
+simulator remain the team's existing work. Kristján chose the experimental scope;
+no canonical reference change or model-gap claim is made. Seven focused tests
+pass; all 15 quick smoke missions are home/alive with no invalid calls/errors,
+all 15 physics replays reproduce, and two full controller repeats match exactly.
+No API call or cloud job. [Protocol](reference-ablation.md),
+[implementation](../tools/reference_ablation/),
+[smoke evidence](reference-ablation-results/smoke/audit.json),
+[results](reference-ablation-results/README.md). Production results pending.
