@@ -11,3 +11,5 @@ RUN pip install --no-cache-dir "mcp==2.3.0"
 
 WORKDIR /app
 COPY lightlag_client.py /app/lightlag_client.py
+# Starts the agent's program outside the reach of its shell tool's time limit.
+COPY detach.py /app/detach.py

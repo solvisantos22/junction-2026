@@ -54,7 +54,7 @@ Your score is the mean over all 6 missions, so it lies between 0 and 1. It is co
   ```
 
   A rejected request raises `ValueError` with the reason and changes nothing.
-- Start your program in the background and watch its output, for example `nohup python3 autopilot.py > autopilot.log 2>&1 &`. A command left in the foreground may be cut off by your shell tool's time limit while the campaign is still running.
+- Start your program with the launcher: `python3 /app/detach.py python3 autopilot.py`. It returns at once, the program keeps running, and its output goes to `autopilot.log`, which you can read with separate short commands. Do not rely on `&` or `nohup` for this: when a command reaches your shell tool's time limit, the tool may stop everything that command started, background jobs included, and the campaign would go on without your program.
 - You may also call the tools yourself at any time, and you may change or restart your program while the campaign runs. The clock does not wait for either.
 
-You may write and run any code. If you stop early, the mission in progress still runs to its end with the battery draining, and the missions after it score 0.
+You may write and run any code. Your program stops when your session ends, so do not finish before `campaign_complete` is true. If you stop early, the mission in progress still runs to its end with the battery draining, and the missions after it score 0.

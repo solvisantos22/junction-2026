@@ -47,10 +47,23 @@ class TaskFilesTest(unittest.TestCase):
         self.assertIn("docker-compose.yaml", ignore)
         dockerfile = (TASK / "environment" / "Dockerfile").read_text(encoding="utf-8")
         copied = [line.split()[1] for line in dockerfile.splitlines() if line.startswith("COPY ")]
-        self.assertEqual(copied, ["lightlag_client.py"])
-        client = (TASK / "environment" / "lightlag_client.py").read_text(encoding="utf-8")
-        for word in ("lightlag_live", "lightlag_dynamic", "DynamicEnvironment", "seed"):
-            self.assertNotIn(word, client)
+        self.assertEqual(copied, ["lightlag_client.py", "detach.py"])
+        for name in copied:
+            text = (TASK / "environment" / name).read_text(encoding="utf-8")
+            for word in ("lightlag_live", "lightlag_dynamic", "DynamicEnvironment", "seed"):
+                self.assertNotIn(word, text, name)
+
+    def test_the_instruction_names_a_launcher_that_is_in_the_image(self):
+        # Task 0.1.1 suggested `nohup ... &`; three agents' programs were killed by their shell tool that way.
+        instruction = (TASK / "instruction.md").read_text(encoding="utf-8")
+        self.assertIn("python3 /app/detach.py python3 autopilot.py", instruction)
+        self.assertNotIn("nohup python3 autopilot.py", instruction)
+        # An agent that ends its session takes its program with it; 0.1.3 says so in as many words.
+        self.assertIn("Your program stops when your session ends", instruction)
+        dockerfile = (TASK / "environment" / "Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("COPY detach.py /app/detach.py", dockerfile)
+        self.assertEqual((TASK / "environment" / "detach.py").read_bytes(),
+                         (REPO / "lightlag_live" / "detach.py").read_bytes())
 
     def test_the_solution_holds_no_simulator_and_no_seed(self):
         for path in (TASK / "solution").rglob("*"):

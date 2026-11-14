@@ -1,0 +1,11 @@
+{
+ "kind": "claude",
+ "label": "Haiku 5.5 · agent 3",
+ "model": "Claude Haiku 5.5",
+ "how": "OpenCode agent",
+ "source": "harbor run -p harbor/lightlag-live -a opencode -m anthropic/claude-haiku-5-5 --ak version=1.19.5 (Harbor 0.25.0), on the real clock",
+ "cost_usd": 0.04099360999999999,
+ "harbor_exception": "NonZeroAgentExitCodeError",
+ "task_version": "0.1.2",
+ "note": "The first run on task 0.1.2. Wrote an 8.7 kB autopilot (it installed numpy for it), fixed two lines and started it through the launcher two and a half minutes into the session: `python3 /app/detach.py python3 autopilot.py` returned in 0.4 seconds. The program then called the simulator every tick for 261 seconds, straight through the 120-second mark at which the three programs on 0.1.1 were killed. It took few samples: its estimate of slip was wrong on sand. In mission 6 at tick 11 the program died on a transport error (httpx ReadError) at the moment Docker on the laptop stalled for about a quarter of an hour, while a replay study by the same chat was finishing on the same machine; the agent's own requests to the model stalled with it. Missions 1 to 5 are unaffected; mission 6 (0.00) is not a fair reading of the program. OpenCode exited with code 1 after its closing report, which Harbor records as an exception; the grade is unaffected."
+}

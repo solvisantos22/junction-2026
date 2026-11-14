@@ -2,6 +2,8 @@
 
 Several unchanged Lightlag missions in a row, on a real-time clock, with the published noise dial at 2. A proposal for the team, not a rules decision. Owner: Kristján / Claude Code. Results and the reasoning behind each choice: [docs/lightlag-live.md](../docs/lightlag-live.md).
 
+**What it showed:** the reference scores higher than every Claude run on the task, but on 200 fresh maps Opus's one-request autopilot is level with it. Read the write-up before using this as evidence of a gap.
+
 It adds a way to *serve* the team's missions. It changes no file of `lightlag/`, `lightlag_dynamic/` or `lightlag_mcp/`: every mission is an unchanged `DynamicEnvironment` episode, and the reference is the unchanged `kf_mpc`, started fresh for each mission.
 
 ## Run
@@ -9,7 +11,7 @@ It adds a way to *serve* the team's missions. It changes no file of `lightlag/`,
 From the repository root. The tests and the sandbox need Python 3.9+ and nothing else; the MCP server needs `mcp==2.3.0`; Harbor needs Docker.
 
 ```sh
-python3 -m unittest discover -s tests/lightlag_live -v                        # 25 tests; 3 need the mcp package
+python3 -m unittest discover -s tests/lightlag_live -v                        # 38 tests; 3 need the mcp package
 uv run --with 'mcp==2.3.0' python -m unittest discover -s tests/lightlag_live -v   # all of them
 
 harbor run -p harbor/lightlag-live -a oracle                                   # the reference, about 5.5 minutes
@@ -19,6 +21,7 @@ harbor run -p harbor/lightlag-live -a opencode -m anthropic/claude-opus-5-5 --ak
 
 python3 -m lightlag_live.make_task --check                                     # are the task's copies fresh?
 python3 -m lightlag_live.sandbox --reference /tmp/ref                          # the reference on a simulated clock
+python3 -m lightlag_live.fresh_maps table                                      # the reference against every saved program on 200 fresh maps
 python3 viewer/build_ghosts.py                                                 # rebuild viewer/ghosts-demo.html
 ```
 
@@ -34,7 +37,7 @@ python3 viewer/build_ghosts.py                                                 #
 | Sensing noise | level 1 | level 2: the same published dial (`noise_level`), doubled |
 | Tools, physics, scoring per mission | | unchanged |
 
-Nobody can keep up with one tick per second by calling tools by hand, so the agent has to write a program that drives. The agent's container holds a helper, `/app/lightlag_client.py`, that gives a program the five tools as plain function calls.
+Nobody can keep up with one tick per second by calling tools by hand, so the agent has to write a program that drives. The agent's container holds two small files: `/app/lightlag_client.py` gives a program the five tools as plain function calls, and `/app/detach.py` starts that program so that it outlives the shell command that started it ([why](../docs/lightlag-live.md#the-launch-trap-in-011-and-its-fix)).
 
 ## Files
 
@@ -46,8 +49,11 @@ Nobody can keep up with one tick per second by calling tools by hand, so the age
 | `finish.py` | The collect hook: closes and grades the campaign from inside the simulator's container |
 | `reference.py` | `play_campaign(tools, policy)`: runs a single-mission controller once per mission |
 | `make_task.py` | Writes `harbor/lightlag-live/` from the sources; `--check` reports stale copies |
-| `sandbox.py`, `sandbox_worker.py` | Run a model-written `play(tools)` through the campaign in a locked-down container |
+| `detach.py` | The launcher in the agent's container: starts a program in its own session, with its output in a log file, and returns at once |
+| `sandbox.py`, `sandbox_worker.py` | Run a model-written `play(tools)`, or with `--program` an agent's own `autopilot.py`, through the campaign in a locked-down container |
 | `oneshot.py` | One request, one autopilot: build the request text, send it once, keep the reply and its score |
+| `fresh_maps.py` | The reference against every saved Claude-written program on maps none of them was built on; `docs/lightlag-live-fresh-maps.json` holds the scores |
+| `results_chart.py` | Draws `docs/lightlag-live-results.svg` from the saved runs |
 
 ## How it connects
 

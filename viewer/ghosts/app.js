@@ -491,7 +491,7 @@ function fitUi() { document.documentElement.style.setProperty('--s', clamp(Math.
 const short = run => run.ref ? 'REFERENCE' : run.label.toUpperCase();
 function buildBoard() {
   board.innerHTML = `<h2>STANDINGS<span id="after"></span></h2><div id="rows"></div>
-    <p id="foot">Mean score over the missions played so far. A bar is one mission: its width is the score, ½ means the rover finished away from base, LOST means its battery ran out. ${esc(DATA.note || '')}</p>`;
+    <p id="foot">${K > 1 ? 'Mean score over the missions played so far. A bar is one mission' : 'The bar is the mission'}: its width is the score, ½ means the rover finished away from base, LOST means its battery ran out. ${esc(DATA.note || '')}</p>`;
   const rows = $('#rows');
   for (const run of RUNS) {
     const row = document.createElement('div');
@@ -503,7 +503,10 @@ function buildBoard() {
   $('#missions').innerHTML = MISSIONS.map((m, i) => `<button data-m="${i}">${i + 1}<i></i></button>`).join('');
   for (const button of $('#missions').children) button.onclick = () => seek(+button.dataset.m * T);
   $('#legend').innerHTML = `<span><i style="background:${css(GOLD)}"></i>Reference controller</span><span><i style="background:${css(ICE)}"></i>Claude run you follow</span><span><i style="background:${css(0x6f5a50)}"></i>Every other Claude run</span>`;
-  $('#pitch').innerHTML = `${K} missions back to back, one second per tick. Nobody can joystick that, so each Claude model wrote an autopilot. <b>Gold is the reference controller on the same missions.</b>`;
+  $('#pitch').innerHTML = DATA.pitch;                       // written by viewer/build_ghosts.py, not by a viewer
+  for (const node of document.querySelectorAll('.brand2')) node.textContent = DATA.brand;
+  document.title = DATA.title;
+  $('#missions').style.display = K > 1 ? '' : 'none';
   $('#cast').innerHTML = RUNS.map(run => `<li class="${run.ref ? 'ref' : ''}"><span>${esc(short(run))}</span><small>${esc(run.how)}</small></li>`).join('');
 }
 function drawMarks() {
@@ -540,7 +543,7 @@ function updateBoard() {
       cell.firstChild.style.opacity = done ? 1 : 0.55;
     });
   });
-  setText($('#after'), over ? 'final' : g < 1e-6 ? 'before the start' : `mission ${mission + 1} of ${K}`);
+  setText($('#after'), over ? 'final' : g < 1e-6 ? 'before the start' : K > 1 ? `mission ${mission + 1} of ${K}` : `tick ${Math.floor(local + 1e-6)} of ${T}`);
   [...$('#missions').children].forEach((button, k) => {
     button.classList.toggle('on', k === mission && !over);
     const done = k < (over ? K : mission), best = Math.max(...CLAUDE.map(r => r.missions[k].reward));
@@ -549,14 +552,14 @@ function updateBoard() {
   });
   $('#clock b').textContent = String(Math.min(T, Math.floor(local + 1e-6))).padStart(2, '0');
   $('#clock span').textContent = `/${T} · M${mission + 1}`;
-  $('#tag').innerHTML = `<b>MISSION ${mission + 1}</b><span>of ${K} · every position fix is ${MISSIONS[mission].delay} ticks old and off by up to a metre</span>`;
+  $('#tag').innerHTML = K > 1 ? `<b>MISSION ${mission + 1}</b><span>of ${K} · ${esc(DATA.tag)}</span>` : `<b>${esc(DATA.brand)}</b><span>${esc(DATA.tag)}</span>`;
   // banner: the mission card for its first ticks, the result at the very end
   let text = '', alpha = 0;
   if (over) {
     const best = CLAUDE.slice().sort((a, b) => b.reward - a.reward)[0], lost = CLAUDE.reduce((n, r) => n + r.lost, 0);
     text = `<b><em style="color:${css(GOLD)}">${two(REF.reward)}</em> · <em style="color:${css(ICE)}">${best ? two(best.reward) : '–'}</em></b><span>Reference against the best of ${CLAUDE.length} Claude runs${best ? ` (${esc(best.label)})` : ''} · ${lost} rover${lost === 1 ? '' : 's'} lost by Claude, ${REF.lost} by the reference</span>`;
     alpha = 1;
-  } else if (local >= T - 0.02) {
+  } else if (local >= T - 0.02 && K > 1) {
     // the mission just ended: who took it
     const top = CLAUDE.slice().sort((a, b) => b.missions[mission].reward - a.missions[mission].reward)[0];
     const ref = REF.missions[mission].reward, best = top ? top.missions[mission].reward : 0;
@@ -564,11 +567,11 @@ function updateBoard() {
     text = `<b><em style="color:${css(GOLD)}">${two(ref)}</em> · <em style="color:${css(ICE)}">${two(best)}</em></b><span>Mission ${mission + 1}: reference against the best Claude run here${top ? ` (${esc(top.label)})` : ''}${lost ? ` · ${lost} rover${lost === 1 ? '' : 's'} lost` : ''}</span>`;
     alpha = 1;
   } else if (local < 2.2 && g > 1e-6 || (g <= 1e-6 && !state.playing)) {
-    text = `<b>MISSION ${mission + 1}</b><span>${MISSIONS[mission].targets.filter(t => !t.appear).length} targets on the map · more will appear</span>`;
+    text = `<b>${K > 1 ? 'MISSION ' + (mission + 1) : esc(DATA.brand)}</b><span>${MISSIONS[mission].targets.filter(t => !t.appear).length} targets on the map · more will appear</span>`;
     alpha = g <= 1e-6 ? 0 : clamp(Math.min(local / 0.25, (2.2 - local) / 0.6), 0, 1);
   }
   if (banner.dataset.text !== text) { banner.dataset.text = text; banner.innerHTML = text; }
-  banner.classList.toggle('final', over || local >= T - 0.02);
+  banner.classList.toggle('final', over || (local >= T - 0.02 && K > 1));
   banner.style.opacity = alpha;
 }
 

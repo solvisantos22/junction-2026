@@ -1,0 +1,11 @@
+{
+ "kind": "claude",
+ "label": "Haiku 5.5 · agent 4",
+ "model": "Claude Haiku 5.5",
+ "how": "OpenCode agent, left 92 s in",
+ "source": "harbor run -p harbor/lightlag-live -a opencode -m anthropic/claude-haiku-5-5 --ak version=1.19.5 (Harbor 0.25.0), on the real clock",
+ "cost_usd": 0.025819404999999993,
+ "harbor_exception": "NonZeroAgentExitCodeError",
+ "task_version": "0.1.2",
+ "note": "The second run on task 0.1.2, with nothing else running on the laptop. Wrote its autopilot 86 seconds into the session and started it through the launcher untested; that call returned after its own five-second sleep, and no command of this run was cut off by the shell tool. The agent then stopped and restarted its program twice with changes while the campaign ran, and ended its session 92 seconds into the campaign, in mission 2, with the words \"I ran out of time to tune this properly, so the campaign is only partly played\". Its session had 27 minutes left. Ending the session stopped its program, so missions 3 to 6 scored 0 as the task says. Task 0.1.3 adds one sentence saying that a program stops when the session ends. OpenCode exited with code 1 after the closing report, which Harbor records as an exception; the grade is unaffected."
+}

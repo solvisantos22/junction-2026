@@ -46,8 +46,10 @@ COPIES = {
     "environment/simulator/lightlag_live/reference.py": "lightlag_live/reference.py",
     "environment/simulator/lightlag_live/server.py": "lightlag_live/server.py",
     "environment/simulator/requirements.txt": "lightlag_mcp/requirements.txt",
-    # The agent's container: only a client for the five public tools.
+    # The agent's container: a client for the five public tools, and a launcher that keeps the
+    # agent's program running after the shell command that started it has returned.
     "environment/lightlag_client.py": "lightlag_mcp/client.py",
+    "environment/detach.py": "lightlag_live/detach.py",
     # The reference run: public-tool controllers only, no simulator code.
     "solution/lightlag_client.py": "lightlag_mcp/client.py",
     "solution/campaign_reference.py": "lightlag_live/reference.py",
@@ -68,7 +70,7 @@ artifacts = [{ source = "/evaluator", service = "lightlag" }]
 
 [task]
 name = "neural-network-november/lightlag-live"
-version = "0.1.1"
+version = "0.1.3"
 description = "Build an autopilot: %(count)d rover missions in a row through a signal delay, on a real-time clock, with noisy sensing."
 authors = []
 keywords = ["rl-environment", "signal-delay", "real-time", "control", "state-estimation", "mcp"]
@@ -153,6 +155,8 @@ RUN pip install --no-cache-dir "mcp==2.3.0"
 
 WORKDIR /app
 COPY lightlag_client.py /app/lightlag_client.py
+# Starts the agent's program outside the reach of its shell tool's time limit.
+COPY detach.py /app/detach.py
 """
 
 AGENT_DOCKERIGNORE = """\
@@ -387,10 +391,10 @@ Your score is the mean over all %(count)d missions, so it lies between 0 and 1. 
   ```
 
   A rejected request raises `ValueError` with the reason and changes nothing.
-- Start your program in the background and watch its output, for example `nohup python3 autopilot.py > autopilot.log 2>&1 &`. A command left in the foreground may be cut off by your shell tool's time limit while the campaign is still running.
+- Start your program with the launcher: `python3 /app/detach.py python3 autopilot.py`. It returns at once, the program keeps running, and its output goes to `autopilot.log`, which you can read with separate short commands. Do not rely on `&` or `nohup` for this: when a command reaches your shell tool's time limit, the tool may stop everything that command started, background jobs included, and the campaign would go on without your program.
 - You may also call the tools yourself at any time, and you may change or restart your program while the campaign runs. The clock does not wait for either.
 
-You may write and run any code. If you stop early, the mission in progress still runs to its end with the battery draining, and the missions after it score 0.
+You may write and run any code. Your program stops when your session ends, so do not finish before `campaign_complete` is true. If you stop early, the mission in progress still runs to its end with the battery draining, and the missions after it score 0.
 """
 
 

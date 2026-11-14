@@ -63,19 +63,31 @@ def track(replay: Dict[str, Any], result: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def load_run(folder: Path) -> Dict[str, Any]:
-    meta = json.loads((folder / "run.json").read_text(encoding="utf-8"))
+def load_run(folder: Path, meta: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """A saved run: a Lightlag Live campaign, or one turn-based episode shown as a one-mission campaign."""
+    if meta is None:
+        meta = json.loads((folder / "run.json").read_text(encoding="utf-8"))
     evaluator = folder / "artifacts" / "evaluator"
     result = json.loads((evaluator / "result.json").read_text(encoding="utf-8"))
     replays = []
-    for mission in result["missions"]:
-        path = evaluator / "missions" / "{:02d}".format(mission["mission"]) / "replay.json"
-        replays.append(json.loads(path.read_text(encoding="utf-8")))
+    if "missions" in result:
+        for mission in result["missions"]:
+            path = evaluator / "missions" / "{:02d}".format(mission["mission"]) / "replay.json"
+            replays.append(json.loads(path.read_text(encoding="utf-8")))
+    else:
+        reward = result["raw_score"] / result["max_available_value"]
+        result = {"reward": reward, "seconds_per_tick": None, "missions": [dict(result, mission=1, reward=reward)]}
+        replays.append(json.loads((evaluator / "replay.json").read_text(encoding="utf-8")))
     return {"meta": meta, "result": result, "replays": replays, "source": folder.name}
 
 
-def gather(folders: Sequence[Path]) -> Dict[str, Any]:
-    loaded = [load_run(folder) for folder in folders]
+def gather(folders: Sequence[Path], described: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """`described` is a set file: which folders to show and how to name them, for runs that carry no run.json."""
+    if described:
+        loaded = [load_run(RUNS / run["folder"], {key: value for key, value in run.items() if key != "folder"})
+                  for run in described["runs"]]
+    else:
+        loaded = [load_run(folder) for folder in folders]
     if not loaded:
         raise SystemExit("no runs found: expected docs/lightlag-runs/live-*/run.json")
     references = [run for run in loaded if run["meta"]["kind"] == "reference"]
@@ -118,8 +130,14 @@ def gather(folders: Sequence[Path]) -> Dict[str, Any]:
     reference = next(r for r in runs if r["kind"] == "reference")
     sensing = dict((first["replays"][0].get("dynamic") or {}).get("sensing") or {})
     sensing.pop("heading_errors", None)
+    count, delay = len(missions), missions[0]["delay"]
+    text = dict(DEFAULT_TEXT, **{key: value for key, value in (described or {}).items() if key in DEFAULT_TEXT})
     return {
-        "title": "Lightlag Live",
+        "title": "Lightlag " + text["brand"].title(),
+        "brand": text["brand"],
+        "pitch": text["pitch"].format(count=count, delay=delay),
+        "tag": text["tag"].format(count=count, delay=delay),
+        "note": text["note"],
         "settings": {"seconds_per_tick": first["result"]["seconds_per_tick"],
                      "noise_level": (first["replays"][0].get("dynamic") or {}).get("noise_level"),
                      "sensing": sensing},
@@ -127,6 +145,16 @@ def gather(folders: Sequence[Path]) -> Dict[str, Any]:
         "runs": [reference] + claude,
         "best": claude[0]["id"] if claude else None,
     }
+
+
+# What the page says about the runs it shows. A set file may replace any of these.
+DEFAULT_TEXT = {
+    "brand": "LIVE",
+    "pitch": "{count} missions back to back, one second per tick. Nobody can joystick that, so each Claude model "
+             "wrote an autopilot. <b>Gold is the reference controller on the same missions.</b>",
+    "tag": "every position fix is {delay} ticks old and off by up to a metre",
+    "note": "",
+}
 
 
 def standalone(data: Dict[str, Any]) -> str:
@@ -165,12 +193,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--data-only", action="store_true", help="only refresh viewer/ghosts/data.json")
     parser.add_argument("--runs", type=Path, default=RUNS, help="folder holding the live-* run folders")
-    parser.add_argument("--out", type=Path, default=REPO / "viewer" / "ghosts-demo.html")
+    parser.add_argument("--set", type=Path, default=None,
+                        help="a set file under viewer/ghosts/sets/: show the runs it lists instead of live-*")
+    parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)
-    folders = sorted(path.parent for path in args.runs.glob("live-*/run.json"))
-    data = gather(folders)
-    (GHOSTS / "data.json").write_text(json.dumps(data, separators=(",", ":")), encoding="utf-8")
-    print("wrote viewer/ghosts/data.json: {} missions".format(len(data["missions"])))
+    if args.set:
+        data = gather([], json.loads(args.set.read_text(encoding="utf-8")))
+        out = args.out or REPO / "viewer" / "ghosts-{}.html".format(args.set.stem)
+        print("gathered {}: {} mission(s)".format(args.set.name, len(data["missions"])))
+    else:
+        folders = sorted(path.parent for path in args.runs.glob("live-*/run.json"))
+        data = gather(folders)
+        out = args.out or REPO / "viewer" / "ghosts-demo.html"
+        (GHOSTS / "data.json").write_text(json.dumps(data, separators=(",", ":")), encoding="utf-8")
+        print("wrote viewer/ghosts/data.json: {} missions".format(len(data["missions"])))
+    args.out = out
     for run in data["runs"]:
         print("  {:<34} {:<9} reward {:.3f}  missions {}  rovers lost {}".format(
             run["label"][:34], run["kind"], run["reward"],

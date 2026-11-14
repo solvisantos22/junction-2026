@@ -102,5 +102,59 @@ class StandalonePage(unittest.TestCase):
                          json.loads(json.dumps(DATA)), hint)
 
 
+class RushSet(unittest.TestCase):
+    """The same page fed the team's saved turn-based attempts on `rush` seed 501."""
+
+    def setUp(self):
+        self.path = build_ghosts.GHOSTS / "sets" / "rush-501.json"
+        self.data = build_ghosts.gather([], json.loads(self.path.read_text(encoding="utf-8")))
+
+    def test_it_shows_every_original_prompt_attempt_and_the_reference(self):
+        runs = self.data["runs"]
+        self.assertEqual([run["kind"] for run in runs], ["reference"] + ["claude"] * 6)
+        self.assertEqual(len(self.data["missions"]), 1)
+        self.assertAlmostEqual(runs[0]["reward"], 10 / 12)
+        self.assertEqual(sum(run["lost"] for run in runs[1:]), 4)       # four rovers lost in six attempts
+        self.assertEqual(runs[0]["lost"], 0)
+        for run in runs:
+            reward = float((build_ghosts.RUNS / run["id"] / "verifier" / "reward.txt").read_text())
+            self.assertAlmostEqual(run["reward"], reward, places=5)
+
+    def test_the_committed_page_is_up_to_date(self):
+        page = build_ghosts.standalone(self.data)
+        self.assertEqual((REPO / "viewer" / "ghosts-rush-501.html").read_text(encoding="utf-8"), page,
+                         "run: python3 viewer/build_ghosts.py --set viewer/ghosts/sets/rush-501.json")
+
+
+class RushControlSet(unittest.TestCase):
+    """Seed 501 again: the six by-hand attempts beside the same model's own autopilot."""
+
+    def setUp(self):
+        self.path = build_ghosts.GHOSTS / "sets" / "rush-501-control.json"
+        self.data = build_ghosts.gather([], json.loads(self.path.read_text(encoding="utf-8")))
+
+    def test_the_autopilot_played_the_teams_mission_and_ties_the_reference(self):
+        runs = self.data["runs"]
+        self.assertEqual([run["kind"] for run in runs], ["reference"] + ["claude"] * 7)
+        autopilot = next(run for run in runs if run["label"].endswith("own autopilot"))
+        self.assertEqual(self.data["best"], autopilot["id"])            # the run the page opens on
+        self.assertAlmostEqual(autopilot["reward"], runs[0]["reward"])  # 10 of 12, like the reference
+        self.assertEqual(autopilot["lost"], 0)
+        by_hand = [run for run in runs if "by hand" in run["label"]]
+        self.assertEqual(len(by_hand), 6)
+        self.assertEqual(sum(run["lost"] for run in by_hand), 4)
+        # gather() refuses a run whose map, settings or targets differ from the reference's; say so here too
+        folder = build_ghosts.RUNS / "explore-standard-noise" / "opus-a" / "rush-501"
+        replay = build_ghosts.load_run(folder, {"kind": "claude", "label": ""})["replays"][0]
+        reference = build_ghosts.load_run(build_ghosts.RUNS / "rush-seed501-delay3-kf-mpc",
+                                          {"kind": "reference", "label": ""})["replays"][0]
+        self.assertEqual(build_ghosts.mission_definition(replay), build_ghosts.mission_definition(reference))
+
+    def test_the_committed_page_is_up_to_date(self):
+        page = build_ghosts.standalone(self.data)
+        self.assertEqual((REPO / "viewer" / "ghosts-rush-501-control.html").read_text(encoding="utf-8"), page,
+                         "run: python3 viewer/build_ghosts.py --set viewer/ghosts/sets/rush-501-control.json")
+
+
 if __name__ == "__main__":
     unittest.main()
