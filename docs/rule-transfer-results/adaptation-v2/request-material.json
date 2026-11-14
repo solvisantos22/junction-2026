@@ -1,0 +1,73 @@
+{
+  "system": "Adapt the supplied Python autopilot to the published mission rules.\nYou have exactly two responses. First call evaluate_policy once with your complete\ncandidate; it is compiled and run on the fixed 20 practice missions. After its\nfeedback, call submit_policy once with your final program. No other tools exist.\nFor either tool provide exactly one of code (full Python source) or replacements\n(ordered literal old/new edits). Each submission starts from the ORIGINAL source\nin the prompt, not the practice candidate. Each old string must match exactly once\nat that edit step. Keep a synchronous top-level play(tools) entry point. Python\nstandard library and NumPy are available in the networkless runner. A compile or\npatch error is practice feedback; no person repairs your program. Your final\nsubmission is frozen before any fresh evaluation. Do not provide your program in\nplain text instead of the tool. Do not include private reasoning in tool fields.\n",
+  "tools": [
+    {
+      "description": "Compile and practice-test the first candidate on 20 fixed used missions. Provide exactly one of code or replacements.",
+      "input_schema": {
+        "additionalProperties": false,
+        "description": "Provide exactly one of code or replacements; the harness rejects both or neither.",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "replacements": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "new": {
+                  "type": "string"
+                },
+                "old": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "old",
+                "new"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "name": "evaluate_policy"
+    },
+    {
+      "description": "Compile and freeze the final candidate after practice feedback. Provide exactly one of code or replacements.",
+      "input_schema": {
+        "additionalProperties": false,
+        "description": "Provide exactly one of code or replacements; the harness rejects both or neither.",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "replacements": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "new": {
+                  "type": "string"
+                },
+                "old": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "old",
+                "new"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "name": "submit_policy"
+    }
+  ]
+}
