@@ -20,10 +20,10 @@ from .service import EpisodeService, ToolError
 INSTRUCTIONS = """\
 Lightlag: you drive a rover through a signal delay.
 
-Goal: sample science targets and end the episode at base. Score = total value of \
-sampled targets x 1.0 if the rover ends within base_radius of base, x 0.5 if it ends \
-alive elsewhere, x 0 if the battery reached zero. It is scored when the episode's \
-fixed number of ticks has passed.
+Goal: sample science targets and end the episode at base. Score = total credited \
+sample value under the episode's sampling rules x 1.0 if the rover ends within \
+base_radius of base, x 0.5 if it ends alive elsewhere, x 0 if the battery reached \
+zero. It is scored when the episode's fixed number of ticks has passed.
 
 Timing: a command you send at tick t executes at tick t + delay_ticks + 1 at the \
 earliest, one command per tick, in order. A telemetry packet describes the rover at \
@@ -31,7 +31,8 @@ packet.tick and reaches you delay_ticks later, so what you read is the past. Onl
 `advance` moves the clock; every other tool is free.
 
 Unknown: how much the wheels slip on each terrain. `rules` gives the range. Compare \
-wheel_odometry with visual_odometry in telemetry to measure it.
+wheel_odometry with visual_odometry in telemetry to estimate slip. `rules` defines \
+measurement accuracy.
 
 Start with `rules` and `map`. You may write and run code to plan.\
 """
@@ -41,13 +42,15 @@ RULES_DESCRIPTION = (
     "per terrain, sampling and base radius, and command limits. Free: does not advance time."
 )
 MAP_DESCRIPTION = (
-    "The full map: size in metres, base position, targets (id, x, y, value), hazard rectangles and sand "
-    "rectangles (x1, y1, x2, y2). Everything not sand is bedrock. Free: does not advance time."
+    "Currently available public map and target information: size in metres, base position, targets "
+    "(id, x, y, value), hazard rectangles and sand rectangles (x1, y1, x2, y2). Everything not sand is "
+    "bedrock. `rules` defines target discoveries and their timing. Free: does not advance time."
 )
 TELEMETRY_DESCRIPTION = (
     "Every telemetry packet received so far, oldest first. Each packet has tick (the moment it describes), "
-    "received_tick, position [x, y], heading_deg, battery, terrain, wheel_odometry and visual_odometry "
-    "(metres commanded and metres actually moved during that tick), sampled_targets, alive and events. "
+    "received_tick, position [x, y], heading_deg (commanded heading), battery, terrain, wheel_odometry "
+    "(wheel distance in metres during that tick), visual_odometry (reported movement in metres during "
+    "that tick), sampled_targets, alive and events. `rules` defines measurement accuracy. "
     "Packets are delay_ticks old when they arrive. Free: does not advance time."
 )
 UPLINK_DESCRIPTION = (
