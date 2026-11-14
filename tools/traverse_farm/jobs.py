@@ -7,6 +7,7 @@ A job is a small dict that survives JSON:
     {"policy": "greedy", "seed": 123}                                  # any scripted policy of lightlag_traverse.play
     {"policy": "program", "program": "<source defining play(tools)>", "seed": 123, "time_limit": 1500}
     {"policy": "program", "files": {"auto.py": "<source>", ...}, "entry": "auto.py", "seed": 123}
+    {"policy": "pilot", "seed": 123, "mission": {"sun_margin_ticks": 0}}   # any of these, on changed rules
 
 The second form is an agent's own script as it ran in the task: it is started as `__main__` with a
 stand-in `lightlag_client` beside it, as `lightlag_traverse.sandbox --program` does. Both forms get
@@ -79,7 +80,7 @@ class _CopyingTools:
     """The five tools, handing out and taking in JSON copies, as the MCP server does."""
 
     def __init__(self, tools: Any) -> None:
-        self._tools = tools
+        self._tools, self.tick = tools, 0
 
     @staticmethod
     def _copy(value: Any) -> Any:
@@ -98,7 +99,9 @@ class _CopyingTools:
         return self._copy(self._tools.uplink(self._copy(commands)))
 
     def advance(self, ticks=1):
-        return self._copy(self._tools.advance(ticks))
+        reply = self._copy(self._tools.advance(ticks))
+        self.tick = reply["current_tick"]   # the last tick the program saw, for its row
+        return reply
 
     def tool_names(self):
         return ["rules", "map", "telemetry_log", "uplink", "advance"]
@@ -129,8 +132,11 @@ def program_id(job: Dict[str, Any]) -> Optional[str]:
 
 def job_key(item: Dict[str, Any]) -> str:
     """What makes two jobs (or a job and a row) the same mission: who plays, with what, on which world."""
-    return json.dumps({"policy": item.get("policy"), "options": item.get("options") or {},
-                       "program": program_id(item), "seed": item.get("seed")}, sort_keys=True)
+    key = {"policy": item.get("policy"), "options": item.get("options") or {},
+           "program": program_id(item), "seed": item.get("seed")}
+    if item.get("mission"):   # changed rules make another mission; unchanged keys stay as they were saved
+        key["mission"] = item["mission"]
+    return json.dumps(key, sort_keys=True)
 
 
 def pilot_defaults() -> Dict[str, Any]:
@@ -182,10 +188,30 @@ def _main_thread() -> bool:
     return threading.current_thread() is threading.main_thread()
 
 
-def _run_program(job: Dict[str, Any], tools: Any, time_limit: Optional[float]) -> Optional[str]:
+class _Tail(io.StringIO):
+    """Stands in for a program's stdout and stderr, keeping only the end of what it printed."""
+
+    def __init__(self, size: int = 2000) -> None:
+        super().__init__()
+        self.size = size
+
+    def write(self, text: str) -> int:
+        if self.tell() > 8 * self.size:   # trim now and then, so a chatty program cannot fill the memory
+            rest = self.getvalue()[-self.size:]
+            self.seek(0)
+            self.truncate()
+            super().write(rest)
+        return super().write(text)
+
+    def tail(self) -> str:
+        return self.getvalue()[-self.size:]
+
+
+def _run_program(job: Dict[str, Any], tools: Any, time_limit: Optional[float]) -> Dict[str, Any]:
     """Run a model-written controller once: `play(tools)` from "program", or an agent's script.
 
-    Returns None, or the program's failure as text: a failure is a result, never a harness crash.
+    Returns the program's failure as text (None if it ended normally: a failure is a result, never
+    a harness crash), the last tick it saw, and the end of what it printed.
     """
     if os.environ.get("TRAVERSE_FARM_ALLOW_PROGRAMS") != "1":
         raise PermissionError("program jobs run model-written code; only inside the isolated farm container")
@@ -206,10 +232,10 @@ def _run_program(job: Dict[str, Any], tools: Any, time_limit: Optional[float]) -
     saved_path, saved_modules, saved_cwd = list(sys.path), set(sys.modules), os.getcwd()
     sys.path.insert(0, str(work))
     sys.modules["lightlag_client"] = _client_shim(tools)
-    error = None
+    error, printed = None, _Tail()
     try:
         os.chdir(work)
-        with contextlib.redirect_stdout(io.StringIO()), _time_limit(time_limit):
+        with contextlib.redirect_stdout(printed), contextlib.redirect_stderr(printed), _time_limit(time_limit):
             if script is not None:
                 runpy.run_path(str(script), run_name="__main__")
             else:
@@ -230,7 +256,7 @@ def _run_program(job: Dict[str, Any], tools: Any, time_limit: Optional[float]) -
             sys.modules.pop(name, None)
         sys.modules.pop("lightlag_client", None)
         shutil.rmtree(work, ignore_errors=True)
-    return error
+    return {"error": error, "tick": tools.tick, "printed": printed.tail()}
 
 
 def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
@@ -240,18 +266,39 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
     row.update(seed=seed, policy=job["policy"], options=job.get("options") or {})
     if job["policy"] == "program":
         row["program_id"] = program_id(job)
+    mission = job.get("mission") or None   # rule changes for this mission, e.g. {"sun_margin_ticks": 0}
+    if mission:
+        row["mission"] = mission
     started = time.time()
     if job["policy"] == "program":
-        env = play.TraverseEnvironment(seed)
+        env = play.TraverseEnvironment(seed, mission=mission)
         tools = play.PublicTools(env)
-        row["error"] = _run_program(job, tools, job.get("time_limit", 1500))
+        ran = _run_program(job, tools, job.get("time_limit", 1500))
         seconds, calls = time.time() - started, tools.calls
         while not env.advance(5)["episode_complete"]:
             pass
         result = env.evaluate()
-    else:
+        # Where the program stopped steering, when the rover's battery ran out (None: it did not),
+        # and, if either went wrong, the end of what the program printed.
+        row.update(error=ran["error"], program_tick=ran["tick"], died_tick=None)
+        if not result["alive"]:
+            row["died_tick"] = next(s["tick"] for s in env.replay()["states"] if not s["alive"])
+        if ran["error"] or not result["alive"]:
+            row["printed"] = ran["printed"]
+    elif not mission:
         run = play.run_episode(play.policy(policy_name(job)), seed)
         result, seconds, calls = run["result"], run["seconds"], run["public_calls"]
+        row["error"] = None
+    else:   # play.run_episode, on the changed rules
+        controller = play.policy(policy_name(job))
+        env = play.TraverseEnvironment(seed, mission=mission)
+        tools = play.PublicTools(env)
+        started = time.time()
+        controller(tools)          # as there, a policy's error propagates: it must not turn into a low score
+        seconds, calls = time.time() - started, tools.calls
+        while not env.advance(5)["episode_complete"]:
+            pass
+        result = env.evaluate()
         row["error"] = None
     row.update(
         reward=result["raw_score"] / result["max_available_value"],
@@ -274,6 +321,8 @@ def _safe(job: Dict[str, Any]) -> Dict[str, Any]:
                    crash="{}: {}".format(type(failure).__name__, failure)[:400])
         if job.get("policy") == "program":
             row["program_id"] = program_id(job)
+        if job.get("mission"):
+            row["mission"] = job["mission"]
         return row
 
 

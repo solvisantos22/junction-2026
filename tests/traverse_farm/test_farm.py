@@ -63,6 +63,19 @@ class Jobs(unittest.TestCase):
         with self.assertRaises(ValueError):
             jobs.policy_name({"policy": "greedy", "options": {"floor": 3}})
 
+    def test_a_mission_can_be_played_on_changed_rules(self):
+        row = jobs.run_job({"policy": "nothing", "seed": 100, "mission": {"sun_margin_ticks": 0}})
+        self.assertEqual((row["mission"], row["alive"], row["reward"]), ({"sun_margin_ticks": 0}, True, 0.0))
+        with mock.patch.dict(os.environ, ALLOW):
+            seen = jobs.run_job({"policy": "program", "seed": 100, "mission": {"sun_margin_ticks": 0},
+                                 "program": "def play(tools):\n    assert tools.rules()['sun_margin_ticks'] == 0\n"})
+        self.assertIsNone(seen["error"])
+
+    def test_changed_rules_are_another_mission_and_saved_keys_stay_the_same(self):
+        plain = {"policy": "pilot", "seed": 1}
+        self.assertEqual(jobs.job_key(plain), '{"options": {}, "policy": "pilot", "program": null, "seed": 1}')
+        self.assertNotEqual(jobs.job_key(plain), jobs.job_key(dict(plain, mission={"sun_margin_ticks": 0})))
+
     def test_crashes_come_back_as_rows(self):
         rows = jobs.local_map([{"policy": "pilot", "options": {"no_such_option": 1}, "seed": 100}], workers=1)
         self.assertIn("no_such_option", rows[0]["crash"])
@@ -110,6 +123,31 @@ class Programs(unittest.TestCase):
                   "    world['base'][0] = -999\n"
                   "    assert tools.map()['base'][0] != -999, 'the world changed'\n")
         self.assertIsNone(self.run_program(source)["error"])
+
+    def test_a_failed_program_says_where_it_stopped_and_what_it_printed(self):
+        row = self.run_program("import sys\n"
+                               "def play(tools):\n"
+                               "    tools.advance(5)\n"
+                               "    tools.advance(2)\n"
+                               "    print('plan A')\n"
+                               "    print('low battery', file=sys.stderr)\n"
+                               "    raise RuntimeError('boom')\n")
+        self.assertEqual((row["error"], row["program_tick"], row["died_tick"]), ("RuntimeError: boom", 7, None))
+        self.assertTrue(row["alive"])
+        self.assertIn("plan A", row["printed"])
+        self.assertIn("low battery", row["printed"])
+
+    def test_a_program_that_ends_normally_keeps_its_output_out_of_the_row(self):
+        row = self.run_program("def play(tools):\n    print('fine')\n")
+        self.assertIsNone(row["error"])
+        self.assertNotIn("printed", row)
+
+    def test_a_chatty_program_keeps_only_the_end_of_its_output(self):
+        tail = jobs._Tail(size=10)
+        for number in range(1000):
+            tail.write("line {}\n".format(number))
+        self.assertEqual(tail.tail(), "\nline 999\n")
+        self.assertLess(len(tail.getvalue()), 200)
 
     def test_nothing_a_program_imports_leaks_into_the_next_job(self):
         self.run_program("import lightlag_surface\ndef play(tools):\n    pass\n")
@@ -173,6 +211,24 @@ class Search(unittest.TestCase):
             search.evaluate(run_many, policies, list(range(10)), out=Path(folder))
             search.evaluate(run_many, policies, list(range(10)), out=Path(folder))
         self.assertEqual(calls, [10])
+
+    def test_a_long_run_is_saved_part_by_part(self):
+        saved_before_each_part = []
+
+        with tempfile.TemporaryDirectory() as folder:
+            rows_file = Path(folder) / "rows.jsonl"
+
+            def run_many(batch):
+                saved_before_each_part.append(len(rows_file.read_text().splitlines()) if rows_file.exists() else 0)
+                return [dict(candidate=job["candidate"], seed=job["seed"], policy="greedy", options={},
+                             reward=0.1, alive=True, at_base=True, seconds=1.0) for job in batch]
+
+            ledger = search.Ledger(Path(folder), part=2)
+            jobs_ = [{"policy": "greedy", "candidate": "greedy", "seed": seed} for seed in range(5)]
+            played = ledger.play(run_many, jobs_)
+            self.assertEqual(len(rows_file.read_text().splitlines()), 5)
+        self.assertEqual(saved_before_each_part, [0, 2, 4])
+        self.assertEqual([row["seed"] for row in played], [0, 1, 2, 3, 4])
 
     def test_different_players_on_the_same_world_are_different_missions(self):
         calls = []

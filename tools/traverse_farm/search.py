@@ -141,10 +141,10 @@ def versus(rows: List[Dict[str, Any]], baseline: str, candidates: Iterable[str])
 
 # ---- bookkeeping --------------------------------------------------------------------------
 class Ledger:
-    """Every row on disk as it arrives, so an interrupted search resumes without replaying worlds."""
+    """Rows on disk as each part of a run finishes, so an interrupted run resumes without replaying worlds."""
 
-    def __init__(self, folder: Optional[Path]):
-        self.folder, self.rows, self.done = folder, [], {}
+    def __init__(self, folder: Optional[Path], part: int = 400):
+        self.folder, self.rows, self.done, self.part = folder, [], {}, part
         if folder:
             folder.mkdir(parents=True, exist_ok=True)
             path = folder / "rows.jsonl"
@@ -163,15 +163,18 @@ class Ledger:
             if k not in self.done and k not in queued:
                 queued.add(k)
                 todo.append(job)
-        fresh = run_many(todo) if todo else []
-        if self.folder and fresh:
-            with (self.folder / "rows.jsonl").open("a", encoding="utf-8") as stream:
-                for row in fresh:
-                    stream.write(json.dumps(row, sort_keys=True) + "\n")
-        for row in fresh:
-            self.rows.append(row)
-            if "reward" in row:
-                self.done[_mission_key(row)] = row
+        fresh = []
+        for start in range(0, len(todo), self.part):   # saved part by part: a stopped run keeps what it played
+            part = run_many(todo[start:start + self.part])
+            if self.folder and part:
+                with (self.folder / "rows.jsonl").open("a", encoding="utf-8") as stream:
+                    for row in part:
+                        stream.write(json.dumps(row, sort_keys=True) + "\n")
+            for row in part:
+                self.rows.append(row)
+                if "reward" in row:
+                    self.done[_mission_key(row)] = row
+            fresh.extend(part)
         out = []
         for job in jobs:   # relabel cached rows with this job's candidate/generation tags
             cached = self.done.get(_mission_key(job))
@@ -283,15 +286,19 @@ def search(run_many: RunMany, defaults: Dict[str, Any], *, search_seeds: Sequenc
 
 
 def evaluate(run_many: RunMany, policies: Dict[str, Dict[str, Any]], seeds: Sequence[int],
-             out: Optional[Path] = None, baseline: Optional[str] = "pilot") -> Dict[str, Any]:
+             out: Optional[Path] = None, baseline: Optional[str] = "pilot",
+             mission: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Several policies on the same worlds. `policies`: name -> job fields (policy, options, program...).
-    If `baseline` is one of them, every other policy is also compared with it world by world."""
+    If `baseline` is one of them, every other policy is also compared with it world by world.
+    `mission` changes the rules for every mission (for example {"sun_margin_ticks": 0})."""
     ledger = Ledger(out)
-    jobs = [dict(spec, candidate=name, seed=seed) for name, spec in policies.items() for seed in seeds]
+    extra = {"mission": mission} if mission else {}
+    jobs = [dict(spec, candidate=name, seed=seed, **extra) for name, spec in policies.items() for seed in seeds]
     rows = run_many(jobs) if out is None else ledger.play(run_many, jobs)
     table = {name: summarise(rows, name) for name in policies}
     against = versus(rows, baseline, policies) if baseline in policies else {}
     labels = {name: spec.get("label") for name, spec in policies.items() if spec.get("label")}
     ledger.write("evaluation.json", {"seeds": [seeds[0], seeds[-1]], "worlds": len(seeds), "table": table,
-                                     "baseline": baseline if against else None, "versus": against, "labels": labels})
+                                     "baseline": baseline if against else None, "versus": against, "labels": labels,
+                                     "mission": mission or {}})
     return {"rows": rows, "table": table, "versus": against}

@@ -6,5 +6,6 @@
  "source": "harbor run -p harbor/lightlag-traverse -a opencode -m anthropic/claude-sonnet-5-5 --ak version=1.19.5 (Harbor 0.25.0)",
  "cost_usd": 0.3720064999999999,
  "harbor_exception": "NonZeroAgentExitCodeError",
- "task_version": "0.1.0"
+ "task_version": "0.1.0",
+ "program": "program/ was rebuilt from the trajectory (agent/trajectory.json): the agent's file writes and later edits replayed in order, nothing executed. The Harbor mission ran an earlier auto.py from tick 0, stopped it, then resumed this final version with RESUME=1, so replaying this version from tick 0 will not match the recorded score exactly."
 }

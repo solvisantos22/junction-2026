@@ -58,6 +58,8 @@ def mission(job: dict) -> dict:
 
 def _run_many(batch):
     """Play a batch on Modal; a job that raised comes back as a row with `crash`, never dropped."""
+    from traverse_farm.jobs import program_id
+
     if not batch:
         return []
     started = time.time()
@@ -68,6 +70,10 @@ def _run_many(batch):
             row = {k: job[k] for k in ("candidate", "label", "generation", "block") if k in job}
             row.update(seed=job.get("seed"), policy=job.get("policy"), options=job.get("options") or {},
                        crash="{}: {}".format(type(result).__name__, result)[:400])
+            if job.get("policy") == "program":   # so the crash is reported under its own job
+                row["program_id"] = program_id(job)
+            if job.get("mission"):
+                row["mission"] = job["mission"]
             rows.append(row)
         else:
             rows.append(result)
@@ -97,14 +103,18 @@ def smoke(seeds: str = "600-607", policies: str = "pilot,greedy"):
 
 
 @app.local_entrypoint()
-def evaluate(policies: str = "pilot,greedy,straight", seeds: str = "600-799", out: str = "", baseline: str = "pilot"):
+def evaluate(policies: str = "pilot,greedy,straight", seeds: str = "600-799", out: str = "", baseline: str = "pilot",
+             mission: str = ""):
     """Several policies on the same worlds, each also compared world by world with `baseline`.
-    `program:<path>` plays a model-written file defining play(tools); `agent:<folder>/<entry.py>` an agent's script."""
+    `program:<path>` plays a model-written file defining play(tools); `agent:<folder>/<entry.py>` an agent's script.
+    `mission` changes the rules for every mission, as JSON: '{"sun_margin_ticks": 0}'."""
+    import json
+
     from traverse_farm import search
     from traverse_farm.common import format_table, format_versus, parse_policies, parse_seeds
 
     result = search.evaluate(_run_many, parse_policies(policies), parse_seeds(seeds), out=Path(out) if out else None,
-                             baseline=baseline)
+                             baseline=baseline, mission=json.loads(mission) if mission else None)
     print(format_table(result["table"]))
     if result["versus"]:
         print(format_versus(baseline, result["versus"]))
