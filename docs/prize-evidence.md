@@ -804,17 +804,26 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
 - **Evidence:** [guard](../lightlag_ppo_icm/home.py), [tests](../tests/lightlag_ppo_icm/), [policies, run logs and check rows](../lightlag_ppo_icm/policies/).
 - **Scope and limits:** a sandbox baseline, not a rules or reference decision. No model or API call, no cloud compute. Flat 40 m family only. The guard trusts the belief, which can be off by more than the base radius at the end; crust, which hides soft cells, is only priced at twice its cost. Training with the guard did not teach the agent to pace itself: the guard does the pacing.
 
-### Kristján / Codex — reference component ablations (14 November)
+### Kristján / Codex — reference component ablations (14–15 November)
 
 Kristján asked Codex to modify each part of the reference a little and collect
 more numbers. Codex implemented an isolated 15-configuration sweep, including
-cubature heading propagation, with pinned sources, paired maps, a predeclared
-selection/fresh-confirmation protocol and replay audits. The baseline pilot and
-simulator remain the team's existing work. Kristján chose the experimental scope;
-no canonical reference change or model-gap claim is made. Seven focused tests
-pass; all 15 quick smoke missions are home/alive with no invalid calls/errors,
-all 15 physics replays reproduce, and two full controller repeats match exactly.
-No API call or cloud job. [Protocol](reference-ablation.md),
-[implementation](../tools/reference_ablation/),
-[smoke evidence](reference-ablation-results/smoke/audit.json),
-[results](reference-ablation-results/README.md). Development is now complete: all 180 full-budget missions home/alive; all 71,735 commands and 75,780 states replay exactly. Baseline .513402; best individual .516507; cubature ties baseline on all 12 maps. Candidates are frozen before 128 fresh checks. [Development report](reference-ablation-results/development/report.json), [selection](reference-ablation-results/selection.json).
+cubature heading propagation, with pinned sources, paired maps, frozen candidate
+selection and fresh confirmation. It builds on the team's existing pilot and
+simulator; those and Sölvi/Manh's learning packages were not edited. Kristján set
+the experimental scope. The evidence supports retaining the frozen reference.
+
+Seven focused tests pass. All 180 development and 128 fresh confirmation missions
+finish home/alive with no invalid calls or controller exceptions. Fresh baseline
+0.523064; selected combination 0.524087: +0.001023, paired 95% interval
+[-0.003556, +0.005227], failing the predeclared improvement criteria. Cubature
+matches all 12 development scores; 50% more search costs 45% more CPU for only
++0.000109 reward. The negative findings are retained. All 323 archived physics
+replays (including 15 smoke missions), 129,185 commands and 135,983 states verify;
+four full controller repeats match exactly. No cloud job or evaluation model API
+call. The study does not make a new Claude-performance claim.
+
+[Implementation commit](https://github.com/solvisantos22/junction-2026/commit/815688b),
+[development/selection published before fresh evaluation](https://github.com/solvisantos22/junction-2026/commit/ca558c9),
+[protocol](reference-ablation.md), [results and raw data](reference-ablation-results/README.md),
+[verification](reference-ablation-results/verification.json).
