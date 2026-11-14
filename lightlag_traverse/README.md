@@ -21,7 +21,7 @@ Nobody can reach every target, so which ones, in what order and by which way ove
 
 There are two Harbor tasks. `harbor/lightlag-traverse/` is one mission on one world. `harbor/lightlag-traverse-campaign/` is three missions on three worlds, played one after another under exactly the same rules and scored together ([below](#the-campaign-three-sites-in-a-row)). The campaign exists because one world lets a lucky program through.
 
-All numbers are scores from 0 to 1. Development worlds are seeds 1 to 24; the one-mission task's world is seed 2026, fixed before anything had played it. Agent runs on it played task 0.1.0; the task is now 0.1.2, with the same instruction, agent image and simulator behaviour ([versions](../docs/lightlag-traverse.md#task-versions)).
+All numbers are scores from 0 to 1. Development worlds are seeds 1 to 24; the one-mission task's world is seed 2026, fixed before anything had played it. Agent runs on it played task 0.1.0; the task is now 0.1.2, with the same instruction, agent image and simulator behaviour ([versions](../docs/lightlag-traverse-campaign.md#task-versions)).
 
 **On the task's world, through Harbor:**
 
@@ -75,7 +75,7 @@ On one world the two best agent runs came within 0.04 and 0.05 of the reference,
 | Haiku's one-request program, replayed | 0.030, away | 0.004, away | lost | 0.011 |
 | Sonnet agent 1's final program, replayed | lost | lost | lost | 0.000 |
 
-The replays are Kristján's other session's, on Modal (`docs/traverse-farm/campaign-worlds/` on `main`); on the same worlds the pilot there repeats its Harbor scores exactly. They measure programs written for one mission on world 2026, played without their agents. Claude agents playing the campaign itself: see [`docs/lightlag-traverse.md`](../docs/lightlag-traverse.md).
+The replays are Kristján's other session's, on Modal (`docs/traverse-farm/campaign-worlds/` on `main`); on the same worlds the pilot there repeats its Harbor scores exactly. They measure programs written for one mission on world 2026, played without their agents. Claude agents playing the campaign itself: see [`docs/lightlag-traverse.md`](../docs/lightlag-traverse-campaign.md).
 
 ## Run
 
