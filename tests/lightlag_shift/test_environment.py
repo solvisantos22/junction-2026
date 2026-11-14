@@ -100,6 +100,18 @@ class Service(unittest.TestCase):
         self.assertEqual(replay["ground_change"]["tick"], draw_change(3100)[0])
         self.assertIn("raw_score", result)
 
+    def test_the_service_can_play_the_rule_change_mission_instead(self):
+        with tempfile.TemporaryDirectory() as directory:
+            service = ShiftEpisodeService(seed=3100, profile="rush_noisy", config=CONFIG, artifact_dir=directory, mission="rule")
+            rules = service.call("rules")
+            self.assertIn("rule_change", rules)
+            self.assertNotIn("ground_change", rules)
+            service.finish()
+            replay = json.loads((Path(directory) / "replay.json").read_text(encoding="utf-8"))
+        self.assertIn(replay["rule_change"]["kind"], ("ground", "turning", "link", "relay"))
+        with self.assertRaises(ValueError):
+            ShiftEpisodeService(seed=1, config=CONFIG, mission="weather")
+
 
 if __name__ == "__main__":
     unittest.main()
