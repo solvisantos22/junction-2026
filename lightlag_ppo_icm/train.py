@@ -71,9 +71,9 @@ def summary(episodes):
             "samples": float(np.mean([e["samples"] for e in episodes]))}
 
 
-def train(env="max", out="lightlag_ppo_icm/runs/max", updates=300, episodes=256, workers=8, delay=3, seed=0,
-          int_coef=0.5, int_final=0.1, lr=3e-4, lr_final=0.3, icm_lr=1e-3, ent_coef=0.01, hidden=128, headings=16,
-          wait_bias=4.0, sample_bias=2.0, eval_every=10, train_seeds=TRAIN_SEEDS, dev_seeds=DEV_SEEDS,
+def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128, workers=8, delay=3, seed=0,
+          int_coef=0.5, int_final=0.1, lr=3e-4, lr_final=0.3, icm_lr=1e-3, ent_coef=0.005, hidden=128, headings=16,
+          wait_bias=4.0, sample_bias=2.0, eval_every=20, train_seeds=TRAIN_SEEDS, dev_seeds=DEV_SEEDS,
           max_minutes=None, quiet=False, metres="auto", home_pull=0.0):
     """Train once and return the summary that is also written to <out>/summary.json."""
     out = Path(out)
@@ -176,8 +176,8 @@ def main(argv=None):
     parser.add_argument("--env", default="max", help="max, max_rocks, a profile (rush, rush_noisy, ...), "
                                                      "profile@biome, traverse, traverse_max")
     parser.add_argument("--out", required=True, help="a new folder for the log and the checkpoints")
-    parser.add_argument("--updates", type=int, default=300)
-    parser.add_argument("--episodes", type=int, default=256, help="episodes per update")
+    parser.add_argument("--updates", type=int, default=600)
+    parser.add_argument("--episodes", type=int, default=128, help="episodes per update")
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--delay", type=int, default=3)
     parser.add_argument("--seed", type=int, default=0, help="of the network weights and the training draws")
@@ -186,7 +186,7 @@ def main(argv=None):
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--lr-final", type=float, default=0.3)
     parser.add_argument("--icm-lr", type=float, default=1e-3)
-    parser.add_argument("--ent-coef", type=float, default=0.01)
+    parser.add_argument("--ent-coef", type=float, default=0.005)
     parser.add_argument("--hidden", type=int, default=128)
     parser.add_argument("--headings", type=int, default=16)
     parser.add_argument("--metres", type=lambda text: text if text == "auto" else tuple(float(m) for m in text.split(",")),
@@ -197,7 +197,7 @@ def main(argv=None):
     parser.add_argument("--home-pull", type=float, default=0.0, metavar="K",
                         help="pay what being home is worth along the way: a potential K times the bonus for "
                              "being home, so the pieces still add up to the official score; 0: off")
-    parser.add_argument("--eval-every", type=int, default=10)
+    parser.add_argument("--eval-every", type=int, default=20)
     parser.add_argument("--train-seeds", type=seed_pair, default=TRAIN_SEEDS, help="e.g. 200000-299999")
     parser.add_argument("--dev-seeds", type=seed_pair, default=DEV_SEEDS)
     parser.add_argument("--max-minutes", type=float, help="stop after the update that passes this")

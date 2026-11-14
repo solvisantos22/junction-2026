@@ -8,7 +8,7 @@ import unittest
 import numpy as np
 
 from lightlag_dynamic.tools import PublicTools
-from lightlag_ppo_icm import check
+from lightlag_ppo_icm import check, habits
 from lightlag_ppo_icm.agent import Agent, load_policy
 from lightlag_ppo_icm.envs import finish, make_env, share
 from lightlag_ppo_icm.player import load_player, random_player
@@ -91,6 +91,17 @@ class TrainingTests(unittest.TestCase):
                          "episodes": keys[:1], "greedy": False})[0]
         np.testing.assert_array_equal(again["actions"], played[0]["actions"])    # same seeds, same episode
         self.assertEqual(set(summary(played)), {"share", "alive", "home", "samples"})
+
+    def test_habits_count_how_the_commands_and_the_battery_were_spent(self):
+        with contextlib.redirect_stdout(io.StringIO()) as printed:
+            rows = habits.main(["--policy", os.path.join(self.out, "policy.npz"), "--seeds", "300004-300005"])
+        self.assertEqual(len(rows), 2)
+        for row in rows:
+            self.assertEqual(row["drives"] + row["samples"] + row["waits"], row["decisions"])
+            self.assertEqual(row["decisions"], 47)
+            self.assertLessEqual(row["replaced"], row["drives"] + row["samples"])
+            self.assertGreaterEqual(row["battery"], 0.0)
+        self.assertIn("the battery guard replaced", printed.getvalue())
 
     def test_the_check_prints_the_policy_beside_scripted_players(self):
         out = os.path.join(self.folder.name, "rows.json")
