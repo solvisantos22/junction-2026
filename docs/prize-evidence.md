@@ -533,6 +533,12 @@ These are recommended evidence choices, not newly asserted official entry requir
 - **Artifacts:** [frozen protocol](rule-transfer.md),
   [results and handoff](rule-transfer-results/README.md),
   [isolated tools](../tools/rule_transfer/). No API spend or prize submission.
+- **Verified free result:** 400 total episodes and 47,414 public calls
+  independently reconstructed; 14 tests pass. Saved Opus beats Prepared on
+  ground, link and relay changes, but has 23/40 deaths with turning costs. Its
+  changed-case mean .628668 versus .644859 hides that failure. Three rejected
+  relay calls are retained. No live-model failure is inferred; inspect before
+  the authorized conditional adaptation. Existing model code was not changed.
 
 ## Keep recording with minimal overhead
 
