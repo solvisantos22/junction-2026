@@ -1,0 +1,113 @@
+{
+  "runs": [
+    {
+      "run": "rocks-rush-noisy-seed1026-delay3-kf-mpc",
+      "replay_matches": true,
+      "decomposition_adds_up": true,
+      "reference_raw": 10.0,
+      "raw": 10.0,
+      "infrastructure": [],
+      "public_calls": 64,
+      "main": [],
+      "hazard_stops": []
+    },
+    {
+      "run": "rocks-rush-noisy-seed1026-r1-opus-5-5",
+      "replay_matches": true,
+      "decomposition_adds_up": true,
+      "reference_raw": 10.0,
+      "raw": 11.0,
+      "infrastructure": [],
+      "public_calls": 25,
+      "main": [],
+      "hazard_stops": []
+    },
+    {
+      "run": "rocks-rush-noisy-seed1026-r2-opus-5-5",
+      "replay_matches": true,
+      "decomposition_adds_up": true,
+      "reference_raw": 10.0,
+      "raw": 6.75,
+      "infrastructure": [],
+      "public_calls": 27,
+      "main": [
+        {
+          "call": 4,
+          "tick": 0,
+          "points_lost": 4.25,
+          "findings": [
+            {
+              "tag": "PLAN_WORSE_THAN_REFERENCE",
+              "kind": "reasoning"
+            }
+          ]
+        },
+        {
+          "call": 12,
+          "tick": 12,
+          "points_lost": 2.0,
+          "findings": [
+            {
+              "tag": "SAFETY_STOP",
+              "kind": "reasoning"
+            }
+          ]
+        }
+      ],
+      "hazard_stops": [
+        17
+      ]
+    },
+    {
+      "run": "rocks-rush-noisy-seed1026-r3-opus-5-5",
+      "replay_matches": true,
+      "decomposition_adds_up": true,
+      "reference_raw": 10.0,
+      "raw": 9.0,
+      "infrastructure": [],
+      "public_calls": 31,
+      "main": [
+        {
+          "call": 7,
+          "tick": 5,
+          "points_lost": 4.0,
+          "findings": [
+            {
+              "tag": "QUEUE_RAN_DRY",
+              "kind": "reasoning"
+            }
+          ]
+        },
+        {
+          "call": 13,
+          "tick": 11,
+          "points_lost": 1.25,
+          "findings": [
+            {
+              "tag": "QUEUE_RAN_DRY",
+              "kind": "reasoning"
+            }
+          ]
+        },
+        {
+          "call": 16,
+          "tick": 14,
+          "points_lost": 1.25,
+          "findings": [
+            {
+              "tag": "PLAN_WORSE_THAN_REFERENCE",
+              "kind": "reasoning"
+            },
+            {
+              "tag": "DISCOVERY_MISSED",
+              "kind": "reasoning"
+            }
+          ]
+        }
+      ],
+      "hazard_stops": []
+    }
+  ],
+  "public_calls": 147,
+  "model_successful_observations": 83
+}
