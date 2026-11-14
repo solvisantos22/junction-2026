@@ -67,4 +67,6 @@ Info Team acknowledged the reported fifth-floor issue, could not promise a fix b
 
 ## Monitoring and publication
 
+The regular source set now also includes the **#ask-organizers activity index and relevant presentation/judging follow-up threads**, bringing routine coverage to ten sources. The parent verified the monitor resumed at the unchanged 30-minute cadence after the targeted presentation search; the Sunday 17:00 end is unchanged.
+
 The local monitor requires the Mac, Codex and authenticated app sessions to remain available. Failed access is recorded as a gap, not as no updates. New actionable notices are pushed to `main` and linked in the parent-chat alert; publication failures are reported explicitly and retried. Credentials, private runtime files and raw conversations stay outside Git. [Monitor controls](../tools/junction_watch/README.md) · [Publication workflow](../tools/junction_watch/PUBLISHING.md).
