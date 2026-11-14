@@ -204,6 +204,24 @@ These are recommended evidence choices, not newly asserted official entry requir
   inference, Modal or Gemini usage. Project/reference adoption remains a team
   decision; Codex's contribution is experiment engineering and critical review.
 
+### R07 — 14 November — Preserve a negative reference comparison
+
+- Codex separately declared candidate 27 on 48 already inspected cells, then
+  ran and checked all episodes against the unchanged earlier reference study.
+  The controller remains Manh's work; Codex contributed the isolated study,
+  dependency checks, complete evidence and independent critical review.
+- Candidate 27 finishes every episode alive at base, but its inspected-set
+  means, **0.754040 rush / 0.677788 noisy**, are below both earlier policies.
+  The result is retained without tuning, replacement seeds or a reference swap.
+- Verification: 48 exact transcript replays / 3,283 calls, 19 frozen sources,
+  110 inputs, four predetermined complete policy repetitions, four guard
+  checks and five additional reviewer reruns. Root reran the full verifier.
+- Evidence: [supplement and commands](lightlag-runs/overnight-reference27-study/README.md),
+  [verification](lightlag-runs/overnight-reference27-study/verification.json),
+  [runner](../tools/lightlag_experiments/overnight_reference27.py).
+  This is selected-policy evidence on inspected cells, not a new model test.
+  No paid inference, Modal/Gemini use or final rules/prize decision.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.

@@ -306,6 +306,29 @@ favorable historical baseline. The user's nominal remaining credit after A is
 balance check). The cumulative launch guard remains $12 for A plus all later
 blocks.
 
+## Candidate-27 supplement complete
+
+The [separate 48-episode supplement](lightlag-runs/overnight-reference27-study/README.md)
+does not support replacing either earlier policy on these plain profiles.
+Candidate 27's means on the already inspected 3000–3019 cells are **0.754040
+for rush** and **0.677788 for noisy**, below original KF's 0.772639 and 0.683006
+and candidate 24's 0.780537 and 0.683006. All 48 candidate runs finish alive
+at base. Improvements and regressions are retained; no candidate or seed was
+replaced after observing these outcomes.
+
+This check was declared at `d9d5d32` after candidate 24's results, so it is a
+selected-policy comparison on inspected cells, not independent confirmation.
+It reuses the 96 earlier baseline rows only after verifying their source and
+artifact compatibility. Independent review and root verification checked all
+48 exact transcript replays, 3,283 calls, 110 input hashes, four predetermined
+full policy repetitions and four guard tests. The reviewer additionally reran
+five representative cases. No paid inference or canonical-reference change.
+
+The practical implication is to test the model's accounting explanation next,
+not assume newer controller complexity automatically creates a better test.
+The candidate's broader scenario results concern different factors and are
+not contradicted by this narrower plain-profile comparison.
+
 ## Status
 
 Block A protocol was published at `253b263` before new attempts; all nine are
