@@ -29,3 +29,18 @@ The implementation is in [stereo_survey](../stereo_survey/README.md), with 12 fo
 Coverage-only greedy reaches approximately 15–17% of the proved stereo ceiling, while pair-aware greedy portfolios reach approximately 96%. The beam portfolio matches all **23 proved** stereo optima. Expanded seed 11 hit the two-million-joint-plan cap: reference and beam both scored 36, but that is only a best-known value until the exhaustive search finishes. The incomplete case stays in the report. All 24 monocular references prove optimal.
 
 This validates complementary images as a real requirement, but the planning problem is currently easy for generic pair-aware search. Complete the bounded reference proof and one fixed fresh check before the final decision. No new model failure is established, and no API/model call has been made.
+
+## Reference completion and frozen fresh check
+
+The capped development case was rerun with a ten-million-joint-plan allowance; the unchanged exact algorithm completed after **2,348,648** evaluations and proved science **36** optimal. The original capped report is preserved, alongside [the completion run](stereo-survey-results/development-reference-completion.json). It is the same development instance, not new evidence. All 24 development stereo optima are now known, and the beam portfolio reaches every one.
+
+Before opening fresh results, freeze this protocol:
+
+- Generator `stereo-survey-v1`, unchanged geometry and algorithms; compact and expanded profiles.
+- Seeds **41000–41023** for each profile: 48 new missions, each scored under stereo and matched monocular objectives.
+- Exact caps: 10,000 feasible local schedules per platform and **10,000,000** joint-plan evaluations. Retain capped cases; no retry or subset selection on check data.
+- Controls: coverage-only greedy, pair greedy, pair density, image beam 64, pair beam 64, best-of-three greedy and best-of-two beam portfolios. The portfolios can use the public checker, never the optimum.
+- Gate remains unchanged: every reference proved/replay-valid/nonzero, greedy portfolio at most 90%, beam portfolio at most 95%. Development already fails the difficulty thresholds; the cheap check validates that outcome rather than searching for a favourable seed.
+- Preserve all source hashes, plans, raw science and exclusion counts. Profiles sharing a numeric seed are correlated; report descriptive means, not independent-trial confidence intervals.
+
+The initial run predates a command-line-only improvement that exposes search caps and returns exit code 2 for incomplete proof. Its exact original `__main__.py` is retained by hash under `stereo-survey-results/source-archive/`; generator, geometry, study, search and replay source are unchanged. This wrapper was not used by the study.

@@ -106,4 +106,21 @@ optimal. Coverage-only greedy obtains only 15–17% on the certified cases, but
 pair-aware greedy obtains about 96%. This demonstrates the intended pairing
 mechanism; it does not yet justify a model-difficulty claim.
 
+The capped development case has since been completed without changing the
+algorithm: science 36 is optimal after 2,348,648 joint evaluations. The original
+and completion reports are both retained; this is not an additional instance.
+The initial report's old CLI wrapper is archived by hash; it was not part of
+study execution. All algorithm and replay source hashes are unchanged.
+
+The fresh check is fixed before running:
+
+```sh
+python3 -m stereo_survey.study --split check --start 41000 --count 24 --max-joint 10000000 --output docs/stereo-survey-results/check.json
+```
+
+Both profiles and both objectives are included. No check instance is retried or
+filtered. The prospective gate requires every reference proved and valid, the
+greedy portfolio at most 90%, and the beam portfolio at most 95% of optimum.
+This is an engineering screening rule, not a model-failure claim.
+
 See [design, protocol and results](../docs/stereo-survey.md).
