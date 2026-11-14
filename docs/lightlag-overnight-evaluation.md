@@ -171,6 +171,28 @@ specifically delay-caused problem; or estimate map-wide reliability. These
 maps inspired the advice and remain diagnostic/development cases. Any later
 confirmation needs fresh predeclared maps and a frozen agent condition.
 
+## Later reference supplement: candidate 27
+
+Declared after the candidate-24 study's aggregate results, before any
+candidate-27 score is inspected. Manh published candidate 27 in `bdb77f6`
+after the original study was fixed. Its new estimator/guard logic merits a
+separate check; it does not replace the two-policy study or its conclusions.
+
+Run exactly `EKF_fading_sandfilter_sandodo_guarded_aimdisc_turncost_window_MPC_manh_controller_27`
+from a frozen `bdb77f6` source snapshot, through the same public-callback
+boundary and unchanged `DynamicEnvironment`. Use the same 48 cells: seeds
+501–504 and 3000–3019, each on rush and rush_noisy, delay 3, horizon 50,
+noise 1 and bumpiness 0. Keep logger/oracle/scenario factors off. Verify every
+simulator and original-reference dependency still matches the first study;
+reuse its original and candidate-24 rows only if those checks pass.
+
+Retain all 48 new attempts and full public transcripts/replays; errors have
+null scores, no retries or replacements. Report differences from both earlier
+policies by set/profile, wins/ties/losses and survival. Keep original model
+comparisons clearly retrospective. This is a later selected-policy comparison
+on an already inspected controller set, not a new independent holdout or model
+generalization test. There is no paid inference or canonical-reference change.
+
 ## Independent reviews
 
 The [evaluation review](research/2026-11-14-lightlag-evaluation-review.md) and
