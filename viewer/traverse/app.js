@@ -820,19 +820,18 @@ function setHtml(node, value) { if (node.dataset.html !== value) { node.dataset.
 function buildBoard() {
   document.title = DATA.title;
   for (const node of document.querySelectorAll('.brand2')) node.textContent = DATA.brand;
-  $('#pitch').innerHTML = DATA.pitch;                       // written by viewer/build_traverse.py from the runs shown
-  $('#src').textContent = `Recorded runs, not a simulation in this page: every path is what that rover really drove. Heights are drawn ${EXAG} times too tall so the relief reads; the ground beyond the map's edge line is scenery.`;
-  $('#cast').innerHTML = RUNS.map(run => `<li class="${run.ref ? 'ref' : ''}"><span>${esc(short(run))}${kind(run)}</span><small>${esc(run.how || run.who)}</small></li>`).join('');
-  $('#cast').classList.toggle('many', RUNS.length > 8);    // a long cast drops the small print so the card still fits
+  // the opening card stays short: which world, how many rovers, the one rule that makes it hard; the board names the runs
+  const COUNT = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
+  $('#kicker').textContent = `World ${DATA.seed}`;
+  $('#pitch').textContent = `${COUNT[RUNS.length] || RUNS.length} rover${RUNS.length === 1 ? '' : 's'}. One battery each. Every command lands ${CFG.delay} ticks late.`;
   if (MOMENTS.length) {
     $('#storybtn').hidden = false;
     $('#storybtn').onclick = event => { event.stopPropagation(); startStory(); };
-    $('#title .help').textContent += ' · S story mode · N next moment';
+    $('#title .help').textContent += ' · S story';
   }
   if (DATA.sites) {                                         // a campaign: one page per site, all in this file
-    $('#sites').innerHTML = DATA.sites.map(site => `<a href="?site=${site.n}" class="${site.n === DATA.site ? 'on' : ''}">${esc(site.label)}<small>${esc(site.note)}</small></a>`).join('');
+    $('#sites').innerHTML = DATA.sites.map(site => `<a href="?site=${site.n}" class="${site.n === DATA.site ? 'on' : ''}">${esc(site.label)}</a>`).join('');
     $('#sites').onclick = event => event.stopPropagation();  // choosing a site is not starting the replay
-    $('#title .help').textContent += ` · ${DATA.sites.map(site => site.n).join(' ')} site`;
   }
   board.innerHTML = `<h2>STANDINGS<span id="after"></span></h2><div id="rows"></div>
     <p id="foot">The bar is the score so far: the value of the samples a rover carries, over all the value on the map. It settles at the end: ½ means the rover finished away from the lander, LOST that its battery ran out.</p>`;
@@ -1140,8 +1139,10 @@ window.addEventListener('keydown', event => {
 });
 window.addEventListener('resize', fitUi);
 
-// The visitor's camera (see `user`): the mouse, a trackpad or fingers on the 3D view.
+// The visitor's camera (see `user`): the mouse, a trackpad or fingers on the 3D view. While story mode turns to a
+// moment, holds on it and turns back, the camera is the story's: input waits until the moment is over.
 const stage = $('#stage'), touches = new Map();
+const held = () => story.on && story.weight > 0;
 let drag = null;
 const viewPoint = (x, y) => { const port = view.port || { vw: window.innerWidth, vh: window.innerHeight, top: 0 }; return new THREE.Vector2(x / port.vw * 2 - 1, 1 - (y - port.top) / port.vh * 2); };
 const middle = () => { const [a, b] = [...touches.values()]; return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, gap: Math.hypot(a.x - b.x, a.y - b.y) }; };
@@ -1156,10 +1157,12 @@ function pick(at) {                    // a click on a rover follows it
 stage.addEventListener('contextmenu', event => event.preventDefault());
 stage.addEventListener('wheel', event => {
   event.preventDefault();
+  if (held()) return;
   const amount = clamp(event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 400 : 1), -300, 300);
   zoomAt(viewPoint(event.clientX, event.clientY), Math.exp(amount * (event.ctrlKey ? 0.01 : 0.0015)));   // ctrl: a trackpad pinch
 }, { passive: false });
 stage.addEventListener('pointerdown', event => {
+  if (held()) return;
   touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
   try { stage.setPointerCapture(event.pointerId); } catch (error) { /* a pointer the browser no longer tracks */ }
   stage.classList.add('dragging');
@@ -1171,6 +1174,7 @@ stage.addEventListener('pointermove', event => {
   const last = touches.get(event.pointerId);
   if (!last || !drag) return;
   touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (held()) return;                  // a drag that a moment interrupts stays still until the moment is over
   if (drag.pinch) {                    // two fingers: apart zooms in, together zooms out, and both together move
     if (touches.size < 2) return;
     const m = middle(), at = viewPoint(m.x, m.y);
@@ -1188,12 +1192,12 @@ function release(event) {
   if (!touches.has(event.pointerId)) return;
   touches.delete(event.pointerId);
   if (stage.hasPointerCapture(event.pointerId)) stage.releasePointerCapture(event.pointerId);
-  if (drag && !drag.pinch && !drag.turn && drag.moved < 4 && event.type === 'pointerup') pick(viewPoint(event.clientX, event.clientY));
+  if (drag && !drag.pinch && !drag.turn && drag.moved < 4 && event.type === 'pointerup' && !held()) pick(viewPoint(event.clientX, event.clientY));
   if (touches.size === 1) { const p = [...touches.values()][0]; drag = { turn: false, grab: groundUnder(viewPoint(p.x, p.y)), moved: 99 }; }
   else if (!touches.size) { drag = null; stage.classList.remove('dragging'); }
 }
 stage.addEventListener('pointerup', release); stage.addEventListener('pointercancel', release);
-stage.addEventListener('dblclick', () => handBack(false));
+stage.addEventListener('dblclick', () => { if (!held()) handBack(false); });
 
 let last = performance.now(), shown = -1;
 function frame(now) {
@@ -1208,6 +1212,8 @@ function frame(now) {
   }
   const near = story.on && (story.active || (nextMoment() && nextMoment().t - state.t < NEAR));
   story.weight = clamp(story.weight + (near ? dt / 1.1 : -dt / 1.4), 0, 1);
+  if (held() && user.on && !user.back) handBack(false);               // a moment is coming: the camera flies to it
+  stage.classList.toggle('held', held());
   const t = state.t, want = state.cam === 'chase' ? 1 : 0;
   if (Math.abs(t - shown) > 3) view.snap = true;                        // a jump in time: the camera cuts instead of flying
   shown = t;
