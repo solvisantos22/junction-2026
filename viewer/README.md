@@ -4,6 +4,8 @@
 
 **Open [`mars-demo.html`](mars-demo.html) by double-clicking it.** It is one file with everything inside, so it needs no server and no network. Use Chrome, press **F** for full screen, pick a mission, and it plays.
 
+Use the visible playback bar to pause, step, restart or jump to the next event. Expand any panel for a closer look; on phones, switch between Mars, Earth, Map and Console with the view tabs. The **?** button opens the mission guide. [Full control guide and browser verification](USABILITY.md).
+
 It replays recorded runs. Nothing is simulated in the page and nothing is re-enacted: every tool call it shows was made by the agent in that saved trial, and the scores are the ones the verifier wrote.
 
 ### The three missions

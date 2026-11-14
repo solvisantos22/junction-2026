@@ -17,6 +17,6 @@ Keyboard: Space plays/pauses; arrows step; `[` and `]` jump between events; `R` 
 
 ## Verification
 
-14 November 2026: Chrome browser checks exercised mission selection, mouse and keyboard stepping, immediate slider synchronization, play/pause, event navigation, run comparison, camera/focus controls, guide focus and 768/390-pixel layouts. All eight included outcomes were compared against the saved replay rewards, and no runtime errors occurred. The 28 existing Python viewer tests passed. Screenshots were inspected locally; they are QA artifacts, not new evidence of model performance.
+14 November 2026: Chrome browser checks exercised mission selection, mouse and keyboard stepping, immediate slider synchronization, play/pause, event navigation, run comparison, camera/focus controls, guide focus and 768/390-pixel layouts. After integrating the reserve correction and the new Rocks mission, all twelve included outcomes were compared against the saved replay rewards. All 38 browser checks passed, including opening the standalone file with networking disabled: no runtime errors and no HTTP requests. The 29 Python viewer tests passed. Screenshots were inspected locally; they are QA artifacts, not new evidence of model performance.
 
 This is replay presentation. It does not change mission rules, the benchmark reference, saved model decisions or scoring.
