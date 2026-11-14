@@ -147,3 +147,31 @@ from this experiment's historical usage ledger and is not a verified balance.
 The final correction passes 25 focused tests and independent safety review; the
 combined reference/repair/study-runner suite passes 38 tests. Outcome improvements
 remain to be measured on the full declared comparison.
+
+## Second repair result: safer, still not a science improvement
+
+The [second complete 128-episode repair comparison](lightlag-runs/survey-reference-repair-v2/summary.json)
+uses the identical declared three-region development grid, frozen at `6192e8e`.
+All cases complete without controller errors, all full replays reconstruct, and
+source hashes remain unchanged.
+
+| Policy | Mean raw science after survival | Deaths | Alive and home |
+|---|---:|---:|---:|
+| Frozen reference | 7.68594 | 1/32 | 30/32 |
+| Guarded scheduling revision | 7.17031 | 0/32 | 32/32 |
+| Frozen no-probe | 6.24375 | 2/32 | 30/32 |
+| Guarded no-probe | 7.12344 | 0/32 | 32/32 |
+
+The safety correction removes observed deaths and failed returns, but adaptive
+mean raw science remains lower than the frozen reference. Within the revised
+planner, inspections add only .046875 raw on these old maps. This is comparator
+development, not independent validation or evidence of model difficulty. The
+conservative guard trades some collection for survival; it is not universally
+better. Both negative and positive outcomes remain published.
+
+The next step is the predeclared six-region development matrix, with all controls
+sharing the guarded navigation. Its structural gate and disjoint check still
+determine whether a paid pilot is justified. A retained development-only timing
+check ([artifact](lightlag-runs/survey-timing-v1/timing.json), map0/seed100) took
+.517 seconds including transcript/replay reconstruction, within the declared
+one-second target. No cases or settings were selected from that score.

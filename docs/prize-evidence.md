@@ -455,6 +455,13 @@ These are recommended evidence choices, not newly asserted official entry requir
   All negative evidence is retained while the comparator is diagnosed before
   the six-region matrix. No model gap, new Claude API call, task promotion or
   final project choice is claimed.
+- Follow-up: Codex review identified underestimated sand-boundary costs,
+  correlated-pose bounds and reuse of pending-drive reserves; the public-only
+  correction passes 25 focused tests (38 including runners). [Code `6192e8e`](https://github.com/solvisantos22/junction-2026/commit/6192e8e).
+  The complete 128-case rerun removes all new-reference deaths/failed returns,
+  but its raw mean 7.17031 remains below the old 7.68594; its no-probe control is
+  7.12344. Both versions, full transcripts and replays are retained. The sealed
+  six-region runner has 10 tests and independent review; no paid model claim.
 
 ## Keep recording with minimal overhead
 
