@@ -21,7 +21,7 @@ Saturday 14 November, about 22:20 Helsinki. Kristján's freeze holds (rules 0.1.
 | **Meaningful difficulty**: explain the mistakes, information available | 30 | Worse routes (28–53% fewer samples); flat batteries with home in reach (87% of lost rovers); write-once autopilots; a textbook A* + Kalman controller scores like Claude (0.270) while route planning is worth 0.2; every formula in `rules()` | Put the controller ladder in the README and the deck |
 | **Reward integrity**: hard to game | 25 | Doing nothing 0; stopping early 0.149; true-state grading in a separate container; the `NonZeroAgentExitCodeError` explained | Get the result of Codex's exploit hunt (claimed 19:04, unpublished); judges will spend 15 minutes on it |
 | **Craft**: sensible rules, one-command rerun | 15 | Published Mars-like physics; scores repeat exactly on a laptop, on Modal and through Harbor | Make the README the front page; check the commands from a clean clone |
-| **Tiebreaker**: a smaller model improving with training | — | Sölvi's PPO 0.087 → 0.377 on validation worlds (greedy 0.381, reference 0.514) | Sölvi: a clean before/after on the final frozen code, one paragraph and a figure |
+| **Tiebreaker**: a smaller model improving with training | — | Sölvi's PPO 0.087 → 0.377 on validation worlds, a development result (greedy 0.381, reference 0.514) | Sölvi: a held-out before/after on his untouched final worlds 82000–82039 once the weights are frozen, one paragraph and a figure |
 
 ## Best use of Modal ($2,000 + $3,000 credits)
 

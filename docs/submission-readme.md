@@ -65,7 +65,7 @@ Doing nothing scores 0; stopping after the first site scores 0.149; grading read
 
 ## The team and the tools
 
-Kristján, Sölvi and Manh, with Claude Code and Codex. Modal ran the rollout farm (about 6,000 missions) and Sölvi's learning runs: a small PPO policy trained from scratch rises from 0.087 to 0.377 on validation worlds (greedy 0.381, the reference 0.514) ([learning](learning-campaign-results/pilot/README.md)). Everything we tried and retired along the way is written up under [`docs/`](.).
+Kristján, Sölvi and Manh, with Claude Code and Codex. Modal ran the rollout farm (about 6,000 missions) and Sölvi's learning runs: a small PPO policy trained from scratch rises from 0.087 to 0.377 on validation worlds (a development result: those worlds were checked repeatedly; greedy 0.381, the reference 0.514; Sölvi's untouched final worlds 82000–82039 wait for frozen weights) ([learning](learning-campaign-results/pilot/README.md)). Everything we tried and retired along the way is written up under [`docs/`](.).
 
 ## Caveats
 
