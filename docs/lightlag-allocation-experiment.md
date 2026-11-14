@@ -131,3 +131,19 @@ historical user-reported $15.70 and old morning-brief headroom are not a live
 balance; reconcile the account before funding the separate nine-attempt task
 contract proposal. The current twelve-trial pilot keeps its frozen serial
 $1.00 stop-new-launches guard and $1.50 soft target.
+
+## Coverage limitation found during the pilot
+
+A [post-hoc check using only the public rules](lightlag-runs/information-allocation-pilot-v1/coverage-limitation.json)
+shows that every optimal inspection in this matrix targets the route with the
+highest prior expected reward. The matrix distinguishes inspection value from
+entropy, but it cannot distinguish optimal information-value targeting from a
+current-leader heuristic given the same probe/skip decision. Correct actions do
+not reveal the model's internal reasoning algorithm. A case where inspecting a
+less promising challenger is best remains untested. This finding does not change
+the frozen cases, reference, model settings or paid-run count.
+
+At the eight-session checkpoint, both second repetitions of cases1/2 again
+receive soft signals and correctly choose the detour. Their firm-signal branch
+remains uncovered by actual models. All eight observed decisions and timings
+match the reference; the remaining repeats continue under the original protocol.

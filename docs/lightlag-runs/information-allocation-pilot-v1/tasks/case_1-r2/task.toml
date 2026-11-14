@@ -1,0 +1,39 @@
+schema_version = "1.4"
+artifacts = [{ source = "/evaluator", service = "allocation" }]
+
+[task]
+name = "neural-network-november/information-allocation-pilot"
+version = "0.1.0"
+description = "Choose which independent route uncertainty to inspect using one shared inspection before an irreversible trip."
+authors = []
+keywords = ["partial-observability", "information-acquisition", "mcp"]
+
+[metadata]
+
+[verifier]
+timeout_sec = 120.0
+environment_mode = "separate"
+
+[[verifier.collect]]
+service = "allocation"
+command = "python /srv/finish.py --url http://127.0.0.1:8000 --token-file /run/information/token"
+timeout_sec = 60.0
+
+[verifier.env]
+
+[agent]
+timeout_sec = 1800.0
+
+[environment]
+network_mode = "public"
+build_timeout_sec = 900.0
+os = "linux"
+
+[[environment.mcp_servers]]
+name = "allocation"
+transport = "streamable-http"
+url = "http://allocation:8000/mcp"
+
+[environment.env]
+
+[solution.env]
