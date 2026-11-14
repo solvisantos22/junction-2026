@@ -10,7 +10,8 @@
 
 The environment and the delay are the ones the policy was trained on unless --env says
 otherwise. A policy of the traverse's target mode (targets.py) plays that mode; beside it
-random_targets and nearest_targets (the same adapter without a network) and the traverse's
+random_targets, nearest_targets and cluster_targets (the same adapter without a network, see
+player.py) and the traverse's
 scripted players, the reference `pilot` when named. Players: ppo_icm (greedy), ppo_icm_sampled (actions drawn as in training), plain
 (a hand-written rule on the same observation), random (the same adapter with random actions),
 nothing, plain_home, random_home and ppo_icm_home (plain, random and the policy with the home guard
@@ -18,8 +19,8 @@ of task.py on; plain_home plays by default when the policy was trained with the 
 scripted players of the environment:
 max_navigator, fused, c37, kf_mpc, blind on the max env; kf_mpc, blind, reference, leg_and_wait on
 a profile or biome; pilot, pilot_fast, greedy, straight on the traverse, and manh_max,
-manh_max_fast besides on its MAX map (the full-search pilot and manh_max are slow, so they play
-only when named).
+manh_max_fast, manh_max_home, manh_max_home_fast besides on its MAX map (the full-search pilot,
+manh_max and manh_max_home are slow, so they play only when named).
 
 Prints each player's mean share of the available value, deaths and returns home, and its paired
 difference to the first player with a 95% bootstrap interval over the seeds.
@@ -32,7 +33,8 @@ from multiprocessing import Pool
 from lightlag_dynamic.biomes.max_check import seed_range, table
 
 from .envs import FiveTools, finish, make_env, share
-from .player import load_player, nearest_target_player, plain_player, random_player, random_target_player
+from .player import (cluster_target_player, load_player, nearest_target_player, plain_player, random_player,
+                     random_target_player)
 from .targets import is_target_config
 from .task import TaskConfig
 
@@ -72,12 +74,15 @@ def player(name, policy, spec):
         return random_target_player()
     if name == "nearest_targets":
         return nearest_target_player()
+    if name == "cluster_targets":
+        return cluster_target_player()
     if name == "nothing":
         return lambda tools, env=None: None
     players = scripted(spec)
     if name not in players:
         raise ValueError(f"no player {name!r} for {spec}; there are ppo_icm, ppo_icm_sampled, ppo_icm_home, plain, "
-                         "plain_home, random, random_home, random_targets, nearest_targets, nothing, "
+                         "plain_home, random, random_home, random_targets, nearest_targets, cluster_targets, "
+                         "nothing, "
                          + ", ".join(players))
     return players[name]
 
@@ -85,12 +90,13 @@ def player(name, policy, spec):
 def default_players(extra, spec):
     """ppo_icm, plain (and plain_home when the policy plays with the home guard), random, nothing,
     then the scripted players of the environment but the slow ones. In the target mode: ppo_icm,
-    nearest_targets, random_targets, nothing and the traverse's scripted players but the pilot."""
+    nearest_targets, cluster_targets, random_targets, nothing and the traverse's scripted players but
+    the pilot."""
     if is_target_config(extra["task"]):
-        builtin = ["ppo_icm", "nearest_targets", "random_targets", "nothing"]
+        builtin = ["ppo_icm", "nearest_targets", "cluster_targets", "random_targets", "nothing"]
         return builtin + [n for n in scripted(spec) if n not in builtin + ["pilot"]]
     builtin = ["ppo_icm", "plain"] + (["plain_home"] if extra["task"].get("home_guard") else []) + ["random", "nothing"]
-    return builtin + [n for n in scripted(spec) if n not in builtin + ["pilot", "manh_max"]]
+    return builtin + [n for n in scripted(spec) if n not in builtin + ["pilot", "manh_max", "manh_max_home"]]
 
 
 def episode(job):

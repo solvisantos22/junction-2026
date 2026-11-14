@@ -847,13 +847,16 @@ Kristján explicitly requested parallel Modal training, prioritizing speed using
 his remaining credits, to try to beat the reference with a learned model. Codex
 built an isolated public-state strategy selector, counterfactual rollout dataset
 and three classical model fits; the existing reference remains the team's work.
-Six focused tests pass. All 12 initial Modal smoke missions finish home/alive;
-common prefixes/features agree and the baseline replay matches the local run
-exactly. A Modal SDK cleanup warning after completion is retained and will be
-fixed before production. Training and fresh results are pending. No canonical
-reference change or new LLM-performance claim. [Protocol](learned-portfolio.md),
-[evidence](learned-portfolio-results/README.md).
-
+Seven focused tests pass, including all three fits and checkpoint round trips.
+All 12 initial Modal smoke missions finish home/alive; common prefixes/features
+agree and the baseline controller exactly matches the local trajectory. All 12
+physics replays, 4,874 commands and 5,052 states independently verify. The original
+SDK cleanup warning is retained; `eb4f9e2` fixed it before production and disabled
+implicit source upload. Modal data app `ap-tctysvmd3CxtowroSpSlM0` is running the
+frozen 2,880 missions, with 97 concurrent workers observed. Training and fresh
+results are pending. No canonical reference change or new LLM-performance claim.
+Initial implementation `570c7e5`, production launch source `78cfb5d`.
+[Protocol](learned-portfolio.md), [evidence](learned-portfolio-results/README.md).
 
 ### 15 November — Sölvi / Codex: audited final learning and exact-campaign comparison
 
@@ -864,3 +867,8 @@ reference change or new LLM-performance claim. [Protocol](learned-portfolio.md),
 - **Modal evidence:** final app **`ap-GGkMI4eQi8N9MVVuTef5Au`**, [dashboard](https://modal.com/apps/solvisantos22/main/ap-GGkMI4eQi8N9MVVuTef5Au), [six-call receipt](learning-final-results/fit/receipt.json), [terminal status and per-call costs](learning-final-results/fit/status.json). Returned wrappers sum to **$7.262395867 estimated running CPU/memory**, excluding startup/build/storage/egress and other experiments; not an invoice or verified account balance. No GPU/model API or new cloud job for the final evaluation. Earlier pilot app `ap-rogIzhog6ZpkrAeb474Z11` and its separately reported $1.592405 remain in [old-pilot closure](learning-campaign-results/pilot/README.md); it was not resumed.
 - **Verification and reuse:** [final findings/handoff](learning-final-results/README.md), [fresh-world audit](learning-final-results/evaluation/audit.json), [campaign audit](learning-final-results/campaign/evaluation/audit.json), [recorded-agent comparison](learning-final-results/campaign/comparison.json), [figure](learning-final-results/figures/learning-curve.png), [README/video copy](learning-final-results/submission-copy.md). Source freeze `2257871`, policy freeze **`d81fa88`**, campaign freeze **`48a63ee`** preceded their respective runs. Six campaign, three aggregation and two plotting tests passed; parent-hash hardening passed both metadata tests. Audits reconstruct physics/grades/retained-observation choices and statistics; observation generation/controller linkage remain source-pinned, and production optimizer learning was not reconstructed.
 - **Decision:** retain the reference; present learned improvement and the recorded-agent comparison with greedy and all limitations. Worlds 82000–82039 are now consumed. This entry records actual Codex and Modal use; it does not assert a prize win or replace the team's final submission decision.
+
+
+### 15 November — Sölvi / Codex: RL–greedy hybrid search preparation
+
+Sölvi authorized combining the retained learned policies with greedy and using parallel Modal capacity before submission. Codex prepared a separate 65-arm experiment, grouped selection across every training seed, rank ensembles/blends, immutable source/weight checks and hybrid decision/physics audits. The frozen simulator, reference, prior learners and prior results are unchanged. Nineteen focused tests passed, including full-mission equivalence with an original policy, tampering rejection and a complete controller repeat on used smoke world 1. [Protocol](learning-hybrid.md); code in `lightlag_hybrid/` and `tools/learning_hybrid/`; tests in `tests/learning_hybrid/`. Modal execution and measured outcomes are pending; no improvement or additional training is claimed. Simulator/navigation authorship remains with the team. This entry will be extended with actual app IDs, costs and results after execution.
