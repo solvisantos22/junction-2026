@@ -17,14 +17,17 @@ from dataclasses import dataclass
 import itertools
 import math
 
-from lightlag_dynamic.controllers import Leg, RESERVE
+from lightlag_dynamic.controllers import Leg, RESERVE, _clip_interval
 from lightlag_dynamic.kf_mpc import (KalmanMPCController, P_COMMIT, P_TRY,
-                                     VAR_FLOOR, inside_probability)
+                                     P_HOME, VAR_FLOOR, inside_probability)
 from .reference import ExpeditionController, posterior
 
 
 MODES = ("reference", "adaptive", "no_probe", "entropy", "fixed_pair")
 MAX_TARGETS = 4
+# Reuse the frozen controller's 90% home-confidence level rather than fitting a
+# safety margin to particular episodes. This Gaussian corridor is not a guarantee.
+TERRAIN_CONFIDENCE_RADIUS = math.sqrt(-2.0 * math.log(1.0 - P_HOME))
 
 
 @dataclass(frozen=True)
@@ -61,6 +64,8 @@ class ExpeditionControllerV2(ExpeditionController):
             raise ValueError("fixed_pair is only valid for the fixed_pair policy")
         self.fixed_pair = tuple(fixed_pair or ())
         self._v2_geometry = {}
+        self._v2_execution = {}
+        self._v2_safe_geometry = {}
         self._route_pools = {}
         self._sample_intents = {}
         self._evaluated_candidates = []
@@ -70,6 +75,8 @@ class ExpeditionControllerV2(ExpeditionController):
         if hasattr(self, "_route_pools"):
             self._route_pools.clear()
             self._v2_geometry.clear()
+            self._v2_execution.clear()
+            self._v2_safe_geometry.clear()
 
     def _pending_targets(self):
         """Pending intentions are unavailable targets, never confirmed successes."""
@@ -87,7 +94,7 @@ class ExpeditionControllerV2(ExpeditionController):
                 if targets:
                     target = min(targets, key=lambda target: math.hypot(
                         target["x"] - predicted["x"], target["y"] - predicted["y"]))
-                    spread = math.sqrt(max(predicted["cov"][0][0], predicted["cov"][1][1]))
+                    spread = math.sqrt(self._position_variance(predicted["cov"]))
                     if math.hypot(target["x"] - predicted["x"], target["y"] - predicted["y"]) \
                             <= self.radius + 3 * spread:
                         target_id = target["id"]
@@ -97,19 +104,60 @@ class ExpeditionControllerV2(ExpeditionController):
 
     def predict(self, slot, use_pending=True):
         state = super().predict(slot, use_pending=use_pending)
+        # Keep the terrain-risk reserve for accepted drives until delivered battery
+        # replaces the forecast. Otherwise a later pipeline decision can spend the
+        # difference between safe admission cost and the parent's mean drive cost.
+        extra = self._pending_drive_reserve(slot) if use_pending else 0.0
+        state["battery"] = max(0.0, state["battery"] - extra)
+        state["alive"] = state["alive"] and state["battery"] > 0
         state["sampled"] = set(self.packets[-1]["sampled_targets"])
         state["pending_samples"] = self._pending_targets() if use_pending else set()
         return state
 
+    def _pending_drive_reserve(self, slot):
+        mean, cov = list(self.filter.mean), [row[:] for row in self.filter.cov]
+        last_tick, extra = self.packets[-1]["tick"], 0.0
+        pending = sorted((ack for ack in self.acks
+                          if last_tick < ack["execute_tick"] < slot
+                          and ack["command_id"] not in self.cancelled),
+                         key=lambda ack: ack["execute_tick"])
+        for ack in pending:
+            command = ack["command"]
+            if command["action"] != "drive":
+                continue
+            start, variance = tuple(mean[:2]), self._position_variance(cov)
+            mean, cov, by_terrain = self.filter.propagate(
+                mean, cov, command["heading_deg"], command["metres"], self.terrain_at)
+            expected = sum(wheel * self.drive_cost * self.multiplier[terrain]
+                           for terrain, wheel in by_terrain.items())
+            # Here propagation retains the full current covariance, including its
+            # cross terms, so the largest eigenvalue already includes correlations.
+            radius = TERRAIN_CONFIDENCE_RADIUS * math.sqrt(max(variance, self._position_variance(cov)))
+            guarded = self._guarded_segment_cost(start, tuple(mean[:2]), command["metres"], radius)
+            extra += max(0.0, guarded - expected)
+        return extra
+
     def _reset_planning(self, state):
         self._v2_geometry.clear()
+        self._v2_execution.clear()
+        self._v2_safe_geometry.clear()
         self._route_pools.clear()
         self._evaluated_candidates = []
-        self._var0 = max(state["cov"][0][0], state["cov"][1][1], VAR_FLOOR)
+        self._var0 = max(self._position_variance(state["cov"]), VAR_FLOOR)
 
     def _geometry(self, start, goal, variance):
-        """Cache geometry once; the starting position variance is additive in KF legs."""
+        """Price commanded motion and possible costly terrain, not just ideal waypoints.
+
+        Each drive is propagated with the public KF. A confidence corridor that
+        can touch sand charges that drive's full wheel length at the sand rate.
+        Both outbound and home legs use this conservative budget. It prevents a
+        nearly free route along a sand boundary from silently becoming a costly
+        drive when localization/heading/slip error moves its execution into sand.
+        """
         key = (tuple(start), tuple(goal))
+        safe_key = key + (variance,)
+        if safe_key in self._v2_safe_geometry:
+            return self._v2_safe_geometry[safe_key]
         if key not in self._v2_geometry:
             previous = self._var0
             self._var0 = VAR_FLOOR
@@ -120,8 +168,55 @@ class ExpeditionControllerV2(ExpeditionController):
         leg = self._v2_geometry[key]
         if leg is None:
             return None
-        return Leg(leg.commands, leg.energy, leg.energy_safe,
-                   math.sqrt(max(0.0, leg.uncertainty ** 2 - VAR_FLOOR + variance)))
+        if key not in self._v2_execution:
+            self._v2_execution[key] = self._command_energy_profile(start, leg.commands)
+        expected, segments = self._v2_execution[key]
+        guarded = 0.0
+        for a, b, wheel, base_variance in segments:
+            # Initial position and learned slip/bias can be correlated. Adding
+            # standard deviations gives a conservative covariance envelope;
+            # adding variances would incorrectly assume independence here.
+            radius = TERRAIN_CONFIDENCE_RADIUS * (
+                math.sqrt(max(0.0, variance)) + math.sqrt(max(0.0, base_variance - VAR_FLOOR)))
+            guarded += self._guarded_segment_cost(a, b, wheel, radius)
+        result = Leg(leg.commands, max(leg.energy, expected), max(leg.energy_safe, guarded),
+                     math.sqrt(max(0.0, leg.uncertainty ** 2 - VAR_FLOOR + variance)))
+        self._v2_safe_geometry[safe_key] = result
+        return result
+
+    def _guarded_segment_cost(self, start, end, wheel, radius):
+        possible_sand = any(_clip_interval(start, end, rect, margin=radius) is not None for rect in self.sand)
+        multiplier = max(self.multiplier.values()) if possible_sand else self.multiplier["bedrock"]
+        return wheel * self.drive_cost * multiplier
+
+    @staticmethod
+    def _position_variance(covariance):
+        """Largest eigenvalue: an isotropic envelope also covers correlated fixes."""
+        a, b, c = covariance[0][0], covariance[0][1], covariance[1][1]
+        return max(0.0, (a + c + math.sqrt((a - c) ** 2 + 4 * b * b)) / 2)
+
+    def _command_energy_profile(self, start, commands):
+        # Cache nuisance-state propagation without the starting position block;
+        # _geometry combines the marginal deviations without assuming independence.
+        mean = list(self.filter.mean)
+        mean[0], mean[1] = start
+        cov = [row[:] for row in self.filter.cov]
+        for index in range(len(cov)):
+            cov[0][index] = cov[1][index] = cov[index][0] = cov[index][1] = 0.0
+        cov[0][0] = cov[1][1] = VAR_FLOOR
+        expected, segments = 0.0, []
+        for command in commands:
+            if command["action"] != "drive":
+                continue
+            a = tuple(mean[:2])
+            before = self._position_variance(cov)
+            mean, cov, by_terrain = self.filter.propagate(
+                mean, cov, command["heading_deg"], command["metres"], self.terrain_at)
+            expected += sum(wheel * self.drive_cost * self.multiplier[terrain]
+                            for terrain, wheel in by_terrain.items())
+            segments.append((a, tuple(mean[:2]), command["metres"],
+                             max(before, self._position_variance(cov))))
+        return expected, tuple(segments)
 
     def _factors(self, beliefs):
         poor, rich = self.multipliers["poor"], self.multipliers["rich"]
@@ -136,7 +231,7 @@ class ExpeditionControllerV2(ExpeditionController):
 
     def _pool(self, state, slot, depth=MAX_TARGETS):
         excluded = frozenset(state["sampled"]) | frozenset(state.get("pending_samples", ()))
-        variance = max(state["cov"][0][0], state["cov"][1][1], VAR_FLOOR)
+        variance = max(self._position_variance(state["cov"]), VAR_FLOOR)
         key = (state["x"], state["y"], state["battery"], state["tick"], slot,
                excluded, depth, variance)
         if key in self._route_pools:
@@ -165,7 +260,7 @@ class ExpeditionControllerV2(ExpeditionController):
                 leg, home = hop(here, index), homes[index]
                 if leg is None or home is None:
                     continue
-                spent = energy + leg.energy + self.sample_cost
+                spent = energy + leg.energy_safe + self.sample_cost
                 if spent + home.energy_safe > budget:
                     continue
                 sample_tick = tick + (self.wait_per_leg() if ids else 0) + len(leg.commands)
@@ -270,7 +365,7 @@ class ExpeditionControllerV2(ExpeditionController):
             future["x"], future["y"] = position
         if covariance is not None:
             future["cov"] = covariance
-        variance = max(future["cov"][0][0], future["cov"][1][1], VAR_FLOOR)
+        variance = max(self._position_variance(future["cov"]), VAR_FLOOR)
         home = self._geometry((future["x"], future["y"]), self.base, variance)
         reserve = self.idle * (self.horizon - future["tick"]) + RESERVE
         if (next_slot > self.horizon or future["battery"] <= 0 or home is None
@@ -281,7 +376,7 @@ class ExpeditionControllerV2(ExpeditionController):
 
     def _prefix(self, state, slot, target):
         start, point = (state["x"], state["y"]), (target["x"], target["y"])
-        variance = max(state["cov"][0][0], state["cov"][1][1], VAR_FLOOR)
+        variance = max(self._position_variance(state["cov"]), VAR_FLOOR)
         leg = self._geometry(start, point, variance)
         if leg is None or self.needs_confirmation(leg):
             return None
@@ -301,7 +396,7 @@ class ExpeditionControllerV2(ExpeditionController):
         if chance < (P_COMMIT if leg.commands else P_TRY):
             return None
         return {"target": target, "commands": list(leg.commands) + [{"action": "sample"}],
-                "energy": energy + self.sample_cost, "chance": chance,
+                "energy": max(energy, leg.energy_safe) + self.sample_cost, "chance": chance,
                 "position": tuple(mean[:2]), "cov": xy_cov,
                 "sample_tick": slot + len(leg.commands)}
 
@@ -401,6 +496,7 @@ class ExpeditionControllerV2(ExpeditionController):
             "route_pools_built": len(self._route_pools),
             "sample_learning": "exact only after delivered region_quality; hypothetical success/failure branches",
             "value_semantics": "heuristic: first prefix sample has hit/miss branches; direct/continuation samples assume planned success; future pose conditioning omitted",
+            "energy_budget_basis": "safe outbound and home: public commanded-leg KF propagation, 90% Gaussian pose corridor with full drive charged at highest terrain multiplier when sand exposure is possible; not a guarantee",
             "planning_horizon_targets": MAX_TARGETS,
         }
         return direct, best, diagnostics

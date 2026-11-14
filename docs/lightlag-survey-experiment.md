@@ -106,3 +106,44 @@ requires both. Physical return/battery regressions are being diagnosed before
 launching the six-region development matrix. Any revised code and rerun will
 use a new output directory and keep this source version and all outcomes.
 No additional Claude API calls have been made.
+
+## Safety correction before the next comparison
+
+The two deaths in the first scheduling revision followed departures near sand
+boundaries. Their predicted travel costs were approximately 16 energy, while
+executed travel cost 23–30. Inspection and idle charges were already included;
+the weak point was estimating terrain from ideal waypoints despite uncertain
+pose and slip.
+
+The next revision propagates commanded drives through the public KF and prices
+possible sand exposure in a covariance envelope using the existing 90% home
+confidence level. Both outbound travel and return use guarded energy. This is
+a conservative heuristic, not a safety guarantee, and applies identically to
+every acquisition control. It does not change simulator physics, mission energy,
+seeds, probe policy or the frozen first comparison.
+
+Synthetic checks cover a public-world execution inside the pose envelope that
+uses more sand than the nominal plan, variance-sensitive caching, correlated
+pose, unchanged costs without sand, and outbound/home/idle reserve accounting.
+Review also found that unobserved queued drives could release this extra reserve
+when the inherited predictor used their mean cost. The correction retains
+guarded-minus-mean cost until delivered battery telemetry reconciles it, excluding
+canceled commands and avoiding duplicate sample, inspection or idle charges.
+The entire 128-episode old-map comparison will be rerun in a new directory;
+repair cases alone cannot establish improvement.
+
+## Related teammate evidence
+
+Kristján's [Lightlag Live research](lightlag-live.md), integrated in `d0da13b`,
+reports a saved Opus autopilot approximately tied with the reference on 200 fresh
+maps (.515 versus .518). Its selected campaign has a larger reference lead;
+clock/harness incidents and reuse of fixed programs limit interpretation. This
+is evidence against relying on a hand-played navigation gap when scripting is
+allowed, not evidence for our new information bottleneck. The survey keeps
+scripting available, a separate mechanism, and an unselected check split.
+The Live report attributes about $9.15 to Kristján's key; that amount is separate
+from this experiment's historical usage ledger and is not a verified balance.
+
+The final correction passes 25 focused tests and independent safety review; the
+combined reference/repair/study-runner suite passes 38 tests. Outcome improvements
+remain to be measured on the full declared comparison.

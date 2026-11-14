@@ -7,7 +7,10 @@ import math
 import unittest
 from unittest.mock import patch
 
-from lightlag import Config
+from lightlag import Config, Environment
+from lightlag.model import Rect, World
+from lightlag_dynamic.controllers import Leg
+from lightlag_dynamic.kf_mpc import KalmanMPCController
 from lightlag_dynamic.environment import DynamicEnvironment
 from lightlag_dynamic.tools import PublicTools
 from lightlag_expedition.environment import ExpeditionEnvironment
@@ -239,6 +242,154 @@ class RoutePoolsAndControls(unittest.TestCase):
         imports = {node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)}
         self.assertEqual(imports, {"dataclasses", "lightlag_dynamic.controllers",
                                    "lightlag_dynamic.kf_mpc", "reference"})
+
+
+class PublicTerrainSafety(unittest.TestCase):
+    def pending_controller(self):
+        tools = Fixture()
+        tools.public_map["sand"] = [{"x1": 20, "y1": 20.5, "x2": 30, "y2": 30}]
+        c = ExpeditionControllerV2(tools)
+        c.filter.cov[0][0] = c.filter.cov[1][1] = 1.
+        c.send([{"action": "drive", "heading_deg": 0, "metres": 2},
+                {"action": "drive", "heading_deg": 0, "metres": 2},
+                {"action": "sample"}, {"action": "inspect", "region": "r2"}])
+        return c
+
+    def test_pending_drives_keep_reserve_without_changing_pose_or_other_costs(self):
+        c = self.pending_controller()
+        raw = KalmanMPCController.predict(c, 8)
+        guarded = c.predict(8)
+        self.assertAlmostEqual(guarded["battery"], 100 - 7 * .5 - 8 - 3 - 2)
+        self.assertAlmostEqual(c._pending_drive_reserve(8), 4.)
+        for key in ("x", "y", "cov", "bias", "tick"):
+            self.assertEqual(guarded[key], raw[key])
+        # The slot itself has not executed: neither drive at4 is charged before4.
+        self.assertEqual(c._pending_drive_reserve(4), 0.)
+        self.assertAlmostEqual(c._pending_drive_reserve(5), 2.)
+
+    def test_pending_drive_reserve_reconciles_delivery_and_cancellation(self):
+        c = self.pending_controller()
+        c.cancelled.add(c.acks[0]["command_id"])
+        self.assertAlmostEqual(c._pending_drive_reserve(8), 2.)
+        self.assertAlmostEqual(c.predict(8)["battery"], 100 - 7 * .5 - 4 - 3 - 2)
+        # Public battery at tick5 supersedes both drive forecasts; only later
+        # sample/inspection and tick6/7 idle remain. No reserve is charged twice.
+        packet = deepcopy(c.packets[-1])
+        packet.update(tick=5, battery=93.5, position=[23.8, 20.], events=[])
+        c.absorb(packet)
+        self.assertEqual(c._pending_drive_reserve(8), 0.)
+        self.assertAlmostEqual(c.predict(8)["battery"], 93.5 - 2 * .5 - 3 - 2)
+
+    def test_multiple_pending_drives_propagate_in_chronological_order(self):
+        c = self.pending_controller()
+        seen = []
+
+        def record(start, end, wheel, radius):
+            seen.append((start, end))
+            return 2 * wheel
+
+        with patch.object(c, "_guarded_segment_cost", side_effect=record):
+            c._pending_drive_reserve(8)
+        self.assertEqual(len(seen), 2)
+        self.assertEqual(seen[0][1], seen[1][0])
+        self.assertNotEqual(seen[0][0], seen[1][0])
+
+    def test_sand_exposure_inside_pose_corridor_covers_cost_missed_by_mean_route(self):
+        tools = Fixture()
+        tools.public_map["sand"] = [{"x1": 20, "y1": 20.5, "x2": 30, "y2": 30}]
+        c = ExpeditionControllerV2(tools)
+        low = c._geometry((20, 20), (24, 20), 1e-6)
+        guarded = c._geometry((20, 20), (24, 20), 1.0)
+        self.assertGreater(guarded.energy_safe, low.energy_safe)
+        self.assertIs(c._geometry((20, 20), (24, 20), 1e-6), low)
+        self.assertIs(c._geometry((20, 20), (24, 20), 1.0), guarded)
+        # A possible true starting pose .6m north is inside the 90% corridor.
+        # Execute the unchanged public commands in that explicit synthetic world.
+        env = Environment(seed=0, config=Config(delay_ticks=0, max_ticks=60, idle_cost=0),
+                          world=World(base=(20, 20.6), sand=(Rect(20, 20.5, 30, 30),),
+                                      hazards=(), targets=()))
+        env.uplink(guarded.commands)
+        env.advance(5)
+        actual_cost = 100 - env.telemetry_log()[-1]["battery"]
+        self.assertGreater(actual_cost, low.energy_safe)
+        self.assertGreaterEqual(guarded.energy_safe + 1e-8, actual_cost)
+
+    def test_no_sand_preserves_frozen_leg_energy_and_commands(self):
+        c = ExpeditionControllerV2(Fixture())
+        legacy = c.leg((20, 20), (24, 20))
+        guarded = c._geometry((20, 20), (24, 20), .8)
+        self.assertEqual(guarded.commands, legacy.commands)
+        self.assertAlmostEqual(guarded.energy, legacy.energy, places=5)
+        self.assertAlmostEqual(guarded.energy_safe, legacy.energy_safe, places=5)
+
+    def test_corridor_does_not_assume_position_and_slip_are_independent(self):
+        tools = Fixture()
+        tools.public_map["sand"] = [{"x1": 20, "y1": 23.5, "x2": 30, "y2": 30}]
+        c = ExpeditionControllerV2(tools)
+        start, goal = (20, 20), (24, 20)
+        legacy = c.leg(start, goal)
+        wheel = sum(command["metres"] for command in legacy.commands)
+        # Equal unit position/motion variances may be positively correlated:
+        # the 90% radius then exceeds the3.5m sand gap. Independence would miss it.
+        profile = (wheel, ((start, goal, wheel, 1.000001),))
+        with patch.object(c, "_command_energy_profile", return_value=profile):
+            guarded = c._geometry(start, goal, 1.)
+        self.assertAlmostEqual(guarded.energy_safe, 2 * wheel)
+
+    def test_correlated_starting_position_uses_eigenvalue_at_all_safety_call_sites(self):
+        tools = Fixture()
+        tools.public_map["sand"] = [{"x1": 20, "y1": 22.5, "x2": 30, "y2": 30}]
+        tools.public_map["targets"][1]["x"] = 24
+        c = ExpeditionControllerV2(tools)
+        state = c.predict(4)
+        state["cov"] = [[1., .9], [.9, 1.]]
+        c._reset_planning(state)
+        self.assertAlmostEqual(c._var0, 1.9)
+        original_geometry = c._geometry
+        variances = []
+
+        def record_geometry(start, goal, variance):
+            variances.append(variance)
+            return original_geometry(start, goal, variance)
+
+        with patch.object(c, "_geometry", side_effect=record_geometry):
+            c._pool(state, 4)
+            c._prefix(state, 4, c.targets["t2"])
+            c._safe_future(state, 11, 2)
+        self.assertTrue(variances)
+        self.assertTrue(all(abs(variance - 1.9) < 1e-9 for variance in variances))
+        # Isolate starting covariance: no nuisance variance in this public profile.
+        # A2.5m sand gap lies outside maxdiag's90% radius, but inside lambda_max's.
+        c._v2_geometry.clear()
+        c._v2_execution.clear()
+        c._v2_safe_geometry.clear()
+        start, goal = (20, 20), (24, 20)
+        wheel = sum(command["metres"] for command in c.leg(start, goal).commands)
+        profile = (wheel, ((start, goal, wheel, 1e-6),))
+        with patch.object(c, "_command_energy_profile", return_value=profile):
+            underpriced = c._geometry(start, goal, 1.)
+            guarded = c._geometry(start, goal, c._position_variance(state["cov"]))
+        self.assertGreater(guarded.energy_safe, underpriced.energy_safe)
+        self.assertAlmostEqual(guarded.energy_safe, 2 * wheel)
+
+    def test_route_pool_requires_safe_outbound_as_well_as_home_and_idle(self):
+        c = ExpeditionControllerV2(Fixture())
+        state = c.predict(4)
+        state["battery"] = c.idle * (c.horizon - state["tick"]) + 2 + 10
+        risky = Leg([{"action": "wait"}], 1., 5., 0.)
+        with patch.object(c, "_geometry", return_value=risky):
+            pool = c._pool(state, 4)
+        # Mean outbound1+sample3+home5 fits10; safe outbound5+sample3+home5 does not.
+        self.assertEqual(pool.routes, ())
+
+    def test_productive_prefix_charges_guarded_outbound_cost(self):
+        c = ExpeditionControllerV2(Fixture())
+        state = c.predict(4)
+        guarded = Leg([{"action": "drive", "heading_deg": 0, "metres": .1}], .1, 10., 0.)
+        with patch.object(c, "_geometry", return_value=guarded):
+            prefix = c._prefix(state, 4, c.targets["t1"])
+        self.assertIsNotNone(prefix)
+        self.assertEqual(prefix["energy"], 13.)
 
 
 class ContinuousDevelopmentSmoke(unittest.TestCase):
