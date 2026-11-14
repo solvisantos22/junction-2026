@@ -1,0 +1,118 @@
+{
+  "cases": 20,
+  "control_matches_frozen_persistence": false,
+  "decisions": 879,
+  "full_physics_replays": true,
+  "limit": "Uses the same source-pinned feasibility model and navigator to re-extract features; model accuracy is not proved. Reused maps.",
+  "rejected_candidates": 592,
+  "report_sha256": "57ecb4c44c15aece9b41eb8ac859a074d39d72c3ccdfc607fc4b1d499de9be46",
+  "scaffold_features_choices_commands_reexecuted": true,
+  "schema": "rl-feasible-audit-v1",
+  "smoke": true,
+  "summary": {
+    "arms": {
+      "final": {
+        "charge_aware": {
+          "alive_home": 4,
+          "deaths": 0,
+          "invalid_calls": 0,
+          "mean_reward": 0.10102704553235194,
+          "mean_samples": 6.25,
+          "n": 4,
+          "rejected_candidates": 237
+        },
+        "time_only": {
+          "alive_home": 4,
+          "deaths": 0,
+          "invalid_calls": 0,
+          "mean_reward": 0.10374443683669976,
+          "mean_samples": 6.75,
+          "n": 4,
+          "rejected_candidates": 0
+        }
+      },
+      "greedy": {
+        "charge_aware": {
+          "alive_home": 2,
+          "deaths": 0,
+          "invalid_calls": 0,
+          "mean_reward": 0.29484765491270115,
+          "mean_samples": 16.0,
+          "n": 2,
+          "rejected_candidates": 102
+        },
+        "time_only": {
+          "alive_home": 1,
+          "deaths": 0,
+          "invalid_calls": 0,
+          "mean_reward": 0.2285433070866142,
+          "mean_samples": 16.5,
+          "n": 2,
+          "rejected_candidates": 0
+        }
+      },
+      "initial": {
+        "charge_aware": {
+          "alive_home": 4,
+          "deaths": 0,
+          "invalid_calls": 0,
+          "mean_reward": 0.0984637110578569,
+          "mean_samples": 6.25,
+          "n": 4,
+          "rejected_candidates": 253
+        },
+        "time_only": {
+          "alive_home": 2,
+          "deaths": 0,
+          "invalid_calls": 0,
+          "mean_reward": 0.0734637110578569,
+          "mean_samples": 6.0,
+          "n": 4,
+          "rejected_candidates": 0
+        }
+      }
+    },
+    "contrasts": {
+      "final": {
+        "bootstrap_95": [
+          -0.0054347826086956486,
+          0.0
+        ],
+        "mean_paired_gain": -0.0027173913043478243,
+        "paired_map_differences": {
+          "1": 0.0,
+          "2": -0.0054347826086956486
+        }
+      },
+      "greedy": {
+        "bootstrap_95": [
+          0.0,
+          0.1326086956521739
+        ],
+        "mean_paired_gain": 0.06630434782608695,
+        "paired_map_differences": {
+          "1": 0.0,
+          "2": 0.1326086956521739
+        }
+      },
+      "initial": {
+        "bootstrap_95": [
+          0.0,
+          0.05000000000000001
+        ],
+        "mean_paired_gain": 0.025000000000000005,
+        "paired_map_differences": {
+          "1": 0.0,
+          "2": 0.05000000000000001
+        }
+      }
+    },
+    "gate": {
+      "deaths_not_higher": true,
+      "home_not_lower": true,
+      "invalid_not_higher": true,
+      "score_within_01": true
+    },
+    "screen_passes": true
+  }
+}

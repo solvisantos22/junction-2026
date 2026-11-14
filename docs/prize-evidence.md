@@ -696,3 +696,10 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
   - Missions in containers that Modal preempted were replayed from the start; a mission is deterministic per world, so this changes no result.
 - **Evidence:** [write-up](traverse-farm.md), [comparison rows](traverse-farm/programs-1/), [harsher-day rows](traverse-farm/sun-margin-0/), [code](../tools/traverse_farm/), [tests](../tests/traverse_farm/).
 - **Scope:** no change to `lightlag_traverse/`, the Harbor task or any teammate's file; no Harbor run, model API spend or prize submission.
+
+### 14 November — Kristján / Codex: charging-aware RL follow-up
+
+- **Human direction:** Kristján approved the review’s next steps: check charging-aware visit/return feasibility, then conditionally try contextual planner-initialized learning and fair model comparisons.
+- **Codex contribution:** an isolated public-information candidate filter using the existing reference route model, a frozen paired development protocol, a bounded local runner with complete traces and a physics/scaffold re-execution auditor. Sölvi’s policies, persistence wrapper and original experiments, and Claude Code’s navigator and route model retain their original attribution.
+- **Verification at implementation checkpoint:** seven focused tests pass; 20 smoke missions complete with no deaths or invalid calls. All 20 physics replays and 879 choices/features/commands re-execute exactly; all 21 inherited persistence tests pass. Production comparison has not yet run; no new learning or frontier-model claim.
+- **Artifacts:** [protocol](lightlag-rl-feasible.md), [helper and runner](../lightlag_rl_feasible/adapter.py), [results and reproduction](lightlag-rl-feasible-results/README.md). No canonical rule change, cloud job, model API spend or prize submission.
