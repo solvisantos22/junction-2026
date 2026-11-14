@@ -108,6 +108,69 @@ do not convert them to a fabricated score or replace the seed. A better
 candidate would support a team decision to adopt it in a future version, not
 a retroactive change to the original experiment.
 
+## Block B: a prospective procedural-aid comparison
+
+Declared after six A outcomes, before any B attempt. Start only after A finishes
+and its cost/error ledger is reconciled. Use **12 new attempts**, original
+prompt (C) versus the exact [energy/queue appendix](../tools/lightlag_experiments/ledger_aid_v1.md)
+(T), two attempts per condition per selected case. The appendix is a combined
+procedural prompt intervention: it asks the agent to maintain its own ledger;
+it does not supply a persistent ledger, reference route or automatic filter.
+All treatment attempts count whether or not they visibly adopt the advice.
+
+Only `instruction.md` changes: append one newline and the appendix bytes to the
+frozen instruction. Keep the simulator, map, tools, verifier, original reference,
+model/harness versions, provider defaults and 1,800-second timeout unchanged.
+Record the original and treatment instruction/task hashes. Use fresh sessions
+without earlier transcripts, no retries or replacement seeds.
+
+The case/condition ordering was generated independently of outcomes from the
+seed `lightlag-ledger-B-2026-11-14` and then counterbalanced by reversing case
+and condition order in repetition two:
+
+| Pair | Case | Repetition | Launch order |
+|---|---|---:|---|
+| 1 | rush_noisy 504 | 1 | T, C |
+| 2 | rush_noisy 502 | 1 | T, C |
+| 3 | rush 501 | 1 | C, T |
+| 4 | rush 501 | 2 | T, C |
+| 5 | rush_noisy 502 | 2 | C, T |
+| 6 | rush_noisy 504 | 2 | C, T |
+
+Launch pair members close together in that order, at most two concurrently.
+Complete and reconcile each pair before starting another. Pairing controls the
+map and execution period, not model randomness. Keep A outside B's primary
+comparison: historical controls do not exclude period effects.
+
+Primary performance measure: **mean T-minus-C terminal reward over all six
+pairs**, weighting each selected case equally. Primary safety measure:
+**battery-death counts out of six per condition**. Also report every paired
+difference, per-case means/reference gaps, alive/home status, credited science
+before the survival multiplier, late samples, audit findings, calls, duration
+and cost. Observable accounting behavior is secondary, not an inclusion rule.
+
+Retain every assigned attempt. Missing/invalid grading is not a valid zero;
+report incomplete pairs and bounds using missing rewards' possible [0,1]
+range. Finish the declared sample without efficacy stopping. The original
+provider/error rules, **$12 cumulative launch guard** and **$15.70 overall
+ceiling** still apply; list unrun rows if those prevent completion. The current
+six-A average projects roughly $9.26 for A+B, an estimate rather than a charge
+or commitment to spend the limit.
+
+Predeclared engineering interpretation: call the gap *provisionally removable
+on these selected cases* if all six T attempts survive and each T case mean
+lies no more than 0.05 below its frozen reference. Support for an improvement
+is stronger if the paired mean gain is at least 0.10 and positive in at least
+two cases. These are practical decision thresholds, not significance tests.
+If fresh controls also perform well, the result weakens repeatability instead
+of demonstrating a treatment effect.
+
+The intervention cannot separate energy guidance, queue guidance, added
+attention or extra deliberation; establish ledger mediation; prove a
+specifically delay-caused problem; or estimate map-wide reliability. These
+maps inspired the advice and remain diagnostic/development cases. Any later
+confirmation needs fresh predeclared maps and a frozen agent condition.
+
 ## Independent reviews
 
 The [evaluation review](research/2026-11-14-lightlag-evaluation-review.md) and

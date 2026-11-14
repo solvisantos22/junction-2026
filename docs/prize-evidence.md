@@ -161,6 +161,25 @@ These are recommended evidence choices, not newly asserted official entry requir
   this declared block at this checkpoint; subsequent increments extend it.
 - Usage reports are not verified balances. No Modal/Gemini use or prize entry.
 
+### E07 — 14 November — Decision-focused offline replay demo
+
+- Sölvi asked Codex to build the decision demo and continue independently
+  overnight. Codex wrote a reviewed design, delegated implementation, and
+  conducted independent spec/quality reviews and browser verification.
+- Delivered [three-case offline page](../viewer/decisions.html) and
+  [rebuild/walkthrough](lightlag-decision-demo.md), using the team's existing
+  simulator, saved runs and Manh's auditor. It distinguishes protected truth,
+  noisy delayed packets, accepted commands, post-hoc continuations and an
+  independently played reference. The full mixed comparison stays prominent.
+- Verification: all 13 viewer tests; both continuations match saved scores and
+  batteries; source replay bytes and original viewer preserved. Chrome checked
+  offline loading, controls, keyboard and three viewport widths. Review fixed
+  unsafe HTML-tokenizer edge-case escaping and a commanded-heading arrow that
+  could be mistaken for true orientation. No paid calls for this demo.
+- Human decisions remain provisional; this is evidence presentation, not a new
+  model result, final rules choice or prize submission. Author attribution for
+  existing teammate components is preserved. Codex model version unrecorded.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
