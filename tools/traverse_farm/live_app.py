@@ -85,9 +85,12 @@ def mission(job: dict) -> dict:
     return run_job(job)
 
 
-@app.function(cpu=1.0, memory=2048, timeout=1200, max_containers=6, volumes={"/cache": cache})
-def build_page(seed: int) -> str:
-    """Play the eight drivers on one world and save its page in the cache."""
+# Sonnet agent 1's autopilot takes about four minutes a mission (the farm's median, 237 s); the
+# others take under a minute. The page is saved without it first, then again once it is done.
+SLOW = ("agent:traverse-agent-sonnet-1",)
+
+
+def _save(seed: int, rows: list, specs: dict) -> None:
     import sys
     import tempfile
 
@@ -95,22 +98,38 @@ def build_page(seed: int) -> str:
     import build_traverse
     from traverse_farm import replays
 
-    specs = _drivers()
-    jobs = [dict(spec, candidate=name, seed=seed, keep_replay=True) for name, spec in specs.items()]
-    rows = []
-    results = list(mission.map(jobs, order_outputs=True, return_exceptions=True))   # read it all, then pair
-    for job, row in zip(jobs, results):
-        if isinstance(row, BaseException):
-            if job["candidate"] == "pilot":
-                raise row                      # no page without the reference
-            continue                           # a Claude program that crashed the harness is left off the page
-        rows.append(row)
     with tempfile.TemporaryDirectory() as folder:
         replays.write(rows, specs, Path(folder))
         world = Path(folder) / "world-{}".format(seed)
         page = build_traverse.standalone(build_traverse.gather(build_traverse.run_folders(world)))
     Path("/cache/" + PAGE.format(seed)).write_text(page, encoding="utf-8")
     cache.commit()
+
+
+@app.function(cpu=1.0, memory=2048, timeout=1500, max_containers=6, volumes={"/cache": cache})
+def build_page(seed: int) -> str:
+    """Play the eight drivers on one world and save its page in the cache: about a minute in without
+    the slow driver, and again with it when it is done."""
+    specs = _drivers()
+    jobs = [dict(spec, candidate=name, seed=seed, keep_replay=True) for name, spec in specs.items()]
+    slow = [mission.spawn(job) for job in jobs if job["candidate"] in SLOW]
+    fast = [job for job in jobs if job["candidate"] not in SLOW]
+    rows = []
+    results = list(mission.map(fast, order_outputs=True, return_exceptions=True))   # read it all, then pair
+    for job, row in zip(fast, results):
+        if isinstance(row, BaseException):
+            if job["candidate"] == "pilot":
+                raise row                      # no page without the reference
+            continue                           # a Claude program that crashed the harness is left off the page
+        rows.append(row)
+    _save(seed, rows, specs)
+    for call in slow:
+        try:
+            rows.append(call.get(timeout=1200))
+        except Exception:                      # a slow program that fails or runs too long stays off the page
+            continue
+    if slow:
+        _save(seed, rows, specs)
     return PAGE.format(seed)
 
 
@@ -223,7 +242,8 @@ def _waiting(seed: int, since: float) -> str:
     body = """<p class="eyebrow">World __SEED__</p>
 <h1>Rovers on<br>the ground.</h1>
 <p class="lead">Eight rovers are driving world __SEED__ right now, each in its own Modal container.
-A mission is 420 ticks. It takes about a minute, and the replay opens by itself.</p>
+A mission is 420 ticks. Seven of them finish in about a minute, and the replay opens by itself.
+Sonnet agent 1's autopilot is slower: it joins the replay a few minutes later.</p>
 <div class="lanes">__LANES__</div>
 <p class="small" id="note">Started <span id="ago">__AGO__</span> s ago · <a href="/">Pick another world</a></p>
 <script>
