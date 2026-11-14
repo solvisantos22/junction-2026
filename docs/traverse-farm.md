@@ -32,6 +32,8 @@ modal run tools/traverse_farm/modal_app.py::evaluate \
 modal run tools/traverse_farm/modal_app.py::search --out docs/traverse-farm/search-1
 ```
 
+`replays --policies "pilot,agent:..." --seeds 871 --out <folder>` records whole missions for the demo (see Demo worlds below). Stopping the local `modal run` does not always stop its app: `modal app list` shows it, and `modal app stop --yes <app id>` stops it.
+
 `--mission '{"sun_margin_ticks": 0}'` plays every mission on changed rules (JSON, as `TraverseEnvironment(seed, mission=...)` takes them); each row records them, and missions on other rules stay apart in the same folder.
 
 `evaluate` compares every policy with `--baseline` (default `pilot`) world by world: the mean difference, its 95% paired bootstrap interval, and on how many worlds the policy scored higher, the same, or lower. With `--out`, rows are saved after every 400 missions and a rerun into the same folder plays only missions it has not seen, so policies can be added to a finished comparison.
@@ -59,6 +61,15 @@ Worlds 600–899, every policy on the same 300 worlds, played on Modal: the pilo
 The pilot scores higher than every saved Claude program on 288 to 300 of the 300 worlds, and never loses a rover. The two agent programs that came closest to the reference on the task's world lose the most rovers here. Opus agent 3's (0.515 on world 2026, against the reference's 0.565) runs its battery flat on 157 of 300 worlds, between ticks 54 and 395 (median 213); its output shows it still ordering full 5 m drives with the battery at 8.8 of 100 a few ticks before the end. Sonnet agent 1's loses 91 rovers (median tick 139): it checks the battery only at the end of a route, as the Traverse owner found in its code. All of Sonnet agent 1's 300 errors come at tick 417, the same end-of-mission error as in its Harbor run (an uplink that would run past tick 420). Haiku's 226 errors are that error too, at ticks these older rows do not record. The real server rejects that call as well.
 
 Read with care: an agent's program was written during its own mission on world 2026 and is replayed here on worlds it never saw, with no agent watching. This measures the program, not the agent, which in a mission could notice trouble and step in. The one-request programs were written without seeing any world, so for them fresh worlds are a fair test.
+
+## Demo worlds: whole missions on fresh ground
+
+Two fresh worlds recorded whole for the demo, on the published 0.1.0 rules (the rules the saved programs were written for): the pilot as the reference, and three agent programs replayed without their agents (Modal app `ap-j4LFeiVghpOyQhGreAsUnH`). Open the page, press Enter, and Tab or click a name to follow that rover.
+
+- [World 871](traverse-farm/replays/world-871.html): at tick 244 Opus agent 3's autopilot is level with the reference (0.39 each, 17 samples against 19) and Sonnet agent 1's is close behind (0.36). Both then run their batteries flat, at ticks 324 and 369, and end with nothing although they hold 19 and 18 samples. The reference brings 25 samples home: 0.524. Opus agent 1 ends at the lander with 0.310.
+- [World 610](traverse-farm/replays/world-610.html): both batteries run out early (ticks 166 and 135); the reference brings 28 samples home (0.583), Opus agent 1 0.371.
+
+The run folders beside each page are what `viewer/build_traverse.py --runs <folder>` reads. The pages were built from a copy of `viewer/`, because that builder also rewrites `viewer/traverse/data.json`, which the main demo uses. The reference's and the two lost rovers' missions repeat the comparison's rows exactly. Opus agent 1's program plans with an unseeded random search against the clock, so its score differs from run to run: 0.371 here against 0.354 in the comparison on world 610, 0.310 against 0.354 on 871.
 
 ## The pilot under a harsher day (a proposal, not the rules)
 

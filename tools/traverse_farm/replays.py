@@ -39,7 +39,7 @@ def run_meta(name: str, spec: Dict[str, Any], row: Dict[str, Any]) -> Dict[str, 
     if spec["policy"] == "program":
         origin = _origin(spec)
         return dict(played, kind="claude", label=origin.get("label") or name, model=origin.get("model", ""),
-                    how="its saved program ({}), replayed by the Traverse farm without the agent".format(spec.get("label")),
+                    how="its saved program, replayed without the agent", program=spec.get("label"),
                     program_id=row.get("program_id"), died_tick=row.get("died_tick"), program_tick=row.get("program_tick"),
                     error=row.get("error"))
     return dict(played, kind="scripted", label=name, how="lightlag_traverse.play policy {}, played by the Traverse farm".format(name))
