@@ -17,7 +17,7 @@ The maximum summed phase running CPU/memory estimate is **$22.73184**, plus imag
 
 ## Verification already performed
 
-36 focused tests passed before launch. Both algorithms trained32 missions on already-used worlds1/2; replay then resumed to64 with its full state. [Retained preflight reports and validation replays](preflight/). These are engineering checks, not held-out learning evidence. Model, target, optimizer, replay and RNG continuation were checked independently; saved actor choices reproduce.
+36 core tests passed before launch; subsequent staging, evaluation, supervisor and audit tests are retained alongside them. Both algorithms trained32 missions on already-used worlds1/2; replay then resumed to64 with its full state. [Retained preflight reports and validation replays](preflight/). These are engineering checks, not held-out learning evidence. The [independent audit](preflight/audit.json) reconstructs all three updates over96 smoke missions,705 training choices and88 validation choices, with exact model/target/optimizer/replay/RNG continuation and zero numeric deviation. Complete smoke batch/checkpoint archives are retained so this can be reproduced.
 
 A known archive-only interruption window remains: if a process dies after recording milestone validation but before copying its full milestone checkpoint, a resume can retain a valid atomic `checkpoint-latest.json.gz` without the separate milestone archive. Checkpoint existence is checked before relying on an archive; no weights or results may be invented to fill a gap. The immutable training image is not patched after production begins. Also, `batch_seconds` excludes the subsequent full-checkpoint write; use wrapper elapsed time and actual completed missions for compute throughput/cost.
 
@@ -31,3 +31,9 @@ MODAL_PROFILE=solvi-junction /tmp/junction-learning-venv/bin/python -m tools.lea
 ```
 
 The stop marker is durable and prevents further stage launches. Do not relaunch the pilot or clear its reservation. Every stage has a one-time lock, and later phases cannot overlap earlier jobs. Retain negative/incomplete results. Before final-check evaluation, freeze every included initial/last completed policy and include matched2048 snapshots, charge-aware greedy and the unchanged beam reference. Report all three training seeds and every failure; a learning gain is not itself a frontier-agent gap.
+
+## Continuation supervisor and final confirmation
+
+`tools.learning_campaign.manage` monitors only this campaign. Without `--follow` it performs one remote read-only poll. With `--follow` it may launch only the frozen expanded/extended stages for entire qualifying methods, checks the unchanged frozen source, and stops on any ambiguous receipt, remote exception or corrupt download. It downloads report/policy/validation artifacts only after every stage function has returned and committed its volume. It does not open final-check maps.
+
+After training has settled, `tools.learning_campaign.evaluate --freeze ... --runs ...` creates a self-contained final manifest without constructing any environments. Publish that manifest before `--run`; audit the resulting complete physics replays with `--audit`. Include all six run identities, initial/last completed policies, matched2048 policies, greedy and beam. Never select the best initialization.
