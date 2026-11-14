@@ -817,4 +817,4 @@ all 15 physics replays reproduce, and two full controller repeats match exactly.
 No API call or cloud job. [Protocol](reference-ablation.md),
 [implementation](../tools/reference_ablation/),
 [smoke evidence](reference-ablation-results/smoke/audit.json),
-[results](reference-ablation-results/README.md). Production results pending.
+[results](reference-ablation-results/README.md). Development is now complete: all 180 full-budget missions home/alive; all 71,735 commands and 75,780 states replay exactly. Baseline .513402; best individual .516507; cubature ties baseline on all 12 maps. Candidates are frozen before 128 fresh checks. [Development report](reference-ablation-results/development/report.json), [selection](reference-ablation-results/selection.json).
