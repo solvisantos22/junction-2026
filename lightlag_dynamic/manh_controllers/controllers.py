@@ -27,7 +27,7 @@ import math
 import numpy as np
 
 import lightlag_dynamic.controllers as _lc
-from lightlag_dynamic.controllers import Leg
+from lightlag_dynamic.controllers import HAZARD_CLEARANCE, Leg, _clip_interval
 from lightlag_dynamic.kf_mpc import GATE, VAR_FLOOR, DriveFilter, KalmanMPCController
 
 from .estimators import ParticleFilter, cubature_drive, rts_smooth
@@ -312,6 +312,168 @@ class _TurnCost:
         return Leg(hop.commands, hop.energy + extra, hop.energy_safe + 1.5 * extra, hop.uncertainty)
 
 
+class _SandOdometer:
+    """Reads unmapped sand off the battery. Battery telemetry has no noise, and a drive costs
+    drive_cost x terrain multiplier per wheel metre, so between two consecutive packets
+
+        sand wheel metres = (battery drop - idle - turn energy) / drive_cost - wheel metres
+                            (with multipliers 1 and 2; the general form divides by their difference)
+
+    exactly. Where that is more than the published map predicts along the drive, the controller
+    adds the unmapped stretch to its own copy of the sand map, so every later leg and the way home
+    are routed and budgeted with it. Where the stretch lies along the drive comes from the packet's
+    terrain field (true terrain under the rover at each end); if both ends are bedrock it is placed
+    mid-drive, which gives the same cost to a return along the same line. Inactive while the map
+    is right."""
+    SAND_TOL = 0.2  # wheel metres of disagreement treated as unmapped sand (exact reading: ~1e-6)
+    PAD = 0.25      # metres around a marked stretch, for the offset of a later crossing
+
+    def _filter(self, packet):
+        f = self.filter
+        start = (f.mean[0], f.mean[1])
+        super()._filter(packet)
+        try:
+            self._read_sand(packet, start, (f.mean[0], f.mean[1]))
+        except (KeyError, IndexError, ZeroDivisionError):
+            pass  # a packet this reading cannot use
+
+    def _read_sand(self, packet, start, end):
+        if len(self.packets) < 2 or self.packets[-1] is not packet:
+            return
+        prev = self.packets[-2]
+        drive = _executed_drive(self, packet)
+        if drive is None or not drive[2] or packet["tick"] != prev["tick"] + 1 or not packet["alive"]:
+            return
+        heading, wheel, _ = drive
+        mult = self.multiplier
+        energy = prev["battery"] - packet["battery"] - self.idle
+        if not hasattr(self, "_turn_cost"):
+            self._turn_cost = self.tools.rules().get("turn_cost_per_degree") or 0.0
+        if self._turn_cost and prev.get("heading_deg") is not None:
+            turn = abs((heading - prev["heading_deg"] + 180.0) % 360.0 - 180.0)
+            energy -= self._turn_cost * turn * self.drive_cost * mult.get(prev.get("terrain"), 1.0)
+        sand_wheel = (energy / self.drive_cost - mult["bedrock"] * wheel) / (mult["sand"] - mult["bedrock"])
+        _, bed, sand = self._segment(start, end)
+        self.driven = getattr(self, "driven", []) + [(start, end)]  # ground this rover has checked
+        self.bedrock_driven = getattr(self, "bedrock_driven", 0.0) + bed
+        s_bed, s_sand = self.slip("bedrock"), self.slip("sand")
+        mapped_wheel = bed / (1 - s_bed) + sand / (1 - s_sand)
+        expected = wheel * (sand / (1 - s_sand)) / mapped_wheel if mapped_wheel > 1e-9 else 0.0
+        excess = sand_wheel - expected
+        if excess <= self.SAND_TOL:
+            return
+        length = min(math.dist(start, end), excess * (1 - s_sand))
+        d = math.dist(start, end)
+        if d < 1e-6:
+            return
+        ux, uy = (end[0] - start[0]) / d, (end[1] - start[1]) / d
+        at_end = packet.get("terrain") == "sand" and self.terrain_at(*end) == "bedrock"
+        at_start = prev.get("terrain") == "sand" and self.terrain_at(*start) == "bedrock"
+        if at_end and not at_start:
+            a = d - length
+        elif at_start and not at_end:
+            a = 0.0
+        else:
+            a = (d - length) / 2
+        p = (start[0] + ux * a, start[1] + uy * a)
+        q = (start[0] + ux * (a + length), start[1] + uy * (a + length))
+        self.unmapped_found = getattr(self, "unmapped_found", 0.0) + length
+        self._mark_sand(p, q)
+
+    def _mark_sand(self, p, q):
+        pad = self.PAD
+        rect = {"x1": min(p[0], q[0]) - pad, "y1": min(p[1], q[1]) - pad,
+                "x2": max(p[0], q[0]) + pad, "y2": max(p[1], q[1]) + pad}
+        if not hasattr(self, "found_sand"):
+            self.sand = [dict(r) for r in self.sand]  # own copy: never touch the published map
+            self.found_sand = []
+        self.sand.append(rect)
+        self.found_sand.append(rect)
+        w, h = self.size
+        for x in (rect["x1"] - 0.05, rect["x2"] + 0.05):
+            for y in (rect["y1"] - 0.05, rect["y2"] + 0.05):
+                if 0.3 <= x <= w - 0.3 and 0.3 <= y <= h - 0.3 and not any(
+                        _clip_interval((x, y), (x, y), r, HAZARD_CLEARANCE) for r in self.hazards):
+                    self.corners.append((x, y))
+        self._segments.clear()
+
+
+def _point_segment_distance(p, a, b):
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = dx * dx + dy * dy
+    t = 0.0 if n < 1e-12 else max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / n))
+    return math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy)
+
+
+class _MapDoubt:
+    """Once the battery has shown the map to be wrong (needs _SandOdometer), the home budget doubts
+    the ground the rover has not driven: a share rho of every unverified bedrock metre is budgeted
+    as sand, rho being the unmapped share seen so far,
+
+        rho = unmapped sand found / max(bedrock driven, 5 m), at most 0.5.
+
+    Unverified = more than VERIFIED metres from any drive so far, sampled every STEP metres along the
+    straight line of the leg. Inactive while the map is right, so clean maps are unchanged. Only the
+    safe energy changes, which the planner uses for the way home."""
+    VERIFIED = 0.5
+    STEP = 0.25
+    MIN_DRIVEN = 5.0
+    MAX_RHO = 0.5
+
+    def leg(self, start, goal):
+        hop = super().leg(start, goal)
+        found = getattr(self, "unmapped_found", 0.0)
+        if hop is None or found <= 0.0:
+            return hop
+        rho = min(self.MAX_RHO, found / max(getattr(self, "bedrock_driven", 0.0), self.MIN_DRIVEN))
+        d = math.dist(start, goal)
+        steps = int(d / self.STEP)
+        driven = getattr(self, "driven", [])
+        unverified = 0.0
+        for i in range(steps):
+            t = (i + 0.5) / max(steps, 1)
+            pt = (start[0] + (goal[0] - start[0]) * t, start[1] + (goal[1] - start[1]) * t)
+            if self.terrain_at(*pt) != "bedrock":
+                continue
+            if all(_point_segment_distance(pt, a, b) > self.VERIFIED for a, b in driven):
+                unverified += d / max(steps, 1)
+        if unverified <= 0.0:
+            return hop
+        m = self.multiplier
+        per_metre = self.drive_cost * (m["sand"] / (1 - self.slip_safe("sand")) - m["bedrock"] / (1 - self.slip("bedrock")))
+        return Leg(hop.commands, hop.energy, hop.energy_safe + rho * unverified * per_metre, hop.uncertainty)
+
+
+class _StayAlive:
+    """Never sends a batch expected to empty the battery before the horizon. Dead scores 0 while
+    alive away from base scores half, so a command is only worth sending when, with expected
+    slip, energy remains for every idle tick after it (SSY345 L2: decide on the outcome). If
+    staying put cannot survive either, nothing is lost by trying."""
+
+    def send(self, commands):
+        if commands and not self._survives(commands):
+            return False
+        return super().send(commands)
+
+    def _survives(self, commands):
+        slot = self.next_slot()
+        if slot > self.horizon:
+            return True
+        state = self.predict(slot)
+        if not state["alive"] or state["battery"] - self.idle * (self.horizon - slot + 1) <= 0:
+            return True  # lost either way
+        sim = {"x": state["x"], "y": state["y"], "battery": state["battery"]}
+        batch = commands[:max(0, self.horizon - slot + 1)]
+        for c in batch:
+            sim["battery"] -= self.idle
+            if c["action"] == "drive":
+                self._simulate_drive(sim, c)
+            elif c["action"] == "sample":
+                sim["battery"] -= self.sample_cost
+        sim["battery"] -= self.idle * (self.horizon - (slot + len(batch) - 1))
+        return sim["battery"] > 0
+
+
 class _AimDisc:
     """Legs end short of the centre by what the landing uncertainty allows: a sample only needs
     the rover within the radius. Saves about 0.5 m per leg; the end-inside chance accounts for the
@@ -372,6 +534,26 @@ class CKF_aimdisc_turncost_window_MPC(_WindowAware, _AimDisc, _TurnCost, CKF_MPC
 
 class PF_aimdisc_turncost_window_MPC(_WindowAware, _AimDisc, _TurnCost, PF_MPC):
     """21: as 19 on the particle filter."""
+
+
+class EKF_sandodo_aimdisc_turncost_window_MPC(_WindowAware, _AimDisc, _TurnCost, _SandOdometer, EKF_MPC):
+    """22: as 19, plus the battery sand odometer: unmapped sand found from the battery reading is
+    added to the controller's own map."""
+
+
+class EKF_stayalive_aimdisc_turncost_window_MPC(_StayAlive, _WindowAware, _AimDisc, _TurnCost, EKF_MPC):
+    """23: as 19, plus the stay-alive rule: no command that is expected to empty the battery."""
+
+
+class EKF_sandodo_stayalive_aimdisc_turncost_window_MPC(_StayAlive, _WindowAware, _AimDisc, _TurnCost,
+                                                        _SandOdometer, EKF_MPC):
+    """24: as 19 with both the battery sand odometer (22) and the stay-alive rule (23)."""
+
+
+class EKF_sandodo_mapdoubt_stayalive_aimdisc_turncost_window_MPC(_StayAlive, _WindowAware, _AimDisc, _TurnCost,
+                                                                 _MapDoubt, _SandOdometer, EKF_MPC):
+    """25: as 24, plus map doubt: once unmapped sand has been found, the way home budgets the share
+    of undriven bedrock that may be sand too."""
 
 
 # =============================================================================================
@@ -543,6 +725,36 @@ register("PF_aimdisc_turncost_window_MPC_manh_controller_21", _ours(PF_aimdisc_t
          note="particle filter + aim at disc + turn-cost budget + window awareness",
          why="As 19 on the estimator that held up best with large position noise (2). 77.1%; 89% with 1 m "
              "position noise (noisy, delay 3); weak with two hidden sand patches (38%).")
+register("EKF_sandodo_aimdisc_turncost_window_MPC_manh_controller_22", _ours(EKF_sandodo_aimdisc_turncost_window_MPC),
+         built="2026-11-14, hidden-sand fix",
+         note="19 + battery sand odometer: unmapped sand read off the battery is added to its own map",
+         why="Hidden sand was the biggest failure: plans trust the published map, so a quarter of rovers die. "
+             "Battery telemetry is noise-free, so each drive's battery drop gives its sand wheel metres exactly. "
+             "Result, held-out seeds 400-419: +0.2 points over 19 (95% interval +0.1 to +0.3), +0.4 on Part B; "
+             "two hidden patches on noisy 49% -> 54%. Unchanged on the published profiles.")
+register("EKF_stayalive_aimdisc_turncost_window_MPC_manh_controller_23", _ours(EKF_stayalive_aimdisc_turncost_window_MPC),
+         built="2026-11-14, hidden-sand fix",
+         note="19 + stay-alive rule: never send a command expected to empty the battery before the horizon",
+         why="Traced hidden-sand deaths: the patch on the last route home cannot be seen in time, and the rover "
+             "then makes a final short drive home and dies there (score 0) instead of staying alive just "
+             "outside (half score). Result, held-out seeds: never worse than 19 (7 episodes better, 0 worse "
+             "of 3,840), +0.1 points; two hidden patches on noisy: deaths 27% -> 22%.")
+register("EKF_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_24",
+         _ours(EKF_sandodo_stayalive_aimdisc_turncost_window_MPC), built="2026-11-14, hidden-sand fix",
+         note="19 + battery sand odometer (22) + stay-alive rule (23)",
+         why="The odometer fixes legs after a patch is found; the stay-alive rule covers the patch found too "
+             "late. Result, held-out seeds: best so far, +0.2 points over 19 (+0.1 to +0.4) and +1.9 over "
+             "controller 1 (+1.6 to +2.3); Part B +0.6 over 19 (+0.3 to +0.9); identical on the published "
+             "profiles. Two hidden patches on noisy: 54% vs 68% for solvi_reference, deaths 20% vs 7%.")
+register("EKF_sandodo_mapdoubt_stayalive_aimdisc_turncost_window_MPC_manh_controller_25",
+         _ours(EKF_sandodo_mapdoubt_stayalive_aimdisc_turncost_window_MPC), built="2026-11-14, hidden-sand fix",
+         note="24 + map doubt: once the map is shown wrong, undriven bedrock on the way home is budgeted at the "
+              "unmapped-sand rate seen so far",
+         why="Traces of 24 showed the remaining deaths: the patch on the last route home is crossed only after "
+             "the third target. Once one patch has been found, the next may be on undriven ground. "
+             "Result, held-out seeds: deaths with two patches on noisy fall from 20% to 12%, but the share "
+             "only from 54% to 55%, and it costs 0.4 points on the published profiles and the noise suite "
+             "(-0.2 vs 19 overall): the odometer's rare false patches on clean maps switch the doubt on.")
 for _name in ("solvi_reference", "kristjan_reference", "blind", "cautious"):
     register(_name, _team(_name), kind="team", logged=False, note="team controller, imported unchanged",
              why="comparison only")

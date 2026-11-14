@@ -46,6 +46,10 @@ python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                
 | 19 | `EKF_aimdisc_turncost_window_MPC_manh_controller_19` | Controller 1 with 18, 14 and 13 together | Each addition helped on its own factor and is inactive when its rule is absent. Matches the best of the three on each factor. **Confirmed on held-out seeds 400–419:** +1.7 points over controller 1 (95% interval +1.4 to +2.0), and it needs no numpy. |
 | 20 | `CKF_aimdisc_turncost_window_MPC_manh_controller_20` | As 19 on the cubature filter | Best on development seeds (77.5% averaged over the three suites). On held-out seeds 400–419 it ties 19 (+0.1 points, interval −0.2 to +0.4): the cubature filter adds nothing measurable. |
 | 21 | `PF_aimdisc_turncost_window_MPC_manh_controller_21` | As 19 on the particle filter | 77.1%. Best at 1 m position noise: 89% (noisy, delay 3). Weak with two hidden sand patches: 38%, home 45% of the time (noisy, delay 3). |
+| 22 | `EKF_sandodo_aimdisc_turncost_window_MPC_manh_controller_22` | 19 plus a battery sand odometer: unmapped sand read off the battery is added to its own map | Plans trust the published map. Battery telemetry is noise-free, so each drive's battery drop gives its sand wheel metres exactly. Held-out: +0.2 points over 19 (+0.1 to +0.3); two hidden patches on `noisy` 49% → 54%. |
+| 23 | `EKF_stayalive_aimdisc_turncost_window_MPC_manh_controller_23` | 19 plus a stay-alive rule: never send a command expected to empty the battery before the horizon | Traces showed rovers dying on a last short drive home (score 0) instead of staying alive just outside (half score). Held-out: never worse than 19 (7 episodes better, 0 worse); +0.1 points. |
+| 24 | `EKF_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_24` | 19 plus 22 and 23 | The odometer fixes legs once a patch is found; the stay-alive rule covers a patch found too late. **Best on held-out seeds:** +1.9 over controller 1 (+1.6 to +2.3), +0.2 over 19 (+0.1 to +0.4); identical to 19 on the published profiles. |
+| 25 | `EKF_sandodo_mapdoubt_stayalive_aimdisc_turncost_window_MPC_manh_controller_25` | 24 plus map doubt: once the map is shown wrong, undriven bedrock on the way home is budgeted at the unmapped-sand rate seen so far | The remaining deaths of 24 come from the patch on the last route home. Cuts deaths with two patches from 20% to 12% but gains only 1 point there, and loses 0.4 points elsewhere: rare false odometer patches on clean maps switch the doubt on. |
 
 **Bounds** use privileged information through `scenarios.ScenarioEnvironment`. They are yardsticks, not entries.
 
@@ -71,6 +75,7 @@ Share of the maximum score, averaged over every cell of each suite:
 | Bound 17 (no delay) | 95.9% | 93.8% | 78.1% | 89.3% | 95% |
 | Bound 16 | 90.4% | 86.2% | 69.5% | 82.0% | 94% |
 | **20** CKF + aim at disc + turn cost + windows | 86.7% | 77.0% | 68.7% | **77.5%** | 97% |
+| 24 EKF + the same + sand odometer + stay alive | 86.5% | 76.5% | 68.8% | 77.3% | 97% |
 | 21 PF + the same | 86.7% | 77.2% | 67.4% | 77.1% | 96% |
 | 19 EKF + the same | 86.5% | 76.5% | 68.2% | 77.0% | 97% |
 | 14 EKF + turn cost | 85.0% | 75.6% | 67.8% | 76.1% | 97% |
@@ -90,10 +95,15 @@ Share of the maximum score, averaged over every cell of each suite:
 | 19 EKF + aim + turn cost + windows | +1.6 (+1.1 to +2.0) | **+1.7 (+1.4 to +2.0)** | 96% → 97% |
 | 20 CKF + the same | +2.1 (+1.6 to +2.6) | **+1.8 (+1.4 to +2.2)** | 96% → 98% |
 | 21 PF + the same | +1.8 (+0.9 to +2.6) | +1.4 (+0.8 to +1.9) | 96% → 96% |
+| 22 19 + sand odometer | +1.7 (+1.2 to +2.2) | +1.8 (+1.5 to +2.2) | 96% → 98% |
+| 23 19 + stay alive | +1.7 (+1.2 to +2.1) | +1.7 (+1.4 to +2.1) | 96% → 97% |
+| 24 19 + sand odometer + stay alive | +1.8 (+1.3 to +2.3) | **+1.9 (+1.6 to +2.3)** | 96% → 98% |
+| 25 24 + map doubt | +1.6 (+1.1 to +2.1) | +1.4 (+1.0 to +1.9) | 96% → 98% |
 | Bound 16 | +8.0 (+6.5 to +9.6) | +9.8 (+8.5 to +11.1) | 96% → 95% |
 
 - **The gain is real, and it comes from the planner additions, not the estimator.** 19 and 20 tie on held-out seeds: 20 vs 19 is +0.1 points (−0.2 to +0.4). The cubature filter's extra lead on development seeds did not replicate.
-- **Candidate for the repository reference:** 19. It is `kf_mpc` plus three pure-Python mixins, so it needs no numpy and could run inside the Harbor task image.
+- **24 vs 19 on held-out seeds:** +0.2 points (+0.1 to +0.4), +0.6 on Part B (+0.3 to +0.9), and the same score on every published-profile episode. Its two additions are pure Python, like 19's.
+- **Candidate for the repository reference:** 19, or 24 if the team wants the hidden-sand fixes too. It is `kf_mpc` plus three pure-Python mixins, so it needs no numpy and could run inside the Harbor task image.
 - **Where 19–20 gain on held-out seeds:** turn cost +21 points; uplink windows +5 to +8. Where they lose: hidden sand, −2 to −4. Aiming at the disc removes slack that unmapped sand then needs.
 
 The suites:
@@ -114,14 +124,22 @@ The suites:
   - turn cost 0.01 or 0.03 per degree.
 
 **Still unsolved, and where to build next:**
-- **Hidden sand patches.** With two patches on `noisy` at delay 3, Manh controllers score 38–56% and get home 45–85% of the time. `solvi_reference` scores 68% and gets home 90% of the time.
-  - **Why Sölvi's controller wins:** it never attempts the third target. Its slip learner requires position and odometry to agree exactly, which never happens under noise, so it always budgets the worst-case slip and keeps a 5-energy reserve. That slack absorbs unmapped sand.
-  - **Why ours fail:** they take the third target with about 2 energy to spare, on a plan that trusts the published map. Crossing a 2.5 m patch costs about 4.6 more energy than the plan expects. On two-patch `noisy` episodes at delay 3, 5 of 20 rovers die.
+- **Hidden sand patches.** Narrowed by 22–25, not closed. Held-out seeds, `noisy`, pooled delays (share / home / dead):
+
+  | Controller | Clean map | 1 patch | 2 patches |
+  |---|---|---|---|
+  | 19 | 90% / 100% / 0% | 68% / 85% / 10% | 49% / 70% / 27% |
+  | 24 | 90% / 100% / 0% | 69% / 90% / 10% | 54% / 77% / 20% |
+  | 25 | 89% / 100% / 0% | 67% / 90% / 10% | 55% / 83% / 12% |
+  | `solvi_reference` | 74% / 98% / 0% | 73% / 98% / 2% | 68% / 92% / 7% |
+
+  - On `rush_noisy` ours win everywhere (two patches: 42–43% vs 27%), and on clean maps by 16 points on `noisy`.
+  - **Why Sölvi's controller wins on `noisy`:** it never attempts the third target. Its slip learner requires position and odometry to agree exactly, which never happens under noise, so it always budgets the worst-case slip and keeps a 5-energy reserve. That slack absorbs unmapped sand.
+  - **Why ours still die:** they take the third target with about 2 energy to spare. The patch that kills them lies on the last route home, so it is first crossed after the energy is spent. The battery sand odometer (22) reads it exactly (0.00 on every bedrock drive), but too late; the stay-alive rule (23) only turns some deaths into half scores.
+  - **Map doubt (25) is the right idea with the wrong trigger.** Budgeting undriven bedrock once the map is shown wrong cuts deaths with two patches from 20% to 12%, but the odometer makes rare false patches on clean maps (0.1–0.2 per episode), and each one switches the doubt on.
   - **A bigger reserve is not the fix.** Controller 1 with a reserve of 5 scores 65% with hidden sand, but 75% instead of 94% without it.
-  - **What we had not used: the battery reading is an exact sand odometer.** Telemetry battery has no noise and sand doubles the cost per wheel metre. So (battery drop − idle) / drive cost − wheel metres gives, exactly, the wheel metres each drive spent on sand. Checked on three seeds: 0.00 on every bedrock drive.
-  - The packet's `terrain` field also reports the true terrain under the rover. It is weaker, because it is only sampled at the end of each tick.
-  - Candidate: compare that sand reading with the map. When they disagree, add the patch to the map, budget every later leg (including home) with it, and keep a model-error reserve only until the map has been checked.
-  - Candidate: change detection, or a multiple-model filter, that treats a local slip surprise as unmapped sand.
+  - Candidate: switch map doubt on only when the packet's `terrain` field confirms sand where the map says bedrock, so it costs nothing on clean maps.
+  - Candidate: price the third target against the chance that the route home holds an unseen patch, instead of a fixed reserve.
 - **Uplink windows 16/4 on `rush_noisy`.** At delay 3 every Manh controller and bound 16 get home only 15–35% of the time. `blind`, which sends its whole plan at tick 0, scores 54% and always gets home.
   - Candidate: a rollout planner that sends whole plans at window openings.
 - **Heading noise of 6° on `rush_noisy`.** Bound 16 drops to the controllers' level (53% vs 52% at delay 3), so no controller can help: the setting is too hard.

@@ -86,7 +86,13 @@ About 90,000 scripted episodes were run on development seeds 0–19 at delays 0,
 **Why Sölvi's reference wins with hidden sand.**
 - It never attempts the third target: under noise its slip learner never fires, so it budgets the worst-case slip and keeps a 5-energy reserve.
 - Ours take the third target with about 2 energy to spare, on a plan that trusts the published map, so a quarter of them die.
-- Battery telemetry is noise-free and sand doubles the cost per wheel metre, so the battery reading measures exactly how many wheel metres each drive spent on sand. No controller uses that yet; [details](../lightlag_dynamic/manh_controllers/README.md).
+- Battery telemetry is noise-free and sand doubles the cost per wheel metre, so the battery reading measures exactly how many wheel metres each drive spent on sand.
+
+**Hidden-sand fixes, controllers 22–25** ([details](../lightlag_dynamic/manh_controllers/README.md)). Built on 19, checked on held-out seeds 400–419:
+- **22** reads unmapped sand off the battery and adds it to its own map. **23** never sends a command expected to empty the battery before the horizon, since alive away from base scores half and dead scores 0. **24** combines both. **25** adds map doubt: once the map is shown wrong, undriven bedrock on the way home is budgeted as possible sand.
+- 24 is the best Manh controller on held-out seeds: +1.9 points over `kf_mpc` (+1.6 to +2.3), +0.2 over 19 (+0.1 to +0.4), and the same score as 19 on every published-profile episode.
+- With two hidden patches on `noisy` it lifts 19 from 49% to 54% and cuts deaths from 27% to 20%. `solvi_reference` still wins there (68%, deaths 7%); ours win on `rush_noisy` and on clean maps.
+- 25 cuts those deaths to 12% but gains only one point, and costs 0.4 points elsewhere: rare false odometer patches on clean maps switch the doubt on.
 
 ## Second increment: noisy sensing and a Kalman filter + MPC reference
 
