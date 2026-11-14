@@ -326,7 +326,7 @@ def audit(pilot):
         expected_names = {prefix + assignment_id for assignment_id in ordered_ids
                           for prefix in ("model-", "matched-reference-")}
         names = {path.name for path in (pilot / "runs").iterdir() if path.is_dir()}
-        summary["excluded_smoke_runs"] = sorted(names & {"smoke-nop", "smoke-reference"})
+        summary["excluded_smoke_runs"] = sorted(names & {"smoke-nop", "smoke-reference", "smoke-isolation", "smoke-isolation-live"})
         require(not names - expected_names - set(summary["excluded_smoke_runs"]), "unexpected run directories")
         cache, manifests = {}, {}
         for item in order:

@@ -88,8 +88,13 @@ in the evidence.
 
 All 38 environment/reference/service tests and three packaging tests pass.
 The protected Harbor reference preflight scores 0.825 on case_3, seed0; matched
-local policy behavior and separate grading agree. Paid trials are pending the
-remaining no-op and actual container isolation checks.
+local policy behavior and separate grading agree. The no-op scores zero. A live
+agent-container check confirms simulator source, evaluator result/token and
+oracle policy are absent, and unauthenticated evaluator finish returns 404.
+All four free preflight jobs (reference and three no-ops, including isolation
+checks) are retained separately; they are not model attempts or replacements.
+The smoke task predates the clean code freeze and truthfully records dirty
+source provenance. Paid tasks will be generated from the clean committed code.
 
 [Structural summary](lightlag-runs/information-allocation-v1/summary.json),
 [weighted rows](lightlag-runs/information-allocation-v1/exact_rows.jsonl),
