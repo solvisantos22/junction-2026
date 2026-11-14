@@ -4,6 +4,8 @@
     POLICIES["manh_max"](PublicTools(make_env(7, "max")))
 
   manh_max   Manh's controller for the MAX map (below)
+  manh_max_home   manh_max with Kristján's way-home rule: on the way home the battery reserve is spent
+             (the `home_rule` option). A separate player, so manh_max's published scores stay valid
   pilot      Kristján's reference pilot (lightlag_traverse/pilot.py), the traverse's reference
   greedy     the same pilot without route optimisation
   straight   ... and without reading the ground: straight at the next target
@@ -50,8 +52,10 @@ On the normal map none of this switches on and manh_max plays move for move like
 the way home (a test checks the first 100 ticks). Standard library only, Python 3.9+. Methods
 copied from the pilot with changes say so; they follow lightlag_traverse/pilot.py as of commit
 f90cb6b (Kristján's beam search). His later `home_floor` rule (task 0.1.1: on the way home the
-reserve is spent) is not carried over, so the last ticks of a day can differ; on his worlds
-2026-2029 the scores are the same (docs/second-machine-check.md).
+reserve is spent) is not in manh_max, whose published scores were played without it, so the last
+ticks of a day can differ; on his worlds 2026-2029 the scores are the same
+(docs/second-machine-check.md). manh_max_home is manh_max with that rule (`home_rule`): at the same
+spot and battery it decides as the pilot does (tested).
 """
 
 from __future__ import annotations
@@ -86,6 +90,9 @@ MAX_DEFAULTS: Dict[str, Any] = {
                                # checks use it at once, only the cost-to-go fields wait
     "max_home_slack": 1.25,    # on the MAX map, the pilot's home_slack and home_margin become these: relay
     "max_home_margin": 8.0,    # passes, detours around traps and trips make the way home slower than planned
+    "home_rule": False,        # True (the player manh_max_home): on the way home, spend the reserve down to the
+                               # pilot's home_floor and creep on what the battery can pay for. Off in manh_max,
+                               # whose published scores were played without it
 }
 
 
@@ -774,8 +781,29 @@ class MaxPilot(Pilot):
                 return {"action": "wait"} if not self.opt["terrain"] else self._sidestep(x, y, want)
         commanded = (heading - self.filter.bias) % 360.0
         turn = self._turn_energy(x, y, self._pred_heading, commanded)
-        if battery - model["energy"] - turn - self.sun.idle < self.opt["floor"]:
-            return {"action": "wait"}                          # let the sun catch up
+        if not self.opt["home_rule"]:
+            if battery - model["energy"] - turn - self.sun.idle < self.opt["floor"]:
+                return {"action": "wait"}                      # let the sun catch up
+            return {"action": "drive", "heading_deg": commanded, "metres": round(metres, 3)}
+        # Kristján's way-home rule (lightlag_traverse/pilot.py, task 0.1.1), with the turn cost paid first: a
+        # reserve is worth nothing once the mission is over, and stopping short of the lander costs half the
+        # score, so on the way home it is spent down to home_floor, creeping on what the battery can pay for
+        reserve = self.opt["floor"]
+        if goal == "base":
+            reserve = min(reserve, self.opt["home_floor"])
+        spare = battery - self.sun.idle - reserve - turn
+        if model["energy"] > spare:
+            if goal != "base" or spare <= 0.0:
+                return {"action": "wait"}                      # let the sun catch up
+            for _ in range(4):                                 # the first part of the same drive
+                metres *= min(0.9, spare / model["energy"])
+                if metres < 0.5:
+                    return {"action": "wait"}
+                model = self._model(x, y, heading, metres)
+                if model["stop"] is None and model["energy"] <= spare:
+                    break
+            else:
+                return {"action": "wait"}
         return {"action": "drive", "heading_deg": commanded, "metres": round(metres, 3)}
 
     def _sidestep(self, x: float, y: float, want: float) -> Dict[str, Any]:
@@ -807,10 +835,13 @@ def fly_max(tools: Any, options: Optional[Dict[str, Any]] = None) -> MaxPilot:
 
 
 FAST = {"plan_steps": 40000, "replan_steps": 5000, "beam": 150, "rebeam": 40}     # Kristján's pilot_fast budget
+HOME = {"home_rule": True}                 # manh_max with Kristján's way-home rule
 
 POLICIES = {
     "manh_max": lambda tools: fly_max(tools),
     "manh_max_fast": lambda tools: fly_max(tools, FAST),
+    "manh_max_home": lambda tools: fly_max(tools, HOME),
+    "manh_max_home_fast": lambda tools: fly_max(tools, dict(FAST, **HOME)),
     "pilot": TRAVERSE_POLICIES["pilot"],
     "pilot_fast": TRAVERSE_POLICIES["pilot_fast"],
     "greedy": TRAVERSE_POLICIES["greedy"],

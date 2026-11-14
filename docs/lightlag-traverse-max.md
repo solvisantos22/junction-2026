@@ -11,7 +11,7 @@ Manh asked to carry the max env's mechanics over to Kristján's new Lightlag Tra
 From the repository root. Python 3.9+, standard library only.
 
 ```sh
-python3 -m unittest discover -s tests/lightlag_traverse_max -v        # 31 tests, under a minute
+python3 -m unittest discover -s tests/lightlag_traverse_max -v        # 38 tests, about a minute
 python3 -m lightlag_traverse_max.play --seeds 1-8 --maps normal,max --policies manh_max,pilot,greedy,straight
 ```
 
@@ -62,6 +62,7 @@ Every rule is published in `rules()` (and the crust regions in `map()`); only th
 | Player | What it is |
 |---|---|
 | **`manh_max`** | **Manh's best.** Kristján's reference pilot, with the layers of the max-env controller `max_navigator` carried over and fixes found on the Traverse (below). **On the normal map it sends exactly the pilot's commands** (a test checks it), so it scores the same there |
+| `manh_max_home` | `manh_max` with Kristján's way-home rule (`home_floor`, task 0.1.1): on the way home the battery reserve is spent. A separate player, so `manh_max`'s published scores stay valid. [Results](#manh_max_home-kristjáns-way-home-rule-tried): the pilot's equal on the normal map to the last tick, no better than `manh_max` on the MAX map |
 | `pilot` | **The frozen reference** on the Traverse: Kristján's `lightlag_traverse/pilot.py`, unchanged, as of his beam search (`f90cb6b`) |
 | `greedy` | The pilot without route optimisation: always the best next target by value per tick |
 | `straight` | Drives straight at the next target and ignores the ground. **It is not random:** it is deterministic, so a seed always gives the same run |
@@ -173,6 +174,32 @@ Each MAX mechanic switched on alone, and each switched off with all the others o
 - **`manh_max` loses at most 0.024 to any one mechanic.** With all of them on it loses 0.116, and the slip check is the biggest part of that: switching it off gives back 0.064.
 - With every mechanic off, `manh_max` scores a little below the pilot (0.473 against 0.493). It still reads `map_option: "max"` in `rules()` and keeps the MAX map's wider home margins. On Kristján's own environment it plays exactly like the pilot.
 
+## `manh_max_home`: Kristján's way-home rule, tried
+
+Sunday 15 November, about 00:50 Helsinki. The [second-machine check](second-machine-check.md) found `manh_max` one rule behind the pilot: Kristján's `home_floor` (task 0.1.1), which spends the battery reserve on the way home and creeps on what the battery can pay for. On his world 2028, on the MAX map, `manh_max` had stopped 6.8 m from the lander with 6.1 battery left, waiting for the sun. Manh asked for the rule to be added and tested.
+
+**It is a separate player, `manh_max_home`** (the option `home_rule`), so every published `manh_max` score stays valid. `manh_max` still sends the same commands as before the change on worlds 2026 to 2029 on the MAX map (checked). The rule and its number (2.0) are Kristján's, unchanged; nothing was tuned.
+
+| Check | `manh_max` | `manh_max_home` |
+|---|---|---|
+| Normal map, development worlds 1–24: sends exactly the pilot's commands | on 15 of 24 worlds (same mean, 0.505) | **on 24 of 24** |
+| MAX map, development worlds 1–24 | 0.361, 2 away | 0.361, 2 away: the same result on all 24 |
+| MAX map, fresh worlds 600–699 | 0.317, 17 away, 0 lost | 0.317, 17 away, 0 lost: one world better, one worse, 98 the same (−0.001, 95% −0.007 to +0.004) |
+| MAX map, Kristján's world 2028 | 0.223, away | **0.445, home** |
+| MAX map, his worlds 2027–2029 as a campaign | 0.235 | 0.312 |
+| MAX map, the held-out fair and superhard tasks | 0.487 and 0.158 | 0.487 and 0.158: the same result on all six worlds |
+
+Rows: [`lightlag-runs/max-home-rule/`](lightlag-runs/max-home-rule/). The fresh worlds' `manh_max` scores are the farm's; replayed here on its 17 away worlds, `manh_max` repeats them exactly.
+
+- **The rule does what it should, and rarely matters on the MAX map.** On the normal map it makes the controller the pilot's equal to the last tick; without it the last ticks differed on 9 of 24 worlds, at no cost in score. On the MAX map it changed 2 worlds in 100 and none of the held-out six.
+- **The battery is not why `manh_max` ends away from the lander.** Of its 17 away endings on the fresh worlds, one was the battery case (world 654, now home: 0.126 to 0.252). Six rovers were on their way and 9 to 40 m short when time ran out. Ten were still 74 to 306 m out, with 2 to 13 slip stops behind them: four did not move at all in the last 60 ticks, five covered 30 to 71 m where a free rover covers about 250, and one began those ticks 310 m out.
+- **The world that got worse (663) is an end-game slip, not the rule misfiring.** With the rule the rover was inside the lander's circle by tick 414, 2.7 m out; a last queued drive on a slope then carried it to 6.7 m at tick 420. Without the rule it arrived on the last tick, 2.5 m out. On the MAX map the position fix is 2 m off, and the pilot parks only within 1.2 m of where it believes the lander is.
+- **So `manh_max_home` is not a stronger MAX reference.** Its mean on fresh worlds is `manh_max`'s. World 2028, where the fix is large, is the world the failure was first seen on.
+
+```sh
+python3 -m lightlag_traverse_max.play --seeds 1-24 --maps max --policies manh_max_home,manh_max --workers 10
+```
+
 ## A frozen model baseline
 
 Manh asked for superhard and fair MAX worlds as a fixed point to measure Claude Opus 5.5, Sonnet 5.5 and Haiku 5.5 against. Everything below was frozen in [`docs/lightlag-runs/max-baseline/`](lightlag-runs/max-baseline/README.md) before any paid call. Code: [`lightlag_traverse_max/oneshot.py`](../lightlag_traverse_max/oneshot.py) and [`sandbox.py`](../lightlag_traverse_max/sandbox.py); tests: [`test_oneshot.py`](../tests/lightlag_traverse_max/test_oneshot.py).
@@ -233,7 +260,7 @@ Kristján approved (through Manh) a Harbor task for the MAX map. There are two, 
 
 - **Against Opus the MAX map has no gap yet.** Of four Opus replies to the frozen request, one beats `manh_max` on the fair task and two beat it on the superhard task; on 100 fresh MAX worlds two of Opus's programs are higher on 45 and 47 ([Kristján's check](max-map-claude-check.md), [the second-machine check](second-machine-check.md)). Sonnet and Haiku are far behind.
 - **The frozen one-request baseline has two sets of replies:** Kristján's key in `replies/` (all nine) and Manh's key in `replies-manh/` (six). The Harbor tasks above have not been run with an agent.
-- **`manh_max` is one end-of-day rule behind the pilot.** Kristján's `home_floor` (task 0.1.1: spend the reserve on the way home) is not carried over. On his normal-map worlds 2026 to 2029 the scores are identical and only the last 53 ticks of world 2027 differ. On the MAX map `manh_max` ends away from the lander on 17 of 100 fresh worlds, so that rule is the first thing to try.
+- **`manh_max` is one end-of-day rule behind the pilot.** Kristján's `home_floor` (task 0.1.1: spend the reserve on the way home) is not carried over. On his normal-map worlds 2026 to 2029 the scores are identical and only the last 53 ticks of world 2027 differ. On the MAX map `manh_max` ends away from the lander on 17 of 100 fresh worlds. The rule was then tried as [`manh_max_home`](#manh_max_home-kristjáns-way-home-rule-tried): it brings one of those 17 home and is not the cause of the rest.
 - **24 fresh worlds, one run each.** Scores vary a lot from world to world, so differences under about 0.03 are noise.
 - **The MAX settings are the max env's values, carried over, not tuned for the Traverse.** The slip check is 0.45, the catalog's value for long missions (the 50-tick max env uses 0.40).
 - **`manh_max` is slower on the MAX map.** Each time its ground costs are rebuilt (a trip, a soft cell, the wheel size), Kristján's pilot runs its full route search again. See **Time** above.
@@ -244,11 +271,12 @@ Kristján approved (through Manh) a Harbor task for the MAX map. There are two, 
 - **Development: 1–24**, part of Kristján's development range 1–99, used read-only as he does.
 - **101–124:** a first full run, before rebasing onto Kristján's beam search. They lie inside the farm's search range 100–399, so they are reported above but not used for the claim.
 - **Final: 500–523.** Unclaimed in `TEAM_STATUS.md` before this run; now used.
+- **600–699:** the farm's fresh comparison worlds, Kristján's. `manh_max_home` was played on them once on the MAX map, after its development-world runs; nothing was tuned there.
 - **Model baseline: superhard 505, 509, 515; fair 500, 510, 520** (chosen from 500–523 as above), **and 2026**, the task's world. Example world in the request: 99991, Kristján's, never evaluated. The six are the team's [held-out evaluation worlds](#held-out-evaluation-worlds).
 
 ## Suggested next steps (not done)
 
-1. Re-tune `manh_max`'s MAX home margins on the development worlds now that the pilot plans with a beam search: 7 of 24 fresh MAX missions ended away from the lander.
+1. Cut `manh_max`'s away endings on the MAX map (17 of 100 fresh worlds). From the [`manh_max_home` trial](#manh_max_home-kristjáns-way-home-rule-tried): leave for home earlier (six rovers were 9 to 40 m short), park once inside the lander's circle near the end (world 663), and get the ten rovers that were stuck or slow far from home moving again. Development worlds 1–24 show only two away endings, so this needs more development worlds.
 2. A Harbor task or MCP entry for the MAX map, so that a model can play it. API spend: a team decision.
 3. Skip the full route search after a small rebuild, to make `manh_max` faster on the MAX map.
 4. A MAX row in the Traverse demo.

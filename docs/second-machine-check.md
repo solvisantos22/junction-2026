@@ -60,7 +60,7 @@ Rows: [`harbor-runs.json`](second-machine-check/harbor-runs.json), [`replays-pyt
 
 - **Normal map: the same score, because it is the same planner.** `manh_max` is Kristján's pilot with layers that switch on only on the MAX map. On worlds 2026, 2028 and 2029 its replay is byte for byte the reference's.
 - **One difference, on world 2027.** At tick 364 the reference drives on, spending its reserve on the way home (the `home_floor` rule Kristján added in task 0.1.1). `manh_max` waits one tick: its copy of that step is from before the rule. The last 53 ticks differ; the samples, the ending and the score do not. So "move for move like the pilot" holds until the way home, and the test for it stops at tick 100.
-- **MAX map on his worlds:** `manh_max` scores 0.235 over the three sites where the pilot scores 0.028, but it ends away from the lander at two of the three, which halves those sites. Carrying the pilot's way-home rule into `manh_max` is the obvious thing to try next; it is not done here.
+- **MAX map on his worlds:** `manh_max` scores 0.235 over the three sites where the pilot scores 0.028, but it ends away from the lander at two of the three, which halves those sites. Carrying the pilot's way-home rule into `manh_max` was the obvious thing to try next. It has since been tried as the player [`manh_max_home`](lightlag-traverse-max.md#manh_max_home-kristjáns-way-home-rule-tried): site 2028 comes home (0.445) and the campaign score rises to 0.312, but on 100 fresh MAX worlds the mean does not move.
 
 ## 3. Will an agent beat our designated controllers?
 

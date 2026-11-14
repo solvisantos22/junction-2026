@@ -5,6 +5,7 @@
 Standard library only. The two player tests fly short missions; under a minute in all.
 """
 
+import math
 import sys
 import unittest
 from pathlib import Path
@@ -13,14 +14,14 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
 from lightlag_traverse.environment import MISSION, TraverseEnvironment  # noqa: E402
-from lightlag_traverse.pilot import fly  # noqa: E402
+from lightlag_traverse.pilot import Pilot, fly  # noqa: E402
 from lightlag_traverse.play import PublicTools  # noqa: E402
 from lightlag_traverse.surface import PHYSICS  # noqa: E402
 from lightlag_traverse.terrain import TraverseWorld  # noqa: E402
 from lightlag_traverse_max import play  # noqa: E402
 from lightlag_traverse_max.environment import (MAX_SETTINGS, NOTHING_ON, OPTIONS,  # noqa: E402
                                                MaxTraverseEnvironment, make_env)
-from lightlag_traverse_max.players import FAST, fly_max  # noqa: E402
+from lightlag_traverse_max.players import FAST, HOME, POLICIES, MaxPilot, fly_max  # noqa: E402
 
 DELAY = MISSION["delay_ticks"]
 # Drives in eight directions, a sample and a wait: commands that do not depend on the telemetry.
@@ -217,6 +218,40 @@ class PlayerTest(unittest.TestCase):
             sent.append(env._sent)
         self.assertGreater(len(sent[0]), 50)
         self.assertEqual(sent[0], sent[1])
+
+    def test_manh_max_home_takes_the_pilots_step_on_the_way_home_and_manh_max_is_unchanged(self):
+        """The same rover, 69 m out and told to go home, at 58 battery levels: manh_max_home decides as
+        the pilot does (drive on, or creep on what the battery can pay for); manh_max still waits for
+        the sun under its reserve, as when its published scores were played."""
+        self.assertIn("manh_max_home", POLICIES)
+        pilots = {}
+        for name, make in (("pilot", lambda tools: Pilot(tools, dict(FAST))),
+                           ("manh_max", lambda tools: MaxPilot(tools, dict(FAST))),
+                           ("manh_max_home", lambda tools: MaxPilot(tools, dict(FAST, **HOME)))):
+            env = make_env(2, "normal", mission=self.SHORT)
+            pilot = make(PublicTools(env))
+            for _ in range(40):
+                pilot.act()
+                out = pilot.tools.advance(1)
+                pilot.observe(out["packets"], out["current_tick"])
+            pilots[name] = (env, pilot)
+        self.assertEqual(pilots["pilot"][0]._sent, pilots["manh_max"][0]._sent)
+        self.assertEqual(pilots["pilot"][0]._sent, pilots["manh_max_home"][0]._sent)
+        waited, crept = 0, 0
+        for quarter in range(2, 60):
+            battery, chosen = quarter / 4.0, {}
+            for name, (_, pilot) in pilots.items():
+                tick = max(pilot.now + pilot.delay + 1, pilot.reserved_until + 1)
+                x, y, _, _ = pilot.predict(tick)
+                gx, gy = pilot._spot("base")
+                drive = pilot._drive if name == "pilot" else pilot._drive_command
+                chosen[name] = drive("base", x, y, gx, gy, math.hypot(gx - x, gy - y), battery)
+            self.assertEqual(chosen["manh_max_home"], chosen["pilot"], battery)
+            if chosen["pilot"]["action"] == "drive" and chosen["manh_max"]["action"] == "wait":
+                waited += 1
+                crept += chosen["pilot"]["metres"] < 5.0
+        self.assertGreater(waited, 10, "battery levels where the pilot drives home and manh_max waits")
+        self.assertGreater(crept, 3, "... and where the pilot creeps on a shortened drive")
 
     def test_on_the_max_map_it_reads_the_wheel_size_off_the_battery_and_bridges_lost_packets(self):
         env = make_env(4, "max", mission=self.SHORT)
