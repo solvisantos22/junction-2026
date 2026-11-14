@@ -4,6 +4,11 @@ A standard-library-only prototype for choosing compatible images under camera,
 energy, memory and communication constraints. This is a small planning
 experiment, not a new canonical Harbor task or a model evaluation.
 
+**Result:** the reference and the predeclared generic beam portfolio both reach
+the exact optimum on all 48 fresh missions. This version fails its difficulty
+gate. Pairing matters, but simple search already solves it; no paid/model pilot
+or full replacement environment follows from this result.
+
 ## Mission and reward
 
 Two camera platforms follow known tracks above a flat map. At each opportunity,
@@ -122,5 +127,13 @@ Both profiles and both objectives are included. No check instance is retried or
 filtered. The prospective gate requires every reference proved and valid, the
 greedy portfolio at most 90%, and the beam portfolio at most 95% of optimum.
 This is an engineering screening rule, not a model-failure claim.
+
+The frozen protocol was published in
+[`845cac7`](https://github.com/solvisantos22/junction-2026/commit/845cac7).
+On the fresh check, the coverage-only greedy control scores 28.05% / 18.63%
+of the stereo optimum, the greedy portfolio 92.10% / 93.67%, and the beam
+portfolio 100% / 100% (compact / expanded). All 96 reference proofs—48 stereo
+and 48 matched monocular—complete and replay correctly. The full report is
+[`check.json`](../docs/stereo-survey-results/check.json). Check data is now used.
 
 See [design, protocol and results](../docs/stereo-survey.md).
