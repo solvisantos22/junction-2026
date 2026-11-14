@@ -1,6 +1,6 @@
 # RL–greedy hybrid search
 
-Preparation is complete; cloud results are pending. [Fixed protocol](../learning-hybrid.md).
+The 65-mission smoke stage is running on Modal; production results are pending. [Fixed protocol](../learning-hybrid.md).
 
 The 65-arm development search compares individual-policy shortlists, rank
 ensembles across all retained seeds, and RL–greedy rank blends. It uses new
@@ -47,3 +47,5 @@ Every source change requires a newly published freeze. Final worlds
 612000–612255 remain unopened until the frozen selection is published.
 No prior supervisor is restarted. App IDs, progress, costs and final handoff
 will be appended here as stages complete.
+
+Smoke app: [`ap-SiN8z0aHUAlm2IPQLFEXoU`](https://modal.com/apps/solvisantos22/main/ap-SiN8z0aHUAlm2IPQLFEXoU). [Durable launch receipt](smoke/receipt.json). Source/weights and both smoke/development matrices were published in `4f203d4` before launch. The client log-stream timeout occurred after the detached call was submitted; a read-only status poll confirms the coordinator is running, with no reported error.
