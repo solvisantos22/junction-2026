@@ -1,4 +1,22 @@
-# Contextual learning campaign: live handoff
+# Contextual learning campaign: completed old pilot
+
+**All six original pilot runs completed at 2,048 missions each. The old supervisor remains stopped; do not resume its continuation commands.** The changed final navigator is handled by a [separate experiment](../learning-final.md), with fresh learners and new source pins. Original freeze `e8a8acb` and every historical artifact are preserved.
+
+| Policy | Mean validation reward | Home / alive |
+|---|---:|---:|
+| Initial, average of 3 seeds per method | .087395 | 96/96 per method |
+| PPO after 2,048, average of 3 seeds | .376800 | 96/96 |
+| Replay after 2,048, average of 3 seeds | .364144 | 96/96 |
+| Charge-aware greedy control | .380555 | 32/32 |
+| Original beam control | .514345 | 32/32 |
+
+Both methods passed their frozen pilot continuation gate, and every seed improved. All 576 retained validation episodes report home/alive with zero invalid calls. Across 12,288 training episodes, batch reports retain two away finishes and no deaths or invalid calls. Actual-duration running-compute estimate: **$1.592405**, not an invoice. Final worlds 82000–82039 remain unopened by this campaign.
+
+[Completed results, all six seeds, compute and limitations](pilot/README.md) · [Decision](pilot/decision.json) · [Terminal status](pilot/status.json) · [Hash/counter/arithmetic verification](pilot/verification.json). All 42 downloaded artifact hashes match. Production optimizer updates and physics have not been independently reconstructed here; full training archives remain on Modal. These results describe the old navigator, not the new final version.
+
+## Archived live handoff
+
+The remainder preserves the earlier protocol, observations and operational history. **Its underway/active descriptions and continuation instructions are superseded by the closure above. No old continuation or final-map command is authorized by this archive.**
 
 > **Latest user direction: larger training is paused.** Sölvi asked to wait for the team to finalize the map/task. The local continuation supervisor PID54377 was stopped and verified absent; current pilot jobs may finish. Do not use the resume command below until this pause is resolved. [Question for Kristján/Manh and reply template](team-training-readiness.md). Runtime pause record: `/tmp/junction-learning-monitor/user-pause.json`.
 
@@ -54,13 +72,13 @@ After training has settled, `tools.learning_campaign.evaluate --freeze ... --run
 
 The early learning gain is real in these recorded validation scores; it has not reached either control. Keep training under the declared gates. The controls were measured as context after validation had opened, with no tuning or change to staging thresholds. They establish neither a final learned-policy win nor a language-model failure.
 
-## Active process and next handoff
+## Historical active-process handoff — now superseded
 
-The bounded continuation supervisor is running from its own fixed checkout **`/tmp/junction-learning-supervisor` at `06979e7`**, using the original training checkout at `e8a8acb`. PID at launch: **54377**. Its heartbeat, receipts, downloaded stage artifacts, decisions and append-only events are under **`/tmp/junction-learning-monitor`**; read `state.json` for current status. An idle-sleep guard watches this process and exits with it. Current cloud jobs keep running independently of the local supervisor.
+The bounded continuation supervisor previously ran from **`/tmp/junction-learning-supervisor` at `06979e7`**, using the original training checkout at `e8a8acb`; its launch PID was **54377**. It was stopped at Sölvi's request and must not be resumed. Its historical files remain under **`/tmp/junction-learning-monitor`**. All six pilot jobs have now completed independently. Closure used a separate, remote-read-only one-poll directory `/tmp/junction-learning-pilot-closure`; it launched no continuation. The completed evidence is published in [pilot/](pilot/README.md).
 
 All **61 tests pass**. Smoke updates/actions reproduce exactly; full control physics audits pass. Work remains: collect completed pilot artifacts, let the fixed all-seed gate decide continued training, then publish the final policy/evaluation freeze and run/audit the40 untouched final maps. The supervisor stops at `ready_for_final_evaluation`; it never silently opens those maps or pushes new results. The next agent should publish stage receipts/decisions and update this handoff before interpreting final results.
 
-To inspect local progress: `cat /tmp/junction-learning-monitor/state.json`. To resume a stopped local supervisor without duplicating submitted jobs, use the exact fixed code and existing output directory:
+Historical command retained for provenance only: **deprecated; do not run or resume this old supervisor**. The separate final-version experiment replaces this operational path:
 
 ```sh
 cd /tmp/junction-learning-supervisor
@@ -82,4 +100,4 @@ This experiment trains a small public-observation **goal selector** above the ex
 
 For our final evaluation, use the original frozen training modules and source hashes. Copy only the published evaluator tool files into a matching evaluation checkout if needed; do not silently evaluate old weights with newly changed navigation or mission rules. A different final submission package gets its own labelled compatibility/comparison run. This keeps both the training evidence and the submission's version claims accurate.
 
-Latest status checked while this note was written: all three2048-mission PPO pilot jobs completed; all three replay pilot jobs are running; the local continuation supervisor is healthy. Latest teammate publication`95102a1` retains the campaign oracle0.476257, nop0 and stop-after-first0.148743 baselines, with saved-artifact consistency checks. The actual campaign runtime/viewer and fresh full-agent campaign evidence remain separate outstanding work.
+Historical earlier snapshot, superseded by the completed closure above: all three2048-mission PPO pilot jobs completed; all three replay pilot jobs are running; the local continuation supervisor is healthy. Latest teammate publication`95102a1` retains the campaign oracle0.476257, nop0 and stop-after-first0.148743 baselines, with saved-artifact consistency checks. The actual campaign runtime/viewer and fresh full-agent campaign evidence remain separate outstanding work.

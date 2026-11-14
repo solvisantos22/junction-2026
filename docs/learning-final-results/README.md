@@ -8,6 +8,8 @@
 - First stage: PPO and Rainbow-inspired replay × initialization seeds 17, 29, 43, each targeting **8192 missions**. All six began together; stage cutoff **22:42 UTC**. Only entire methods passing the declared gain/reliability gate can extend toward **32768 missions per seed**, with a separate three-hour limit. Absolute stop **15 November 03:30 UTC / 05:30 Helsinki**.
 - Maximum six 8-CPU/16-GiB containers and six rollout workers each. Running CPU/memory envelope **$18.185472**, below the $19 guard; image/startup/storage/egress are additional. No GPU or model API. This is not an invoice cap or verified credit balance.
 
+Sölvi also authorized more containers when useful, within the user-reported $300 shared team budget. The current six-run source/resource freeze stays unchanged. Additional capacity can support a separately bounded parallel evaluation after training; no additional jobs or budget were allocated by that permission alone.
+
 ## Verification and interpretation
 
 **51 focused tests pass**, with an independent code review finding no blocking issue. Both algorithms complete 32-mission local smoke runs on worlds 1/2. Complete reports, policies, batches, optimizer checkpoints and validation replays are retained under [preflight](preflight/). These are engineering checks.
