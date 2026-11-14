@@ -1,0 +1,1451 @@
+{
+  "all_planned_model_and_reference_trials_complete": true,
+  "all_planned_trials_complete": true,
+  "all_planned_trials_decisions_and_timing_optimal": true,
+  "analysis_source_files_verified": [
+    "lightlag_information_allocation/__init__.py",
+    "lightlag_information_allocation/environment.py",
+    "lightlag_information_allocation/model.py",
+    "lightlag_information_allocation/policies.py",
+    "lightlag_information_allocation/service.py"
+  ],
+  "completed_model_trials": 12,
+  "completed_or_exported_attempt_costs_known": true,
+  "decision_complete_count": 12,
+  "harness": "OpenCode 1.19.5 / Harbor 0.25",
+  "invalid_service_call_count": 0,
+  "known_reported_cost_usd": 0.6699462,
+  "limitations": [
+    "This is a public-decision analysis; run audit_pilot separately for exact replay, grade and commitment checks.",
+    "Unrun means no exported run is available; while the pilot is active it can mean not exported yet.",
+    "The route assessment uses only signals delivered in public responses before commitment acceptance.",
+    "Signal availability does not prove how a model internally reasoned; no reasoning text is analyzed.",
+    "A zero realized reward can follow optimal expected-reward decisions; hindsight terrain knowledge is excluded from decision scoring.",
+    "The cases are hand-designed development contexts with two sessions each, not a population reliability estimate.",
+    "Costs are reported harness usage, not independently reconciled provider billing."
+  ],
+  "mean_model_reward_paired": 0.6749999999999999,
+  "mean_realized_reward_completed": 0.6749999999999999,
+  "mean_reference_reward_paired": 0.6749999999999999,
+  "model": "anthropic/claude-opus-5-5",
+  "observed_commit_routes": {
+    "a": 3,
+    "b": 5,
+    "detour": 4
+  },
+  "observed_signal_branch_counts": {
+    "a": {
+      "firm": 1,
+      "soft": 3
+    },
+    "b": {
+      "firm": 2,
+      "soft": 2
+    }
+  },
+  "optimal_conditional_route_count": 12,
+  "optimal_initial_acquisition_count": 12,
+  "paired_model_reference_trials": 12,
+  "paired_reward_match_count": 12,
+  "planned_model_trials": 12,
+  "planned_selective_expected_mean": 0.6743,
+  "precommit_signal_branch_counts": {
+    "a": {
+      "firm": 1,
+      "soft": 3
+    },
+    "b": {
+      "firm": 2,
+      "soft": 2
+    }
+  },
+  "precommit_signal_branch_counts_by_context": {
+    "case_1": {
+      "a": {
+        "firm": 0,
+        "soft": 2
+      },
+      "b": {
+        "firm": 0,
+        "soft": 0
+      }
+    },
+    "case_2": {
+      "a": {
+        "firm": 0,
+        "soft": 0
+      },
+      "b": {
+        "firm": 0,
+        "soft": 2
+      }
+    },
+    "case_3": {
+      "a": {
+        "firm": 1,
+        "soft": 1
+      },
+      "b": {
+        "firm": 0,
+        "soft": 0
+      }
+    },
+    "case_4": {
+      "a": {
+        "firm": 0,
+        "soft": 0
+      },
+      "b": {
+        "firm": 2,
+        "soft": 0
+      }
+    },
+    "case_5": {
+      "a": {
+        "firm": 0,
+        "soft": 0
+      },
+      "b": {
+        "firm": 0,
+        "soft": 0
+      }
+    },
+    "case_6": {
+      "a": {
+        "firm": 0,
+        "soft": 0
+      },
+      "b": {
+        "firm": 0,
+        "soft": 0
+      }
+    }
+  },
+  "reference_timing_match_count": 12,
+  "rows": [
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_1-r1",
+      "completion_tick": 11,
+      "context": "case_1",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.53375,
+          "b": 0.45375000000000004,
+          "none": 0.45
+        },
+        "actions": [
+          {
+            "action": "probe",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "a",
+            "sent_tick": 0
+          },
+          {
+            "action": "commit",
+            "call_n": 5,
+            "execution_tick": 5,
+            "route": "detour",
+            "sent_tick": 3
+          }
+        ],
+        "actual_probe_route": "a",
+        "actual_route": "detour",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 5,
+        "commit_sent_tick": 3,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.08249999999999998,
+          "b": 0.165,
+          "detour": 0.325
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 3,
+        "energy_available_at_commit_execution": 9,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [
+          {
+            "delivery_tick": 3,
+            "probe_route": "a",
+            "signal": "soft",
+            "state_tick": 2
+          }
+        ],
+        "optimal_initial_acquisitions": [
+          "a"
+        ],
+        "optimal_routes_given_observed_information": [
+          "detour"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.09999999999999998,
+          "b": 0.2
+        },
+        "public_service_calls": 7,
+        "reference_earliest_commit_sent_tick": 3,
+        "reference_probe_route": "a",
+        "signal_observed_before_commit": {
+          "delivery_tick": 3,
+          "probe_route": "a",
+          "signal": "soft",
+          "state_tick": 2
+        },
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": "a",
+      "reference_reward": 0.325,
+      "reference_route": "detour",
+      "reference_status": "complete",
+      "repeat": 1,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.11841800000000001,
+      "reward": 0.325,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_1-r1__qrfzuVt",
+      "usage": {
+        "cost_usd": 0.11841800000000001,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.11841800000000001,
+            "n_cache_tokens": 70635,
+            "n_input_tokens": 70649,
+            "n_output_tokens": 769
+          }
+        },
+        "n_cache_tokens": 70635,
+        "n_input_tokens": 70649,
+        "n_output_tokens": 769,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    },
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_2-r1",
+      "completion_tick": 11,
+      "context": "case_2",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.45375000000000004,
+          "b": 0.53375,
+          "none": 0.45
+        },
+        "actions": [
+          {
+            "action": "probe",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "b",
+            "sent_tick": 0
+          },
+          {
+            "action": "commit",
+            "call_n": 5,
+            "execution_tick": 5,
+            "route": "detour",
+            "sent_tick": 3
+          }
+        ],
+        "actual_probe_route": "b",
+        "actual_route": "detour",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 5,
+        "commit_sent_tick": 3,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.165,
+          "b": 0.08249999999999998,
+          "detour": 0.325
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 3,
+        "energy_available_at_commit_execution": 9,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [
+          {
+            "delivery_tick": 3,
+            "probe_route": "b",
+            "signal": "soft",
+            "state_tick": 2
+          }
+        ],
+        "optimal_initial_acquisitions": [
+          "b"
+        ],
+        "optimal_routes_given_observed_information": [
+          "detour"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.2,
+          "b": 0.09999999999999998
+        },
+        "public_service_calls": 7,
+        "reference_earliest_commit_sent_tick": 3,
+        "reference_probe_route": "b",
+        "signal_observed_before_commit": {
+          "delivery_tick": 3,
+          "probe_route": "b",
+          "signal": "soft",
+          "state_tick": 2
+        },
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": "b",
+      "reference_reward": 0.325,
+      "reference_route": "detour",
+      "reference_status": "complete",
+      "repeat": 1,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.0634578,
+      "reward": 0.325,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_2-r1__fXhwCB9",
+      "usage": {
+        "cost_usd": 0.0634578,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.0634578,
+            "n_cache_tokens": 98844,
+            "n_input_tokens": 98860,
+            "n_output_tokens": 854
+          }
+        },
+        "n_cache_tokens": 98844,
+        "n_input_tokens": 98860,
+        "n_output_tokens": 854,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    },
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_3-r1",
+      "completion_tick": 7,
+      "context": "case_3",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.63415,
+          "b": 0.60555,
+          "none": 0.5850000000000001
+        },
+        "actions": [
+          {
+            "action": "probe",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "a",
+            "sent_tick": 0
+          },
+          {
+            "action": "commit",
+            "call_n": 5,
+            "execution_tick": 5,
+            "route": "a",
+            "sent_tick": 3
+          }
+        ],
+        "actual_probe_route": "a",
+        "actual_route": "a",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 5,
+        "commit_sent_tick": 3,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.7784274193548386,
+          "b": 0.39875,
+          "detour": 0.325
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 3,
+        "energy_available_at_commit_execution": 9,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [
+          {
+            "delivery_tick": 3,
+            "probe_route": "a",
+            "signal": "firm",
+            "state_tick": 2
+          }
+        ],
+        "optimal_initial_acquisitions": [
+          "a"
+        ],
+        "optimal_routes_given_observed_information": [
+          "a"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.9435483870967741,
+          "b": 0.55
+        },
+        "public_service_calls": 6,
+        "reference_earliest_commit_sent_tick": 3,
+        "reference_probe_route": "a",
+        "signal_observed_before_commit": {
+          "delivery_tick": 3,
+          "probe_route": "a",
+          "signal": "firm",
+          "state_tick": 2
+        },
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": "a",
+      "reference_reward": 0.825,
+      "reference_route": "a",
+      "reference_status": "complete",
+      "repeat": 1,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.0523756,
+      "reward": 0.825,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_3-r1__s3p92GP",
+      "usage": {
+        "cost_usd": 0.0523756,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.0523756,
+            "n_cache_tokens": 68713,
+            "n_input_tokens": 68725,
+            "n_output_tokens": 689
+          }
+        },
+        "n_cache_tokens": 68713,
+        "n_input_tokens": 68725,
+        "n_output_tokens": 689,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    },
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_4-r1",
+      "completion_tick": 7,
+      "context": "case_4",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.60555,
+          "b": 0.63415,
+          "none": 0.5850000000000001
+        },
+        "actions": [
+          {
+            "action": "probe",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "b",
+            "sent_tick": 0
+          },
+          {
+            "action": "commit",
+            "call_n": 5,
+            "execution_tick": 5,
+            "route": "b",
+            "sent_tick": 3
+          }
+        ],
+        "actual_probe_route": "b",
+        "actual_route": "b",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 5,
+        "commit_sent_tick": 3,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.39875,
+          "b": 0.7784274193548386,
+          "detour": 0.325
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 3,
+        "energy_available_at_commit_execution": 9,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [
+          {
+            "delivery_tick": 3,
+            "probe_route": "b",
+            "signal": "firm",
+            "state_tick": 2
+          }
+        ],
+        "optimal_initial_acquisitions": [
+          "b"
+        ],
+        "optimal_routes_given_observed_information": [
+          "b"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.55,
+          "b": 0.9435483870967741
+        },
+        "public_service_calls": 6,
+        "reference_earliest_commit_sent_tick": 3,
+        "reference_probe_route": "b",
+        "signal_observed_before_commit": {
+          "delivery_tick": 3,
+          "probe_route": "b",
+          "signal": "firm",
+          "state_tick": 2
+        },
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": "b",
+      "reference_reward": 0.825,
+      "reference_route": "b",
+      "reference_status": "complete",
+      "repeat": 1,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.0535516,
+      "reward": 0.825,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_4-r1__nuk4yE5",
+      "usage": {
+        "cost_usd": 0.0535516,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.0535516,
+            "n_cache_tokens": 68693,
+            "n_input_tokens": 68705,
+            "n_output_tokens": 758
+          }
+        },
+        "n_cache_tokens": 68693,
+        "n_input_tokens": 68705,
+        "n_output_tokens": 758,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    },
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_5-r1",
+      "completion_tick": 4,
+      "context": "case_5",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.78375,
+          "b": 0.78375,
+          "none": 0.855
+        },
+        "actions": [
+          {
+            "action": "commit",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "a",
+            "sent_tick": 0
+          }
+        ],
+        "actual_probe_route": null,
+        "actual_route": "a",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 2,
+        "commit_sent_tick": 0,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.855,
+          "b": 0.54,
+          "detour": 0.4
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 0,
+        "energy_available_at_commit_execution": 10,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [],
+        "optimal_initial_acquisitions": [
+          "none"
+        ],
+        "optimal_routes_given_observed_information": [
+          "a"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.95,
+          "b": 0.6
+        },
+        "public_service_calls": 4,
+        "reference_earliest_commit_sent_tick": 0,
+        "reference_probe_route": null,
+        "signal_observed_before_commit": null,
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": null,
+      "reference_reward": 0.9,
+      "reference_route": "a",
+      "reference_status": "complete",
+      "repeat": 1,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.039586800000000005,
+      "reward": 0.9,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_5-r1__XLMBUpU",
+      "usage": {
+        "cost_usd": 0.039586800000000005,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.039586800000000005,
+            "n_cache_tokens": 53734,
+            "n_input_tokens": 53744,
+            "n_output_tokens": 574
+          }
+        },
+        "n_cache_tokens": 53734,
+        "n_input_tokens": 53744,
+        "n_output_tokens": 574,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    },
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_6-r1",
+      "completion_tick": 4,
+      "context": "case_6",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.78375,
+          "b": 0.78375,
+          "none": 0.855
+        },
+        "actions": [
+          {
+            "action": "commit",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "b",
+            "sent_tick": 0
+          }
+        ],
+        "actual_probe_route": null,
+        "actual_route": "b",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 2,
+        "commit_sent_tick": 0,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.54,
+          "b": 0.855,
+          "detour": 0.4
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 0,
+        "energy_available_at_commit_execution": 10,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [],
+        "optimal_initial_acquisitions": [
+          "none"
+        ],
+        "optimal_routes_given_observed_information": [
+          "b"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.6,
+          "b": 0.95
+        },
+        "public_service_calls": 4,
+        "reference_earliest_commit_sent_tick": 0,
+        "reference_probe_route": null,
+        "signal_observed_before_commit": null,
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": null,
+      "reference_reward": 0.9,
+      "reference_route": "b",
+      "reference_status": "complete",
+      "repeat": 1,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.0395236,
+      "reward": 0.9,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_6-r1__vMSJtkd",
+      "usage": {
+        "cost_usd": 0.0395236,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.0395236,
+            "n_cache_tokens": 53768,
+            "n_input_tokens": 53778,
+            "n_output_tokens": 518
+          }
+        },
+        "n_cache_tokens": 53768,
+        "n_input_tokens": 53778,
+        "n_output_tokens": 518,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    },
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_1-r2",
+      "completion_tick": 11,
+      "context": "case_1",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.53375,
+          "b": 0.45375000000000004,
+          "none": 0.45
+        },
+        "actions": [
+          {
+            "action": "probe",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "a",
+            "sent_tick": 0
+          },
+          {
+            "action": "commit",
+            "call_n": 5,
+            "execution_tick": 5,
+            "route": "detour",
+            "sent_tick": 3
+          }
+        ],
+        "actual_probe_route": "a",
+        "actual_route": "detour",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 5,
+        "commit_sent_tick": 3,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.08249999999999998,
+          "b": 0.165,
+          "detour": 0.325
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 3,
+        "energy_available_at_commit_execution": 9,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [
+          {
+            "delivery_tick": 3,
+            "probe_route": "a",
+            "signal": "soft",
+            "state_tick": 2
+          }
+        ],
+        "optimal_initial_acquisitions": [
+          "a"
+        ],
+        "optimal_routes_given_observed_information": [
+          "detour"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.09999999999999998,
+          "b": 0.2
+        },
+        "public_service_calls": 7,
+        "reference_earliest_commit_sent_tick": 3,
+        "reference_probe_route": "a",
+        "signal_observed_before_commit": {
+          "delivery_tick": 3,
+          "probe_route": "a",
+          "signal": "soft",
+          "state_tick": 2
+        },
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": "a",
+      "reference_reward": 0.325,
+      "reference_route": "detour",
+      "reference_status": "complete",
+      "repeat": 2,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.05946320000000001,
+      "reward": 0.325,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_1-r2__6ETTtim",
+      "usage": {
+        "cost_usd": 0.05946320000000001,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.05946320000000001,
+            "n_cache_tokens": 83661,
+            "n_input_tokens": 83675,
+            "n_output_tokens": 759
+          }
+        },
+        "n_cache_tokens": 83661,
+        "n_input_tokens": 83675,
+        "n_output_tokens": 759,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    },
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_2-r2",
+      "completion_tick": 11,
+      "context": "case_2",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.45375000000000004,
+          "b": 0.53375,
+          "none": 0.45
+        },
+        "actions": [
+          {
+            "action": "probe",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "b",
+            "sent_tick": 0
+          },
+          {
+            "action": "commit",
+            "call_n": 5,
+            "execution_tick": 5,
+            "route": "detour",
+            "sent_tick": 3
+          }
+        ],
+        "actual_probe_route": "b",
+        "actual_route": "detour",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 5,
+        "commit_sent_tick": 3,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.165,
+          "b": 0.08249999999999998,
+          "detour": 0.325
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 3,
+        "energy_available_at_commit_execution": 9,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [
+          {
+            "delivery_tick": 3,
+            "probe_route": "b",
+            "signal": "soft",
+            "state_tick": 2
+          }
+        ],
+        "optimal_initial_acquisitions": [
+          "b"
+        ],
+        "optimal_routes_given_observed_information": [
+          "detour"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.2,
+          "b": 0.09999999999999998
+        },
+        "public_service_calls": 7,
+        "reference_earliest_commit_sent_tick": 3,
+        "reference_probe_route": "b",
+        "signal_observed_before_commit": {
+          "delivery_tick": 3,
+          "probe_route": "b",
+          "signal": "soft",
+          "state_tick": 2
+        },
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": "b",
+      "reference_reward": 0.325,
+      "reference_route": "detour",
+      "reference_status": "complete",
+      "repeat": 2,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.057356000000000004,
+      "reward": 0.325,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_2-r2__RL4bQQr",
+      "usage": {
+        "cost_usd": 0.057356000000000004,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.057356000000000004,
+            "n_cache_tokens": 83475,
+            "n_input_tokens": 83489,
+            "n_output_tokens": 741
+          }
+        },
+        "n_cache_tokens": 83475,
+        "n_input_tokens": 83489,
+        "n_output_tokens": 741,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    },
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_3-r2",
+      "completion_tick": 7,
+      "context": "case_3",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.63415,
+          "b": 0.60555,
+          "none": 0.5850000000000001
+        },
+        "actions": [
+          {
+            "action": "probe",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "a",
+            "sent_tick": 0
+          },
+          {
+            "action": "commit",
+            "call_n": 5,
+            "execution_tick": 5,
+            "route": "b",
+            "sent_tick": 3
+          }
+        ],
+        "actual_probe_route": "a",
+        "actual_route": "b",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 5,
+        "commit_sent_tick": 3,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.14111842105263156,
+          "b": 0.39875,
+          "detour": 0.325
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 3,
+        "energy_available_at_commit_execution": 9,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [
+          {
+            "delivery_tick": 3,
+            "probe_route": "a",
+            "signal": "soft",
+            "state_tick": 2
+          }
+        ],
+        "optimal_initial_acquisitions": [
+          "a"
+        ],
+        "optimal_routes_given_observed_information": [
+          "b"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.17105263157894735,
+          "b": 0.55
+        },
+        "public_service_calls": 6,
+        "reference_earliest_commit_sent_tick": 3,
+        "reference_probe_route": "a",
+        "signal_observed_before_commit": {
+          "delivery_tick": 3,
+          "probe_route": "a",
+          "signal": "soft",
+          "state_tick": 2
+        },
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": "a",
+      "reference_reward": 0.725,
+      "reference_route": "b",
+      "reference_status": "complete",
+      "repeat": 2,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.0548472,
+      "reward": 0.725,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_3-r2__soU2ea8",
+      "usage": {
+        "cost_usd": 0.0548472,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.0548472,
+            "n_cache_tokens": 83531,
+            "n_input_tokens": 83545,
+            "n_output_tokens": 692
+          }
+        },
+        "n_cache_tokens": 83531,
+        "n_input_tokens": 83545,
+        "n_output_tokens": 692,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    },
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_4-r2",
+      "completion_tick": 7,
+      "context": "case_4",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.60555,
+          "b": 0.63415,
+          "none": 0.5850000000000001
+        },
+        "actions": [
+          {
+            "action": "probe",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "b",
+            "sent_tick": 0
+          },
+          {
+            "action": "commit",
+            "call_n": 5,
+            "execution_tick": 5,
+            "route": "b",
+            "sent_tick": 3
+          }
+        ],
+        "actual_probe_route": "b",
+        "actual_route": "b",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 5,
+        "commit_sent_tick": 3,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.39875,
+          "b": 0.7784274193548386,
+          "detour": 0.325
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 3,
+        "energy_available_at_commit_execution": 9,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [
+          {
+            "delivery_tick": 3,
+            "probe_route": "b",
+            "signal": "firm",
+            "state_tick": 2
+          }
+        ],
+        "optimal_initial_acquisitions": [
+          "b"
+        ],
+        "optimal_routes_given_observed_information": [
+          "b"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.55,
+          "b": 0.9435483870967741
+        },
+        "public_service_calls": 6,
+        "reference_earliest_commit_sent_tick": 3,
+        "reference_probe_route": "b",
+        "signal_observed_before_commit": {
+          "delivery_tick": 3,
+          "probe_route": "b",
+          "signal": "firm",
+          "state_tick": 2
+        },
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": "b",
+      "reference_reward": 0.825,
+      "reference_route": "b",
+      "reference_status": "complete",
+      "repeat": 2,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.0555508,
+      "reward": 0.825,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_4-r2__CfeawH7",
+      "usage": {
+        "cost_usd": 0.0555508,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.0555508,
+            "n_cache_tokens": 83749,
+            "n_input_tokens": 83763,
+            "n_output_tokens": 653
+          }
+        },
+        "n_cache_tokens": 83749,
+        "n_input_tokens": 83763,
+        "n_output_tokens": 653,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    },
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_5-r2",
+      "completion_tick": 4,
+      "context": "case_5",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.78375,
+          "b": 0.78375,
+          "none": 0.855
+        },
+        "actions": [
+          {
+            "action": "commit",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "a",
+            "sent_tick": 0
+          }
+        ],
+        "actual_probe_route": null,
+        "actual_route": "a",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 2,
+        "commit_sent_tick": 0,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.855,
+          "b": 0.54,
+          "detour": 0.4
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 0,
+        "energy_available_at_commit_execution": 10,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [],
+        "optimal_initial_acquisitions": [
+          "none"
+        ],
+        "optimal_routes_given_observed_information": [
+          "a"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.95,
+          "b": 0.6
+        },
+        "public_service_calls": 4,
+        "reference_earliest_commit_sent_tick": 0,
+        "reference_probe_route": null,
+        "signal_observed_before_commit": null,
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": null,
+      "reference_reward": 0.9,
+      "reference_route": "a",
+      "reference_status": "complete",
+      "repeat": 2,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.038125599999999996,
+      "reward": 0.9,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_5-r2__NbarLpM",
+      "usage": {
+        "cost_usd": 0.038125599999999996,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.038125599999999996,
+            "n_cache_tokens": 53703,
+            "n_input_tokens": 53713,
+            "n_output_tokens": 562
+          }
+        },
+        "n_cache_tokens": 53703,
+        "n_input_tokens": 53713,
+        "n_output_tokens": 562,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    },
+    {
+      "agent_info": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "assignment_id": "case_6-r2",
+      "completion_tick": 4,
+      "context": "case_6",
+      "decision_analysis": {
+        "acquisition_expected_values": {
+          "a": 0.78375,
+          "b": 0.78375,
+          "none": 0.855
+        },
+        "actions": [
+          {
+            "action": "commit",
+            "call_n": 3,
+            "execution_tick": 2,
+            "route": "b",
+            "sent_tick": 0
+          }
+        ],
+        "actual_probe_route": null,
+        "actual_route": "b",
+        "all_decisions_and_timing_optimal": true,
+        "command_delay_consistent": true,
+        "commit_execution_tick": 2,
+        "commit_sent_tick": 0,
+        "conditional_route_expected_regret": 0.0,
+        "conditional_route_expected_values": {
+          "a": 0.54,
+          "b": 0.855,
+          "detour": 0.4
+        },
+        "conditional_route_optimal": true,
+        "decision_complete": true,
+        "earliest_commit_sent_tick_for_actual_acquisition": 0,
+        "energy_available_at_commit_execution": 10,
+        "initial_acquisition_expected_regret": 0.0,
+        "initial_acquisition_optimal": true,
+        "invalid_service_calls": 0,
+        "matches_reference_timing": true,
+        "observed_signals": [],
+        "optimal_initial_acquisitions": [
+          "none"
+        ],
+        "optimal_routes_given_observed_information": [
+          "b"
+        ],
+        "posterior_firm_at_commit": {
+          "a": 0.6,
+          "b": 0.95
+        },
+        "public_service_calls": 4,
+        "reference_earliest_commit_sent_tick": 0,
+        "reference_probe_route": null,
+        "signal_observed_before_commit": null,
+        "timing_optimal_for_actual_acquisition": true
+      },
+      "episode_status": "complete",
+      "exception_info": null,
+      "reference_decisions_and_timing_optimal": true,
+      "reference_probe_route": null,
+      "reference_reward": 0.9,
+      "reference_route": "b",
+      "reference_status": "complete",
+      "repeat": 2,
+      "reported_cost_known": true,
+      "reported_cost_usd": 0.03769,
+      "reward": 0.9,
+      "same_seed_reward_difference": 0.0,
+      "status": "complete",
+      "trial_name": "case_6-r2__pQTZqDK",
+      "usage": {
+        "cost_usd": 0.03769,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.03769,
+            "n_cache_tokens": 53700,
+            "n_input_tokens": 53710,
+            "n_output_tokens": 532
+          }
+        },
+        "n_cache_tokens": 53700,
+        "n_input_tokens": 53710,
+        "n_output_tokens": 532,
+        "rollout_details": null
+      },
+      "zero_reward_interpretation": null
+    }
+  ],
+  "schema_version": 1,
+  "selective_expected_reward_by_context": {
+    "case_1": 0.53375,
+    "case_2": 0.53375,
+    "case_3": 0.63415,
+    "case_4": 0.63415,
+    "case_5": 0.855,
+    "case_6": 0.855
+  },
+  "source_commits": [
+    "0854b48ef0fc712c2be07f802414544d1d585a23"
+  ],
+  "status_counts": {
+    "complete": 12,
+    "error": 0,
+    "incomplete": 0,
+    "unrun": 0
+  },
+  "total_reported_cost_usd": 0.6699462,
+  "unknown_cost_assignment_ids": []
+}

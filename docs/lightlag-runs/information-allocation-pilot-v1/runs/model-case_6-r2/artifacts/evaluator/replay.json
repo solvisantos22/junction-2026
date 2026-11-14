@@ -1,0 +1,432 @@
+{
+  "context": {
+    "id": "case_6",
+    "prior_a": 0.6,
+    "prior_b": 0.95,
+    "probe_energy": 1,
+    "value_a": 10,
+    "value_b": 10
+  },
+  "evaluation": {
+    "completed": true,
+    "completion_tick": 4,
+    "context_id": "case_6",
+    "energy": 6,
+    "probe_route": null,
+    "probe_used": false,
+    "reward": 0.9,
+    "route": "b",
+    "status": "complete",
+    "success": true
+  },
+  "events": [
+    {
+      "action": "briefing",
+      "delivery_tick": 0,
+      "energy": 10,
+      "probe_route": null,
+      "route": null,
+      "state_tick": 0,
+      "status": "ready"
+    },
+    {
+      "action": "commit",
+      "delivery_tick": 3,
+      "energy": 6,
+      "probe_route": null,
+      "route": "b",
+      "state_tick": 2,
+      "status": "traveling"
+    },
+    {
+      "action": "complete",
+      "delivery_tick": 5,
+      "energy": 6,
+      "probe_route": null,
+      "route": "b",
+      "state_tick": 4,
+      "status": "complete"
+    }
+  ],
+  "seed": 37886555001045912254514477514517945125,
+  "signals": {
+    "a": "soft",
+    "b": "firm"
+  },
+  "terrains": {
+    "a": "soft",
+    "b": "firm"
+  },
+  "transcript": [
+    {
+      "arguments": {},
+      "method": "rules",
+      "result": {
+        "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. One probe TOTAL across both routes, before at most one commitment. Commitment is immutable on acceptance.",
+        "command_schema": [
+          {
+            "action": "probe",
+            "route": "a|b"
+          },
+          {
+            "action": "commit",
+            "route": "a|b|detour"
+          },
+          {
+            "action": "wait"
+          }
+        ],
+        "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+        "context": {
+          "id": "case_6",
+          "prior_a": 0.6,
+          "prior_b": 0.95,
+          "probe_energy": 1,
+          "value_a": 10,
+          "value_b": 10
+        },
+        "delay": 1,
+        "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+        "horizon": 30,
+        "independence": "The ground states of a and b are independent. Each route has one fixed imperfect signal, generated independently conditional on its own ground state. Inspecting one route does not update the other route's ground probability.",
+        "initial_energy": 10,
+        "max_advance_ticks": 5,
+        "max_batch_size": 5,
+        "normalization": 10,
+        "penalty_per_tick": 0.25,
+        "priors_firm": {
+          "a": 0.6,
+          "b": 0.95
+        },
+        "probe": "Spend probe_energy at execution to inspect a OR b. Its fixed signal equals that route's terrain with signal_accuracy. A probe event names probe_route. One shared inspection budget; inspecting both routes or repeating a probe is forbidden. Repeated log reads add no evidence.",
+        "routes": {
+          "a": {
+            "duration": 2,
+            "energy": {
+              "firm": 4,
+              "soft": 12
+            },
+            "target_value": 10
+          },
+          "b": {
+            "duration": 2,
+            "energy": {
+              "firm": 4,
+              "soft": 12
+            },
+            "target_value": 10
+          },
+          "detour": {
+            "duration": 6,
+            "energy": {
+              "firm": 8,
+              "soft": 8
+            },
+            "target_value": 6
+          }
+        },
+        "signal_accuracy": 0.9,
+        "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+        "trip": "Choose one target via a, b or the safe detour; each trip includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+      }
+    },
+    {
+      "arguments": {},
+      "method": "map",
+      "result": {
+        "context": {
+          "id": "case_6",
+          "prior_a": 0.6,
+          "prior_b": 0.95,
+          "probe_energy": 1,
+          "value_a": 10,
+          "value_b": 10
+        },
+        "description": "Routes a and b have independent uncertain terrain and distinct targets. The detour reaches a third target on known safe terrain. One shared probe can inspect either a or b before choosing one immutable trip.",
+        "priors_firm": {
+          "a": 0.6,
+          "b": 0.95
+        },
+        "routes": {
+          "a": {
+            "duration": 2,
+            "energy": {
+              "firm": 4,
+              "soft": 12
+            },
+            "target_value": 10
+          },
+          "b": {
+            "duration": 2,
+            "energy": {
+              "firm": 4,
+              "soft": 12
+            },
+            "target_value": 10
+          },
+          "detour": {
+            "duration": 6,
+            "energy": {
+              "firm": 8,
+              "soft": 8
+            },
+            "target_value": 6
+          }
+        },
+        "terrain_states": [
+          "firm",
+          "soft"
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "commands": [
+          {
+            "action": "commit",
+            "route": "b"
+          }
+        ]
+      },
+      "method": "uplink",
+      "result": {
+        "accepted": [
+          {
+            "action": "commit",
+            "execution_tick": 2,
+            "route": "b"
+          }
+        ],
+        "sent_tick": 0
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 5,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "probe_route": null,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 2,
+            "status": "traveling"
+          },
+          {
+            "action": "complete",
+            "delivery_tick": 5,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 4,
+            "status": "complete"
+          }
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 10,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "probe_route": null,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 2,
+            "status": "traveling"
+          },
+          {
+            "action": "complete",
+            "delivery_tick": 5,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 4,
+            "status": "complete"
+          }
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 15,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "probe_route": null,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 2,
+            "status": "traveling"
+          },
+          {
+            "action": "complete",
+            "delivery_tick": 5,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 4,
+            "status": "complete"
+          }
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 20,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "probe_route": null,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 2,
+            "status": "traveling"
+          },
+          {
+            "action": "complete",
+            "delivery_tick": 5,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 4,
+            "status": "complete"
+          }
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 25,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "probe_route": null,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 2,
+            "status": "traveling"
+          },
+          {
+            "action": "complete",
+            "delivery_tick": 5,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 4,
+            "status": "complete"
+          }
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 30,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "probe_route": null,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 2,
+            "status": "traveling"
+          },
+          {
+            "action": "complete",
+            "delivery_tick": 5,
+            "energy": 6,
+            "probe_route": null,
+            "route": "b",
+            "state_tick": 4,
+            "status": "complete"
+          }
+        ]
+      }
+    }
+  ]
+}

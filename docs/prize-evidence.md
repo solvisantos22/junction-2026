@@ -384,10 +384,14 @@ These are recommended evidence choices, not newly asserted official entry requir
   enumeration of 2,016 strategy/state outcomes agrees. Selective exact mean
   0.6743 vs skipping 0.63, either fixed probe 0.63245, and matched entropy 0.6647667.
 - [Design, protocol and results](lightlag-allocation-experiment.md). Structural
-  results plus the first actual Claude round: six Opus5.5/OpenCode1.19.5 sessions,
-  all acquisition/route/timing decisions optimal, all scores match references,
-  $0.3669134 reported cost. The frozen second repetitions are in progress.
-  No continuous rover changes, measured model gap, final rules choice or prize submission.
+  results plus twelve actual Opus 5.5/OpenCode 1.19.5 sessions: all acquisition,
+  route and timing decisions optimal; every score matches its reference (mean
+  0.675). All 24 replay/grade/hash audits and 12 commitments pass; no retries,
+  invalid calls or observed truncations. **Reported API cost $0.6699462.**
+- Limits: 5/8 context/signal branches sampled; a current-leader target heuristic
+  remains compatible with the cases. Optimal observed actions do not prove an
+  internal reasoning algorithm or a difficult benchmark. No continuous rover
+  changes, measured model gap, final rules choice or prize submission.
 
 ## Keep recording with minimal overhead
 

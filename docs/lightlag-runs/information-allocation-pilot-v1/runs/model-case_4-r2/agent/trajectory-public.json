@@ -1,0 +1,220 @@
+{
+  "agent": {
+    "model_name": "anthropic/claude-opus-5-5",
+    "name": "opencode",
+    "version": "1.19.5"
+  },
+  "export_note": "All message fields omitted; tool calls, observations and measured metrics retained. Private provider state and raw provider logs are not published.",
+  "final_metrics": {
+    "total_cached_tokens": 83749,
+    "total_completion_tokens": 653,
+    "total_cost_usd": 0.0555508,
+    "total_prompt_tokens": 83763,
+    "total_steps": 7
+  },
+  "schema_version": "ATIF-v1.7",
+  "session_id": "ses_e260360e1ffe8madpWJ8qybmkQ",
+  "steps": [
+    {
+      "source": "user",
+      "step_id": 1
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "cached_tokens": 12709,
+        "completion_tokens": 54,
+        "cost_usd": 0.0036378,
+        "prompt_tokens": 12713
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "observation": {
+        "results": [
+          {
+            "content": "{\"context\":{\"id\":\"case_4\",\"prior_a\":0.55,\"prior_b\":0.65,\"value_a\":9,\"value_b\":10,\"probe_energy\":1},\"priors_firm\":{\"a\":0.55,\"b\":0.65},\"independence\":\"The ground states of a and b are independent. Each route has one fixed imperfect signal, generated independently conditional on its own ground state. Inspecting one route does not update the other route's ground probability.\",\"initial_energy\":10,\"horizon\":30,\"delay\":1,\"signal_accuracy\":0.9,\"penalty_per_tick\":0.25,\"normalization\":10,\"max_advance_ticks\":5,\"max_batch_size\":5,\"routes\":{\"a\":{\"target_value\":9,\"duration\":2,\"energy\":{\"firm\":4,\"soft\":12}},\"b\":{\"target_value\":10,\"duration\":2,\"energy\":{\"firm\":4,\"soft\":12}},\"detour\":{\"target_value\":6,\"duration\":6,\"energy\":{\"firm\":8,\"soft\":8}}},\"command_schema\":[{\"action\":\"probe\",\"route\":\"a|b\"},{\"action\":\"commit\",\"route\":\"a|b|detour\"},{\"action\":\"wait\"}],\"command_timing\":\"First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.\",\"acceptance\":\"Validate the entire batch, including execution at or before horizon, atomically. One probe TOTAL across both routes, before at most one commitment. Commitment is immutable on acceptance.\",\"probe\":\"Spend probe_energy at execution to inspect a OR b. Its fixed signal equals that route's terrain with signal_accuracy. A probe event names probe_route. One shared inspection budget; inspecting both routes or repeating a probe is forbidden. Repeated log reads add no evidence.\",\"telemetry\":\"Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.\",\"trip\":\"Choose one target via a, b or the safe detour; each trip includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain.\",\"grading\":\"A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.\"}",
+            "source_call_id": "toolu_01FcefnYw8xW1DibcqL5Fb4R"
+          },
+          {
+            "content": "{\"context\":{\"id\":\"case_4\",\"prior_a\":0.55,\"prior_b\":0.65,\"value_a\":9,\"value_b\":10,\"probe_energy\":1},\"priors_firm\":{\"a\":0.55,\"b\":0.65},\"terrain_states\":[\"firm\",\"soft\"],\"routes\":{\"a\":{\"target_value\":9,\"duration\":2,\"energy\":{\"firm\":4,\"soft\":12}},\"b\":{\"target_value\":10,\"duration\":2,\"energy\":{\"firm\":4,\"soft\":12}},\"detour\":{\"target_value\":6,\"duration\":6,\"energy\":{\"firm\":8,\"soft\":8}}},\"description\":\"Routes a and b have independent uncertain terrain and distinct targets. The detour reaches a third target on known safe terrain. One shared probe can inspect either a or b before choosing one immutable trip.\"}",
+            "source_call_id": "toolu_01T62rZ19RcM4duqti8g86kn"
+          }
+        ]
+      },
+      "source": "agent",
+      "step_id": 2,
+      "timestamp": "2026-11-14T12:16:16.210000+00:00",
+      "tool_calls": [
+        {
+          "arguments": {},
+          "function_name": "allocation_rules",
+          "tool_call_id": "toolu_01FcefnYw8xW1DibcqL5Fb4R"
+        },
+        {
+          "arguments": {},
+          "function_name": "allocation_map",
+          "tool_call_id": "toolu_01T62rZ19RcM4duqti8g86kn"
+        }
+      ]
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "cached_tokens": 12767,
+        "completion_tokens": 68,
+        "cost_usd": 0.0222064,
+        "extra": {
+          "cache_write_tokens": 1113,
+          "reasoning_tokens": 636
+        },
+        "prompt_tokens": 12769
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "observation": {
+        "results": [
+          {
+            "content": "{\"sent_tick\":0,\"accepted\":[{\"action\":\"probe\",\"route\":\"b\",\"execution_tick\":2}]}",
+            "source_call_id": "toolu_01MdGYaDqWR6sFFi5wgHs57t"
+          }
+        ]
+      },
+      "source": "agent",
+      "step_id": 3,
+      "timestamp": "2026-11-14T12:16:17.897000+00:00",
+      "tool_calls": [
+        {
+          "arguments": {
+            "commands": [
+              {
+                "action": "probe",
+                "route": "b"
+              }
+            ]
+          },
+          "function_name": "allocation_uplink",
+          "tool_call_id": "toolu_01MdGYaDqWR6sFFi5wgHs57t"
+        }
+      ]
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "cached_tokens": 13880,
+        "completion_tokens": 52,
+        "cost_usd": 0.007569,
+        "extra": {
+          "cache_write_tokens": 749
+        },
+        "prompt_tokens": 13882
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "observation": {
+        "results": [
+          {
+            "content": "{\"current_tick\":3,\"entries\":[{\"action\":\"briefing\",\"state_tick\":0,\"delivery_tick\":0,\"energy\":10,\"status\":\"ready\",\"route\":null,\"probe_route\":null},{\"action\":\"probe\",\"state_tick\":2,\"delivery_tick\":3,\"energy\":9,\"status\":\"ready\",\"route\":null,\"probe_route\":\"b\",\"signal\":\"firm\"}]}",
+            "source_call_id": "toolu_0195MXW9c21SQDnfqBfSr5kL"
+          }
+        ]
+      },
+      "source": "agent",
+      "step_id": 4,
+      "timestamp": "2026-11-14T12:16:25.893000+00:00",
+      "tool_calls": [
+        {
+          "arguments": {
+            "ticks": 3
+          },
+          "function_name": "allocation_advance",
+          "tool_call_id": "toolu_0195MXW9c21SQDnfqBfSr5kL"
+        }
+      ]
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "cached_tokens": 14629,
+        "completion_tokens": 96,
+        "cost_usd": 0.0057688,
+        "extra": {
+          "cache_write_tokens": 183
+        },
+        "prompt_tokens": 14631
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "observation": {
+        "results": [
+          {
+            "content": "{\"sent_tick\":3,\"accepted\":[{\"action\":\"commit\",\"route\":\"b\",\"execution_tick\":5}]}",
+            "source_call_id": "toolu_01QugatSGqtQujShmrjUC8XA"
+          }
+        ]
+      },
+      "source": "agent",
+      "step_id": 5,
+      "timestamp": "2026-11-14T12:16:27.715000+00:00",
+      "tool_calls": [
+        {
+          "arguments": {
+            "commands": [
+              {
+                "action": "commit",
+                "route": "b"
+              }
+            ]
+          },
+          "function_name": "allocation_uplink",
+          "tool_call_id": "toolu_01QugatSGqtQujShmrjUC8XA"
+        }
+      ]
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "cached_tokens": 14812,
+        "completion_tokens": 52,
+        "cost_usd": 0.0047104,
+        "extra": {
+          "cache_write_tokens": 140
+        },
+        "prompt_tokens": 14814
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "observation": {
+        "results": [
+          {
+            "content": "{\"current_tick\":8,\"entries\":[{\"action\":\"briefing\",\"state_tick\":0,\"delivery_tick\":0,\"energy\":10,\"status\":\"ready\",\"route\":null,\"probe_route\":null},{\"action\":\"probe\",\"state_tick\":2,\"delivery_tick\":3,\"energy\":9,\"status\":\"ready\",\"route\":null,\"probe_route\":\"b\",\"signal\":\"firm\"},{\"action\":\"commit\",\"state_tick\":5,\"delivery_tick\":6,\"energy\":5,\"status\":\"traveling\",\"route\":\"b\",\"probe_route\":\"b\"},{\"action\":\"complete\",\"state_tick\":7,\"delivery_tick\":8,\"energy\":5,\"status\":\"complete\",\"route\":\"b\",\"probe_route\":\"b\"}]}",
+            "source_call_id": "toolu_01W7f9bDNdDGDsbVegSMwKtz"
+          }
+        ]
+      },
+      "source": "agent",
+      "step_id": 6,
+      "timestamp": "2026-11-14T12:16:29.279000+00:00",
+      "tool_calls": [
+        {
+          "arguments": {
+            "ticks": 5
+          },
+          "function_name": "allocation_advance",
+          "tool_call_id": "toolu_01W7f9bDNdDGDsbVegSMwKtz"
+        }
+      ]
+    },
+    {
+      "llm_call_count": 1,
+      "metrics": {
+        "cached_tokens": 14952,
+        "completion_tokens": 331,
+        "cost_usd": 0.0116584,
+        "extra": {
+          "cache_write_tokens": 288,
+          "reasoning_tokens": 30
+        },
+        "prompt_tokens": 14954
+      },
+      "model_name": "anthropic/claude-opus-5-5",
+      "source": "agent",
+      "step_id": 7,
+      "timestamp": "2026-11-14T12:16:30.687000+00:00"
+    }
+  ]
+}
