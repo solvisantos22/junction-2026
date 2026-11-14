@@ -474,3 +474,20 @@ def fly(tools: Any, options: Optional[Dict[str, Any]] = None) -> Pilot:
         pilot.observe(out["packets"], out["current_tick"])
         if out["episode_complete"]:
             return pilot
+
+
+def fly_campaign(tools: Any, options: Optional[Dict[str, Any]] = None) -> List[Pilot]:
+    """Play every mission of a campaign (campaign.py), one after another. Each mission gets a fresh
+    pilot: its ground, targets and hidden values are its own. Returns the pilots, in order."""
+    pilots = []
+    while True:
+        pilot = Pilot(tools, options)
+        while True:
+            pilot.act()
+            out = tools.advance(1)
+            pilot.observe(out["packets"], out["current_tick"])
+            if out["episode_complete"]:
+                break
+        pilots.append(pilot)
+        if out.get("campaign_complete", True):
+            return pilots
