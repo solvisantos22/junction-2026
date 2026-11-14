@@ -93,12 +93,48 @@ rejects promotion of this run, not the possibility that larger training or a
 different learner could work. No task rule, reward, training budget or checkpoint
 selection was changed after seeing the check results.
 
-Sölvi's independent [larger scratch-learning campaign](../learning-campaign-results/README.md)
-is the next source of learning evidence. His published early 512-mission PPO
+## Version handoff after the team's freeze
+
+The team subsequently merged the frozen normal-Traverse rules, the task 0.1.1
+reference's `home_floor` return behavior, and the three-mission campaign candidate
+([owner's readiness answer](../lightlag-traverse-readiness.md)). The simulator
+rules are unchanged, but the navigator now permits a smaller reserve and shorter
+drives when returning home. Identical reference scores on the owner's tested
+worlds do not prove identical commands or outcomes for every learned policy.
+
+This study's code, complete artifacts and original navigator are preserved at
+**`5557935`**, on branch `codex/rl-feasible-results`. Its actual production source
+freeze is `55654bb`. Run the audit from that result commit, not from a newer
+checkout with changed source pins:
+
+```sh
+git worktree add /tmp/junction-contextual-reproduce 5557935
+cd /tmp/junction-contextual-reproduce
+python3 -m tools.rl_contextual.audit docs/lightlag-rl-feasible-results/contextual/report.json --output /tmp/junction-contextual-audit.json
+```
+
+The [integration check](integration-verification.json) confirms unchanged
+simulator/terrain/surface/planning files and all 13 focused adapter tests pass
+with the updated navigator. The immutable original-training guard correctly
+rejects the changed source set on current main; that is a request to reproduce
+from the pinned commit, not a reason to rewrite historical hashes. These are
+API/component checks, not a new evaluation of the trained checkpoints.
+
+This preserves the experiment rather than re-pinning old results after the
+fact. A current-version compatibility check should use already-used development
+worlds before a separately frozen new training/evaluation run. The campaign's
+2027–2029 worlds are submission cases, not training data. Its aggregate score
+weights missions by available value; the single-mission means above are not
+directly comparable to that campaign score. No learned campaign result is claimed.
+
+Sölvi's independent [scratch-learning campaign](../learning-campaign-results/README.md)
+supplies separate learning evidence. His published early 512-mission PPO
 validation mean rose .0874→.3440, with 96/96 home, while greedy and beam reached
 .3806/.5143 on those validation maps (snapshot `a637cf6`). Those are different
 maps and budgets; they are not a head-to-head comparison with this pilot. His
-final check remains separate from this completed study.
+final check remains separate from this completed study. The later shared status
+records his larger stages paused at his request pending final-version coordination;
+existing 2048-mission pilot jobs may finish. This handoff does not restart them.
 
 ## Next model confirmation
 

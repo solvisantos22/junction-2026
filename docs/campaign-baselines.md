@@ -1,11 +1,12 @@
 # Retained campaign baseline records
 
-These are the three baseline runs saved by Kristján / Claude Code in local
+These are the three baseline runs saved by Kristján / Claude Code in
 commit `b5b7ee7`: Harbor campaign task 0.1.0, worlds 2027, 2028 and 2029.
-Their 53 original files are published unchanged as an independent evidence
-slice. The campaign runtime and its new viewer remain pending compatibility
-with the retained RL source manifests; this evidence publication does not
-promote that implementation or select it as the team's task.
+Their 53 original files were published unchanged as an independent evidence
+slice. Kristján subsequently requested the full Traverse branch merge into
+`main`, including the campaign runtime and viewer, completed in
+[`0130fa6`](https://github.com/solvisantos22/junction-2026/commit/0130fa6).
+The saved records and this consistency audit remain unchanged.
 
 | Saved run | Campaign reward | Mission rewards |
 |---|---:|---|

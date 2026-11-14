@@ -16,8 +16,9 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
 from lightlag_traverse.environment import MISSION, SENSING, TraverseEnvironment  # noqa: E402
-from lightlag_traverse.pilot import DEFAULTS, Filter, fly  # noqa: E402
-from lightlag_traverse.play import POLICIES, run_episode  # noqa: E402
+from lightlag_traverse.pilot import DEFAULTS, Filter, Pilot, fly  # noqa: E402
+from lightlag_traverse.play import POLICIES, PublicTools, run_episode  # noqa: E402
+from lightlag_traverse.terrain import TraverseTarget, TraverseWorld  # noqa: E402
 
 QUICK = {"plan_steps": 12000, "replan_steps": 2000, "beam": 60, "rebeam": 20}
 SEED = 5
@@ -112,6 +113,47 @@ class PilotTest(unittest.TestCase):
             self.assertIsInstance(value, (int, float, str, bool), name)
         self.assertEqual(DEFAULTS["route"], "optimise")
         self.assertIs(DEFAULTS["terrain"], True)
+
+
+class WayHomeTest(unittest.TestCase):
+    """The battery reserve protects the rover out in the field; on the way home it is there to be spent."""
+
+    def setUp(self):
+        flat = tuple(tuple([0] * 41) for _ in range(41))
+        world = TraverseWorld(1, 5.0, flat, tuple("r" * 40 for _ in range(40)), (100.0, 100.0),
+                              (TraverseTarget("t1", 130.0, 100.0, 2.0),))
+        self.pilot = Pilot(PublicTools(TraverseEnvironment(3, world)), QUICK)
+        self.floor, self.home_floor = self.pilot.opt["floor"], self.pilot.opt["home_floor"]
+        self.assertLess(self.home_floor, self.floor)
+
+    def drive(self, goal, battery):
+        gx, gy = self.pilot._spot(goal)
+        return self.pilot._drive(goal, 115.0, 100.0, gx, gy, math.hypot(gx - 115.0, gy - 100.0), battery)
+
+    def test_out_in_the_field_it_waits_for_the_sun_rather_than_dip_into_the_reserve(self):
+        self.assertEqual(self.drive("t1", self.floor + 1.0), {"action": "wait"})
+        self.assertEqual(self.drive("t1", self.floor + 4.0)["action"], "drive")
+
+    def test_on_the_way_home_it_spends_the_reserve_and_creeps_on_what_is_left(self):
+        full = self.drive("base", self.floor + 4.0)
+        self.assertEqual((full["action"], full["metres"]), ("drive", 5.0))
+        low = self.drive("base", self.floor)                       # under the field reserve, over the home one
+        self.assertEqual((low["action"], low["metres"]), ("drive", 5.0))
+        creep = self.drive("base", self.home_floor + 1.2)          # pays for part of a drive only
+        self.assertEqual(creep["action"], "drive")
+        self.assertTrue(0.5 <= creep["metres"] < 5.0, creep)
+        self.assertEqual(self.drive("base", self.home_floor + 0.2), {"action": "wait"})
+
+    def test_a_creeping_drive_never_costs_more_than_the_battery_has_above_the_home_reserve(self):
+        from lightlag_traverse.surface import drive as model_drive
+        for battery in (2.6, 3.0, 3.4, 4.0, 5.0):
+            command = self.drive("base", battery)
+            if command["action"] != "drive":
+                continue
+            heading = command["heading_deg"] + self.pilot.filter.bias
+            cost = model_drive(self.pilot.surface, self.pilot.physics, 115.0, 100.0, heading, command["metres"],
+                               self.pilot.slip)["energy"]
+            self.assertGreaterEqual(battery - cost - self.pilot.sun.idle, self.home_floor - 1e-9, battery)
 
 
 class FilterTest(unittest.TestCase):

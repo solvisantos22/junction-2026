@@ -30,7 +30,9 @@ The installed macOS LaunchAgent is `com.krissi.junction-main-push-2026`, with
 `StartInterval` set to `300`. Private instructions, configuration and state live
 under `~/.codex/junction-main-push-2026/`; they are not committed to this repo.
 The integration worktree is `/private/tmp/junction-main-push-integration`, on
-`codex/main-push-watch`. The agent can recreate that worktree if it disappears.
+a watcher-owned `codex/main-push-*` branch. Recovery branches preserve earlier
+unpublished integration attempts. The agent can recreate the worktree if it
+disappears.
 
 The timer reuses a private copy of the existing
 [Junction Watch adapter](../tools/junction_watch/README.md), independently of

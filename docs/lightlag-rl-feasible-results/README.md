@@ -69,3 +69,8 @@ return alive/home. Its full audit reproduces 600 imitation epochs, 24 RL updates
 trajectories and all 340 teacher/evaluation controllers. This
 complements Sölvi's larger scratch-learning campaign. The existing full-route planner
 remains the project reference.
+
+The team subsequently merged the task 0.1.1 navigator and three-mission campaign.
+These studies retain their original source pins; use result commit `5557935` for
+reproduction. See the [version handoff](contextual.md#version-handoff-after-the-teams-freeze)
+before interpreting results under the newer navigator or campaign.

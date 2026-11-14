@@ -759,6 +759,11 @@ function buildBoard() {
   $('#src').textContent = `Recorded runs, not a simulation in this page: every path is what that rover really drove. Heights are drawn ${EXAG} times too tall so the relief reads; the ground beyond the map's edge line is scenery.`;
   $('#cast').innerHTML = RUNS.map(run => `<li class="${run.ref ? 'ref' : ''}"><span>${esc(short(run))}${kind(run)}</span><small>${esc(run.how || run.who)}</small></li>`).join('');
   $('#cast').classList.toggle('many', RUNS.length > 8);    // a long cast drops the small print so the card still fits
+  if (DATA.sites) {                                         // a campaign: one page per site, all in this file
+    $('#sites').innerHTML = DATA.sites.map(site => `<a href="?site=${site.n}" class="${site.n === DATA.site ? 'on' : ''}">${esc(site.label)}<small>${esc(site.note)}</small></a>`).join('');
+    $('#sites').onclick = event => event.stopPropagation();  // choosing a site is not starting the replay
+    $('#title .help').textContent += ` · ${DATA.sites.map(site => site.n).join(' ')} site`;
+  }
   board.innerHTML = `<h2>STANDINGS<span id="after"></span></h2><div id="rows"></div>
     <p id="foot">The bar is the score so far: the value of the samples a rover carries, over all the value on the map. It settles at the end: ½ means the rover finished away from the lander, LOST that its battery ran out.</p>`;
   const rows = $('#rows');
@@ -933,6 +938,7 @@ title.onclick = () => { showTitle(false); setPlaying(true); };
 window.addEventListener('keydown', event => {
   if (event.metaKey || event.ctrlKey || event.altKey) return;
   const key = event.key, step = event.shiftKey ? 10 : 1;
+  if (DATA.sites && DATA.sites.some(site => String(site.n) === key) && +key !== DATA.site) { location.search = `?site=${key}`; return; }
   if (!title.classList.contains('gone')) { if (key === 'Enter' || key === ' ') { event.preventDefault(); showTitle(false); setPlaying(true); } else if (key === 'f' || key === 'F') toggleFull(); return; }
   if (key === ' ' || key === 'Enter') { event.preventDefault(); if (state.t >= T) seek(0); setPlaying(!state.playing); }
   else if (key === 'ArrowRight') { event.preventDefault(); setPlaying(false); seek(Math.floor(state.t + 1e-6) + step); }

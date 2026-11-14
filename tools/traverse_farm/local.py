@@ -40,6 +40,7 @@ def main(argv=None) -> int:
     ev.add_argument("--out", type=Path)
     ev.add_argument("--baseline", default="pilot", help="compare every other policy with this one, world by world")
     ev.add_argument("--mission", type=json.loads, help='change the rules for every mission, as JSON: \'{"sun_margin_ticks": 0}\'')
+    ev.add_argument("--analyse", action="store_true", help="also check, tick by tick, whether each rover could still get home")
     se = commands.add_parser("search", help="search the pilot's options, then confirm on unseen worlds")
     se.add_argument("--generations", type=int, default=2)
     se.add_argument("--population", type=int, default=4)
@@ -59,10 +60,13 @@ def main(argv=None) -> int:
         if any(spec["policy"] == "program" for spec in policies.values()):
             parser.error("program policies run only on Modal (tools/traverse_farm/modal_app.py)")
         result = search.evaluate(run_many, policies, parse_seeds(args.seeds), out=args.out, baseline=args.baseline,
-                                 mission=args.mission)
+                                 mission=args.mission, analyse=args.analyse)
         print(format_table(result["table"]))
         if result["versus"]:
             print(format_versus(args.baseline, result["versus"]))
+        if args.analyse:
+            from traverse_farm.analysis import format_summary
+            print(format_summary(result["home"]))
     else:
         search.search(run_many, jobs.pilot_defaults(), search_seeds=parse_seeds(args.search_seeds),
                       select_seeds=parse_seeds(args.select), confirm_seeds=parse_seeds(args.confirm),

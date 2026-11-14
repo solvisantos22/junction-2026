@@ -44,6 +44,7 @@ SPACE: Dict[str, Tuple[str, float, float]] = {
     "leg_slack": ("float", 0.9, 1.3),
     "energy_weight": ("log", 0.05, 1.0),
     "rebuild_shift": ("log", 0.01, 0.1),
+    "home_floor": ("float", 0.5, 5.0),      # task 0.1.1 (pilot commit 1545627): the reserve spent on the way home
 }
 
 
@@ -88,6 +89,11 @@ def key(options: Dict[str, Any]) -> str:
 def _mission_key(item: Dict[str, Any]) -> str:
     from .jobs import job_key
     return job_key(item)
+
+
+def _current_source() -> str:
+    from .jobs import source_id
+    return source_id()
 
 
 # ---- statistics ---------------------------------------------------------------------------
@@ -141,10 +147,14 @@ def versus(rows: List[Dict[str, Any]], baseline: str, candidates: Iterable[str])
 
 # ---- bookkeeping --------------------------------------------------------------------------
 class Ledger:
-    """Rows on disk as each part of a run finishes, so an interrupted run resumes without replaying worlds."""
+    """Rows on disk as each part of a run finishes, so an interrupted run resumes without replaying worlds.
 
-    def __init__(self, folder: Optional[Path], part: int = 400):
+    A saved row is reused only if the same Traverse code played it (its `source`): after the pilot or
+    the environment changes, a rerun into the same folder plays its missions again."""
+
+    def __init__(self, folder: Optional[Path], part: int = 400, source: Optional[str] = None):
         self.folder, self.rows, self.done, self.part = folder, [], {}, part
+        self.source = source if source is not None else _current_source()
         if folder:
             folder.mkdir(parents=True, exist_ok=True)
             path = folder / "rows.jsonl"
@@ -153,7 +163,7 @@ class Ledger:
                     if line.strip():
                         row = json.loads(line)
                         self.rows.append(row)
-                        if "reward" in row:
+                        if "reward" in row and row.get("source", self.source) == self.source:
                             self.done[_mission_key(row)] = row
 
     def play(self, run_many: RunMany, jobs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -226,7 +236,7 @@ def search(run_many: RunMany, defaults: Dict[str, Any], *, search_seeds: Sequenc
                                "block": block, "elites": elites, "finalists": finalists, "max_slowdown": max_slowdown,
                                "search_seeds": [search_seeds[0], search_seeds[-1]], "select_seeds": list(select_seeds),
                                "confirm_seeds": [confirm_seeds[0], confirm_seeds[-1]], "rng_seed": rng_seed,
-                               "mission": mission or {}})
+                               "mission": mission or {}, "source": ledger.source})
     for g in range(generations):
         seeds = search_seeds[g * block:(g + 1) * block]
         candidates = {"defaults": base}
@@ -290,12 +300,13 @@ def search(run_many: RunMany, defaults: Dict[str, Any], *, search_seeds: Sequenc
 
 def evaluate(run_many: RunMany, policies: Dict[str, Dict[str, Any]], seeds: Sequence[int],
              out: Optional[Path] = None, baseline: Optional[str] = "pilot",
-             mission: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+             mission: Optional[Dict[str, Any]] = None, analyse: bool = False) -> Dict[str, Any]:
     """Several policies on the same worlds. `policies`: name -> job fields (policy, options, program...).
     If `baseline` is one of them, every other policy is also compared with it world by world.
-    `mission` changes the rules for every mission (for example {"sun_margin_ticks": 0})."""
+    `mission` changes the rules for every mission (for example {"sun_margin_ticks": 0}); `analyse` adds,
+    for every mission, whether the rover could still have got home tick by tick (analysis.py)."""
     ledger = Ledger(out)
-    extra = {"mission": mission} if mission else {}
+    extra = dict({"mission": mission} if mission else {}, **({"analyse": True} if analyse else {}))
     jobs = [dict(spec, candidate=name, seed=seed, **extra) for name, spec in policies.items() for seed in seeds]
     rows = run_many(jobs) if out is None else ledger.play(run_many, jobs)
     table = {name: summarise(rows, name) for name in policies}
@@ -303,5 +314,10 @@ def evaluate(run_many: RunMany, policies: Dict[str, Dict[str, Any]], seeds: Sequ
     labels = {name: spec.get("label") for name, spec in policies.items() if spec.get("label")}
     ledger.write("evaluation.json", {"seeds": [seeds[0], seeds[-1]], "worlds": len(seeds), "table": table,
                                      "baseline": baseline if against else None, "versus": against, "labels": labels,
-                                     "mission": mission or {}})
-    return {"rows": rows, "table": table, "versus": against}
+                                     "mission": mission or {}, "source": ledger.source})
+    home = {}
+    if analyse:
+        from .analysis import summarise as summarise_home
+        home = {name: summarise_home(rows, name) for name in policies}
+        ledger.write("analysis.json", home)
+    return {"rows": rows, "table": table, "versus": against, "home": home}
