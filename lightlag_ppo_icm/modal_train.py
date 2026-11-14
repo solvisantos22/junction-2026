@@ -6,11 +6,12 @@
     modal run lightlag_ppo_icm/modal_train.py::check --policy traverse-targets-ppo/policy.npz \
         --seeds 430000-430299 --players ppo_icm,pilot,greedy,nearest_targets,random_targets --out rows.json
 
-`fit` runs train.train() unchanged in one container (the learner, 2 cores) and sends its rollouts
+`fit` runs train.train() in one container (the learner, 2 cores) and sends its rollouts
 to up to MAX_CONTAINERS one-core containers, one mission per call: a target-mode mission takes a
 few seconds, so an update of 128 missions takes about as long as the slowest one. The run folder
 (log.jsonl, best.npz, policy.npz, summary.json) lives in the Modal volume `lightlag-ppo-icm-runs`,
-committed after every development check, so a run that stops early keeps its best policy.
+committed after every development check, so a run that stops early keeps its best policy, and
+`fit` with the same `--out` continues it from there.
 
 `check` plays every player on every world, one mission per call, and prints the same table as
 check.py. Policies are read from the volume (paths inside it); `--upload` puts a local policy file
@@ -48,7 +49,10 @@ class ModalPool:
         return list(rollout.map(jobs, order_outputs=True))
 
 
-@app.function(cpu=2.0, memory=4096, timeout=6 * 3600, volumes={"/runs": runs})
+# The learner holds the whole run, so it is not preemptible; if it is restarted anyway, it resumes
+# from its last checkpoint in the volume. Rollout containers may be preempted: their missions are
+# simply played again (retries).
+@app.function(cpu=2.0, memory=4096, timeout=6 * 3600, volumes={"/runs": runs}, nonpreemptible=True)
 def learn(settings: dict) -> dict:
     from lightlag_ppo_icm.train import train
 
@@ -57,7 +61,8 @@ def learn(settings: dict) -> dict:
             runs.commit()
 
     out = Path("/runs") / settings.pop("out")
-    result = train(out=str(out), pool=ModalPool(), callback=commit, **settings)
+    runs.reload()
+    result = train(out=str(out), pool=ModalPool(), callback=commit, resume=True, **settings)
     runs.commit()
     return result
 
