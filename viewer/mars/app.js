@@ -603,7 +603,7 @@ class Screen {
       let hy = (b.y1 - b.y0) / 2, hx = (b.x1 - b.x0) / 2;
       if (hx / hy < aspect) hx = hy * aspect; else hy = hx / aspect;
       Object.assign(camera, { left: -hx, right: hx, top: hy, bottom: -hy }); camera.position.set(c.x, 200, c.z); camera.up.set(0, 0, -1); camera.lookAt(c.x, 0, c.z);
-    } else if (this.kind === 'wide') {
+    } else if (this.kind === 'wide' || (this.kind === 'live' && state.camera === 'overview')) {
       // a drone shot that keeps the rover and the base in frame
       const base = this.scene.P(world.base[0], world.base[1]), focus = new THREE.Vector3(lerp(base.x, p.x, 0.62), 0, lerp(base.z, p.z, 0.62));
       if (!this.eye) this.look.copy(focus);
@@ -633,7 +633,10 @@ class Screen {
 // ---------------------------------------------------------------- interface
 const stage = $('#stage'), scrub = $('#scrub'), playButton = $('#play'), clock = $('#clock b');
 const SPEEDS = [[0.75, '½×'], [1.5, '1×'], [3, '2×'], [6, '4×']];
-const state = { t: 0, playing: false, speed: 1, mode: 'mission', mission: MISSIONS[0], run: MISSIONS[0].featuredRun, screens: [], wall: 0 };
+const state = { t: 0, playing: false, speed: 1, mode: 'mission', mission: MISSIONS[0], run: MISSIONS[0].featuredRun, screens: [], wall: 0, camera: 'follow', focus: null, mobileView: 'live' };
+const VIEWS = [['live', 'Mars'], ['feed', 'Earth'], ['map', 'Map'], ['console', 'Console']];
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let loopTimer = null, overviewKey = '';
 const TOOLS = [['rules', 'read'], ['map', 'read'], ['telemetry_log', 'read'], ['uplink', 'send ≤5'], ['advance', 'wait ≤5'], ['shell', 'own code']];
 
 function describeCall(call) {
@@ -683,6 +686,8 @@ function glScreen(kind, run, title, sub) {
     <div class="toast"></div><div class="end"><b></b><em></em><span></span></div>`;
   stage.appendChild(el);
   const screen = new Screen(kind, run); screen.el = el; screen.shown = {};
+  panelControls(screen, title);
+  if (kind === 'map') el.insertAdjacentHTML('beforeend', '<div class="map-legend"><span class="legend-path">━ Travelled</span><span class="legend-queue">┄ Queued aim</span><span class="legend-earth">◌ Last seen</span></div>');
   return screen;
 }
 function consolePanel(run) {
@@ -693,19 +698,63 @@ function consolePanel(run) {
     <div class="keys">${TOOLS.map(([name, hint]) => `<div class="key${name === 'shell' ? ' own' : ''}" data-tool="${name}"><b>${name}</b><span>${hint}</span><em>0</em></div>`).join('')}</div>
     <canvas class="lane"></canvas><div class="log"></div></div>`;
   stage.appendChild(el);
-  return { kind: 'console', run, el, shown: {}, canvas: $('canvas', el) };
+  const panel = { kind: 'console', run, el, shown: {}, canvas: $('canvas', el) };
+  panelControls(panel, 'Console');
+  return panel;
+}
+function panelControls(screen, name) {
+  const controls = document.createElement('div'); controls.className = 'panel-actions';
+  if (screen.kind === 'live') {
+    const camera = document.createElement('button'); camera.className = 'camera-toggle';
+    camera.textContent = state.camera === 'follow' ? 'Overview' : 'Follow rover';
+    camera.title = 'Switch follow / overview camera (C)';
+    camera.onclick = toggleCamera; controls.appendChild(camera);
+  }
+  const focus = document.createElement('button'); focus.className = 'focus'; focus.textContent = '⤢';
+  focus.setAttribute('aria-label', `Expand ${name} view`); focus.setAttribute('aria-pressed', 'false');
+  focus.title = `Expand ${name} view`; screen.focusButton = focus;
+  focus.onclick = () => { state.focus = state.focus === screen ? null : screen; updateLayout(); };
+  controls.appendChild(focus); screen.el.appendChild(controls);
+}
+function toggleCamera() {
+  state.camera = state.camera === 'follow' ? 'overview' : 'follow';
+  for (const screen of state.screens) if (screen.kind === 'live') {
+    screen.eye = null; screen.heading = null;
+    $('.camera-toggle', screen.el).textContent = state.camera === 'follow' ? 'Overview' : 'Follow rover';
+  }
+}
+function updateLayout() {
+  stage.classList.toggle('compare', state.mode === 'compare');
+  stage.classList.toggle('focused', !!state.focus);
+  for (const screen of state.screens) {
+    const focused = state.focus === screen;
+    screen.el.classList.toggle('focused', focused);
+    screen.el.classList.toggle('mobile-active', screen.kind === state.mobileView);
+    screen.focusButton.setAttribute('aria-pressed', String(focused));
+    screen.focusButton.setAttribute('aria-label', focused ? 'Restore all views' : `Expand ${screen.kind === 'wide' ? screen.run.short : VIEWS.find(v => v[0] === screen.kind)?.[1]} view`);
+    screen.focusButton.textContent = focused ? '⤡' : '⤢';
+  }
+  $('#view-tabs').hidden = state.mode === 'compare';
+  for (const button of $('#view-tabs').children) { const active = button.dataset.view === state.mobileView; button.classList.toggle('on', active); button.setAttribute('aria-pressed', String(active)); }
 }
 function build() {
   const mission = state.mission, run = state.run, compare = state.mode === 'compare';
+  state.focus = null; overviewKey = '';
   stage.innerHTML = '';
   scrub.max = mission.T; $('#clock span').textContent = `/${mission.T}`; $('#mname').textContent = mission.name;
   $('#cmp').classList.toggle('on', compare);
+  $('#cmp').setAttribute('aria-pressed', String(compare));
+  $('#cmp').textContent = compare ? 'Mission view' : 'Compare runs';
   $('#runs').className = compare ? 'all' : '';
-  $('#runs').innerHTML = mission.runs.map((r, i) => `<button data-run="${r.id}" class="${!compare && r === run ? 'on' : ''}"><i>${i + 1}</i>${r.short}</button>`).join('');
+  $('#runs').innerHTML = mission.runs.map((r, i) => `<button data-run="${r.id}" aria-pressed="${!compare && r === run}" title="Show ${esc(r.short)} (${i + 1})" class="${!compare && r === run ? 'on' : ''}"><i>${i + 1}</i>${r.short}</button>`).join('');
   for (const button of $('#runs').children) button.onclick = () => { state.run = mission.runs.find(r => r.id === button.dataset.run); state.mode = 'mission'; build(); };
   state.screens = compare
     ? mission.runs.slice(0, 4).map(r => glScreen('wide', r, r.short, r.kind === 'model' ? r.label : 'scripted controller'))
     : [glScreen('live', run, 'Mars', 'now'), glScreen('feed', run, 'Earth', ''), glScreen('map', run, 'Map', 'north up'), consolePanel(run)];
+  $('#mission-facts').textContent = `${run.world.targets.length} sample sites · ${mission.T} ticks · ${mission.K}-tick telemetry delay`;
+  $('#view-tabs').innerHTML = VIEWS.map(([id, label]) => `<button data-view="${id}" aria-pressed="false">${label}</button>`).join('');
+  for (const button of $('#view-tabs').children) button.onclick = () => { state.mobileView = button.dataset.view; state.focus = null; updateLayout(); };
+  updateLayout();
   drawMarks();
 }
 function fitUi() { document.documentElement.style.setProperty('--s', clamp(Math.min(window.innerWidth / 1500, window.innerHeight / 820), 0.8, 1.8).toFixed(3)); }
@@ -802,71 +851,162 @@ function updateConsole(panel, t) {
 }
 
 // ---------------------------------------------------------------- title screen, loop and input
-const title = $('#title');
+const title = $('#title'), guide = $('#guide');
 $('#titleK').textContent = MISSIONS[0].K;
-$('#missions').innerHTML = MISSIONS.map((m, i) => `<li data-i="${i}"><i>${i + 1}</i><b>${esc(m.name)}</b><em>${esc(m.profile.replace('_', ' + '))} · seed ${m.seed} · ${m.ticks} ticks</em><p>${esc(m.brief)}</p></li>`).join('');
-function markMission() { [...$('#missions').children].forEach((li, i) => li.classList.toggle('on', MISSIONS[i] === state.mission)); }
-function showTitle(on) { title.classList.toggle('gone', !on); if (on) { setPlaying(false); markMission(); } }
-function setPlaying(on) { state.playing = on; playButton.textContent = on ? '❚❚' : '▶'; }
-function seek(t) { state.t = clamp(t, 0, state.mission.T); }
-function startMission(mission, run = mission.featuredRun) { state.mission = mission; state.run = run; state.mode = 'mission'; seek(0); build(); showTitle(false); setPlaying(true); }
-function setSpeed(i) { state.speed = clamp(i, 0, SPEEDS.length - 1); $('#speed').textContent = SPEEDS[state.speed][1]; }
-for (const li of $('#missions').children) li.onclick = () => startMission(MISSIONS[+li.dataset.i]);
+$('#missions').innerHTML = MISSIONS.map((m, i) => `<li data-i="${i}"><button class="mission-card" aria-label="Watch ${esc(m.name)} mission"><i>${String(i + 1).padStart(2, '0')}</i><b>${esc(m.name)} <span aria-hidden="true">↗</span></b><em>${esc(m.profile.replace('_', ' + '))} · seed ${m.seed} · ${m.ticks} ticks</em><p>${esc(m.brief)}</p></button></li>`).join('');
+function markMission() {
+  [...$('#missions').children].forEach((li, i) => {
+    const selected = MISSIONS[i] === state.mission;
+    li.classList.toggle('on', selected);
+    $('button', li).setAttribute('aria-current', String(selected));
+  });
+  $('#titleK').textContent = state.mission.K;
+}
+function showTitle(on) {
+  title.classList.toggle('gone', !on); title.inert = !on; $('#ui').inert = on;
+  if (on) { setPlaying(false); markMission(); $('#missions .on button')?.focus({ preventScroll: true }); }
+  else playButton.focus({ preventScroll: true });
+}
+function clearLoop() { if (loopTimer !== null) { clearTimeout(loopTimer); loopTimer = null; } }
+function setPlaying(on) {
+  clearLoop(); state.playing = on;
+  const ended = state.t >= state.mission.T - 0.01;
+  playButton.innerHTML = on ? '❚❚ <span>Pause</span>' : ended ? '↺ <span>Replay</span>' : '▶ <span>Play</span>';
+  playButton.setAttribute('aria-label', on ? 'Pause replay' : ended ? 'Replay mission' : 'Play replay');
+}
+function seek(t) {
+  clearLoop();
+  const next = clamp(t, 0, state.mission.T);
+  if (Math.abs(next - state.t) > 1.1) for (const screen of state.screens) { screen.eye = null; screen.heading = null; }
+  state.t = next; scrub.value = next; overviewKey = '';
+  if (!state.playing) setPlaying(false);
+}
+function startMission(mission, run = mission.featuredRun) {
+  state.mission = mission; state.run = run; state.mode = 'mission'; state.mobileView = 'live';
+  seek(0); build(); showTitle(false); setPlaying(true);
+}
+function setSpeed(i) {
+  state.speed = clamp(i, 0, SPEEDS.length - 1);
+  $('#speed').textContent = SPEEDS[state.speed][1];
+  $('#speed').setAttribute('aria-label', `Playback speed: ${SPEEDS[state.speed][1]}`);
+}
+function eventTicks() {
+  const runs = state.mode === 'compare' ? state.mission.runs : [state.run];
+  return [...new Set([0, state.mission.T, ...runs.flatMap(run => run.events.filter(e => toastFor(run, e)).map(e => e.tick))])].sort((a, b) => a - b);
+}
+function jumpEvent(direction) {
+  const ticks = eventTicks(), t = state.t;
+  const next = direction > 0 ? ticks.find(tick => tick > t + .01) : ticks.slice().reverse().find(tick => tick < t - .01);
+  if (next !== undefined) { setPlaying(false); seek(next); }
+}
+function updateOverview() {
+  const t = Math.floor(state.t + 1e-6), run = state.run, compare = state.mode === 'compare';
+  const key = `${state.mission.id}/${run.id}/${compare}/${t}`;
+  if (key === overviewKey) return;
+  overviewKey = key;
+  $('#sample-count').textContent = compare ? String(state.mission.runs.length) : `${run.stateAt(t).sampled_targets.length}/${run.world.targets.length}`;
+  $('.mission-progress span').innerHTML = compare ? 'runs on the<br>same clock' : 'samples<br>collected';
+  let text = compare ? 'Compare the same mission at the same tick.' : 'Mission start · collect samples and keep enough energy to finish.';
+  let tone = '';
+  if (!compare) {
+    const latest = run.events.filter(e => e.tick <= t && toastFor(run, e)).at(-1);
+    if (latest) { const message = toastFor(run, latest); tone = message[0]; text = `t${latest.tick} · ${message[1]}`; }
+    if (t >= run.T) { const result = verdict(run); tone = result[0]; text = `Mission complete · ${result[1]} · score ${run.reward.toFixed(2)}`; }
+  }
+  $('#event-status').textContent = text; $('#event-status').className = tone;
+  $('#prev-event').disabled = t <= 0; $('#next-event').disabled = t >= state.mission.T;
+  $('#prev-tick').disabled = t <= 0; $('#next-tick').disabled = t >= state.mission.T;
+  scrub.setAttribute('aria-valuetext', `Tick ${t} of ${state.mission.T}`);
+}
+for (const li of $('#missions').children) $('button', li).onclick = () => startMission(MISSIONS[+li.dataset.i]);
 playButton.onclick = () => { if (!state.playing && state.t >= state.mission.T - 0.01) seek(0); setPlaying(!state.playing); };
 scrub.oninput = () => { setPlaying(false); seek(+scrub.value); };
+$('#restart').onclick = () => { setPlaying(false); seek(0); };
+$('#prev-tick').onclick = () => { setPlaying(false); seek(Math.ceil(state.t - 1e-6) - 1); };
+$('#next-tick').onclick = () => { setPlaying(false); seek(Math.floor(state.t + 1e-6) + 1); };
+$('#prev-event').onclick = () => jumpEvent(-1);
+$('#next-event').onclick = () => jumpEvent(1);
 $('#menu').onclick = () => showTitle(true);
 $('#speed').onclick = () => setSpeed((state.speed + 1) % SPEEDS.length);
 $('#cmp').onclick = () => { state.mode = state.mode === 'mission' ? 'compare' : 'mission'; build(); };
+$('#help').onclick = () => { setPlaying(false); guide.showModal(); };
+$('#close-guide').onclick = () => guide.close();
+$('#fullscreen').onclick = toggleFull;
 addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey || guide.open) return;
   const onTitle = !title.classList.contains('gone'), n = MISSIONS.length, at = MISSIONS.indexOf(state.mission);
   if (onTitle) {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startMission(state.mission); }
-    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'n' || e.key === 'N') { state.mission = MISSIONS[(at + (e.key === 'ArrowUp' ? n - 1 : 1)) % n]; state.run = state.mission.featuredRun; seek(0); build(); markMission(); }
-    else if (/^[1-9]$/.test(e.key) && MISSIONS[e.key - 1]) startMission(MISSIONS[e.key - 1]);
+    if (e.key === 'Tab') {
+      const buttons = [...$('#missions').querySelectorAll('button')], index = buttons.indexOf(document.activeElement);
+      if (e.shiftKey && index <= 0) { e.preventDefault(); buttons.at(-1).focus(); }
+      else if (!e.shiftKey && index === buttons.length - 1) { e.preventDefault(); buttons[0].focus(); }
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      if (e.target.closest('button')) return; // Native activation fires once.
+      e.preventDefault(); startMission(state.mission);
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key.toLowerCase() === 'n') {
+      e.preventDefault(); state.mission = MISSIONS[(at + (e.key === 'ArrowUp' ? n - 1 : 1)) % n];
+      state.run = state.mission.featuredRun; seek(0); build(); markMission(); $('#missions .on button').focus();
+    } else if (/^[1-9]$/.test(e.key) && MISSIONS[e.key - 1]) startMission(MISSIONS[e.key - 1]);
     else if (e.key === 'Escape') showTitle(false);
-    else if (e.key === 'f' || e.key === 'F') toggleFull();
+    else if (e.key.toLowerCase() === 'f') toggleFull();
     return;
   }
+  if (e.target.matches('input, select, textarea') || e.target.isContentEditable) return;
+  if ((e.key === ' ' || e.key === 'Enter') && e.target.closest('button, a')) return;
   if (e.key === ' ') { e.preventDefault(); playButton.click(); }
-  else if (e.key === 'ArrowRight') { setPlaying(false); seek(Math.floor(state.t + 1e-6) + 1); }
-  else if (e.key === 'ArrowLeft') { setPlaying(false); seek(Math.ceil(state.t - 1e-6) - 1); }
-  else if (e.key === 'm' || e.key === 'M') $('#cmp').click();
-  else if (e.key === 'n' || e.key === 'N') startMission(MISSIONS[(at + 1) % n]);
-  else if (e.key === 'f' || e.key === 'F') toggleFull();
-  else if (e.key === 'Escape') showTitle(true);
-  else if (e.key === '-' || e.key === '=') setSpeed(state.speed + (e.key === '=' ? 1 : -1));
+  else if (e.key === 'ArrowRight') { e.preventDefault(); $('#next-tick').click(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); $('#prev-tick').click(); }
+  else if (e.key === ']') jumpEvent(1);
+  else if (e.key === '[') jumpEvent(-1);
+  else if (e.key.toLowerCase() === 'r') $('#restart').click();
+  else if (e.key.toLowerCase() === 'c') toggleCamera();
+  else if (e.key.toLowerCase() === 'm') $('#cmp').click();
+  else if (e.key.toLowerCase() === 'n') startMission(MISSIONS[(at + 1) % n]);
+  else if (e.key.toLowerCase() === 'f') toggleFull();
+  else if (e.key === '?' || e.key.toLowerCase() === 'h') $('#help').click();
+  else if (e.key === 'Escape') { if (state.focus) { state.focus = null; updateLayout(); } else showTitle(true); }
+  else if (e.key === '-' || e.key === '=' || e.key === '+') setSpeed(state.speed + (e.key === '-' ? -1 : 1));
   else if (/^[1-4]$/.test(e.key) && state.mission.runs[e.key - 1]) { state.run = state.mission.runs[e.key - 1]; state.mode = 'mission'; build(); }
 });
-function toggleFull() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
-addEventListener('resize', fitUi);
+async function toggleFull() {
+  try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); }
+  catch { $('#fullscreen').title = 'Full screen is unavailable in this browser'; }
+}
+addEventListener('fullscreenchange', () => $('#fullscreen').setAttribute('aria-label', document.fullscreenElement ? 'Exit full screen' : 'Enter full screen'));
+addEventListener('resize', () => { fitUi(); updateLayout(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) setPlaying(false); });
 fitUi(); markMission();
-window.LIGHTLAG = { state, seek, setPlaying, build, startMission, showTitle, MISSIONS };   // for checks from the browser console
+window.LIGHTLAG = { state, seek, setPlaying, build, startMission, showTitle, MISSIONS, jumpEvent };   // browser checks
 
 let last = performance.now();
 function frame(now) {
-  const dt = Math.min(0.1, (now - last) / 1000), T = state.mission.T; last = now; state.wall += dt;
-  if (state.playing) { state.t += dt * SPEEDS[state.speed][0]; if (state.t >= T) { state.t = T; setPlaying(false); if (state.loop) setTimeout(() => { seek(0); setPlaying(true); }, 8000); } }
+  const dt = Math.min(0.1, (now - last) / 1000), T = state.mission.T; last = now;
+  if (state.playing) { state.t += dt * SPEEDS[state.speed][0]; if (state.t >= T) { state.t = T; setPlaying(false); if (state.loop) loopTimer = setTimeout(() => { seek(0); setPlaying(true); }, 8000); } }
   const t = state.t, width = window.innerWidth, height = window.innerHeight;
+  state.wall = reducedMotion ? 0 : t;
+  const stageRect = stage.getBoundingClientRect();
   if (renderer.domElement.width !== Math.round(width * renderer.getPixelRatio()) || renderer.domElement.height !== Math.round(height * renderer.getPixelRatio())) renderer.setSize(width, height, false);
   renderer.setScissorTest(false); renderer.setViewport(0, 0, width, height); renderer.clear();
   renderer.setScissorTest(true);
   for (const screen of state.screens) {
-    if (screen.kind === 'console') { updateConsole(screen, t); continue; }
     const rect = screen.el.getBoundingClientRect();
-    if (rect.width < 4 || rect.height < 4) continue;
+    const left = Math.max(0, stageRect.left, rect.left), right = Math.min(width, stageRect.right, rect.right);
+    const top = Math.max(0, stageRect.top, rect.top), bottom = Math.min(height, stageRect.bottom, rect.bottom);
+    if (right - left < 4 || bottom - top < 4) continue;
+    if (screen.kind === 'console') { updateConsole(screen, t); continue; }
     const info = screen.scene.apply(screen.kind, t, state.wall);
     screen.frame(info, rect.width / rect.height, dt, state.wall);
     screen.scene.fitLabels(screen.camera, rect.height);
     renderer.setViewport(rect.left, height - rect.bottom, rect.width, rect.height);
-    renderer.setScissor(rect.left, height - rect.bottom, rect.width, rect.height);
+    renderer.setScissor(left, height - bottom, right - left, bottom - top);
     renderer.render(screen.scene.scene, screen.camera);
     updateScreen(screen, info, t);
   }
   const shownTick = String(Math.floor(t)).padStart(2, '0');
   if (clock.textContent !== shownTick) clock.textContent = shownTick;
-  scrub.value = t; drawMarks();
+  scrub.value = t; drawMarks(); updateOverview();
   requestAnimationFrame(frame);
 }
-build();
+build(); showTitle(true);
 if (location.hash === '#auto') { state.loop = true; setTimeout(() => startMission(state.mission), 1800); }
 requestAnimationFrame(frame);

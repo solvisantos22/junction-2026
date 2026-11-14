@@ -336,3 +336,10 @@ For paid model/compute work, record the actual provider/model or instance, confi
 - [ ] Confirm the main challenge's Harbor run/score evidence using the [readiness checklist](afterquery-readiness.md).
 
 No prize submission, sponsor post, redemption, account change or paid run was performed in creating this log.
+
+### 14 November — Kristján / Codex: make the 3D mission demo easier to present
+
+- **Human direction:** Kristján asked Codex to inspect the demo and improve its looks, controls and mission presentation. Claude Code authored the existing 3D scene; this increment builds on it.
+- **Codex contribution:** a persistent mission briefing, larger Mars view, explicit playback/step/restart/event controls, camera and panel focus controls, a keyboard-accessible mission menu and guide, and phone layouts with view tabs. Browser testing caught and fixed a slider/step synchronization race. Recorded mission outcomes and simulator/controller behavior are preserved.
+- **Verification:** 28 Python viewer tests; 33 Chrome interaction/outcome checks covering two missions, eight runs, 1440/768/390-pixel layouts, keyboard input and all saved end scores; no runtime errors. Local screenshots inspected. [Behavior and verification](../viewer/USABILITY.md), [source](../viewer/mars/app.js), [standalone artifact](../viewer/mars-demo.html).
+- **Scope:** presentation and interaction work only. No model/API spend, new experiment, inferred performance gain or new prize submission.
