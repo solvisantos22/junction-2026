@@ -10,6 +10,21 @@
 
 Sölvi also authorized more containers when useful, within the user-reported $300 shared team budget. The current six-run source/resource freeze stays unchanged. Additional capacity can support a separately bounded parallel evaluation after training; no additional jobs or budget were allocated by that permission alone.
 
+## Team checkpoints
+
+Use the [shared progress page](progress.md) for checkpoint scores, home/survival counts, six-run progress and estimates. Every page has an explicit observation time. The publisher will refresh it every 15 minutes and, within its five-minute polling interval, when all three seeds of either method reach another declared checkpoint. It does not wake a model for routine updates or change training decisions.
+
+| Missions per run | What the checkpoint is for |
+|---:|---|
+| 512 | Early learning and reliability check |
+| 2048 | Same-budget checkpoint beside the earlier pilot |
+| 8192 | Formal decision on whether the whole method may continue |
+| 16384 and 24576 | Progress during the optional extension |
+| 32768 | Extended target, if reached before the time limit |
+| Final 40 worlds | Separate evaluation after all selected policy artifacts are frozen |
+
+The page averages methods only at a checkpoint completed by all three seeds. Batch-file counts are progress indicators and may lag volume commits; they are not substitutes for validated milestone artifacts. Interim scores are from reused validation worlds, not the final test or submission campaign. Teammates should keep the frozen reference in the demo and submission until a separate, supported decision changes it. Complete checkpoint files remain available on Modal; reporting does not wait for the entire stage to finish.
+
 ## Verification and interpretation
 
 **51 focused tests pass**, with an independent code review finding no blocking issue. Both algorithms complete 32-mission local smoke runs on worlds 1/2. Complete reports, policies, batches, optimizer checkpoints and validation replays are retained under [preflight](preflight/). These are engineering checks.
@@ -44,6 +59,16 @@ The queued instruction directs Codex to reconcile all runs, publish the all-seed
 Runtime code, configuration, state and logs are under `/Users/solvisantos/.codex/junction-learning-final-wake-20261114/`. The private code copy is hash-bound and unaffected by later main commits. `state.json` reports `waiting`, `queued`, `uncertain` or `disabled`. Dispatch is reserved durably before the CLI call; an interrupted or ambiguous attempt is never automatically repeated. A `queued` state means the CLI reported acceptance, not that the follow-up work finished.
 
 A training pause/stop suppresses the wake-up. To disable only this watcher, create `/tmp/junction-learning-final-monitor/wake-stop`; current training continues. A disabled watcher requires deliberate rearming. The Mac and Codex must remain available, and Codex usage limits can interrupt the resumed work. Thirteen synthetic tests cover dispatch, pauses, interruption, identity changes and duplicate prevention; a real local poll verified `waiting`. No test follow-up message was sent to the chat.
+
+## Team delivery requested for 07:30 Helsinki
+
+Sölvi relayed Kristján's requested morning handoff: by **15 November 07:30 Helsinki / 05:30 UTC**, provide one clean before/after on the final frozen source, averaged over all three initialization seeds, with greedy and the frozen reference on the same final worlds; one README/video paragraph; one learning-curve figure; and Modal app IDs with estimated cost in `docs/prize-evidence.md`. The active completion wake-up reads this handoff. Training's absolute 05:30 Helsinki cutoff leaves two hours for that work.
+
+**Seed correction for the team:** worlds **72000–72039 were already consumed by the first small-policy RL experiment** ([retained result](../lightlag-rl-results/README.md)). They must not be reopened and described as fresh. This experiment's predeclared untouched final worlds are **82000–82039**, opened once only after policy freezing. Worlds81000–81031 are held apart from training but repeatedly used for validation and continuation decisions; call them development validation, not an untouched test. Our80000–80511 training range also avoids the newly reserved MAX pool500–523, the team's farm/probe ranges, submission2026–2029 and example99991. The broad suggestion that any seed above5000 is unused does not override prior experiment reservations.
+
+If training hits its deadline, use each run's last completed declared milestone and state the attempted target separately. Retain the same-source matched2048 comparison. The old pilot fallback remains initial .087395 → PPO .376800 at2048, greedy .380555 and beam .514345, but it used the original navigator and must be labelled accordingly; it is not a completed result from this final-version training run. Current validation improvement alone does not establish a learned-policy win or a Claude gap.
+
+The figure should clearly label the training checkpoints as development validation, retain all seeds, and pair any final before/after headline with the separately audited final-world comparison. Keep the current reference until the team separately decides otherwise. Current cloud allocation remains within its published running-compute envelope; no additional allocation should exceed the remaining authorized credit.
 
 ## Next handoff
 
