@@ -19,7 +19,7 @@ seeds 800-879, delay 3): slip_check 0.45 everywhere, 0.40-0.42 on the 50-tick ru
 only; downlink_passes period 2. None of this is a rules decision. Results and what was
 reverted: docs/lightlag-dynamic-pilot.md, section "Mars-operations tweaks".
 
-Co-designed controllers (proposals, not registered): `slip_aware(parent)` plans around the
+Co-designed controllers (proposals; registered as Manh controllers 30-33): `slip_aware(parent)` plans around the
 check; `executive(parent)` adds explicit modes on top (nominal / recover after a slip stop).
 
     env = make_mars_env(seed, 3, "rush_noisy", factors={"slip_check": {"limit": 0.40}})
@@ -133,7 +133,7 @@ def make_mars_env(seed, delay, profile="rush_noisy", horizon=None, **kw):
 
 
 # =============================================================================================
-# Controllers co-designed with the tweaks (experimental; not in the registry)
+# Controllers co-designed with the tweaks (registered in controllers.py as 30-33)
 # =============================================================================================
 
 class _SlipCheckAware:

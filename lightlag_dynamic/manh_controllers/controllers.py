@@ -1073,6 +1073,33 @@ class EKF_latencyaware_MPC(LogMixin, RealTimeKalmanMPC):
 
 
 # =============================================================================================
+# Mars-operations tweaks (mars.py; a sandbox experiment, not a rules decision)
+# =============================================================================================
+# The layer and the executive live in mars.py with the tweaks they answer; with no slip check
+# in the rules (the swarm's ScenarioEnvironment) each class plays exactly like its parent.
+
+from .mars import executive as _mars_executive, slip_aware as _mars_slip_aware  # noqa: E402
+
+
+class EKF_slipaware_MPC(_mars_slip_aware(EKF_MPC)):
+    """30: controller 1 with the slip-check-aware layer."""
+
+
+class EKF_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC(
+        _mars_slip_aware(EKF_sandodo_stayalive_aimdisc_turncost_window_MPC)):
+    """31: controller 24 with the slip-check-aware layer."""
+
+
+class EKF_executive_slipaware_MPC(_mars_executive(EKF_MPC)):
+    """32: controller 1 with the layer and the executive (nominal / recover modes)."""
+
+
+class EKF_executive_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC(
+        _mars_executive(EKF_sandodo_stayalive_aimdisc_turncost_window_MPC)):
+    """33: controller 24 with the layer and the executive (nominal / recover modes)."""
+
+
+# =============================================================================================
 # Registry
 # =============================================================================================
 
@@ -1262,6 +1289,34 @@ register("EKF_latencyaware_MPC_manh_controller_29", _ours(EKF_latencyaware_MPC),
              "turn-based, where 29 equals 1: the gain shows only on the real-time clock. Fresh seeds 600-639 "
              "at 1 tick of thinking per call: +4.0 points on rush_noisy and +8.9 on rush, never worse. A "
              "proposal, not adopted (docs/lightlag-dynamic-pilot.md, 'Real-time-aware reference').")
+_R5 = "2026-11-14, Mars-operations tweaks (sandbox)"
+_SWARM_NOTE = (" The swarm plays without a slip check, where it equals its parent exactly; results come from "
+               "manh_controllers/mars.py's MarsEnvironment (docs/lightlag-dynamic-pilot.md, 'Mars-operations "
+               "tweaks'). A proposal, not a rules decision.")
+register("EKF_slipaware_MPC_manh_controller_30", _ours(EKF_slipaware_MPC), built=_R5,
+         note="1 plus the slip-check-aware layer: a Bayesian trip chance per terrain from the filter's slip belief "
+              "and every slip stop seen; routes around terrain above 10%, drops targets reachable only through "
+              "terrain above 30%",
+         why="With the onboard slip check (stop + discard the queue above a slip limit), 1 replans straight back "
+             "into the sand that stopped it: 6-9 stops per episode and stranded. Fresh seeds 800-879, noisy, "
+             "limit 0.35: 54.1% -> 75.0%, home 51 -> 80 of 80." + _SWARM_NOTE)
+register("EKF_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_31",
+         _ours(EKF_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC), built=_R5,
+         note="24 plus the slip-check-aware layer (as 30)",
+         why="The same layer on the best controller at the time. Fresh seeds 800-879, noisy: limit 0.40 "
+             "74.8% -> 78.8% (home 67 -> 74 of 80), limit 0.35 55.3% -> 75.0% (51 -> 80)." + _SWARM_NOTE)
+register("EKF_executive_slipaware_MPC_manh_controller_32", _ours(EKF_executive_slipaware_MPC), built=_R5,
+         note="30 plus an executive: explicit modes switched by telemetry events (nominal / recover); recover "
+              "backs out by one-segment drives, each sent after the previous executed, when that beats driving "
+              "on; nominal drops a target only with evidence about its terrain",
+         why="The layer alone still crawled along sand edges (12 stops, nothing sampled) and wrote off sand "
+             "targets on the prior. Fresh seeds 900-979, noisy: limit 0.40 78.1% -> 86.6%, 0.35 75.0% -> 85.0%, "
+             "home 80 of 80; never below 30." + _SWARM_NOTE)
+register("EKF_executive_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_33",
+         _ours(EKF_executive_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC), built=_R5,
+         note="31 plus the executive (as 32)",
+         why="Best on the slip check. Fresh seeds 900-979, noisy: limit 0.40 80.3% -> 88.8% (home 77 -> 80 of 80), "
+             "0.35 75.0% -> 85.9%; rush_noisy +0.6 to +0.7 at 0.35-0.42; never below 31." + _SWARM_NOTE)
 for _name in ("solvi_reference", "kristjan_reference", "blind", "cautious"):
     register(_name, _team(_name), kind="team", logged=False, note="team controller, imported unchanged",
              why="comparison only")

@@ -155,7 +155,7 @@ This was checked against Harbor's own documentation ([docs.harborframework.com](
 
 `solvi_reference` never drives on sand, so the slip check never touches it (75.0% on `noisy` at every limit). This is the same worst-case-avoidance effect as with hidden sand.
 
-**Co-designed controller layer (a proposal, like `kf_mpc_rt`).** Without it, controller 1 replans straight back into the sand that stopped it: 6–9 stops per episode, and it ends outside the base. `slip_aware(parent)` adds three things to any `KalmanMPCController`:
+**Co-designed controller layer (a proposal, like `kf_mpc_rt`; Manh controllers 30 and 31).** Without it, controller 1 replans straight back into the sand that stopped it: 6–9 stops per episode, and it ends outside the base. `slip_aware(parent)` adds three things to any `KalmanMPCController`:
 
 - **Trip chance per terrain.** The filter's slip belief, truncated to the published range, is updated by Bayes on every stop. A drive trips with q(s) = P(noise > L − s).
 - **Routing.** While the chance is above 10%, routes pay to cross that terrain.
@@ -179,7 +179,7 @@ Tried and dropped:
 - **Penalties scaled by the trip chance.**
 - **Charging each leg its expected delay instead of dropping targets:** it also padded the legs home and gave up most targets.
 
-**An executive on top (a proposal too): explicit modes switched by telemetry events,** like the rovers' fault protection or a behaviour tree's fallback node. The code is `executive(parent)` in `mars.py`. It has two modes:
+**An executive on top (a proposal too; Manh controllers 32 and 33): explicit modes switched by telemetry events,** like the rovers' fault protection or a behaviour tree's fallback node. The code is `executive(parent)` in `mars.py`. It has two modes:
 
 - **`nominal`:** the slip-aware MPC, with one change. A target is dropped only once there is evidence about its terrain: a stop seen there, or a slip estimate with spread below 0.03. Before that, going for it is the cheapest probe.
 - **`recover`:** entered after a slip stop when backing out is expected to be quicker than driving on.
