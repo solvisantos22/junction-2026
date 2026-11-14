@@ -81,6 +81,18 @@ class ProbeTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertTrue(all(e.startswith("data capacity") for e in result["errors"]))
 
+    def test_cold_storage_can_bind_before_processing(self):
+        mission = generate(0, 6)
+        mission["downlink_slots"] = [9, 13, 17]
+        mission["jobs"] = [
+            {"id": str(i), "value": 1, "collect_duration": 1, "process_duration": 1,
+             "shelf_life": 20, "collect_slots": [i], "deadline": 20} for i in range(3)
+        ]
+        plan = [{"job": str(i), "collect": i, "process": 6 + 4 * i, "transmit": 9 + 4 * i} for i in range(3)]
+        result = verify(mission, plan)
+        self.assertFalse(result["valid"])
+        self.assertEqual(result["errors"], [f"cold capacity at {tick}: 3" for tick in (3, 4, 5)])
+
     def test_compiler_and_aggregate_masks_agree_with_independent_replay(self):
         rng = random.Random(180)
         for seed in range(5):

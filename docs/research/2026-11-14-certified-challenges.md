@@ -2,11 +2,13 @@
 
 Research date: **14 November 2026**. Kristján asked for recent research, a cooler challenge, and a reference that reliably wins. This is a research proposal and a free feasibility probe, not a project decision or evidence of a new model failure. It complements Sölvi's separately claimed mechanism review; existing environments and the demo are unchanged.
 
+**Delivered result:** the exact reference solves all 48 fresh check missions optimally, but a generic beam search obtains 97.29–99.35% of the optimum. The simple sample-chain prototype fails its difficulty gate and should **not** replace Lightlag. Recent research makes compatible science products a plausible next hypothesis; it does not justify a larger full environment yet.
+
 ## Recommendation
 
-**Investigate a complete science-production mission before increasing the map size.** A sample earns value only after collection, processing and transmission. Those stages compete for a rover, a lab, power, storage and short relay windows. An attractive local action can prevent several later deliveries. The interesting failure is doing plenty of work but returning little usable science.
+**Investigate missions where observations must fit together to produce useful science.** Merely scheduling collection, processing and transmission is insufficient in the probe below. A stronger candidate is stereo surveying: images from different positions must jointly satisfy overlap and viewing-angle requirements, then fit power, storage and relay constraints. An attractive local action can prevent several later products. The interesting failure is doing plenty of work but returning little usable science.
 
-Call the candidate **Mars Sample Return** for now. It can reuse the Mars presentation, but the initial test should use a small deterministic scheduling model. Strip away steering and sensor noise until the mission decision itself demonstrates difficulty. A bigger map would then be a presentation or scaling choice, not the mechanism responsible for the gap.
+The tested **Mars Sample Return** concept can reuse the Mars presentation, but its small deterministic scheduling model is too easy for generic search. Keep its exact-reference machinery as a research tool. Test compatible observations or a factory's interdependent recipes separately before building either candidate. A bigger map would then be a presentation or scaling choice, not the mechanism responsible for the gap.
 
 The strongest defensible promise is: **every scored instance has an independently checked winning reference plan**. That is achievable. “A current coding agent always loses” is an empirical hypothesis, not something research or an optimal reference can guarantee. An agent that writes an equivalent solver deserves to win.
 
@@ -50,21 +52,43 @@ These are different experiments, not a pooled benchmark. They support changing t
 
 | Candidate | Interesting decision | Reliable reference | Cost and weakness |
 |---|---|---|---|
-| **Mars Sample Return — first probe** | Reserve collection, processing, storage, power and a downlink together; a locally profitable pickup can block a better complete campaign. | Exact search on a bounded deterministic mission; independently replay its schedule. | Reuses the theme. A competent agent may encode the same scheduling problem. Test that before adding graphics. |
-| **Orbital Stereo Survey — second choice** | Two images must jointly meet geometry, timing and overlap requirements, then reach Earth. More photographs need not produce more useful maps. | Enumerate valid observation pairs, then exactly optimize compatible products on small cases. | Closest research precedent, but requires trustworthy geometry. Publish executable geometry helpers so convention errors cannot create the gap. |
+| **Mars Sample Return — tested, reject this size** | Reserve collection, processing, storage, power and a downlink together; a locally profitable pickup can block a better complete campaign. | Exact search on a bounded deterministic mission; independently replay its schedule. | Reuses the theme, but generic beam search nearly saturates the ceiling. No model run justified by this result. |
+| **Orbital Stereo Survey — next research hypothesis** | Two images must jointly meet geometry, timing and overlap requirements, then reach Earth. More photographs need not produce more useful maps. | Enumerate valid observation pairs, then exactly optimize compatible products on small cases. | Closest research precedent, but requires trustworthy geometry. Publish executable geometry helpers so convention errors cannot create the gap. |
 | **Blackout Factory — larger environment pivot** | Restart a production network with shared transport, limited buffers and batches that spoil if the next machine is unavailable. | CP-SAT or exhaustive search for small instances; retain only publicly specified instances with verified certificates. | Strong visual consequences and coupled decisions. A bigger implementation, and the latest coding agents may still solve it. |
 
 These are proposed designs, not descriptions of benchmarks that already defeat Opus 5.5. There is no need to train a neural reference first: a specialized exact planner gives a clearer ceiling.
 
 ## Free probe contract
 
-The isolated probe under `tools/certified_challenge_probe/` will test whether a small collection → lab → downlink model contains a real planning tradeoff. All times, values and resource limits are public. There is no stochastic noise, privileged hidden state, API latency or model call. The exact reference and every baseline get identical inputs.
+The isolated [probe](../../tools/certified_challenge_probe/README.md) tests whether a small collection → lab → downlink model contains a real planning tradeoff. All times, values and resource limits are public. There is no stochastic noise, privileged hidden state, API latency or model call. The exact reference and every baseline get identical inputs.
 
 The probe must report absolute delivered value, value relative to the computed optimum, full-optimum frequency, reference search effort and independent replay validity. Compare value-first, deadline-first, density-first, a portfolio of those policies and a bounded beam search. A weak greedy baseline is not a substitute for a coding agent.
 
 Development instances may guide implementation. Freeze the generator and algorithms before a separate check range; retain every check result, including zero-value and failed-reference cases. Cross-check exact search against an independent brute-force method on tiny instances. Record hashes and replayable plans so the findings can be reproduced.
 
 The small model is a feasibility check, not a new Harbor task. If short generic search reaches almost the entire ceiling, report that and reject this size as a difficulty claim. Do not keep enlarging it until a chosen agent loses.
+
+## Free probe outcome
+
+The generator, algorithms and fresh-check protocol were published in [`465d91e`](https://github.com/solvisantos22/junction-2026/commit/465d91e) before opening check seeds 30000–30023. Development was 24 cases, check was 48: 24 cases each at eight and twelve jobs. No cases were filtered or dropped. The same seed across sizes is correlated, so these are descriptive comparisons, not independent statistical replications.
+
+| Fresh check | 8 jobs | 12 jobs |
+|---|---:|---:|
+| Exact reference optimal, independently replayed | 24/24 | 24/24 |
+| Reference mean delivered value | 65.25 | 95.4583 |
+| Value-first greedy, mean fraction of optimum | 87.44% | 82.96% |
+| Best-of-four greedy portfolio | 95.74% | 90.41% |
+| Generic beam search, width 64 | **99.35%** | **97.29%** |
+| Beam search reaches exact optimum | 20/24 | 10/24 |
+| Largest exact search, nodes | 16,768 | 832,012 |
+
+The reference proved every optimum within the declared one-million-node limit; the slowest check solve took 4.37 seconds on this machine. Beam search took about 0.67 seconds for all 48 check cases combined, excluding compilation. Absolute values and per-policy timings are retained in [check.json](../../tools/certified_challenge_probe/results/check.json); [development.json](../../tools/certified_challenge_probe/results/development.json) is retained separately. The full theoretical maximum of all listed samples is not used as a misleading denominator: normalized scores use each case's proved achievable optimum.
+
+The predeclared pilot gate required the greedy portfolio to average at most 90% and beam search at most 95%, with every reference certified. Both sizes fail the difficulty requirements. Enlarging from eight to twelve jobs makes greedy performance look much worse, while a small generic search remains close to optimal. A full coding agent may implement this search or the exact reference itself. **Do not describe these controls as agent failures, and do not replace the current environment with this prototype.**
+
+Ten focused tests pass, including a separate brute-force optimum check on eight tiny instances and tests for power, cold storage, memory, temporal boundaries and invalid submissions. A post-write audit regenerated all 72 missions, matched every frozen source hash, replayed all 504 saved policy records and reconstructed every summary. The portfolio records reuse a winning greedy plan; they are not additional independent trials. These checks establish this implementation's internal evidence, not an externally certified production solver.
+
+No actual coding model has played this new prototype. No API spend was incurred. The check seeds are now development data for any future version. The existing rover, demos and canonical Harbor task were not edited.
 
 ## What a meaningful next model experiment must establish
 
