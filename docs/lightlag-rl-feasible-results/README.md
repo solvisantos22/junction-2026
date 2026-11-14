@@ -30,3 +30,32 @@ python3 -m tools.rl_feasible.run --audit docs/lightlag-rl-feasible-results/devel
 
 Run directories are immutable: reruns must use a new path. No training update,
 fresh map, cloud job or model API request belongs to this first comparison.
+
+## Fixed development result
+
+The protocol/code was published at `5b5dcb2` before the 240-case comparison.
+All 120 time-only controls exactly reproduce Sölvi's saved persistent cases.
+
+| Fixed chooser | Score: time-only → charging-aware | Alive/home |
+|---|---:|---:|
+| Initial weights, 48 per arm | .077621 → .098718 | 29/48 → 48/48 |
+| Previously trained weights, 48 per arm | .093678 → .115034 | 28/48 → 48/48 |
+| Greedy, 24 per arm | .226235 → .282238 | 13/24 → 24/24 |
+
+There are no deaths or invalid calls. The primary final-weight paired gain is
+.021355, map-bootstrap 95% interval [.010901, .031750]. The predeclared screen
+passes. All 120 treatment cases return alive and home, compared with 70/120
+controls. Sample counts barely change (final weights 7.208 → 7.167); the official
+score gain largely reflects preserved return credit, not more collected samples.
+All policies are unchanged: this is an interface intervention, not new learning.
+
+[Complete report](development/report.json), [source/input freeze](development/freeze.json),
+and all 240 compressed cases are retained. The [full audit](development/audit.json)
+reproduces all 240 physical trajectories, 10,659 chooser invocations and 6,325
+rejected candidate occurrences; every feature/decision/command is re-extracted. These are the same 24 previously used
+training maps; this supports the charging-time diagnosis there, not a fresh
+generalization or frontier-agent claim. The route model remains approximate.
+
+Next: the separately published [planner-initialized contextual pilot](../lightlag-rl-contextual.md),
+complementing Sölvi's scratch-learning campaign. The existing full-route planner
+remains the project reference.

@@ -705,6 +705,8 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
 - **Verification at implementation checkpoint:** seven focused tests pass; 20 smoke missions complete with no deaths or invalid calls. All 20 physics replays and 879 choices/features/commands re-execute exactly; all 21 inherited persistence tests pass. Production comparison has not yet run; no new learning or frontier-model claim.
 - **Artifacts:** [protocol](lightlag-rl-feasible.md), [helper and runner](../lightlag_rl_feasible/adapter.py), [results and reproduction](lightlag-rl-feasible-results/README.md). No canonical rule change, cloud job, model API spend or prize submission.
 
+- **Completed fixed feasibility comparison:** protocol/helper published first at `5b5dcb2`; all 240 missions and 10,659 choices/features/commands reproduce, including exact equivalence of all 120 old controls. Charging-aware runs return alive/home120/120 versus70/120; fixed final weights score .093678 → .115034, paired gain .021355 with map-bootstrap95% [.010901,.031750]. Initial and greedy controls also improve; no deaths/invalid calls. This passes the declared development screen on reused maps. It is an interface improvement with unchanged policy weights, not new learning or a fresh Claude result. [Full result/audit](lightlag-rl-feasible-results/README.md).
+
 ### 14 November — Sölvi / Codex: contextual learning campaign
 
 - **Human direction:** Sölvi asked to investigate Rainbow and alternatives, then use Modal credits for meaningful training before submission; reported $300 shared team credit.
