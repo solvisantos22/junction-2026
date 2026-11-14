@@ -1,0 +1,115 @@
+{
+ "what": "free Harbor runs (oracle = the task's reference solution, nop = do nothing) from a fresh clone of main",
+ "commit": "c40647525156640a86eef4f389045eba0a150c3e",
+ "machine": "Manh's laptop: Linux x86_64, 20 cores",
+ "os": "Ubuntu 24.04.5 LTS",
+ "docker": "29.1.3 linux/amd64",
+ "harbor": "0.25.0",
+ "host_python": "3.14.7",
+ "command": "harbor run -p harbor/<task> -a <agent> -y",
+ "runs": [
+  {
+   "task": "lightlag-traverse-campaign",
+   "agent": "oracle",
+   "reward": null,
+   "expected": 0.476257,
+   "seconds": 11,
+   "exception": "RuntimeError",
+   "note": "the base image could not be fetched: a DNS lookup of auth.docker.io timed out on this network; no score was recorded; the next attempt ran"
+  },
+  {
+   "task": "lightlag-traverse-campaign",
+   "agent": "oracle",
+   "reward": 0.476257,
+   "expected": 0.476257,
+   "seconds": 247,
+   "exception": null,
+   "compared_with": "docs/lightlag-runs/campaign-reference",
+   "files_identical": {
+    "missions/01/replay.json": true,
+    "missions/01/result.json": true,
+    "missions/02/replay.json": true,
+    "missions/02/result.json": true,
+    "missions/03/replay.json": true,
+    "missions/03/result.json": true,
+    "result.json": true
+   }
+  },
+  {
+   "task": "lightlag-traverse-campaign",
+   "agent": "nop",
+   "reward": 0.0,
+   "expected": 0.0,
+   "seconds": 58,
+   "exception": null,
+   "compared_with": "docs/lightlag-runs/campaign-do-nothing",
+   "files_identical": {
+    "missions/01/replay.json": true,
+    "missions/01/result.json": true,
+    "missions/02/replay.json": true,
+    "missions/02/result.json": true,
+    "missions/03/replay.json": true,
+    "missions/03/result.json": true,
+    "result.json": true
+   }
+  },
+  {
+   "task": "lightlag-traverse",
+   "agent": "oracle",
+   "reward": 0.564655,
+   "expected": 0.564655,
+   "seconds": 240,
+   "exception": null,
+   "compared_with": "docs/lightlag-runs/traverse-reference",
+   "files_identical": {
+    "replay.json": true,
+    "result.json": true
+   }
+  },
+  {
+   "task": "lightlag-traverse",
+   "agent": "nop",
+   "reward": 0.0,
+   "expected": 0.0,
+   "seconds": 39,
+   "exception": null,
+   "compared_with": "docs/lightlag-runs/traverse-do-nothing",
+   "files_identical": {
+    "replay.json": true,
+    "result.json": true
+   }
+  },
+  {
+   "task": "lightlag-traverse-max-fair",
+   "agent": "oracle",
+   "reward": 0.102983,
+   "expected": 0.102983,
+   "seconds": 288,
+   "exception": null
+  },
+  {
+   "task": "lightlag-traverse-max-fair",
+   "agent": "nop",
+   "reward": 0.0,
+   "expected": 0.0,
+   "seconds": 37,
+   "exception": null
+  },
+  {
+   "task": "lightlag-traverse-max-superhard",
+   "agent": "oracle",
+   "reward": 0.036232,
+   "expected": 0.036232,
+   "seconds": 352,
+   "exception": null
+  },
+  {
+   "task": "lightlag-traverse-max-superhard",
+   "agent": "nop",
+   "reward": 0.0,
+   "expected": 0.0,
+   "seconds": 42,
+   "exception": null
+  }
+ ]
+}

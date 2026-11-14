@@ -46,9 +46,12 @@ controller itself cannot drive here: it plans on a flat 40 m square. What is add
                    follows the cost-to-go field vertex by vertex, and if the margins leave no way home,
                    or it stalls again, they are dropped; home slack 1.25 and margin 8 ticks
 
-On the normal map none of this switches on and manh_max plays move for move like the pilot (a test
-checks it). Standard library only, Python 3.9+. Methods copied from the pilot with changes say so;
-they follow lightlag_traverse/pilot.py as of commit f90cb6b (Kristján's beam search).
+On the normal map none of this switches on and manh_max plays move for move like the pilot until
+the way home (a test checks the first 100 ticks). Standard library only, Python 3.9+. Methods
+copied from the pilot with changes say so; they follow lightlag_traverse/pilot.py as of commit
+f90cb6b (Kristján's beam search). His later `home_floor` rule (task 0.1.1: on the way home the
+reserve is spent) is not carried over, so the last ticks of a day can differ; on his worlds
+2026-2029 the scores are the same (docs/second-machine-check.md).
 """
 
 from __future__ import annotations
