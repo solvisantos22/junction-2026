@@ -247,7 +247,9 @@ These are recommended evidence choices, not newly asserted official entry requir
   **$2.8120282**, six assignments pending. The sample is still incomplete.
   Fourth pair adds **0.875 treatment / 0.4375 control**, both alive but control
   away from base. All eight B audits are exact, B usage **$3.722155**, four
-  assignments pending. Reported usage is not a verified balance; no prize entry.
+  assignments pending. Fifth pair adds **0.461538 control / 0.769231 treatment**,
+  both alive/home; ten exact audits, B usage **$4.6207014**, two assignments
+  pending. Reported usage is not a verified balance; no prize entry.
 
 ### E08 — 14 November — Reproducible recorded evidence clip
 

@@ -1,0 +1,2693 @@
+{
+  "commands": [
+    {
+      "command": {
+        "action": "drive",
+        "heading_deg": 101.44,
+        "metres": 4.25
+      },
+      "command_id": 1,
+      "execute_tick": 4,
+      "sent_tick": 0
+    },
+    {
+      "command": {
+        "action": "sample"
+      },
+      "command_id": 2,
+      "execute_tick": 5,
+      "sent_tick": 0
+    },
+    {
+      "command": {
+        "action": "drive",
+        "heading_deg": 139.5,
+        "metres": 4.75
+      },
+      "command_id": 3,
+      "execute_tick": 6,
+      "sent_tick": 0
+    },
+    {
+      "command": {
+        "action": "sample"
+      },
+      "command_id": 4,
+      "execute_tick": 7,
+      "sent_tick": 0
+    },
+    {
+      "command": {
+        "action": "drive",
+        "heading_deg": 5.64,
+        "metres": 5
+      },
+      "command_id": 5,
+      "execute_tick": 8,
+      "sent_tick": 0
+    },
+    {
+      "command": {
+        "action": "drive",
+        "heading_deg": 5.64,
+        "metres": 5
+      },
+      "command_id": 6,
+      "execute_tick": 9,
+      "sent_tick": 0
+    },
+    {
+      "command": {
+        "action": "drive",
+        "heading_deg": 5.64,
+        "metres": 1.1
+      },
+      "command_id": 7,
+      "execute_tick": 13,
+      "sent_tick": 9
+    },
+    {
+      "command": {
+        "action": "sample"
+      },
+      "command_id": 8,
+      "execute_tick": 14,
+      "sent_tick": 9
+    },
+    {
+      "command": {
+        "action": "drive",
+        "heading_deg": 251.9,
+        "metres": 5
+      },
+      "command_id": 9,
+      "execute_tick": 16,
+      "sent_tick": 12
+    },
+    {
+      "command": {
+        "action": "drive",
+        "heading_deg": 251.9,
+        "metres": 2.4
+      },
+      "command_id": 10,
+      "execute_tick": 17,
+      "sent_tick": 12
+    },
+    {
+      "command": {
+        "action": "sample"
+      },
+      "command_id": 11,
+      "execute_tick": 18,
+      "sent_tick": 12
+    },
+    {
+      "command": {
+        "action": "drive",
+        "heading_deg": 274.7,
+        "metres": 5
+      },
+      "command_id": 12,
+      "execute_tick": 19,
+      "sent_tick": 15
+    },
+    {
+      "command": {
+        "action": "drive",
+        "heading_deg": 274.7,
+        "metres": 0.76
+      },
+      "command_id": 13,
+      "execute_tick": 20,
+      "sent_tick": 15
+    },
+    {
+      "command": {
+        "action": "sample"
+      },
+      "command_id": 14,
+      "execute_tick": 21,
+      "sent_tick": 15
+    },
+    {
+      "command": {
+        "action": "drive",
+        "heading_deg": 126.4,
+        "metres": 5
+      },
+      "command_id": 15,
+      "execute_tick": 22,
+      "sent_tick": 17
+    }
+  ],
+  "config": {
+    "base_radius": 0.75,
+    "delay_ticks": 3,
+    "drive_cost": 1.0,
+    "idle_cost": 0.5,
+    "initial_battery": 100.0,
+    "max_ticks": 50,
+    "sample_cost": 3.0,
+    "target_radius": 0.75
+  },
+  "dynamic": {
+    "bumpiness": 0.0,
+    "late_fraction": 0.25,
+    "noise_level": 1.0,
+    "profile": "rush_noisy",
+    "sensing": {
+      "heading_bias_deg": 5.0,
+      "heading_bias_walk_deg": 0.5,
+      "heading_errors": [
+        {
+          "bias_deg": -2.228058,
+          "error_deg": -2.516942,
+          "tick": 4
+        },
+        {
+          "bias_deg": -2.335295,
+          "error_deg": -1.354857,
+          "tick": 6
+        },
+        {
+          "bias_deg": -1.266692,
+          "error_deg": 1.549955,
+          "tick": 8
+        },
+        {
+          "bias_deg": -1.203276,
+          "error_deg": -1.492646,
+          "tick": 9
+        },
+        {
+          "bias_deg": -1.292743,
+          "error_deg": -2.535549,
+          "tick": 13
+        },
+        {
+          "bias_deg": -1.631394,
+          "error_deg": -0.658347,
+          "tick": 16
+        },
+        {
+          "bias_deg": -1.846867,
+          "error_deg": -2.514795,
+          "tick": 17
+        },
+        {
+          "bias_deg": -2.529388,
+          "error_deg": -1.659279,
+          "tick": 19
+        },
+        {
+          "bias_deg": -2.433583,
+          "error_deg": -2.961186,
+          "tick": 20
+        },
+        {
+          "bias_deg": -2.015347,
+          "error_deg": -1.788218,
+          "tick": 22
+        }
+      ],
+      "heading_noise_deg": 1.5,
+      "initial_heading_bias_deg": -2.1605705513339455,
+      "position_noise_m": 0.3,
+      "visual_odometry_noise": 0.05
+    },
+    "targets": [
+      {
+        "appear_tick": 0,
+        "deadline_tick": 24,
+        "id": "t1",
+        "value": 2
+      },
+      {
+        "appear_tick": 0,
+        "deadline_tick": 30,
+        "id": "t2",
+        "value": 2
+      },
+      {
+        "appear_tick": 0,
+        "deadline_tick": 32,
+        "id": "t3",
+        "value": 1
+      },
+      {
+        "appear_tick": 0,
+        "deadline_tick": 21,
+        "id": "t4",
+        "value": 1
+      },
+      {
+        "appear_tick": 0,
+        "deadline_tick": 13,
+        "id": "t5",
+        "value": 2
+      },
+      {
+        "appear_tick": 21,
+        "deadline_tick": 28,
+        "id": "d1",
+        "value": 2
+      },
+      {
+        "appear_tick": 10,
+        "deadline_tick": 22,
+        "id": "d2",
+        "value": 3
+      }
+    ],
+    "version": "lightlag-dynamic-v1"
+  },
+  "received_telemetry": [
+    {
+      "alive": true,
+      "battery": 100.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 0,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 0,
+      "visual_odometry": 0,
+      "wheel_odometry": 0
+    },
+    {
+      "alive": true,
+      "battery": 99.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.6183542965,
+        20.2378244928
+      ],
+      "received_tick": 4,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 1,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 99.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.7051168987,
+        19.6003283228
+      ],
+      "received_tick": 5,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 2,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 98.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.6846511735,
+        19.8498118428
+      ],
+      "received_tick": 6,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 3,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 93.75,
+      "events": [
+        {
+          "command_id": 1,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 101.44,
+      "position": [
+        18.9697756418,
+        24.2195385042
+      ],
+      "received_tick": 7,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 4,
+      "visual_odometry": 4.5771245387,
+      "wheel_odometry": 4.25
+    },
+    {
+      "alive": true,
+      "battery": 90.25,
+      "events": [
+        {
+          "command_id": 2,
+          "type": "command_executed"
+        },
+        {
+          "on_time": true,
+          "target_id": "t1",
+          "type": "sample_taken"
+        }
+      ],
+      "heading_deg": 101.44,
+      "position": [
+        19.3805028806,
+        23.941141629
+      ],
+      "received_tick": 8,
+      "sampled_targets": [
+        "t1"
+      ],
+      "terrain": "bedrock",
+      "tick": 5,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 82.55,
+      "events": [
+        {
+          "command_id": 3,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 139.5,
+      "position": [
+        15.9285066438,
+        26.9704191494
+      ],
+      "received_tick": 9,
+      "sampled_targets": [
+        "t1"
+      ],
+      "terrain": "sand",
+      "tick": 6,
+      "visual_odometry": 4.1017380816,
+      "wheel_odometry": 4.75
+    },
+    {
+      "alive": true,
+      "battery": 79.05,
+      "events": [
+        {
+          "command_id": 4,
+          "type": "command_executed"
+        },
+        {
+          "on_time": true,
+          "target_id": "t5",
+          "type": "sample_taken"
+        }
+      ],
+      "heading_deg": 139.5,
+      "position": [
+        15.6236125071,
+        27.145586715
+      ],
+      "received_tick": 10,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 7,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 68.55,
+      "events": [
+        {
+          "command_id": 5,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 5.64,
+      "position": [
+        20.1453692655,
+        27.8288994289
+      ],
+      "received_tick": 11,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 8,
+      "visual_odometry": 4.0470526247,
+      "wheel_odometry": 5.0
+    },
+    {
+      "alive": true,
+      "battery": 58.05,
+      "events": [
+        {
+          "command_id": 6,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 5.64,
+      "position": [
+        24.1119841157,
+        27.5397172992
+      ],
+      "received_tick": 12,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 9,
+      "visual_odometry": 3.8323001711,
+      "wheel_odometry": 5.0
+    },
+    {
+      "alive": true,
+      "battery": 57.55,
+      "events": [
+        {
+          "target": {
+            "appear_tick": 10,
+            "deadline_tick": 22,
+            "id": "d2",
+            "late_value": 0.75,
+            "value": 3,
+            "x": 23.15,
+            "y": 15.73
+          },
+          "type": "target_discovered"
+        }
+      ],
+      "heading_deg": 5.64,
+      "position": [
+        23.7778423235,
+        27.4920016736
+      ],
+      "received_tick": 13,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 10,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 57.05,
+      "events": [],
+      "heading_deg": 5.64,
+      "position": [
+        24.0544141396,
+        27.5753524114
+      ],
+      "received_tick": 14,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 11,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 56.55,
+      "events": [],
+      "heading_deg": 5.64,
+      "position": [
+        23.8755612836,
+        27.4566281216
+      ],
+      "received_tick": 15,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 12,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 53.85,
+      "events": [
+        {
+          "command_id": 7,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 5.64,
+      "position": [
+        24.9771456903,
+        27.912431827
+      ],
+      "received_tick": 16,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 13,
+      "visual_odometry": 0.7651475859,
+      "wheel_odometry": 1.1
+    },
+    {
+      "alive": true,
+      "battery": 50.35,
+      "events": [
+        {
+          "command_id": 8,
+          "type": "command_executed"
+        },
+        {
+          "on_time": true,
+          "target_id": "t4",
+          "type": "sample_taken"
+        }
+      ],
+      "heading_deg": 5.64,
+      "position": [
+        24.5922249018,
+        27.2050772452
+      ],
+      "received_tick": 17,
+      "sampled_targets": [
+        "t1",
+        "t4",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 14,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 49.85,
+      "events": [],
+      "heading_deg": 5.64,
+      "position": [
+        24.7803640474,
+        27.6327955449
+      ],
+      "received_tick": 18,
+      "sampled_targets": [
+        "t1",
+        "t4",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 15,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 41.45,
+      "events": [
+        {
+          "command_id": 9,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 251.9,
+      "position": [
+        23.408354771,
+        23.6312976568
+      ],
+      "received_tick": 19,
+      "sampled_targets": [
+        "t1",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 16,
+      "visual_odometry": 4.130542384,
+      "wheel_odometry": 5.0
+    },
+    {
+      "alive": true,
+      "battery": 38.55,
+      "events": [
+        {
+          "command_id": 10,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 251.9,
+      "position": [
+        22.5797910787,
+        21.4094455178
+      ],
+      "received_tick": 20,
+      "sampled_targets": [
+        "t1",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 17,
+      "visual_odometry": 2.3399539046,
+      "wheel_odometry": 2.4
+    },
+    {
+      "alive": true,
+      "battery": 35.05,
+      "events": [
+        {
+          "command_id": 11,
+          "type": "command_executed"
+        },
+        {
+          "on_time": true,
+          "target_id": "t2",
+          "type": "sample_taken"
+        }
+      ],
+      "heading_deg": 251.9,
+      "position": [
+        22.4985236392,
+        21.1666225868
+      ],
+      "received_tick": 21,
+      "sampled_targets": [
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 18,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 29.55,
+      "events": [
+        {
+          "command_id": 12,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 274.7,
+      "position": [
+        23.1711648673,
+        16.8237267787
+      ],
+      "received_tick": 22,
+      "sampled_targets": [
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 19,
+      "visual_odometry": 5.0379495073,
+      "wheel_odometry": 5.0
+    },
+    {
+      "alive": true,
+      "battery": 28.29,
+      "events": [
+        {
+          "command_id": 13,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 274.7,
+      "position": [
+        22.928250576,
+        15.4566379116
+      ],
+      "received_tick": 23,
+      "sampled_targets": [
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 20,
+      "visual_odometry": 0.784495302,
+      "wheel_odometry": 0.76
+    },
+    {
+      "alive": true,
+      "battery": 24.79,
+      "events": [
+        {
+          "command_id": 14,
+          "type": "command_executed"
+        },
+        {
+          "on_time": true,
+          "target_id": "d2",
+          "type": "sample_taken"
+        },
+        {
+          "target": {
+            "appear_tick": 21,
+            "deadline_tick": 28,
+            "id": "d1",
+            "late_value": 0.5,
+            "value": 2,
+            "x": 12.75,
+            "y": 19.38
+          },
+          "type": "target_discovered"
+        }
+      ],
+      "heading_deg": 274.7,
+      "position": [
+        22.7080389403,
+        15.6999151938
+      ],
+      "received_tick": 24,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 21,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 19.29,
+      "events": [
+        {
+          "command_id": 15,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 126.4,
+      "position": [
+        20.1839576689,
+        20.1537469989
+      ],
+      "received_tick": 25,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 22,
+      "visual_odometry": 5.2597111804,
+      "wheel_odometry": 5.0
+    },
+    {
+      "alive": true,
+      "battery": 18.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        19.8960051707,
+        19.8439041621
+      ],
+      "received_tick": 26,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 23,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 18.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.4458329505,
+        19.8655654067
+      ],
+      "received_tick": 27,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 24,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 17.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.4450262725,
+        20.2738732658
+      ],
+      "received_tick": 28,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 25,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 17.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.1315336422,
+        20.1464237539
+      ],
+      "received_tick": 29,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 26,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 16.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.1501859859,
+        20.1651079494
+      ],
+      "received_tick": 30,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 27,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 16.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.3961538178,
+        19.4067507965
+      ],
+      "received_tick": 31,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 28,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 15.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        19.7627878028,
+        20.028762524
+      ],
+      "received_tick": 32,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 29,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 15.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.2737471684,
+        19.8721970364
+      ],
+      "received_tick": 33,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 30,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 14.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.6606653397,
+        19.9700012791
+      ],
+      "received_tick": 34,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 31,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 14.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        19.9212888878,
+        19.4422202726
+      ],
+      "received_tick": 35,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 32,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 13.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.2395580374,
+        19.8600037852
+      ],
+      "received_tick": 36,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 33,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 13.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0129118792,
+        20.3883062673
+      ],
+      "received_tick": 37,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 34,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 12.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.166574816,
+        19.5096306941
+      ],
+      "received_tick": 38,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 35,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 12.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.2988707097,
+        20.2129339601
+      ],
+      "received_tick": 39,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 36,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 11.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.2368287221,
+        19.7184728014
+      ],
+      "received_tick": 40,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 37,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 11.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.1716098151,
+        19.7153487323
+      ],
+      "received_tick": 41,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 38,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 10.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        19.9699106987,
+        19.6142287592
+      ],
+      "received_tick": 42,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 39,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 10.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        19.5627093498,
+        19.941261057
+      ],
+      "received_tick": 43,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 40,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 9.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        19.7107023649,
+        19.6929165399
+      ],
+      "received_tick": 44,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 41,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 9.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        19.1162617738,
+        19.8326916377
+      ],
+      "received_tick": 45,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 42,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 8.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.1905688558,
+        19.7403140529
+      ],
+      "received_tick": 46,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 43,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 8.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.2646829443,
+        19.8882682352
+      ],
+      "received_tick": 47,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 44,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 7.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.3328433011,
+        19.4592383555
+      ],
+      "received_tick": 48,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 45,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 7.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0086388494,
+        20.0374966001
+      ],
+      "received_tick": 49,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 46,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 6.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.7213305323,
+        19.5648729659
+      ],
+      "received_tick": 50,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 47,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    }
+  ],
+  "result": {
+    "alive": true,
+    "at_base": true,
+    "max_available_value": 13,
+    "mission_profile": "rush_noisy",
+    "raw_score": 10.0,
+    "sampled_targets": [
+      "d2",
+      "t1",
+      "t2",
+      "t4",
+      "t5"
+    ],
+    "sampled_value": 10.0,
+    "samples": [
+      {
+        "credited_value": 2,
+        "on_time": true,
+        "target_id": "t1",
+        "tick": 5
+      },
+      {
+        "credited_value": 2,
+        "on_time": true,
+        "target_id": "t2",
+        "tick": 18
+      },
+      {
+        "credited_value": 1,
+        "on_time": true,
+        "target_id": "t4",
+        "tick": 14
+      },
+      {
+        "credited_value": 2,
+        "on_time": true,
+        "target_id": "t5",
+        "tick": 7
+      },
+      {
+        "credited_value": 3,
+        "on_time": true,
+        "target_id": "d2",
+        "tick": 21
+      }
+    ],
+    "survival_factor": 1.0,
+    "tick": 50
+  },
+  "seed": 502,
+  "slip_coefficients": {
+    "bedrock": 0.025275229053000586,
+    "sand": 0.24211920989714678
+  },
+  "states": [
+    {
+      "alive": true,
+      "battery": 100.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 0,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 0,
+      "visual_odometry": 0,
+      "wheel_odometry": 0
+    },
+    {
+      "alive": true,
+      "battery": 99.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 4,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 1,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 99.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 5,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 2,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 98.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 6,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 3,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 93.75,
+      "events": [
+        {
+          "command_id": 1,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 101.44,
+      "position": [
+        19.3578514311,
+        24.0899057898
+      ],
+      "received_tick": 7,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 4,
+      "visual_odometry": 4.1400101635,
+      "wheel_odometry": 4.25
+    },
+    {
+      "alive": true,
+      "battery": 90.25,
+      "events": [
+        {
+          "command_id": 2,
+          "type": "command_executed"
+        },
+        {
+          "on_time": true,
+          "target_id": "t1",
+          "type": "sample_taken"
+        }
+      ],
+      "heading_deg": 101.44,
+      "position": [
+        19.3578514311,
+        24.0899057898
+      ],
+      "received_tick": 8,
+      "sampled_targets": [
+        "t1"
+      ],
+      "terrain": "bedrock",
+      "tick": 5,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 82.55,
+      "events": [
+        {
+          "command_id": 3,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 139.5,
+      "position": [
+        16.3095971356,
+        26.8206158107
+      ],
+      "received_tick": 9,
+      "sampled_targets": [
+        "t1"
+      ],
+      "terrain": "sand",
+      "tick": 6,
+      "visual_odometry": 4.0925091897,
+      "wheel_odometry": 4.75
+    },
+    {
+      "alive": true,
+      "battery": 79.05,
+      "events": [
+        {
+          "command_id": 4,
+          "type": "command_executed"
+        },
+        {
+          "on_time": true,
+          "target_id": "t5",
+          "type": "sample_taken"
+        }
+      ],
+      "heading_deg": 139.5,
+      "position": [
+        16.3095971356,
+        26.8206158107
+      ],
+      "received_tick": 10,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 7,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 68.55,
+      "events": [
+        {
+          "command_id": 5,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 5.64,
+      "position": [
+        20.0990834718,
+        27.298664304
+      ],
+      "received_tick": 11,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 8,
+      "visual_odometry": 3.8195205267,
+      "wheel_odometry": 5.0
+    },
+    {
+      "alive": true,
+      "battery": 58.05,
+      "events": [
+        {
+          "command_id": 6,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 5.64,
+      "position": [
+        23.8749618532,
+        27.5724595367
+      ],
+      "received_tick": 12,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 9,
+      "visual_odometry": 3.7857920414,
+      "wheel_odometry": 5.0
+    },
+    {
+      "alive": true,
+      "battery": 57.55,
+      "events": [
+        {
+          "target": {
+            "appear_tick": 10,
+            "deadline_tick": 22,
+            "id": "d2",
+            "late_value": 0.75,
+            "value": 3,
+            "x": 23.15,
+            "y": 15.73
+          },
+          "type": "target_discovered"
+        }
+      ],
+      "heading_deg": 5.64,
+      "position": [
+        23.8749618532,
+        27.5724595367
+      ],
+      "received_tick": 13,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 10,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 57.05,
+      "events": [],
+      "heading_deg": 5.64,
+      "position": [
+        23.8749618532,
+        27.5724595367
+      ],
+      "received_tick": 14,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 11,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 56.55,
+      "events": [],
+      "heading_deg": 5.64,
+      "position": [
+        23.8749618532,
+        27.5724595367
+      ],
+      "received_tick": 15,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 12,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 53.85,
+      "events": [
+        {
+          "command_id": 7,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 5.64,
+      "position": [
+        24.7171253966,
+        27.6181350998
+      ],
+      "received_tick": 16,
+      "sampled_targets": [
+        "t1",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 13,
+      "visual_odometry": 0.8434012633,
+      "wheel_odometry": 1.1
+    },
+    {
+      "alive": true,
+      "battery": 50.35,
+      "events": [
+        {
+          "command_id": 8,
+          "type": "command_executed"
+        },
+        {
+          "on_time": true,
+          "target_id": "t4",
+          "type": "sample_taken"
+        }
+      ],
+      "heading_deg": 5.64,
+      "position": [
+        24.7171253966,
+        27.6181350998
+      ],
+      "received_tick": 17,
+      "sampled_targets": [
+        "t1",
+        "t4",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 14,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 49.85,
+      "events": [],
+      "heading_deg": 5.64,
+      "position": [
+        24.7171253966,
+        27.6181350998
+      ],
+      "received_tick": 18,
+      "sampled_targets": [
+        "t1",
+        "t4",
+        "t5"
+      ],
+      "terrain": "sand",
+      "tick": 15,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 41.45,
+      "events": [
+        {
+          "command_id": 9,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 251.9,
+      "position": [
+        23.3582483858,
+        23.6169276087
+      ],
+      "received_tick": 19,
+      "sampled_targets": [
+        "t1",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 16,
+      "visual_odometry": 4.2256606723,
+      "wheel_odometry": 5.0
+    },
+    {
+      "alive": true,
+      "battery": 38.55,
+      "events": [
+        {
+          "command_id": 10,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 251.9,
+      "position": [
+        22.5340554731,
+        21.425915911
+      ],
+      "received_tick": 20,
+      "sampled_targets": [
+        "t1",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 17,
+      "visual_odometry": 2.3409028636,
+      "wheel_odometry": 2.4
+    },
+    {
+      "alive": true,
+      "battery": 35.05,
+      "events": [
+        {
+          "command_id": 11,
+          "type": "command_executed"
+        },
+        {
+          "on_time": true,
+          "target_id": "t2",
+          "type": "sample_taken"
+        }
+      ],
+      "heading_deg": 251.9,
+      "position": [
+        22.5340554731,
+        21.425915911
+      ],
+      "received_tick": 21,
+      "sampled_targets": [
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 18,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 29.55,
+      "events": [
+        {
+          "command_id": 12,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 274.7,
+      "position": [
+        22.7892514581,
+        16.6218171898
+      ],
+      "received_tick": 22,
+      "sampled_targets": [
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 19,
+      "visual_odometry": 4.8108720118,
+      "wheel_odometry": 5.0
+    },
+    {
+      "alive": true,
+      "battery": 28.29,
+      "events": [
+        {
+          "command_id": 13,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 274.7,
+      "position": [
+        22.8115349609,
+        15.8877774596
+      ],
+      "received_tick": 23,
+      "sampled_targets": [
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 20,
+      "visual_odometry": 0.7343778864,
+      "wheel_odometry": 0.76
+    },
+    {
+      "alive": true,
+      "battery": 24.79,
+      "events": [
+        {
+          "command_id": 14,
+          "type": "command_executed"
+        },
+        {
+          "on_time": true,
+          "target_id": "d2",
+          "type": "sample_taken"
+        },
+        {
+          "target": {
+            "appear_tick": 21,
+            "deadline_tick": 28,
+            "id": "d1",
+            "late_value": 0.5,
+            "value": 2,
+            "x": 12.75,
+            "y": 19.38
+          },
+          "type": "target_discovered"
+        }
+      ],
+      "heading_deg": 274.7,
+      "position": [
+        22.8115349609,
+        15.8877774596
+      ],
+      "received_tick": 24,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 21,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 19.29,
+      "events": [
+        {
+          "command_id": 15,
+          "type": "command_executed"
+        }
+      ],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 25,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 22,
+      "visual_odometry": 4.9066605065,
+      "wheel_odometry": 5.0
+    },
+    {
+      "alive": true,
+      "battery": 18.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 26,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 23,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 18.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 27,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 24,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 17.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 28,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 25,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 17.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 29,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 26,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 16.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 30,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 27,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 16.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 31,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 28,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 15.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 32,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 29,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 15.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 33,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 30,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 14.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 34,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 31,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 14.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 35,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 32,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 13.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 36,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 33,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 13.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 37,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 34,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 12.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 38,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 35,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 12.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 39,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 36,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 11.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 40,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 37,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 11.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 41,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 38,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 10.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 42,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 39,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 10.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 43,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 40,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 9.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 44,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 41,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 9.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 45,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 42,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 8.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 46,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 43,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 8.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 47,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 44,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 7.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 48,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 45,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 7.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 49,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 46,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 6.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 50,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 47,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 6.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 51,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 48,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 5.79,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 52,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 49,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 5.29,
+      "events": [],
+      "heading_deg": 126.4,
+      "position": [
+        20.0244879936,
+        19.9260551281
+      ],
+      "received_tick": 53,
+      "sampled_targets": [
+        "d2",
+        "t1",
+        "t2",
+        "t4",
+        "t5"
+      ],
+      "terrain": "bedrock",
+      "tick": 50,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    }
+  ],
+  "version": "lightlag-replay-v1",
+  "world": {
+    "base": [
+      20.0,
+      20.0
+    ],
+    "default_terrain": "bedrock",
+    "hazards": [
+      {
+        "x1": 21.1,
+        "x2": 23.4,
+        "y1": 11.69,
+        "y2": 12.84
+      },
+      {
+        "x1": 8.77,
+        "x2": 12.64,
+        "y1": 15.71,
+        "y2": 17.22
+      }
+    ],
+    "height": 40.0,
+    "sand": [
+      {
+        "x1": 15.93,
+        "x2": 25.94,
+        "y1": 25.56,
+        "y2": 35.72
+      },
+      {
+        "x1": 28.3,
+        "x2": 34.5,
+        "y1": 18.17,
+        "y2": 27.41
+      }
+    ],
+    "targets": [
+      {
+        "id": "t1",
+        "value": 2,
+        "x": 19.17,
+        "y": 24.1
+      },
+      {
+        "id": "t2",
+        "value": 2,
+        "x": 22.69,
+        "y": 21.33
+      },
+      {
+        "id": "t3",
+        "value": 1,
+        "x": 16.21,
+        "y": 16.53
+      },
+      {
+        "id": "t4",
+        "value": 1,
+        "x": 24.35,
+        "y": 27.49
+      },
+      {
+        "id": "t5",
+        "value": 2,
+        "x": 16.15,
+        "y": 26.68
+      },
+      {
+        "id": "d1",
+        "value": 2,
+        "x": 12.75,
+        "y": 19.38
+      },
+      {
+        "id": "d2",
+        "value": 3,
+        "x": 23.15,
+        "y": 15.73
+      }
+    ],
+    "width": 40.0
+  }
+}

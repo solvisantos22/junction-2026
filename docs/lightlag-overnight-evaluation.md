@@ -388,6 +388,16 @@ the control as a battery death or infer causality from its `LATE_SAMPLE` tag.
 All eight B attempts have exact replays and no infrastructure findings.
 Reported B cost is **$3.722155**, A+B **$7.6931366**; four assignments remain.
 
+### Fifth pair: noisy 502, repetition 2
+
+B09 control scores **6/13 = 0.461538**, B10 treatment **10/13 = 0.769231**,
+both alive at base with no late samples. The paired difference is **+0.307692**;
+treatment matches the frozen reference. All ten completed B audits reproduce
+exactly without infrastructure findings. Reported B cost is **$4.6207014**,
+A+B **$8.591683**. Only the second noisy-504 pair remains. The larger deficits
+in the control involve missed samples; the combined aid does not isolate an
+energy-only mechanism.
+
 ## Status
 
 Block A protocol was published at `253b263` before new attempts; all nine are

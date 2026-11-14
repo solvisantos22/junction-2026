@@ -49,9 +49,12 @@ programs or tune the policy after any evaluation result.
   do not replace it.
 
 Reserve **$1 maximum** for this single request. Before generation, use the
-provider's token counter and require uncached input cost plus the complete
-24,000-output-token allowance to be below $1 and within the remaining overall
-ceiling. Current published standard prices are $4/million input and
+provider's token counter. Because it is an estimate, allow **25% extra input
+tokens plus 1,000 tokens** and require the resulting input cost plus the complete
+24,000-output-token allowance to be **at most $0.90**, while reserving the full
+$1 within the remaining overall ceiling. The
+[token-count endpoint is free and returns an estimate](https://platform.claude.com/docs/en/build-with-claude/token-counting).
+Current published standard prices are $4/million input and
 $20/million output; thinking is included in output usage. Record a calculated
 estimate from the actual provider token counts separately from Harbor-reported
 costs and from an independently verified account balance. Unexpected prices,
@@ -111,7 +114,13 @@ cells per profile. Keep these separate from A/B and reference-selection data.
 Publish complete public transcripts and protected replays with source hashes;
 independently reconstruct every recorded call and final state. Re-run exactly
 four cells for verification only: seed 60000 and 60019 on each profile. These
-are not additional independent samples or replacement primary runs.
+are not additional independent samples or replacement primary runs. These
+forty cells measure transfer of **one sampled program**, not forty independent
+code-generation trials. Ask for deterministic policy behavior in the frozen
+request. Do not repair randomness if the returned code ignores that request;
+retain differing verification repetitions separately and mark the policy as
+not exactly reproducible under the declared runtime. Truncation, incompatibility
+or timeout characterizes this budgeted condition, not general incapability.
 
 Verify the broker with public protocol/error cases, unchanged source/input
 guards, safe output ownership, no key/personal-path leakage and actual Docker

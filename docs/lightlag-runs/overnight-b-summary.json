@@ -49,32 +49,32 @@
     {
       "conditions": {
         "C": {
-          "alive_unknown": 1,
+          "alive_unknown": 0,
           "deaths": 0,
-          "deficits": 1,
-          "mean_reward": null,
+          "deficits": 2,
+          "mean_reward": 0.5384615384615385,
           "mean_reward_bounds": [
-            0.3076923076923077,
-            0.8076923076923077
+            0.5384615384615385,
+            0.5384615384615385
           ],
           "n_planned": 2,
-          "n_valid_reward": 1,
-          "observed_mean_reward": 0.6153846153846154,
-          "reference_minus_mean": null
+          "n_valid_reward": 2,
+          "observed_mean_reward": 0.5384615384615385,
+          "reference_minus_mean": 0.23076923076923073
         },
         "T": {
-          "alive_unknown": 1,
+          "alive_unknown": 0,
           "deaths": 0,
           "deficits": 0,
-          "mean_reward": null,
+          "mean_reward": 0.7884615384615385,
           "mean_reward_bounds": [
-            0.40384615384615385,
-            0.9038461538461539
+            0.7884615384615385,
+            0.7884615384615385
           ],
           "n_planned": 2,
-          "n_valid_reward": 1,
-          "observed_mean_reward": 0.8076923076923077,
-          "reference_minus_mean": null
+          "n_valid_reward": 2,
+          "observed_mean_reward": 0.7884615384615385,
+          "reference_minus_mean": -0.019230769230769273
         }
       },
       "profile": "rush_noisy",
@@ -119,46 +119,46 @@
   ],
   "conditions": {
     "C": {
-      "alive_unknown": 2,
+      "alive_unknown": 1,
       "deaths": 1,
-      "deficits": 4,
+      "deficits": 5,
       "mean_reward": null,
       "mean_reward_bounds": [
-        0.21298076923076925,
-        0.5463141025641026
+        0.2899038461538462,
+        0.45657051282051286
       ],
       "n_planned": 6,
-      "n_valid_reward": 4,
-      "observed_mean_reward": 0.3194711538461539
+      "n_valid_reward": 5,
+      "observed_mean_reward": 0.3478846153846154
     },
     "T": {
-      "alive_unknown": 2,
+      "alive_unknown": 1,
       "deaths": 0,
       "deficits": 1,
       "mean_reward": null,
       "mean_reward_bounds": [
-        0.4873931623931624,
-        0.8207264957264956
+        0.6155982905982906,
+        0.7822649572649573
       ],
       "n_planned": 6,
-      "n_valid_reward": 4,
-      "observed_mean_reward": 0.7310897435897435
+      "n_valid_reward": 5,
+      "observed_mean_reward": 0.7387179487179487
     }
   },
   "cost_note": "Available reported usage only; partial attempts may still accrue cost. Unknown usage is never assumed zero.",
-  "cumulative_known_reported_cost_usd": 7.693136600000001,
-  "cumulative_reported_cost_usd": 7.693136600000001,
-  "known_reported_cost_usd": 3.7221550000000003,
+  "cumulative_known_reported_cost_usd": 8.591683,
+  "cumulative_reported_cost_usd": 8.591683,
+  "known_reported_cost_usd": 4.620701400000001,
   "launch_guard_usd": 12,
-  "n_attempted": 8,
+  "n_attempted": 10,
   "n_failed": 0,
-  "n_pending": 4,
+  "n_pending": 2,
   "n_planned": 12,
-  "n_valid_reward": 8,
+  "n_valid_reward": 10,
   "paired_mean_gain": null,
   "paired_mean_gain_bounds": [
-    -0.058920940170940184,
-    0.6077457264957266
+    0.15902777777777777,
+    0.4923611111111111
   ],
   "pairs": [
     {
@@ -214,12 +214,12 @@
       "seed": 501
     },
     {
-      "C": null,
-      "T": null,
-      "difference": null,
+      "C": 0.46153846153846156,
+      "T": 0.7692307692307693,
+      "difference": 0.3076923076923077,
       "difference_bounds": [
-        -1,
-        1
+        0.3076923076923077,
+        0.3076923076923077
       ],
       "pair": 5,
       "profile": "rush_noisy",
@@ -242,7 +242,7 @@
   ],
   "plan_id": "3dd923b1ab170a3350b525b3b2abce7842e8de260ef44388939eb3832128a9ad",
   "protocol_commit": "6e1cfe3112985cd3caccc0af809d9c6c72bd59de",
-  "reported_cost_usd": 3.7221550000000003,
+  "reported_cost_usd": 4.620701400000001,
   "runs": [
     {
       "agent": {
@@ -1817,58 +1817,366 @@
       ]
     },
     {
-      "alive": null,
-      "at_base": null,
-      "audit": null,
+      "agent": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "alive": true,
+      "at_base": true,
+      "audit": {
+        "decomposition_adds_up": true,
+        "infrastructure_findings": 0,
+        "main_decisions": [
+          {
+            "call": 7,
+            "points_lost": 2.25,
+            "tags": [
+              "SAMPLE_MISSED"
+            ],
+            "tick": 7
+          },
+          {
+            "call": 5,
+            "points_lost": 1.0,
+            "tags": [
+              "PLAN_WORSE_THAN_REFERENCE"
+            ],
+            "tick": 4
+          },
+          {
+            "call": 10,
+            "points_lost": 1.0,
+            "tags": [
+              "SAMPLE_MISSED"
+            ],
+            "tick": 11
+          }
+        ],
+        "path": "overnight-b09-c-rush-noisy-seed502-r2-opus-5-5",
+        "reference_minus_model": 0.3076923076923077,
+        "replay_matches": true
+      },
       "block": "B",
       "condition": "C",
+      "cost_sources_usd": {
+        "trajectory": 0.5575482000000002,
+        "trial": 0.5575482000000002
+      },
+      "duration_seconds": 263.878926,
       "evidence": "overnight-b09-c-rush-noisy-seed502-r2-opus-5-5",
+      "exception": null,
+      "finished_at": "2026-11-14T03:58:15.005364Z",
+      "graded_call_count": 24,
       "index": 9,
       "issues": [],
       "job": "overnight-b09-c-rush-noisy-502-r2",
-      "known_reported_cost_usd": 0,
+      "known_reported_cost_usd": 0.5575482000000002,
+      "late_samples": 0,
       "maximum": 13,
       "pair": 5,
+      "postterminal_count": 0,
       "profile": "rush_noisy",
       "provider_error": false,
-      "raw_score": null,
+      "raw_score": 6.0,
+      "redacted_files": [],
       "reference_evidence": "rush-noisy-seed502-delay3-kf-mpc",
       "reference_raw": 10.0,
       "reference_reward": 0.7692307692307693,
       "repetition": 2,
-      "reported_cost_usd": null,
-      "reward": null,
+      "reported_cost_usd": 0.5575482000000002,
+      "reward": 0.46153846153846156,
+      "sampled_value": 6.0,
+      "samples": [
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t1",
+          "tick": 5
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t2",
+          "tick": 26
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t5",
+          "tick": 7
+        }
+      ],
       "seed": 502,
-      "status": "pending",
+      "started_at": "2026-11-14T03:53:51.126438Z",
+      "status": "complete",
+      "task_digest": "sha256:f77417317a46cac25fe82dda399427fe7a8e5b2190dcace9aa3c08b986511cff",
       "task_key": "rush_noisy-502-C",
-      "trials": []
+      "tool_calls": 24,
+      "trial_id": "ffe22ab2-6e85-4de0-91eb-52f1768db835",
+      "trial_name": "rush_noisy-502__foFkkHq",
+      "trials": [
+        {
+          "agent": {
+            "model_info": {
+              "name": "claude-opus-5-5",
+              "provider": "anthropic"
+            },
+            "name": "opencode",
+            "version": "1.19.5"
+          },
+          "alive": true,
+          "at_base": true,
+          "audit": {
+            "decomposition_adds_up": true,
+            "infrastructure_findings": 0,
+            "main_decisions": [
+              {
+                "call": 7,
+                "points_lost": 2.25,
+                "tags": [
+                  "SAMPLE_MISSED"
+                ],
+                "tick": 7
+              },
+              {
+                "call": 5,
+                "points_lost": 1.0,
+                "tags": [
+                  "PLAN_WORSE_THAN_REFERENCE"
+                ],
+                "tick": 4
+              },
+              {
+                "call": 10,
+                "points_lost": 1.0,
+                "tags": [
+                  "SAMPLE_MISSED"
+                ],
+                "tick": 11
+              }
+            ],
+            "path": "overnight-b09-c-rush-noisy-seed502-r2-opus-5-5",
+            "reference_minus_model": 0.3076923076923077,
+            "replay_matches": true
+          },
+          "cost_sources_usd": {
+            "trajectory": 0.5575482000000002,
+            "trial": 0.5575482000000002
+          },
+          "duration_seconds": 263.878926,
+          "exception": null,
+          "finished_at": "2026-11-14T03:58:15.005364Z",
+          "graded_call_count": 24,
+          "issues": [],
+          "late_samples": 0,
+          "maximum": 13,
+          "postterminal_count": 0,
+          "provider_error": false,
+          "raw_score": 6.0,
+          "redacted_files": [],
+          "reported_cost_usd": 0.5575482000000002,
+          "reward": 0.46153846153846156,
+          "sampled_value": 6.0,
+          "samples": [
+            {
+              "credited_value": 2,
+              "on_time": true,
+              "target_id": "t1",
+              "tick": 5
+            },
+            {
+              "credited_value": 2,
+              "on_time": true,
+              "target_id": "t2",
+              "tick": 26
+            },
+            {
+              "credited_value": 2,
+              "on_time": true,
+              "target_id": "t5",
+              "tick": 7
+            }
+          ],
+          "started_at": "2026-11-14T03:53:51.126438Z",
+          "status": "complete",
+          "task_digest": "sha256:f77417317a46cac25fe82dda399427fe7a8e5b2190dcace9aa3c08b986511cff",
+          "tool_calls": 24,
+          "trial_id": "ffe22ab2-6e85-4de0-91eb-52f1768db835",
+          "trial_name": "rush_noisy-502__foFkkHq"
+        }
+      ]
     },
     {
-      "alive": null,
-      "at_base": null,
-      "audit": null,
+      "agent": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "alive": true,
+      "at_base": true,
+      "audit": {
+        "decomposition_adds_up": true,
+        "infrastructure_findings": 0,
+        "main_decisions": [],
+        "path": "overnight-b10-t-rush-noisy-seed502-r2-opus-5-5",
+        "reference_minus_model": 0.0,
+        "replay_matches": true
+      },
       "block": "B",
       "condition": "T",
+      "cost_sources_usd": {
+        "trajectory": 0.34099820000000003,
+        "trial": 0.34099820000000003
+      },
+      "duration_seconds": 173.992384,
       "evidence": "overnight-b10-t-rush-noisy-seed502-r2-opus-5-5",
+      "exception": null,
+      "finished_at": "2026-11-14T03:56:45.949051Z",
+      "graded_call_count": 23,
       "index": 10,
       "issues": [],
       "job": "overnight-b10-t-rush-noisy-502-r2",
-      "known_reported_cost_usd": 0,
+      "known_reported_cost_usd": 0.34099820000000003,
+      "late_samples": 0,
       "maximum": 13,
       "pair": 5,
+      "postterminal_count": 0,
       "profile": "rush_noisy",
       "provider_error": false,
-      "raw_score": null,
+      "raw_score": 10.0,
+      "redacted_files": [],
       "reference_evidence": "rush-noisy-seed502-delay3-kf-mpc",
       "reference_raw": 10.0,
       "reference_reward": 0.7692307692307693,
       "repetition": 2,
-      "reported_cost_usd": null,
-      "reward": null,
+      "reported_cost_usd": 0.34099820000000003,
+      "reward": 0.7692307692307693,
+      "sampled_value": 10.0,
+      "samples": [
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t1",
+          "tick": 5
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t2",
+          "tick": 18
+        },
+        {
+          "credited_value": 1,
+          "on_time": true,
+          "target_id": "t4",
+          "tick": 14
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t5",
+          "tick": 7
+        },
+        {
+          "credited_value": 3,
+          "on_time": true,
+          "target_id": "d2",
+          "tick": 21
+        }
+      ],
       "seed": 502,
-      "status": "pending",
+      "started_at": "2026-11-14T03:53:51.956667Z",
+      "status": "complete",
+      "task_digest": "sha256:1bff21c82c1ce46d216f57a775e780c10d20e0e4fac7dd49ff502ad709ac36a5",
       "task_key": "rush_noisy-502-T",
-      "trials": []
+      "tool_calls": 23,
+      "trial_id": "0e00fa8a-89f7-4b60-b72f-0194b070f2dd",
+      "trial_name": "rush_noisy-502-T__cRYukCx",
+      "trials": [
+        {
+          "agent": {
+            "model_info": {
+              "name": "claude-opus-5-5",
+              "provider": "anthropic"
+            },
+            "name": "opencode",
+            "version": "1.19.5"
+          },
+          "alive": true,
+          "at_base": true,
+          "audit": {
+            "decomposition_adds_up": true,
+            "infrastructure_findings": 0,
+            "main_decisions": [],
+            "path": "overnight-b10-t-rush-noisy-seed502-r2-opus-5-5",
+            "reference_minus_model": 0.0,
+            "replay_matches": true
+          },
+          "cost_sources_usd": {
+            "trajectory": 0.34099820000000003,
+            "trial": 0.34099820000000003
+          },
+          "duration_seconds": 173.992384,
+          "exception": null,
+          "finished_at": "2026-11-14T03:56:45.949051Z",
+          "graded_call_count": 23,
+          "issues": [],
+          "late_samples": 0,
+          "maximum": 13,
+          "postterminal_count": 0,
+          "provider_error": false,
+          "raw_score": 10.0,
+          "redacted_files": [],
+          "reported_cost_usd": 0.34099820000000003,
+          "reward": 0.7692307692307693,
+          "sampled_value": 10.0,
+          "samples": [
+            {
+              "credited_value": 2,
+              "on_time": true,
+              "target_id": "t1",
+              "tick": 5
+            },
+            {
+              "credited_value": 2,
+              "on_time": true,
+              "target_id": "t2",
+              "tick": 18
+            },
+            {
+              "credited_value": 1,
+              "on_time": true,
+              "target_id": "t4",
+              "tick": 14
+            },
+            {
+              "credited_value": 2,
+              "on_time": true,
+              "target_id": "t5",
+              "tick": 7
+            },
+            {
+              "credited_value": 3,
+              "on_time": true,
+              "target_id": "d2",
+              "tick": 21
+            }
+          ],
+          "started_at": "2026-11-14T03:53:51.956667Z",
+          "status": "complete",
+          "task_digest": "sha256:1bff21c82c1ce46d216f57a775e780c10d20e0e4fac7dd49ff502ad709ac36a5",
+          "tool_calls": 23,
+          "trial_id": "0e00fa8a-89f7-4b60-b72f-0194b070f2dd",
+          "trial_name": "rush_noisy-502-T__cRYukCx"
+        }
+      ]
     },
     {
       "alive": null,
