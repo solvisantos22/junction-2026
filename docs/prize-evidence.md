@@ -489,6 +489,34 @@ These are recommended evidence choices, not newly asserted official entry requir
   environment implementation, API spending or prize submission.
 - Evidence: [research and handoff](research/2026-11-14-next-mechanism-review.md).
 
+### R17 — 14 November — Assess teammate prototypes before another build
+
+- **Human direction:** Sölvi asked to assess the ground-change and sample-chain
+  prototypes, then discuss the direction again before committing to more work.
+- **Codex contribution:** two parallel implementation/evidence reviews;
+  independent reproduction of all 72 retained sample-chain missions and 504
+  policy records, all 400 published ground-controller episodes, and one fixed
+  80-episode public-range diagnostic. Integrated the later teammate update:
+  reproduced 800 four-rule-variant episodes and all six saved pilot transcripts,
+  physical replays and grades. Retained the negative diagnostic and identified
+  the ground filter's initial-range assumption, a short-horizon contract edge and
+  the sample probe's Python runtime requirement.
+- **Human decisions:** assessment was requested; no subsequent mechanism,
+  environment expansion or paid model pilot has been selected by this work.
+- **Verification:** 10 sample-chain and 18 current shift tests pass in the stated
+  runtimes; saved plans, scores, search counts, source hashes and ground replay
+  hashes reproduce. Local documentation links and Git whitespace checks pass.
+  Original controller checks are scripted; the three newly landed Opus attempts
+  are teammate-run exploratory evidence. Their outcomes reproduce, but explicitly
+  stale task hashes and an incomplete source manifest prevent claiming complete
+  frozen-task provenance. The later variant's safe prepared reference does not
+  diagnose which rule changed.
+- **Artifact:** [assessment and handoff](research/2026-11-14-prototype-assessment.md),
+  [scripts and retained evidence](prototype-assessment/README.md). Current
+  sample-chain version should be shelved; ground change remains an unproven
+  hypothesis. No API spend, candidate source edit, project selection or prize
+  submission. Teammate implementations and attribution are preserved.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.

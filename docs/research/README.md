@@ -1,5 +1,14 @@
 # AfterQuery research
 
+Assessment: [The two teammate prototypes](2026-11-14-prototype-assessment.md)
+— independent local reproduction confirms shelving the current sample-chain
+version. Ground change has a measurable effect, but its comparator still assumes
+the original slip bounds; a simple broader-prior diagnostic makes it worse.
+Incorporates the newly landed three-run Opus pilot and four-rule variant: the
+pilot is mixed, and the variant's safe reference does not diagnose the change.
+This assessment made no paid calls or environment changes. Read this
+assessment after the research below before choosing the next experiment.
+
 Latest: [After the survey: which failure should we test next?](2026-11-14-next-mechanism-review.md)
 — 14 November, after the completed six-region check. Reviews current evidence
 for long-horizon memory, delayed consequences, experiment design and recovery,
