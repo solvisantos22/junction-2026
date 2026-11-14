@@ -300,12 +300,13 @@ def search(run_many: RunMany, defaults: Dict[str, Any], *, search_seeds: Sequenc
 
 def evaluate(run_many: RunMany, policies: Dict[str, Dict[str, Any]], seeds: Sequence[int],
              out: Optional[Path] = None, baseline: Optional[str] = "pilot",
-             mission: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+             mission: Optional[Dict[str, Any]] = None, analyse: bool = False) -> Dict[str, Any]:
     """Several policies on the same worlds. `policies`: name -> job fields (policy, options, program...).
     If `baseline` is one of them, every other policy is also compared with it world by world.
-    `mission` changes the rules for every mission (for example {"sun_margin_ticks": 0})."""
+    `mission` changes the rules for every mission (for example {"sun_margin_ticks": 0}); `analyse` adds,
+    for every mission, whether the rover could still have got home tick by tick (analysis.py)."""
     ledger = Ledger(out)
-    extra = {"mission": mission} if mission else {}
+    extra = dict({"mission": mission} if mission else {}, **({"analyse": True} if analyse else {}))
     jobs = [dict(spec, candidate=name, seed=seed, **extra) for name, spec in policies.items() for seed in seeds]
     rows = run_many(jobs) if out is None else ledger.play(run_many, jobs)
     table = {name: summarise(rows, name) for name in policies}
@@ -314,4 +315,9 @@ def evaluate(run_many: RunMany, policies: Dict[str, Dict[str, Any]], seeds: Sequ
     ledger.write("evaluation.json", {"seeds": [seeds[0], seeds[-1]], "worlds": len(seeds), "table": table,
                                      "baseline": baseline if against else None, "versus": against, "labels": labels,
                                      "mission": mission or {}, "source": ledger.source})
-    return {"rows": rows, "table": table, "versus": against}
+    home = {}
+    if analyse:
+        from .analysis import summarise as summarise_home
+        home = {name: summarise_home(rows, name) for name in policies}
+        ledger.write("analysis.json", home)
+    return {"rows": rows, "table": table, "versus": against, "home": home}

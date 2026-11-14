@@ -9,6 +9,7 @@ A job is a small dict that survives JSON:
     {"policy": "program", "files": {"auto.py": "<source>", ...}, "entry": "auto.py", "seed": 123}
     {"policy": "pilot", "seed": 123, "mission": {"sun_margin_ticks": 0}}   # any of these, on changed rules
     {"policy": "pilot", "seed": 123, "keep_replay": True}   # the row also holds the evaluator's replay
+    {"policy": "pilot", "seed": 123, "analyse": True}       # ... or whether the rover could still get home (analysis.py)
 
 The second form is an agent's own script as it ran in the task: it is started as `__main__` with a
 stand-in `lightlag_client` beside it, as `lightlag_traverse.sandbox --program` does. Both forms get
@@ -46,7 +47,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
 SCRIPTED = ("pilot", "greedy", "straight", "nothing")
-PASSTHROUGH = ("candidate", "label", "generation", "block")
+PASSTHROUGH = ("candidate", "label", "generation", "block", "analyse")
 
 
 def _play():
@@ -137,6 +138,8 @@ def job_key(item: Dict[str, Any]) -> str:
            "program": program_id(item), "seed": item.get("seed")}
     if item.get("mission"):   # changed rules make another mission; unchanged keys stay as they were saved
         key["mission"] = item["mission"]
+    if item.get("analyse"):   # a row with the analysis is not the same as one without it
+        key["analyse"] = True
     return json.dumps(key, sort_keys=True)
 
 
@@ -270,6 +273,8 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
     mission = job.get("mission") or None   # rule changes for this mission, e.g. {"sun_margin_ticks": 0}
     if mission:
         row["mission"] = mission
+    want = bool(job.get("keep_replay") or job.get("analyse"))   # the evaluator's replay, for the demo or the analysis
+    replay = None
     started = time.time()
     if job["policy"] == "program":
         env = play.TraverseEnvironment(seed, mission=mission)
@@ -282,18 +287,17 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
         # Where the program stopped steering, when the rover's battery ran out (None: it did not),
         # and, if either went wrong, the end of what the program printed.
         row.update(error=ran["error"], program_tick=ran["tick"], died_tick=None)
+        if want or not result["alive"]:
+            replay = env.replay()
         if not result["alive"]:
-            row["died_tick"] = next(s["tick"] for s in env.replay()["states"] if not s["alive"])
+            row["died_tick"] = next(s["tick"] for s in replay["states"] if not s["alive"])
         if ran["error"] or not result["alive"]:
             row["printed"] = ran["printed"]
-        if job.get("keep_replay"):
-            row["replay"] = env.replay()
     elif not mission:
-        run = play.run_episode(play.policy(policy_name(job)), seed, keep_replay=bool(job.get("keep_replay")))
+        run = play.run_episode(play.policy(policy_name(job)), seed, keep_replay=want)
         result, seconds, calls = run["result"], run["seconds"], run["public_calls"]
         row["error"] = None
-        if job.get("keep_replay"):
-            row["replay"] = run["replay"]
+        replay = run.get("replay")
     else:   # play.run_episode, on the changed rules
         controller = play.policy(policy_name(job))
         env = play.TraverseEnvironment(seed, mission=mission)
@@ -305,8 +309,13 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
             pass
         result = env.evaluate()
         row["error"] = None
-        if job.get("keep_replay"):
-            row["replay"] = env.replay()
+        if want:
+            replay = env.replay()
+    if job.get("analyse"):   # could the rover still have got home, tick by tick (see analysis.py)
+        from .analysis import home_margin
+        row.update(analyse=True, home=home_margin(replay))
+    if job.get("keep_replay"):
+        row["replay"] = replay
     row.update(
         reward=result["raw_score"] / result["max_available_value"],
         raw_score=result["raw_score"], max_value=result["max_available_value"],

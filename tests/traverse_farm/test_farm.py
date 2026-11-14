@@ -179,6 +179,36 @@ class Programs(unittest.TestCase):
         self.assertIn("without the agent", meta["how"])
         self.assertEqual(replays.folder_name("agent:traverse-agent-opus-9"), "traverse-agent-opus-9")
 
+    def test_the_point_of_no_return_on_a_recorded_lost_rover(self):
+        from traverse_farm import analysis
+        folder = REPO / "docs" / "traverse-farm" / "replays" / "world-871"
+        lost = analysis.home_margin(json.loads((folder / "traverse-agent-opus-3" / "artifacts" / "evaluator" / "replay.json").read_text()))
+        home = analysis.home_margin(json.loads((folder / "traverse-pilot" / "artifacts" / "evaluator" / "replay.json").read_text()))
+        self.assertEqual((lost["end"], lost["died_tick"], lost["point_of_no_return"]), ("lost", 324, 291))
+        self.assertEqual((lost["ticks_left"], lost["drives_after"], lost["ticks_to_death"]), (129, 32, 33))
+        self.assertTrue(lost["waiting_always_charges"])
+        self.assertEqual((home["end"], home["point_of_no_return"]), ("lander", None))
+
+    def test_an_analysed_job_says_whether_the_rover_could_get_home(self):
+        row = jobs.run_job({"policy": "nothing", "seed": 100, "candidate": "idle", "analyse": True})
+        self.assertEqual((row["home"]["end"], row["home"]["point_of_no_return"], row["analyse"]), ("lander", None, True))
+        self.assertNotIn("replay", row)
+        self.assertNotEqual(jobs.job_key({"policy": "nothing", "seed": 100}), jobs.job_key(row))
+
+    def test_lost_and_stranded_rovers_are_summarised_apart(self):
+        from traverse_farm import analysis
+        def home(end, point=None, died=None, **more):
+            return {"candidate": "p", "home": dict(end=end, point_of_no_return=point, died_tick=died,
+                                                   waiting_always_charges=True, **more)}
+        rows = [home("lander"),
+                home("lost", 120, 120, metres_from_lander=50.0, ticks_to_death=0, drives_after=0),
+                home("lost", 200, 260, metres_from_lander=300.0, ticks_to_death=60, drives_after=40),
+                home("away", 350, ticks_left=70, samples_after=3, metres_from_lander=90.0, metres_from_lander_at_end=120.0)]
+        s = analysis.summarise(rows, "p")
+        self.assertEqual((s["lander"], s["lost"], s["away"], s["lost_home_still_open"], s["lost_after_point"]), (1, 2, 1, 1, 1))
+        self.assertEqual((s["lost_after_point_ticks"], s["lost_after_point_drives"], s["away_point_tick"]), (60, 40, 350))
+        self.assertIn("home open", analysis.format_summary({"p": s}))
+
     def test_nothing_a_program_imports_leaks_into_the_next_job(self):
         self.run_program("import lightlag_surface\ndef play(tools):\n    pass\n")
         for name in ("policy", "lightlag_surface", "lightlag_client"):
