@@ -179,11 +179,11 @@ DRIVERS = [("gold", "Our planner", "Plans the whole route against the battery an
            ("ice", "Claude, one request", "Three autopilots that Opus, Sonnet and Haiku each wrote in a single answer."),
            ("ring", "Claude, agent runs", "Three autopilots that Opus and Sonnet agents wrote during a mission.")]
 LANES = ["gold", "grey", "ice", "ice", "ice", "ring", "ring", "ring"]      # one per rover on the waiting page
-WORLDS = [(2027, "Judged site 1", "Claude's agent autopilot runs its battery flat."),
+WORLDS = [(2027, "Judged site 1", "Two of Claude's three agent autopilots run their batteries flat."),
           (2028, "Judged site 2", "The closest race: 0.457 against our 0.508."),
-          (2029, "Judged site 3", "Another flat battery for Claude."),
-          (871, "Fresh world", "Claude holds 19 samples. Then the battery dies."),
-          (610, "Fresh world", "We bring 28 samples home. Claude's rover dies at tick 166.")]
+          (2029, "Judged site 3", "Three Claude rovers run their batteries flat."),
+          (871, "Fresh world", "Opus agent 3 holds 19 samples. Then its battery dies."),
+          (610, "Fresh world", "We bring 28 samples home. Two Claude rovers die by tick 166.")]
 
 
 def _page(title: str, body: str) -> str:
