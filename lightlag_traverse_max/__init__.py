@@ -4,6 +4,7 @@
     env = make_env(seed=7, option="max")
 
     python3 -m lightlag_traverse_max.play --seeds 1-24 --maps normal,max
+    python3 -m lightlag_traverse_max.oneshot report     # the frozen model baseline (oneshot.py, sandbox.py)
 
 Built on lightlag_traverse/ without changing it. See docs/lightlag-traverse-max.md.
 """

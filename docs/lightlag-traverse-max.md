@@ -4,14 +4,14 @@ Saturday 14 November 2026. Owner: Manh / Claude Code. Code: [`lightlag_traverse_
 
 Manh asked to carry the max env's mechanics over to Kristján's new Lightlag Traverse, as a choice between the normal map and a MAX map. He also asked to measure four controllers on both maps: his best controller, the frozen reference the team uses, the greedy controller and the straight-line driver.
 
-**A sandbox option, not a rules decision.** Everything is in new files. No file of `lightlag_traverse/`, its tests, its Harbor task or its demo is changed; the MAX map is a subclass of Kristján's `TraverseEnvironment`. Scripted controllers only; no model has played the MAX map; no API spend.
+**A sandbox option, not a rules decision.** Everything is in new files. No file of `lightlag_traverse/`, its tests, its Harbor task or its demo is changed; the MAX map is a subclass of Kristján's `TraverseEnvironment`. Scripted controllers, and Kristján's saved model programs played unchanged; a [frozen model baseline](#a-frozen-model-baseline) waits for its paid step. No API spend so far.
 
 ## Run
 
 From the repository root. Python 3.9+, standard library only.
 
 ```sh
-python3 -m unittest discover -s tests/lightlag_traverse_max -v        # 13 tests, about half a minute
+python3 -m unittest discover -s tests/lightlag_traverse_max -v        # 26 tests, under a minute
 python3 -m lightlag_traverse_max.play --seeds 1-8 --maps normal,max --policies manh_max,pilot,greedy,straight
 ```
 
@@ -173,9 +173,38 @@ Each MAX mechanic switched on alone, and each switched off with all the others o
 - **`manh_max` loses at most 0.024 to any one mechanic.** With all of them on it loses 0.116, and the slip check is the biggest part of that: switching it off gives back 0.064.
 - With every mechanic off, `manh_max` scores a little below the pilot (0.473 against 0.493). It still reads `map_option: "max"` in `rules()` and keeps the MAX map's wider home margins. On Kristján's own environment it plays exactly like the pilot.
 
+## A frozen model baseline
+
+Manh asked for the MAX map's hardest worlds as a fixed point to measure Claude Opus 5.5, Sonnet 5.5 and Haiku 5.5 against. Everything below was frozen in [`docs/lightlag-runs/max-baseline/`](lightlag-runs/max-baseline/README.md) before any paid call. Code: [`lightlag_traverse_max/oneshot.py`](../lightlag_traverse_max/oneshot.py) and [`sandbox.py`](../lightlag_traverse_max/sandbox.py); tests: [`test_oneshot.py`](../tests/lightlag_traverse_max/test_oneshot.py).
+
+- **The worlds.** Of the 24 fresh worlds 500–523, the 8 where `manh_max` scored lowest on the MAX map: 503, 504, 505, 509, 515, 516, 517 and 518. Ranking by the share of its normal-map score that it keeps picks the same 8, and there is a clear gap after them (0.199, then 0.291). On the normal map these worlds are ordinary (`manh_max` 0.478); the MAX map is what makes them hard. World 2026, the task's world, is added beside them, so the MAX results can sit next to Kristján's normal-map baseline. **Caveat:** the worlds were picked because `manh_max` did badly there, so its score on them is biased low. A model's score is not biased that way.
+- **The request.** Kristján's one-request text (`lightlag_traverse/oneshot.py`, unchanged), filled from the MAX map's example world 99991, plus one section on what the MAX map changes. The rules shown are the MAX map's public rules. No hidden value appears in the request (tested).
+- **The models.** Each model writes 3 programs, from 3 separate requests: effort `medium`, adaptive thinking, up to 128,000 output tokens, no retries and no fallback model. Kristján's Opus reply used 50,450 of his 64,000, so the limit is higher here. A reply counts as it came.
+- **Playing.** Docker is not installed on this machine, so [`sandbox.py`](../lightlag_traverse_max/sandbox.py) runs Kristján's worker, unchanged, under bubblewrap: no network, read-only files, user nobody, Python 3.12, his timeouts and call cap. It replays his Docker run of his normal-map Opus program byte for byte (tested).
+
+Free results so far, mean over the 8 hard worlds on the MAX map (per-world tables in the [baseline's README](lightlag-runs/max-baseline/README.md)):
+
+| Player | Score | Ended away | Lost |
+|---|---|---|---|
+| `manh_max` | 0.171 | 7 of 8 | 0 |
+| Reference pilot | 0.017 | 5 | 2 |
+| Greedy | 0.028 | 7 | 1 |
+| Straight line | 0.030 | 7 | 0 |
+| Kristján's Opus 5.5 program, written for the normal map | 0.037 | 7 | 0 |
+| Kristján's Sonnet 5.5 program, written for the normal map | 0.018 | 7 | 0 |
+| Kristján's Haiku 5.5 program, written for the normal map | 0.005 | 8 | 0 |
+
+The paid step sends 9 requests. At Kristján's measured usage that is about $1 per Opus reply, $0.25 per Sonnet reply and $0.02 per Haiku reply: about $5 in all. If every reply used all 128,000 tokens it would be $12. `ask` refuses any call whose worst case would take the total past the budget given. The key goes in the gitignored `.env`; it is never printed or stored.
+
+```sh
+python3 -m lightlag_traverse_max.oneshot ask --budget-usd 15 --env-file .env   # paid: 9 requests
+python3 -m lightlag_traverse_max.oneshot play                                  # free: every program on every world
+python3 -m lightlag_traverse_max.oneshot report                                # rewrites the baseline's README
+```
+
 ## Limits
 
-- **No model has played the MAX map.** There is no Harbor task or MCP entry for it.
+- **No model has written a program for the MAX map yet.** The frozen baseline above waits for its paid step. There is no Harbor task or MCP entry for the MAX map.
 - **24 fresh worlds, one run each.** Scores vary a lot from world to world, so differences under about 0.03 are noise.
 - **The MAX settings are the max env's values, carried over, not tuned for the Traverse.** The slip check is 0.45, the catalog's value for long missions (the 50-tick max env uses 0.40).
 - **`manh_max` is slower on the MAX map.** Each time its ground costs are rebuilt (a trip, a soft cell, the wheel size), Kristján's pilot runs its full route search again. See **Time** above.
@@ -186,6 +215,7 @@ Each MAX mechanic switched on alone, and each switched off with all the others o
 - **Development: 1–24**, part of Kristján's development range 1–99, used read-only as he does.
 - **101–124:** a first full run, before rebasing onto Kristján's beam search. They lie inside the farm's search range 100–399, so they are reported above but not used for the claim.
 - **Final: 500–523.** Unclaimed in `TEAM_STATUS.md` before this run; now used.
+- **Model baseline: 503, 504, 505, 509, 515, 516, 517 and 518** (chosen from 500–523 as above), **and 2026**, the task's world. Example world in the request: 99991, Kristján's, never evaluated.
 
 ## Suggested next steps (not done)
 

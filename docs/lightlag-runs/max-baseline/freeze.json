@@ -1,0 +1,61 @@
+{
+ "name": "MAX-map model baseline",
+ "frozen": "2026-11-14 21:07 Helsinki",
+ "on_commit": "d45d3f97f420f59a464d0f3a764c7ebbc77d78f6",
+ "map": "max",
+ "hard_worlds": [
+  503,
+  504,
+  505,
+  509,
+  515,
+  516,
+  517,
+  518
+ ],
+ "task_world": 2026,
+ "rule": "Of the 24 worlds 500-523 (Manh's claimed range; played once on both maps by all four scripted players at full budgets, never used for tuning), the 8 where manh_max, the best scripted player on the MAX map, scored lowest there. Ranking by the share of its normal-map score it keeps on the MAX map picks the same 8. The 8th scored 0.199, the 9th 0.291. World 2026, the task's world, is added as an anchor next to Kristj\u00e1n's normal-map baseline; it is not one of the hard worlds.",
+ "models": {
+  "haiku": "claude-haiku-5-5",
+  "sonnet": "claude-sonnet-5-5",
+  "opus": "claude-opus-5-5"
+ },
+ "samples_per_model": 3,
+ "effort": "medium",
+ "thinking": "adaptive",
+ "max_tokens": 128000,
+ "fallback_model": null,
+ "replies": "a reply counts as it came, one without a program scoring 0 on every world; a call that brought no reply (an API error) may be sent again",
+ "request": {
+  "file": "request.md",
+  "sha256": "8b0c412f40f21cc0c5bc468372d98baac8d85af324fc2a84461182fd61ab8699",
+  "characters": 27138,
+  "example_world": 99991
+ },
+ "mission_files_sha256": {
+  "lightlag_traverse_max/environment.py": "9fb8af208fe552628a696dc7df9433e71031777cf444b5d4de5206049b410fd3",
+  "lightlag_traverse/environment.py": "ece97a96967f78b7f845c51eb36de90ca4aadb948c18dc8f573d3b63dc4031e9",
+  "lightlag_traverse/surface.py": "ad58635a093fcde8a971812b54d456d6ab7026bbc5ac2d7001a4a53490087233",
+  "lightlag_traverse/terrain.py": "8bbc6d73ee3fc95c745fc156c05f895acce368c252dd33292e8469a75793db19",
+  "lightlag_traverse/planning.py": "629c06325e891b5d49d49b294297f282b332fc1a4dfb13281e0efd2cc49248c5",
+  "lightlag_traverse/sandbox_worker.py": "d72fc9cbbff9c312006d742d49a01d5c09cd9a09b994b7cc08a5f85c94d977cb",
+  "lightlag_mcp/service.py": "46d00c28cab43dc0267c600a957c555d6977e6a451ee0290c504d3760c4d2b98"
+ },
+ "scripted": {
+  "file": "scripted.json",
+  "players": [
+   "manh_max",
+   "pilot",
+   "greedy",
+   "straight"
+  ],
+  "command": "python3 -m lightlag_traverse_max.play --seeds 503,504,505,509,515,516,517,518,2026 --maps normal,max --policies manh_max,pilot,greedy,straight --json <file>"
+ },
+ "transfer": {
+  "normal-opus-1": "docs/lightlag-runs/traverse-oneshot-opus-1/policy.py",
+  "normal-sonnet-1": "docs/lightlag-runs/traverse-oneshot-sonnet-1/policy.py",
+  "normal-haiku-1": "docs/lightlag-runs/traverse-oneshot-haiku-1/policy.py"
+ },
+ "sandbox": "lightlag_traverse_max.sandbox: Kristj\u00e1n's worker under bubblewrap (no network, read-only files, user nobody, 2 GB address space, Python 3.12), his timeouts and call cap",
+ "score": "the mission's reward: credited value x (1 at the lander, 0.5 alive elsewhere, 0 lost) / all the value there was; a program is summed up by its mean over the 8 hard worlds"
+}
