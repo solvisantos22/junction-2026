@@ -50,6 +50,9 @@ python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                
 | 23 | `EKF_stayalive_aimdisc_turncost_window_MPC_manh_controller_23` | 19 plus a stay-alive rule: never send a command expected to empty the battery before the horizon | Traces showed rovers dying on a last short drive home (score 0) instead of staying alive just outside (half score). Held-out: never worse than 19 (7 episodes better, 0 worse); +0.1 points. |
 | 24 | `EKF_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_24` | 19 plus 22 and 23 | The odometer fixes legs once a patch is found; the stay-alive rule covers a patch found too late. **Best on held-out seeds:** +1.9 over controller 1 (+1.6 to +2.3), +0.2 over 19 (+0.1 to +0.4); identical to 19 on the published profiles. |
 | 25 | `EKF_sandodo_mapdoubt_stayalive_aimdisc_turncost_window_MPC_manh_controller_25` | 24 plus map doubt: once the map is shown wrong, undriven bedrock on the way home is budgeted at the unmapped-sand rate seen so far | The remaining deaths of 24 come from the patch on the last route home. Cuts deaths with two patches from 20% to 12% but gains only 1 point there, and loses 0.4 points elsewhere: rare false odometer patches on clean maps switch the doubt on. |
+| 26 | `EKF_sandodo_bayessand_stayalive_aimdisc_turncost_window_MPC_manh_controller_26` | 24 plus a Bayesian belief about unmapped sand (Beta prior in metres, updated by the odometer), priced on every way home | Sölvi's static robust plan still won on `noisy` with hidden sand; adaptive robust routing says price a belief, not the worst case. Hidden sand on `noisy` 69% / 54% → 71% / 70% (one / two patches, held-out), no deaths, but clean `noisy` 90% → 75%: −2.5 points vs 1 overall. Traces then showed the estimator, not the budget, failing. |
+| 27 | `EKF_fading_sandfilter_sandodo_guarded_aimdisc_turncost_window_MPC_manh_controller_27` | 24 with the filter fixed for unmodelled ground (sand-aware propagation, adaptive fading) and guarded moves instead of the stay-alive rule | **Best controller, and ahead of Sölvi on every front.** Held-out: +2.7 over 1 (+2.2 to +3.4), +0.8 over 24 (+0.5 to +1.2); hidden sand on `noisy` 80% / 71% vs Sölvi's 73% / 68%, never dead there. See "Literature round" below. |
+| 28 | `EKF_fading_sandfilter_sandodo_bayessand_guarded_aimdisc_turncost_window_MPC_manh_controller_28` | 27 plus 26's Bayesian pricing | The cautious twin: 75% and home in every held-out `noisy` episode, with or without hidden sand, but 75% instead of 92% on clean `noisy`, so about 5 points below 27 overall. |
 
 **Bounds** use privileged information through `scenarios.ScenarioEnvironment`. They are yardsticks, not entries.
 
@@ -75,6 +78,7 @@ Share of the maximum score, averaged over every cell of each suite:
 | Bound 17 (no delay) | 95.9% | 93.8% | 78.1% | 89.3% | 95% |
 | Bound 16 | 90.4% | 86.2% | 69.5% | 82.0% | 94% |
 | **20** CKF + aim at disc + turn cost + windows | 86.7% | 77.0% | 68.7% | **77.5%** | 97% |
+| **27** EKF + filter fixes + guarded moves + the same | 85.9% | 76.7% | 71.1% | **77.9%** | 98% |
 | 24 EKF + the same + sand odometer + stay alive | 86.5% | 76.5% | 68.8% | 77.3% | 97% |
 | 21 PF + the same | 86.7% | 77.2% | 67.4% | 77.1% | 96% |
 | 19 EKF + the same | 86.5% | 76.5% | 68.2% | 77.0% | 97% |
@@ -82,6 +86,8 @@ Share of the maximum score, averaged over every cell of each suite:
 | 18 EKF + aim at disc | 86.5% | 76.5% | 65.4% | 76.1% | 95% |
 | 8 CKF | 85.5% | 76.4% | 65.3% | 75.7% | 96% |
 | 1 EKF (repository `kf_mpc`) | 85.0% | 75.6% | 65.3% | 75.3% | 96% |
+| 26 24 + Bayesian sand pricing | 82.4% | 71.2% | 65.6% | 73.1% | 98% |
+| 28 27 + Bayesian sand pricing | 81.5% | 71.0% | 66.9% | 73.1% | 99% |
 | 2 PF | 85.3% | 76.5% | 63.7% | 75.2% | 94% |
 | `blind` | 66.6% | 46.6% | 45.3% | 52.8% | 73% |
 | `solvi_reference` | 58.5% | 47.3% | 44.2% | 50.0% | 81% |
@@ -99,6 +105,9 @@ Share of the maximum score, averaged over every cell of each suite:
 | 23 19 + stay alive | +1.7 (+1.2 to +2.1) | +1.7 (+1.4 to +2.1) | 96% → 97% |
 | 24 19 + sand odometer + stay alive | +1.8 (+1.3 to +2.3) | **+1.9 (+1.6 to +2.3)** | 96% → 98% |
 | 25 24 + map doubt | +1.6 (+1.1 to +2.1) | +1.4 (+1.0 to +1.9) | 96% → 98% |
+| 26 24 + Bayesian sand pricing | −2.7 (−3.8 to −1.5) | −2.5 (−3.4 to −1.7) | 96% → 98% |
+| **27** 24 + filter fixes + guarded moves | **+2.7 (+2.0 to +3.3)** | **+2.7 (+2.2 to +3.4)** | 96% → 98% |
+| 28 27 + Bayesian sand pricing | −2.5 (−3.6 to −1.3) | −2.5 (−3.4 to −1.6) | 96% → 99% |
 | Bound 16 | +8.0 (+6.5 to +9.6) | +9.8 (+8.5 to +11.1) | 96% → 95% |
 
 - **The gain is real, and it comes from the planner additions, not the estimator.** 19 and 20 tie on held-out seeds: 20 vs 19 is +0.1 points (−0.2 to +0.4). The cubature filter's extra lead on development seeds did not replicate.
@@ -124,13 +133,16 @@ The suites:
   - turn cost 0.01 or 0.03 per degree.
 
 **Still unsolved, and where to build next:**
-- **Hidden sand patches.** Narrowed by 22–25, not closed. Held-out seeds, `noisy`, pooled delays (share / home / dead):
+- **Hidden sand patches.** Narrowed by 22–25; **closed by 27** (literature round, below). Held-out seeds, `noisy`, pooled delays (share / home / dead):
 
   | Controller | Clean map | 1 patch | 2 patches |
   |---|---|---|---|
   | 19 | 90% / 100% / 0% | 68% / 85% / 10% | 49% / 70% / 27% |
   | 24 | 90% / 100% / 0% | 69% / 90% / 10% | 54% / 77% / 20% |
   | 25 | 89% / 100% / 0% | 67% / 90% / 10% | 55% / 83% / 12% |
+  | 26 | 75% / 100% / 0% | 71% / 92% / 0% | 70% / 95% / 0% |
+  | **27** | **92% / 100% / 0%** | **80% / 87% / 0%** | **71% / 77% / 0%** |
+  | 28 | 75% / 100% / 0% | 75% / 100% / 0% | 75% / 100% / 0% |
   | `solvi_reference` | 74% / 98% / 0% | 73% / 98% / 2% | 68% / 92% / 7% |
 
   - On `rush_noisy` ours win everywhere (two patches: 42–43% vs 27%), and on clean maps by 16 points on `noisy`.
@@ -138,11 +150,61 @@ The suites:
   - **Why ours still die:** they take the third target with about 2 energy to spare. The patch that kills them lies on the last route home, so it is first crossed after the energy is spent. The battery sand odometer (22) reads it exactly (0.00 on every bedrock drive), but too late; the stay-alive rule (23) only turns some deaths into half scores.
   - **Map doubt (25) is the right idea with the wrong trigger.** Budgeting undriven bedrock once the map is shown wrong cuts deaths with two patches from 20% to 12%, but the odometer makes rare false patches on clean maps (0.1–0.2 per episode), and each one switches the doubt on.
   - **A bigger reserve is not the fix.** Controller 1 with a reserve of 5 scores 65% with hidden sand, but 75% instead of 94% without it.
-  - Candidate: switch map doubt on only when the packet's `terrain` field confirms sand where the map says bedrock, so it costs nothing on clean maps.
-  - Candidate: price the third target against the chance that the route home holds an unseen patch, instead of a fixed reserve.
+  - **What actually failed was the estimator** (found in the literature round, below): 27 takes the same third target as 24 and no longer dies.
 - **Uplink windows 16/4 on `rush_noisy`.** At delay 3 every Manh controller and bound 16 get home only 15–35% of the time. `blind`, which sends its whole plan at tick 0, scores 54% and always gets home.
   - Candidate: a rollout planner that sends whole plans at window openings.
 - **Heading noise of 6° on `rush_noisy`.** Bound 16 drops to the controllers' level (53% vs 52% at delay 3), so no controller can help: the setting is too hard.
+
+## Literature round: what worked and what did not (controllers 26–28)
+
+Goal: beat Sölvi's static robust reference on every front. Before this round it still won the `noisy` hidden-sand cells, and died less there. Literature per factor, with sources: vault note `18 Literature Controllers by Factor`. Development seeds 0–19 for every choice; held-out seeds 400–419 once, at the end.
+
+**Worked (kept in 27):**
+1. **Sand-aware filter propagation** (`_SandAwareFilter`). The battery gives each drive's sand wheel metres exactly. Where the map disagrees, the EKF propagates the drive with those metres relabelled as sand.
+   - Before: a drive over unmapped sand was propagated as bedrock. The visual odometry that measured the shortfall failed the 3-sigma gate, which exists to reject wheel spins, and was thrown away. The fixes then dragged the bedrock slip above its published range, and the filter stayed over 1 m off at 8 sigma.
+   - On seed 2 that meant a missed sample, and the rover parked 0.76 m from base believing it was 0.13 m away.
+   - After: the error stays under 2 sigma.
+   - On its own it adds 0.3 points to 24 overall, but does not stop the deaths.
+   - Sources: proprioceptive terrain classification (Ojeda et al. 2006; Brooks & Iagnemma 2005); multiple-model estimation (Bar-Shalom et al. 2001); visual odometry slip on Mars rovers (Helmick et al. 2006; Maimone et al. 2007).
+2. **Guarded moves** (`_GuardedMove`, replaces the stay-alive rule). Before each uplink: would the rover still be alive at the horizon if every unverified metre of mapped bedrock in the batch were sand?
+   - If yes, the batch goes as planned.
+   - If not, only the longest prefix that passes goes, and the controller waits for its telemetry. The patch on the last way home is then found after a short step, while stopping alive is still possible.
+   - Probing costs time, not energy, because idle drain is paid anyway. It runs only while the horizon leaves a round trip, uplink-window waits included.
+   - Effect: deaths with hidden sand 22.5% → 0% on `noisy`, 11.7% → 5% on `rush_noisy` (development seeds).
+   - Two bugs fixed on the way:
+     - Ground just past the end of the last drive counted as verified.
+     - The window wait was missing from the round trip (windows 16/4 fell to 56%).
+   - Sources: safety filters for energy sufficiency (arXiv 2306.15115, 2310.06933); guarded, checked steps on uncertain terrain as on the Mars rovers; worst case only where evidence is missing (adaptive robust routing, arXiv 2204.10913).
+3. **Adaptive fading** (`_FadingFilter`). When the position fixes' normalised innovations average above 4 over 5 fixes (honest filter: 2), the position covariance is inflated.
+   - It catches a confident, wrong filter of any cause. On development seeds, a slip jump pushed the true slip outside the published range the filter clamps to, and the rover stopped 0.9 m from base believing it was 0.3 m away.
+   - Effect: +0.1 points overall; slip jump on `noisy` at delay 3: 70% → 79%.
+   - Sources: Mehra 1972; Xia et al. 1994 (adaptive fading KF); Zhou & Frank 1996 (strong tracking filter); arXiv 1702.00884.
+
+**Worked, at a price (26, 28):** a Bayesian belief about unmapped sand (Beta prior in metres, updated by the odometer), priced on every way home.
+- It makes hidden sand harmless: 28 is home with 75% in every held-out `noisy` episode.
+- It also gives up the thin third target on clean maps: 75% instead of 92% on clean `noisy`.
+- Sources: chance-constrained and CVaR rover planning (Ono, Pavone et al. 2015; arXiv 2303.01169); online energy maps (arXiv 1907.06337).
+
+**Did not work (not kept, documented in the mixins):**
+- **Energy safety filter at the posterior-mean sand rate** (`_SafetyFilter`): no measurable effect, because it almost never binds. The worst-case version with probing is what works (item 2).
+- **Max-margin tie-break** (`_MaxMargin`): no effect (within 0.1 points). Ties in value are rare.
+- **Safe order** (`_SafeOrder`: among equally valuable tours, prefer the one whose last way home crosses the least unverified ground).
+  - +1.2 points with hidden sand, but −4.3 on clean maps: the safer order often has less energy to spare.
+  - A spare floor of 1 or 2 changed nothing.
+- **Earlier, for completeness:** a bigger reserve (5 energy: 94% → 75% on clean maps); map doubt triggered by any found sand (25: false patches switch it on); slip forgetting (10, 11) and smoothing (12).
+
+**Not tried, and why:**
+- A full POMDP solver over the hidden map: heavy, and reported hard to make satisfy goal conditions (Au et al., AAAI 2015).
+- Learned slip or energy predictors (LSTM, GNN, GP): no training data, and the battery reading is already exact.
+- MCTS for chance-constrained stochastic orienteering (arXiv 2409.03170): fits the planner, but the evaluator's 0 / ½ / 1 survival factor makes the expected-score comparison simple enough to do by hand (below).
+
+**What remains, and why it is a limit rather than a bug.** On held-out seeds 27 leads Sölvi in 190 of 192 cells. The two left are `noisy` with two hidden patches at delays 0 and 3: 71.9% vs 75%.
+- On the published map the third target fits only on the nominal budget. Whether it is safe depends on ground the rover has not driven before it commits.
+- An episode whose first line out is clean looks the same, up to the commitment, on a clean map and on a map whose other two lines both hold patches. So the rover must make the same choice in both.
+- Taking the target wins on clean maps (92% vs 75%). On the two-patch map it ends alive away from base, at half score.
+- Sölvi's static plan never takes it, so it ties on clean maps and wins that one cell.
+- No policy can win both. Where Sölvi dies, at delays 3 and 5, 27 still comes out ahead. The cautious twin 28 gives the other trade-off: never below Sölvi on hidden sand, level with him on clean `noisy` maps.
+- Deaths: 27 dies more than Sölvi in 4 held-out `rush_noisy` hidden-sand cells (5–15% vs 0%), where it scores about twice his share (44–61% vs 14–44%).
 
 ## Discriminative seeds
 

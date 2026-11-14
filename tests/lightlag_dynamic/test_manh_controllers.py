@@ -99,6 +99,67 @@ class ScenarioTest(unittest.TestCase):
 
 
 @unittest.skipUnless(HAVE_NUMPY, "the Manh controllers need numpy")
+class LiteratureRoundTest(unittest.TestCase):
+    """Controllers 27 and 28 on the development episodes whose traces motivated them (delay 3)."""
+    HIDDEN = {"name": "hidden_sand_1", "profile": "noisy", "factors": {"hidden_patches": 1}}
+
+    def _worst_error(self, cls):
+        """Largest gap between the filter's position and the truth after any packet."""
+        import math
+
+        from lightlag_dynamic.manh_controllers.scenarios import make_env
+        from lightlag_dynamic.tools import PublicTools
+        seen = []
+
+        class Probe(cls):
+            def _filter(self, packet):
+                super()._filter(packet)
+                seen.append((packet["tick"], self.filter.mean[0], self.filter.mean[1]))
+
+        env = make_env(2, 3, "noisy", factors={"hidden_patches": 1})
+        Probe(PublicTools(env)).run()
+        while not env.advance(5)["episode_complete"]:
+            pass
+        states = env.scenario_replay()["states"]
+        return max(math.dist((x, y), states[tick]["position"]) for tick, x, y in seen)
+
+    def test_sand_aware_filter_keeps_track_on_hidden_sand(self):
+        # Seed 2: the patch lies on the way to the west target. Propagated as bedrock, the drive
+        # overshoots and the visual odometry that shows it fails the gate (24: over 1 m off).
+        from lightlag_dynamic.manh_controllers import controllers as mc
+        self.assertGreater(self._worst_error(mc.EKF_sandodo_stayalive_aimdisc_turncost_window_MPC), 1.0)
+        self.assertLess(self._worst_error(mc.EKF_fading_sandfilter_sandodo_guarded_aimdisc_turncost_window_MPC), 0.5)
+
+    def test_guarded_moves_stop_alive(self):
+        # Seed 5: the patch is on the last way home. 24 queues the whole leg and dies at base;
+        # 27 probes the unverified ground, finds the sand and stops alive with all three samples.
+        from lightlag_dynamic.manh_controllers.swarm import resolve, run_one
+        n24, n27 = resolve(["24", "27"])
+        row24, _ = run_one((n24, self.HIDDEN, 3, 5, False))
+        row27, _ = run_one((n27, self.HIDDEN, 3, 5, False))
+        self.assertFalse(row24["alive"])
+        self.assertTrue(row27["alive"])
+        self.assertAlmostEqual(row27["share"], 0.5)
+
+    def test_fading_recovers_after_a_slip_jump(self):
+        # Seed 14: after the jump the true slip leaves the published range; without fading the
+        # confident filter stops short of base, with it 27 comes home with every target.
+        from lightlag_dynamic.manh_controllers.swarm import resolve, run_one
+        jump = {"name": "slip_jump", "profile": "noisy", "factors": {"slip_change": "auto"}}
+        n24, n27 = resolve(["24", "27"])
+        self.assertFalse(run_one((n24, jump, 3, 14, False))[0]["at_base"])
+        row27, _ = run_one((n27, jump, 3, 14, False))
+        self.assertTrue(row27["alive"] and row27["at_base"])
+        self.assertAlmostEqual(row27["share"], 1.0)
+
+    def test_cautious_twin_takes_the_safe_tour(self):
+        from lightlag_dynamic.manh_controllers.swarm import resolve, run_one
+        row, _ = run_one((resolve(["28"])[0], self.HIDDEN, 3, 5, False))
+        self.assertTrue(row["alive"] and row["at_base"])
+        self.assertAlmostEqual(row["share"], 0.75)
+
+
+@unittest.skipUnless(HAVE_NUMPY, "the Manh controllers need numpy")
 class SwarmTest(unittest.TestCase):
     def test_run_and_report(self):
         from lightlag_dynamic.manh_controllers import swarm
