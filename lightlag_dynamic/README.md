@@ -18,6 +18,7 @@ python3 -m lightlag_dynamic --profile rush --seed 7 --delay 3 < script.jsonl   #
 python3 -m lightlag_dynamic.serve --profile rush_noisy --seed 7 --delay 3 # one episode over MCP (needs the mcp package, Python 3.10+)
 python3 -m lightlag_dynamic.realtime --seconds-per-tick 5 --profile rush_noisy --seed 7 --delay 3   # the same, on a real-time clock
 python3 -m lightlag_dynamic.manh_controllers --list                      # Manh's controller collection and swarm runner (needs numpy)
+python3 -m lightlag_dynamic.biomes --list                                # selectable Mars biomes on top of these profiles (sandbox)
 ```
 
 `serve` takes the same options and environment variables as `python -m lightlag_mcp` (transport, port, artifact directory, evaluator token, token file), plus `--profile`, `--noise-level` and `--bumpiness`. Over HTTP it answers `/healthz` and is graded by `python -m lightlag_mcp.finish`, so the Harbor task in [`harbor/lightlag/`](../harbor/lightlag/) could serve a dynamic profile by starting `python -m lightlag_dynamic.serve --profile <name>` in its simulator container instead of `python -m lightlag_mcp` (with `lightlag_dynamic/` copied in). That switch is the Harbor task owner's call; nothing under `harbor/` is changed here.
@@ -65,6 +66,7 @@ Physics, timing, energy, safety stops, the five public methods and the 1 / 0.5 /
 | `pilot.py` | Policy × profile × delay × seed matrix and summary table |
 | `crosscheck.py` | Runs `lightlag_controllers` beside these controllers, checks `lightlag.evaluation.run_episode` gives identical scores, and optionally applies the team pilot's tougher physics |
 | `manh_controllers/` | Every Manh controller combination, named `<METHODS>_manh_controller_<N>` with what, why and when; bounds, rule factors, failure logger and swarm runner. [What each one is and where things stand](manh_controllers/README.md) |
+| `biomes/` | Selectable Mars biomes on top of the profiles, a sandbox option that is off unless chosen: `main_mars` is this environment unchanged; six more (relay passes, onboard slip check, dunes, crust, sharp rocks, ripple plains) are named after real rover events and published in `rules()` and `map()`. JSON-lines runner, MCP entry and a trial of every registered controller per biome. [What each biome is and which controller did best](../docs/lightlag-biomes.md) |
 | `__main__.py` | JSON-lines runner reusing `lightlag.__main__.dispatch` |
 
 The original `reference` here treats every position fix as exact; under noise it is the "naive" controller. `kf_mpc` is the reference for the noisy profiles.

@@ -198,8 +198,10 @@ def report(out):
         return " + ".join(CATALOG[b]["name"] for b in parse_biome(biome))
 
     def what(name):
-        spec = zoo.REGISTRY.get(name) or {}
-        return f"{label(name)} ({spec.get('note', '')})" if kinds.get(name) != "team" else f"`{name}`"
+        if kinds.get(name) == "team":
+            return f"`{name}`"
+        note = (zoo.REGISTRY.get(name) or {}).get("note", "")
+        return f"{label(name)} ({note if len(note) <= 72 else note[:70].rstrip() + '…'})"
 
     seeds = meta.get("seeds")
     lines = ["# Biome trial", "",

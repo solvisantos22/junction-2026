@@ -418,6 +418,7 @@ Caveats:
 | `swarm.py` | Suites, the parallel runner, the report, the command line |
 | `seeds.py` | Discriminative-seed finder: the declared criteria, the players and a ranked report |
 | `mars.py` | Mars-operations tweaks (onboard slip check, relay passes; off by default) the slip-check-aware layer and an executive with explicit modes (nominal / recover) for controllers 1 and 24 (registered as 30–33); see the pilot doc, "Mars-operations tweaks" |
+| `../biomes/` | Not part of this package, but built on `scenarios.py` and `mars.py`: the same factors as named, selectable biomes, and `python3 -m lightlag_dynamic.biomes.trial`, which plays every controller registered here in each biome. [Results](../../docs/lightlag-biomes.md) |
 
 Failure labels, per episode:
 
