@@ -225,31 +225,27 @@ These are recommended evidence choices, not newly asserted official entry requir
 ### R08 — 14 November — Prospective accounting-aid comparison
 
 - Codex fixed twelve fresh Claude Opus 5.5 / OpenCode 1.19.5 attempts, original
-  prompt versus a generic energy/queue instruction appendix, before outcomes.
-  The model must maintain its own ledger; no route or automatic safety filter
-  is supplied. All attempts count regardless of apparent compliance.
-- First pair: **0.325 treatment / 0.225 control**, both alive at base; reported
-  **$1.1064664**. Ten assignments remain, so no full-block effect is claimed.
-  Codex built plan, cost, privacy and exact-replay checks using Manh's auditor.
-- Review caught plan-truncation, duplicate-session and audit-path edge cases.
-  An actual post-horizon no-op exposed cached grade-count semantics; the narrow
-  export correction preserves every call and raw result. All 23 experiment
-  tests pass; independent review reconstructed all 40 then-available saved
-  transcripts. No simulator or canonical-task changes.
-- Evidence: [protocol/results](lightlag-overnight-evaluation.md),
+  prompt versus a generic energy/queue appendix, before outcomes. Claude
+  performed the actual task; Codex designed and verified the experiment using
+  Manh's decision auditor. No route or automatic safety filter was supplied.
+- All twelve are complete: **five paired improvements, one tie**, mean reward
+  **0.406571 control / 0.732265 aid**, mean paired gain **+0.325694**. Deaths
+  **1/6 versus 0/6**, home finishes **4/6 versus 6/6**. The improvement threshold
+  is met; the stricter gap-removal threshold fails on noisy 504. These selected
+  diagnostic maps do not establish general reliability or energy-only causality.
+- Codex built plan, cost, privacy and exact-replay checks. Review caught
+  plan-truncation, duplicate-session and audit-path edge cases. An actual
+  post-horizon no-op exposed cached grade-count semantics; the narrow export
+  correction preserves every call and raw result. All 23 experiment tests
+  pass; all twelve final audits reproduce exactly without infrastructure
+  findings. No simulator or canonical-task behavior changed.
+- Evidence: [protocol and full results](lightlag-overnight-evaluation.md),
   [twelve-row ledger](lightlag-runs/overnight-b-summary.json),
   [audits](lightlag-audits/overnight/block-b/README.md),
   [tool](../tools/lightlag_experiments/overnight_runs.py).
-  Second pair adds **0.807692 treatment / 0.615385 control**, both alive/home;
-  all four B audits are exact, B usage **$2.1651708**, eight assignments pending.
-  Third pair adds **0 control / 0.916667 treatment** on rush 501; the control
-  dies and treatment survives at base. All six B audits are exact, B usage
-  **$2.8120282**, six assignments pending. The sample is still incomplete.
-  Fourth pair adds **0.875 treatment / 0.4375 control**, both alive but control
-  away from base. All eight B audits are exact, B usage **$3.722155**, four
-  assignments pending. Fifth pair adds **0.461538 control / 0.769231 treatment**,
-  both alive/home; ten exact audits, B usage **$4.6207014**, two assignments
-  pending. Reported usage is not a verified balance; no prize entry.
+  Protocol `6e1cfe3` preceded outcomes; tool/first-pair increment `659dd2c`.
+  Reported B usage **$5.4645252**, A+B **$9.4355068**; provider balance unverified.
+  No retries, result replacement, prize entry or final project/rules decision.
 
 ### E08 — 14 November — Reproducible recorded evidence clip
 

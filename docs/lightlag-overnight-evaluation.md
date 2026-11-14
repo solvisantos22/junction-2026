@@ -398,9 +398,70 @@ A+B **$8.591683**. Only the second noisy-504 pair remains. The larger deficits
 in the control involve missed samples; the combined aid does not isolate an
 energy-only mechanism.
 
+## Block B complete: all twelve declared attempts
+
+The final noisy-504 pair ties at **0.7 / 0.7**, both alive at base, with no
+late samples. Every assigned session finished; no retries, replacements,
+provider exceptions or invalid grades occurred. All twelve public transcripts
+replay exactly and all audits report zero infrastructure findings.
+
+| Pair | Case / repetition | Original prompt C | Accounting aid T | T − C |
+|---|---|---:|---:|---:|
+| 1 | noisy 504 / 1 | 0.225000 | 0.325000 | +0.100000 |
+| 2 | noisy 502 / 1 | 0.615385 | 0.807692 | +0.192308 |
+| 3 | rush 501 / 1 | 0.000000 | 0.916667 | +0.916667 |
+| 4 | rush 501 / 2 | 0.437500 | 0.875000 | +0.437500 |
+| 5 | noisy 502 / 2 | 0.461538 | 0.769231 | +0.307692 |
+| 6 | noisy 504 / 2 | 0.700000 | 0.700000 | 0.000000 |
+
+The primary paired mean gain is **+0.325694**: C mean **0.406571**, T mean
+**0.732265**, with five improvements and one tie. Deaths are **1/6 C versus
+0/6 T**; home finishes **4/6 versus 6/6**. C's other away finish survives and
+retains half its science value; it is not a second death. The twelve individual
+rows, including science before survival/home multipliers, calls, durations,
+late samples, exact hashes and reported costs, are in the
+[complete ledger](lightlag-runs/overnight-b-summary.json).
+
+| Selected case | C mean | T mean | Frozen KF | T minus KF |
+|---|---:|---:|---:|---:|
+| rush 501 | 0.218750 | 0.895833 | 0.833333 | +0.062500 |
+| noisy 502 | 0.538462 | 0.788462 | 0.769231 | +0.019231 |
+| noisy 504 | 0.462500 | 0.512500 | 0.700000 | −0.187500 |
+
+The predeclared **improvement threshold is met**: the paired gain exceeds
+0.10, and case-mean gains are positive in all three cases. The **“gap
+provisionally removable” threshold is not met**: although all treatments
+survive, noisy 504's treatment mean remains 0.1875 below its reference, more
+than the allowed 0.05. These are engineering thresholds, not significance
+tests. Two attempts per condition per selected case give limited precision.
+
+This weakens an unavoidable-control-deficit interpretation. Generic public
+guidance makes a substantial difference on these diagnostics, while residual
+sample/queue errors remain. It does not establish an energy-only mechanism,
+successful persistent-ledger mediation, a delay-specific cause or map-wide
+reliability. Noisy 504's second control also recovers to the reference: retain
+that variation rather than treating every unaided session as a failure.
+
+Reported B usage is **$5.4645252** (C $2.6565338; T $2.8079914), bringing
+A+B to **$9.4355068**. Mean call counts are 23.83 C / 24.67 T; mean trial
+durations 231.49 / 226.51 seconds. These descriptive timings do not establish
+efficiency superiority. Relative to the user-reported $15.70 starting amount,
+the nominal remainder is **$6.2644932**, not an independently checked balance.
+
+Independent final review verified all six task variants, 29 frozen source
+files, 180 exported-file hashes, unique sessions, protected grades and costs.
+All 291 public calls reconstruct, including one tool error and B01's cached
+postterminal grade; all twelve audits match and all 23 export/preparation tests
+pass. The final pair had completed before the Codex usage-limit interruption;
+publication resumed after the user returned. No synthesis call ran during
+that interruption.
+
 ## Status
 
 Block A protocol was published at `253b263` before new attempts; all nine are
 now complete in the [summary](lightlag-runs/overnight-a-summary.json). Block B
-was published at `6e1cfe3` before its outcomes. The earlier interim checkpoints
-above are retained as history; the completed table is authoritative for A.
+was published at `6e1cfe3` before its outcomes and is complete in its
+[twelve-row summary](lightlag-runs/overnight-b-summary.json). The earlier
+interim checkpoints above are retained as history; the completed tables are
+authoritative. The separately declared reusable-policy experiment asks a
+different question and will not be pooled into either block.

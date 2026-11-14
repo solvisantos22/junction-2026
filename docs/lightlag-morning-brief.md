@@ -7,21 +7,29 @@ grading and clear explanations. We do not yet have evidence for a broad or
 unavoidable frontier-model control deficit. More physics is not the immediate
 priority.
 
-**This is an interim handoff while overnight work continues.** Eight of twelve
-accounting-aid attempts are verified; four remain. The reusable-policy study
-is declared and being prepared, with no synthesis request or fresh-map outcome
-yet. Completed-run spend is $7.6931366; running calls may accrue more. The
-coordinator will replace this snapshot with the completed results and budget.
+**This is an interim handoff while the final transfer test is prepared.** All
+nine repeats and all twelve accounting-aid attempts are complete. The aid
+improves selected-case performance substantially, but does not pass the
+stricter gap-removal threshold. Reconciled overnight usage is **$9.4355068**.
+No synthesis request or fresh-map result exists yet; that separate condition
+and final readiness notes will be added before the handoff is closed.
 
 ## What the team has built
 
 - **Kristján:** the actual Docker/Harbor model path, protected simulator
   artifacts, separate verifier and early-stop collection. The original core
-  task is demonstrably runnable; the model solved its seed-7 example.
+  task is demonstrably runnable; the model solved its seed-7 example. His
+  [3D demo](../viewer/mars-demo.html), rebuilt at `18a1351`, now presents three
+  unchanged-prompt attempts and the reference on each of two selected cases,
+  with deadlines, slip and delayed views. All 28 viewer tests pass after sync.
 - **Manh:** dynamic missions, state estimation/control references, the decision
   auditor and additional scenario/controller experiments. The real-time and
   Mars-operation additions remain separate proposals. Their scenario-specific
-  gains should not be assumed to transfer to the plain profiles.
+  gains should not be assumed to transfer to the plain profiles. His `2b2f6fa`
+  [ablation](../lightlag_dynamic/manh_controllers/README.md#plain-profile-check-the-guarded-moves-are-the-whole-cost-saturday-about-1100-helsinki)
+  reports that controller 27's guarded moves explain the plain-profile cost;
+  candidate 24 remains preferable there. The new commit documents results;
+  this coordinator has not independently rerun that ablation.
 - **Sölvi with Codex:** frozen model comparisons, repeated runs, independent
   research, an instruction-aid test, isolated reference comparisons and a
   decision demo. Contributions and actual provider use are recorded in the
@@ -38,7 +46,7 @@ original mixed results. The continuation is not a newly successful model run.
 |---|---|---|
 | Does the model always fail? | Original eight attempts: **3 wins, 2 ties, 3 deficits** against frozen KF + MPC. Both earlier seed-500 pilots scored 1.0. | Keep model wins visible. Two terminal battery deaths drive much of the original mean deficit. |
 | Do failures recur? | Nine new attempts on three failure-selected cases: **2 wins, 2 ties, 5 deficits; 3 deaths**. All exact replays, no infrastructure findings. | Energy failures recur conditionally, but recovery also occurs without changing the prompt. This is not a random-map failure rate. |
-| Does clearer accounting help? | B is a separately declared twelve-attempt comparison with contemporaneous controls. Four pairs are complete; all favor the aid so far, but four attempts remain. | Wait for the full block. The intervention combines energy and command-queue advice; it does not identify which part causes a change. |
+| Does clearer accounting help? | All twelve declared attempts complete: **five paired improvements, one tie; mean C 0.406571 / T 0.732265**. Aid survives and returns home in 6/6. | The improvement threshold passes, but gap-removal fails on noisy 504. Combined energy/queue advice does not isolate a mechanism; selected cases do not measure map-wide reliability. |
 | Is the reference simply too weak? | Candidate 24: fresh rush mean gain **0.007898**, noisy scores all tie. Candidate 27 has lower inspected-set means than either earlier policy. | Preserve capable alternatives and negative results; do not silently substitute a different reference per map. |
 | Can the model generate a transferable controller? | One-response synthesis and forty fresh-map cells are predeclared; preparation underway. | This tests a different condition from online agency, without buying another model call for every map. No result yet. |
 
@@ -135,7 +143,7 @@ building a replacement.
 The user reported $15.70 at the start of this overnight work. Earlier
 $4.2977204 runs are separate. The launch guard is $12 cumulative overnight
 usage, leaving room for work already running; no retries or result replacement.
-Block A reports $3.9709816 and the first eight B attempts $3.722155. Synthesis
+Block A reports $3.9709816 and all twelve B attempts $5.4645252. Synthesis
 reserves at most $1 for a single bounded request; no request has run yet.
 These are reported/estimated usage figures, not an independently checked
 provider balance. Codex credit consumption is not separately metered here.
@@ -157,8 +165,8 @@ view. See [readiness](afterquery-readiness.md) for the submission contract.
 
 ## Active handoff
 
-Finish B and publish its complete comparison, run the reviewed bounded
-synthesis experiment, integrate the isolated wording correction, update this
+Run the reviewed bounded synthesis experiment, integrate the isolated
+wording correction after independent B review, update this
 brief/readiness and reconcile final costs. Current claims and integration
 state are in [TEAM_STATUS.md](../TEAM_STATUS.md). No final project, mission,
 reference, deployment or prize choice has been made on behalf of the team.
