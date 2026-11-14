@@ -32,7 +32,7 @@ The protected checks, source/task hashes, execution limits, prompts, exact model
 
 The [six-case preflight](stereo-survey-followup-results/pilot-02/preflight.json) passes through the actual container interface. Empty plans are valid with zero science; unknown-image plans are invalid with zero science. The reference reaches its proved optima, **44 compact / 57 expanded**, in **under two seconds each** including container overhead on this machine. These are used development cases, not fresh model results.
 
-Six focused checks cover bundle isolation, source tampering, freezing all generations before evaluation, safe extraction, public imports/read-only execution, input mutation isolation, and timeout/output/runtime failures. The 12 existing geometry, replay and reference tests also pass. The cached SDK import succeeds; no model request has been made.
+Six focused checks cover bundle isolation, source tampering, freezing all generations before evaluation, safe extraction, public imports/read-only execution, input mutation isolation, and timeout/output/runtime failures. The 12 existing geometry, replay and reference tests also pass. The cached SDK import was verified without making a model request.
 
 Maximum spend for this three-request batch: **$5 total** for all three generations. [Official standard global pricing](https://platform.claude.com/docs/en/models/opus-5-5/overview), checked 14 November, is $4 per million input tokens and $20 per million output tokens. The runner counts input tokens and reserves the full possible output charge plus a margin before each call. It records provider usage and stops on unknown prior usage. No automatic retries, caching, fast mode or regional-price override is requested. A request interrupted before usage is recorded blocks the next launch pending reconciliation.
 
@@ -46,3 +46,15 @@ STEREO_DOCKER_TESTS=1 python3 -m unittest discover -s tests/stereo_survey_experi
 ```
 
 For the authorized batch, run `ask` for `plain-1`, `plain-2` and `hinted-1` with the approved total budget, then `evaluate` for each. `ask` requires `--approved-budget-usd` and an API credential supplied through the environment; never put a key in command arguments or repository files. The runner refuses to overwrite attempts or evaluations.
+
+## Generation checkpoint, before fresh evaluation
+
+All three Opus 5.5 requests completed normally (`end_turn`) and returned syntactically valid `solve(mission)` programs. No generated code ran on the host, no program was edited, and no fresh mission has been evaluated at this checkpoint. [Frozen program hashes](stereo-survey-followup-results/pilot-02/frozen-generations.json) precede the fresh check.
+
+| Attempt | Output tokens, including thinking | Thinking tokens | Reported cost |
+|---|---:|---:|---:|
+| Plain 1 | 9,298 | 5,103 | $0.225392 |
+| Plain 2 | 15,335 | 10,425 | $0.346132 |
+| Hinted 1 | 20,573 | 14,930 | $0.451636 |
+
+Total reported generation cost: **$1.023160**. All three receive the same 48 held-out missions next; quality is not known yet. The hinted response exceeded the original 16,000-token allowance, so increasing the allowance prospectively avoided truncating that trial.
