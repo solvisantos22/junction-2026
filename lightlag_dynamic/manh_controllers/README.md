@@ -144,6 +144,75 @@ The suites:
   - Candidate: a rollout planner that sends whole plans at window openings.
 - **Heading noise of 6° on `rush_noisy`.** Bound 16 drops to the controllers' level (53% vs 52% at delay 3), so no controller can help: the setting is too hard.
 
+## Discriminative seeds
+
+On seed 500, the Harbor reference (`kf_mpc`) and Claude Opus 5.5 both score 1.000, on `rush` and on `rush_noisy`. That seed cannot show a gap between a model and the reference. `seeds.py` looks for seeds that a feedback controller using only the five public tools nearly solves, while each shortcut an agent might take falls well short.
+
+```bash
+python3 -m lightlag_dynamic.manh_controllers.seeds --seeds 1000-1499 --profiles rush rush_noisy --delay 3
+```
+
+The settings match Sölvi's Harbor experiments: horizon 50, noise level 1, bumpiness 0, delay 3. Each seed is played once per controller; the noise is seeded by the episode seed. The run takes about 80 s on 18 workers.
+
+**Criteria**, declared in the module before the search range was played, per profile and seed:
+- **Selectors:** controllers 19, 20, 21 and 24 must all end alive and home, with every score at least 0.90.
+- **Tier 1, "needs feedback":** `blind` (plans once, never reads telemetry) and `cautious` (one leg, then waits for all its telemetry) both score at most 0.60.
+- **Tier 2, "needs delay-aware, rule-aware feedback":** tier 1, plus `stale_telemetry` (treats the last packet as the present) and `window_blind` (ignores deadlines and discoveries) both score at most 0.60.
+- **Ranking:** by the gap between the lowest selector and the highest shortcut.
+- **Reported, never selected on:** `kf_mpc` (controller 1, the frozen Harbor reference) and bound 16. This avoids picking seeds where the reference happened to be lucky.
+
+**Selection uses scripted controllers only, never a model's outcome.** A seed that every shortcut fails shows that it needs the behaviour, not that a model lacks it. Seed 500 passes tier 1 on both profiles, and Opus solved it.
+
+Seeds 1000–1499, delay 3:
+
+| Profile | Selectors ≥ 0.90 | Tier 1 | Tier 2 | 19 | `kf_mpc` | Bound 16 | Blind | Cautious | Window-blind |
+|---|---|---|---|---|---|---|---|---|---|
+| `rush` | 139 | 34 | 14 | 81% | 78% | 82% | 60% | 59% | 64% |
+| `rush_noisy` | 55 | 18 | 15 | 69% | 68% | 81% | 54% | 40% | 17% |
+
+The last six columns are mean scores. Below, the top tier-2 seeds per profile. Scores are shares of the maximum. Controllers 19–24 score the same on every row listed.
+
+`rush`:
+
+| Seed | Gap | 19–24 | `kf_mpc` (1) | Bound 16 | Blind | Cautious | Window-blind | Targets (launch + found) |
+|---|---|---|---|---|---|---|---|---|
+| 1428 | +0.50 | 1.00 | 0.75 | 1.00 | 0.42 | 0.46 | 0.50 | 5 + 2 |
+| 1295 | +0.48 | 1.00 | 0.88 | 0.83 | 0.50 | 0.50 | 0.52 | 5 + 2 |
+| 1095 | +0.47 | 1.00 | 1.00 | 1.00 | 0.50 | 0.50 | 0.53 | 5 + 1 |
+| 1100 | +0.44 | 1.00 | 0.67 | 1.00 | 0.56 | 0.56 | 0.50 | 5 + 1 |
+| 1156 | +0.44 | 1.00 | 0.67 | 1.00 | 0.56 | 0.56 | 0.50 | 5 + 1 |
+| 1001 | +0.42 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.58 | 5 + 1 |
+| 1035 | +0.42 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.58 | 5 + 1 |
+| 1155 | +0.42 | 1.00 | 1.00 | 1.00 | 0.50 | 0.56 | 0.58 | 5 + 2 |
+| 1208 | +0.42 | 1.00 | 1.00 | 1.00 | 0.50 | 0.52 | 0.58 | 5 + 2 |
+| 1390 | +0.42 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.58 | 5 + 1 |
+
+`rush_noisy`:
+
+| Seed | Gap | 19–24 | `kf_mpc` (1) | Bound 16 | Blind | Cautious | Window-blind | Targets (launch + found) |
+|---|---|---|---|---|---|---|---|---|
+| 1165 | +0.80 | 1.00 | 1.00 | 1.00 | 0.05 | 0.20 | 0.00 | 5 + 1 |
+| 1344 | +0.55 | 1.00 | 1.00 | 1.00 | 0.45 | 0.36 | 0.00 | 5 + 2 |
+| 1458 | +0.52 | 1.00 | 1.00 | 1.00 | 0.23 | 0.48 | 0.00 | 5 + 1 |
+| 1129 | +0.50 | 0.90 | 0.90 | 1.00 | 0.40 | 0.40 | 0.00 | 5 + 1 |
+| 1460 | +0.50 | 1.00 | 1.00 | 1.00 | 0.50 | 0.45 | 0.45 | 5 + 1 |
+| 1035 | +0.44 | 1.00 | 1.00 | 1.00 | 0.56 | 0.56 | 0.00 | 5 + 1 |
+| 1155 | +0.42 | 1.00 | 1.00 | 1.00 | 0.50 | 0.42 | 0.58 | 5 + 2 |
+| 1018 | +0.40 | 1.00 | 1.00 | 1.00 | 0.60 | 0.50 | 0.00 | 5 + 1 |
+| 1318 | +0.40 | 1.00 | 1.00 | 0.72 | 0.60 | 0.45 | 0.00 | 5 + 1 |
+| 1001 | +0.36 | 0.92 | 0.92 | 1.00 | 0.56 | 0.56 | 0.50 | 5 + 1 |
+
+**Tier 2 on both profiles: 1001, 1021, 1035, 1155, 1390.**
+- `kf_mpc` scores 1.00 on all five on `rush`.
+- On `rush_noisy` it scores 1.00 on 1035 and 1155, 0.92 on 1001 and 1390, and 0.90 on 1021.
+
+Caveats:
+- **For a Harbor comparison against `kf_mpc`, prefer seeds where it scores 1.00.** On 1428, 1295, 1100 and 1156 (`rush`), the frozen reference itself falls short, so a model could beat it there.
+- **The agreement check is weak.** The four selectors share one planner, and 24 equals 19 on the published profiles. They score the same on 480 of 500 `rush` seeds and 434 of 500 `rush_noisy` seeds.
+- **Tier 2 is in practice decided by `window_blind`.** `stale_telemetry` runs out of energy on nearly every seed: it scores above 0 on 31 `rush` seeds and 14 `rush_noisy` seeds, and never above 0.20.
+- **Bound 16 is not a strict upper bound.** Its tight planner sometimes scores below the selectors, for example 0.83 on 1295 and 0.72 on 1318.
+- **These seeds are reserved for this search.** 0–19, 100–139, 200–209, 300–319, 400–419 and 500–504 are taken by development, held-out checks and Sölvi's Harbor comparisons.
+
 ## Files
 
 | File | Contents |
@@ -153,6 +222,7 @@ The suites:
 | `scenarios.py` | `ScenarioEnvironment`: the dynamic environment plus separate noise dials, exact telemetry and a truth tap for bounds, and the Part B factors |
 | `superlog.py` | Per-decision, per-packet and per-episode logging, with failure labels |
 | `swarm.py` | Suites, the parallel runner, the report, the command line |
+| `seeds.py` | Discriminative-seed finder: the declared criteria, the players and a ranked report |
 
 Failure labels, per episode:
 
