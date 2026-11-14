@@ -1,0 +1,150 @@
+{
+  "checks": [
+    "seed commitments and complete four-context model/reference coverage",
+    "committed source, copied task source, generated task and export file hashes",
+    "all public successes/errors and full hidden replay reconstructed from pinned source",
+    "protected result, verifier detail, reward.txt and Harbor reward agree",
+    "completed exception-free trials, protocol model/config and known reported costs"
+  ],
+  "errors": [],
+  "excluded_smoke_runs": [
+    "smoke-nop",
+    "smoke-reference"
+  ],
+  "limits": [
+    "Reported cost is harness evidence, not provider billing reconciliation.",
+    "Commitments establish assignment consistency, not proof of when they were published.",
+    "Smoke controls are excluded because their pre-freeze source was dirty.",
+    "This audits reproducibility and evidence consistency, not population reliability."
+  ],
+  "model_costs_complete": true,
+  "passed": true,
+  "runs": [
+    {
+      "context": "uncertain",
+      "finished_at": "2026-11-14T11:32:11.426148Z",
+      "passed": true,
+      "public_tool_calls": 7,
+      "reported_cost_usd": 0.1124056,
+      "reproduced_tool_errors": 0,
+      "reward": 0.325,
+      "role": "model",
+      "run": "model-uncertain",
+      "source_commit": "a7f72ef38ea8783f23325166f521fd3eff1cc33e",
+      "source_files_verified": 14,
+      "started_at": "2026-11-14T11:30:19.063171Z",
+      "task_files_verified": 20
+    },
+    {
+      "context": "uncertain",
+      "finished_at": "2026-11-14T11:32:46.221790Z",
+      "passed": true,
+      "public_tool_calls": 12,
+      "reported_cost_usd": null,
+      "reproduced_tool_errors": 0,
+      "reward": 0.325,
+      "role": "reference",
+      "run": "matched-reference-uncertain",
+      "source_commit": "a7f72ef38ea8783f23325166f521fd3eff1cc33e",
+      "source_files_verified": 14,
+      "started_at": "2026-11-14T11:32:28.034322Z",
+      "task_files_verified": 20
+    },
+    {
+      "context": "likely_firm",
+      "finished_at": "2026-11-14T11:34:12.981109Z",
+      "passed": true,
+      "public_tool_calls": 4,
+      "reported_cost_usd": 0.0359776,
+      "reproduced_tool_errors": 0,
+      "reward": 0.9,
+      "role": "model",
+      "run": "model-likely_firm",
+      "source_commit": "a7f72ef38ea8783f23325166f521fd3eff1cc33e",
+      "source_files_verified": 14,
+      "started_at": "2026-11-14T11:32:30.193844Z",
+      "task_files_verified": 20
+    },
+    {
+      "context": "likely_firm",
+      "finished_at": "2026-11-14T11:35:39.562983Z",
+      "passed": true,
+      "public_tool_calls": 9,
+      "reported_cost_usd": null,
+      "reproduced_tool_errors": 0,
+      "reward": 0.9,
+      "role": "reference",
+      "run": "matched-reference-likely_firm",
+      "source_commit": "a7f72ef38ea8783f23325166f521fd3eff1cc33e",
+      "source_files_verified": 14,
+      "started_at": "2026-11-14T11:35:21.585481Z",
+      "task_files_verified": 20
+    },
+    {
+      "context": "likely_soft",
+      "finished_at": "2026-11-14T11:37:06.136213Z",
+      "passed": true,
+      "public_tool_calls": 5,
+      "reported_cost_usd": 0.0375582,
+      "reproduced_tool_errors": 0,
+      "reward": 0.4,
+      "role": "model",
+      "run": "model-likely_soft",
+      "source_commit": "a7f72ef38ea8783f23325166f521fd3eff1cc33e",
+      "source_files_verified": 14,
+      "started_at": "2026-11-14T11:35:23.723311Z",
+      "task_files_verified": 20
+    },
+    {
+      "context": "likely_soft",
+      "finished_at": "2026-11-14T11:38:02.761894Z",
+      "passed": true,
+      "public_tool_calls": 9,
+      "reported_cost_usd": null,
+      "reproduced_tool_errors": 0,
+      "reward": 0.4,
+      "role": "reference",
+      "run": "matched-reference-likely_soft",
+      "source_commit": "a7f72ef38ea8783f23325166f521fd3eff1cc33e",
+      "source_files_verified": 14,
+      "started_at": "2026-11-14T11:37:44.486045Z",
+      "task_files_verified": 20
+    },
+    {
+      "context": "costly_probe",
+      "finished_at": "2026-11-14T11:39:31.437362Z",
+      "passed": true,
+      "public_tool_calls": 4,
+      "reported_cost_usd": 0.04067,
+      "reproduced_tool_errors": 0,
+      "reward": 0.0,
+      "role": "model",
+      "run": "model-costly_probe",
+      "source_commit": "a7f72ef38ea8783f23325166f521fd3eff1cc33e",
+      "source_files_verified": 14,
+      "started_at": "2026-11-14T11:37:46.740566Z",
+      "task_files_verified": 20
+    },
+    {
+      "context": "costly_probe",
+      "finished_at": "2026-11-14T11:40:02.414818Z",
+      "passed": true,
+      "public_tool_calls": 9,
+      "reported_cost_usd": null,
+      "reproduced_tool_errors": 0,
+      "reward": 0.0,
+      "role": "reference",
+      "run": "matched-reference-costly_probe",
+      "source_commit": "a7f72ef38ea8783f23325166f521fd3eff1cc33e",
+      "source_files_verified": 14,
+      "started_at": "2026-11-14T11:39:44.414468Z",
+      "task_files_verified": 20
+    }
+  ],
+  "schema_version": 1,
+  "source_commits": [
+    "a7f72ef38ea8783f23325166f521fd3eff1cc33e"
+  ],
+  "verified_reported_cost_usd": 0.2266114,
+  "verified_runs": 8
+}

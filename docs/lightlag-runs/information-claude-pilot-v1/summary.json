@@ -1,0 +1,260 @@
+{
+  "completed_model_trials": 4,
+  "harness": "OpenCode 1.19.5 / Harbor 0.25",
+  "interpretation": "All four initial information choices, route choices and commit timings match the exact public-information reference. Costly-probe zero is stochastic loss, not a reasoning failure. No difficulty gap exposed.",
+  "limitations": [
+    "One session in each of four hand-designed development contexts. Not a population success-rate estimate.",
+    "The one probing case observed a soft signal; adaptive reaction to a firm signal was not tested by Claude.",
+    "Single uncertainty and a binary decision; does not test allocation among competing information sources or continuous rover control.",
+    "Dollar figures are reported usage, not independently checked invoice. No hard dollar cap; no budget truncations observed."
+  ],
+  "mean_realized_reward": 0.40625,
+  "mean_reference_reward": 0.40625,
+  "model": "anthropic/claude-opus-5-5",
+  "optimal_public_information_choices": 4,
+  "planned_model_trials": 4,
+  "protocol_commit": "a7f72ef38ea8783f23325166f521fd3eff1cc33e",
+  "retries": 0,
+  "rows": [
+    {
+      "attempts": 1,
+      "completion_tick": 11,
+      "context": "uncertain",
+      "episode_status": "complete",
+      "exception_info": null,
+      "expected_strategy_values": {
+        "always_probe": 0.53375,
+        "blind_probe": 0.4125,
+        "never_probe": 0.45,
+        "selective": 0.53375
+      },
+      "invalid_service_calls": 0,
+      "model": "claude-opus-5-5",
+      "model_actions": [
+        {
+          "action": "probe",
+          "sent_tick": 0
+        },
+        {
+          "action": "commit",
+          "route": "detour",
+          "sent_tick": 3
+        }
+      ],
+      "optimal_public_information_choice_and_timing": true,
+      "public_tool_calls": 7,
+      "reference_decisions": {
+        "commit_sent_tick": 3,
+        "expected_reward": 0.53375,
+        "final_tick": 30,
+        "policy": "selective",
+        "posterior_firm": 0.09999999999999998,
+        "probe_used": true,
+        "route": "detour",
+        "strategy": "always_probe"
+      },
+      "reference_reward": 0.325,
+      "reported_cost_usd": 0.1124056,
+      "reward": 0.325,
+      "signal": "soft",
+      "signal_used": true,
+      "status": "complete",
+      "terrain": "soft",
+      "trial_name": "uncertain__3TTBJAu",
+      "usage": {
+        "cost_usd": 0.1124056,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.1124056,
+            "n_cache_tokens": 68223,
+            "n_input_tokens": 68237,
+            "n_output_tokens": 767
+          }
+        },
+        "n_cache_tokens": 68223,
+        "n_input_tokens": 68237,
+        "n_output_tokens": 767,
+        "rollout_details": null
+      }
+    },
+    {
+      "attempts": 1,
+      "completion_tick": 4,
+      "context": "likely_firm",
+      "episode_status": "complete",
+      "exception_info": null,
+      "expected_strategy_values": {
+        "always_probe": 0.78375,
+        "blind_probe": 0.78375,
+        "never_probe": 0.855,
+        "selective": 0.855
+      },
+      "invalid_service_calls": 0,
+      "model": "claude-opus-5-5",
+      "model_actions": [
+        {
+          "action": "commit",
+          "route": "shortcut",
+          "sent_tick": 0
+        }
+      ],
+      "optimal_public_information_choice_and_timing": true,
+      "public_tool_calls": 4,
+      "reference_decisions": {
+        "commit_sent_tick": 0,
+        "expected_reward": 0.855,
+        "final_tick": 30,
+        "policy": "selective",
+        "posterior_firm": 0.95,
+        "probe_used": false,
+        "route": "shortcut",
+        "strategy": "never_probe"
+      },
+      "reference_reward": 0.9,
+      "reported_cost_usd": 0.0359776,
+      "reward": 0.9,
+      "signal": "firm",
+      "signal_used": false,
+      "status": "complete",
+      "terrain": "firm",
+      "trial_name": "likely_firm__JayY87c",
+      "usage": {
+        "cost_usd": 0.0359776,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.0359776,
+            "n_cache_tokens": 52463,
+            "n_input_tokens": 52473,
+            "n_output_tokens": 571
+          }
+        },
+        "n_cache_tokens": 52463,
+        "n_input_tokens": 52473,
+        "n_output_tokens": 571,
+        "rollout_details": null
+      }
+    },
+    {
+      "attempts": 1,
+      "completion_tick": 8,
+      "context": "likely_soft",
+      "episode_status": "complete",
+      "exception_info": null,
+      "expected_strategy_values": {
+        "always_probe": 0.325,
+        "blind_probe": 0.32499999999999996,
+        "never_probe": 0.4,
+        "selective": 0.4
+      },
+      "invalid_service_calls": 0,
+      "model": "claude-opus-5-5",
+      "model_actions": [
+        {
+          "action": "commit",
+          "route": "detour",
+          "sent_tick": 0
+        }
+      ],
+      "optimal_public_information_choice_and_timing": true,
+      "public_tool_calls": 5,
+      "reference_decisions": {
+        "commit_sent_tick": 0,
+        "expected_reward": 0.4,
+        "final_tick": 30,
+        "policy": "selective",
+        "posterior_firm": 0.05,
+        "probe_used": false,
+        "route": "detour",
+        "strategy": "never_probe"
+      },
+      "reference_reward": 0.4,
+      "reported_cost_usd": 0.0375582,
+      "reward": 0.4,
+      "signal": "soft",
+      "signal_used": false,
+      "status": "complete",
+      "terrain": "soft",
+      "trial_name": "likely_soft__pNY49YB",
+      "usage": {
+        "cost_usd": 0.0375582,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.0375582,
+            "n_cache_tokens": 52466,
+            "n_input_tokens": 52476,
+            "n_output_tokens": 591
+          }
+        },
+        "n_cache_tokens": 52466,
+        "n_input_tokens": 52476,
+        "n_output_tokens": 591,
+        "rollout_details": null
+      }
+    },
+    {
+      "attempts": 1,
+      "completion_tick": null,
+      "context": "costly_probe",
+      "episode_status": "failed",
+      "exception_info": null,
+      "expected_strategy_values": {
+        "always_probe": 0.4125,
+        "blind_probe": 0.4125,
+        "never_probe": 0.45,
+        "selective": 0.45
+      },
+      "invalid_service_calls": 0,
+      "model": "claude-opus-5-5",
+      "model_actions": [
+        {
+          "action": "commit",
+          "route": "shortcut",
+          "sent_tick": 0
+        }
+      ],
+      "optimal_public_information_choice_and_timing": true,
+      "public_tool_calls": 4,
+      "reference_decisions": {
+        "commit_sent_tick": 0,
+        "expected_reward": 0.45,
+        "final_tick": 30,
+        "policy": "selective",
+        "posterior_firm": 0.5,
+        "probe_used": false,
+        "route": "shortcut",
+        "strategy": "never_probe"
+      },
+      "reference_reward": 0,
+      "reported_cost_usd": 0.04067,
+      "reward": 0.0,
+      "signal": "soft",
+      "signal_used": false,
+      "status": "complete",
+      "terrain": "soft",
+      "trial_name": "costly_probe__PcNxmv4",
+      "usage": {
+        "cost_usd": 0.04067,
+        "metadata": null,
+        "model_usage": {
+          "anthropic/claude-opus-5-5": {
+            "cost_usd": 0.04067,
+            "n_cache_tokens": 52600,
+            "n_input_tokens": 52610,
+            "n_output_tokens": 609
+          }
+        },
+        "n_cache_tokens": 52600,
+        "n_input_tokens": 52610,
+        "n_output_tokens": 609,
+        "rollout_details": null
+      }
+    }
+  ],
+  "schema_version": 1,
+  "source_commit": "a7f72ef38ea8783f23325166f521fd3eff1cc33e",
+  "total_reported_cost_usd": 0.2266114,
+  "unrun_trials": 0
+}

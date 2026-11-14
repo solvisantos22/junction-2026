@@ -347,6 +347,29 @@ These are recommended evidence choices, not newly asserted official entry requir
   Four hand-designed development contexts; no Claude run, sponsor API use,
   continuous-rover improvement, final task choice or prize entry is claimed.
 
+### R12 — 14 November — Protected Claude information-choice pilot
+
+- Human direction: Sölvi requested actual model testing of the approved
+  learning-before-commitment prototype before expanding it.
+- Codex implemented the isolated MCP simulator and Harbor package, froze four
+  context trials with seed commitments, ran controls and container isolation
+  checks, and audited public decisions, exact replays, grades and source hashes.
+- Claude contribution: four actual `anthropic/claude-opus-5-5` playthroughs using
+  OpenCode 1.19.5 / Harbor 0.25. It chose when to probe, used the uncertain case's
+  soft signal, and selected the optimal route and commitment timing in all four.
+  Scores 0.325/0.9/0.4/0 equal the protected references. The zero is stochastic
+  loss under the expected-reward objective, not a reasoning error.
+- Verification: 40 package + 3 packaging tests; separate simulator/verifier;
+  actual reference/no-op preflight; independent replay, task-hash, grade, usage
+  and commitment audit. Four planned sessions completed, no retry/replacement or
+  observed truncation. Total **reported API cost $0.2266114**, not a checked invoice.
+- Evidence: [protocol/package commit `a7f72ef`](https://github.com/solvisantos22/junction-2026/commit/a7f72ef),
+  [results and handoff](lightlag-information-pilot.md),
+  [ledger and artifacts](lightlag-runs/information-claude-pilot-v1/summary.json).
+- Limits: four hand-designed development cases, one session each; no model
+  difficulty gap or population reliability established. Competing information
+  sources are proposed next; no final task choice or prize submission made.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.

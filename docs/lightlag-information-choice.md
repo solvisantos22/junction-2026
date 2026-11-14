@@ -23,7 +23,8 @@ python3 -m lightlag_information.study --output /tmp/new-information-choice-study
 
 Use a new output path: existing evidence is never overwritten. The local
 five-method callback interface is for development, not a security boundary.
-The model pilot still needs a protected service/Harbor package.
+The [protected Claude pilot](lightlag-information-pilot.md) now supplies a
+separate simulator service and Harbor verifier.
 
 ## What the comparisons mean
 
@@ -104,8 +105,10 @@ and independently enumerated legal relevant probe/commit timings and contingent
 route choices using exact rational arithmetic. All 29 package tests pass;
 independent review found no remaining blocker. Existing evidence is untouched.
 
-**Handoff:** the mechanism is worth a protected model pilot. That pilot has not
-run; provider cost for this slice is $0. Freeze its instructions, resource budget
-and evaluation cases before calling a model. Test whether the model can select
-information appropriately; retain successes. Expansion remains conditional on
-that result. The current canonical Harbor task and continuous rover are unchanged.
+**Handoff:** the [subsequent protected Claude pilot](lightlag-information-pilot.md)
+is complete: all four information/route decisions and timings match the exact
+reference. Total reported pilot cost is $0.2266114; this original scripted slice
+cost $0. The mechanism works, but these four model trials expose no reasoning
+gap. The pilot page records limitations and a proposed next experiment on
+choosing between competing observations. Expansion and final task selection
+remain open. The current canonical Harbor task and continuous rover are unchanged.

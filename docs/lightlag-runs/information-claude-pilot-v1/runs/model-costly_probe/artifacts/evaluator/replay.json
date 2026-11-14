@@ -1,0 +1,313 @@
+{
+  "context": {
+    "id": "costly_probe",
+    "prior_firm": 0.5,
+    "probe_energy": 3
+  },
+  "evaluation": {
+    "completed": false,
+    "completion_tick": null,
+    "context_id": "costly_probe",
+    "energy": 0,
+    "probe_used": false,
+    "reward": 0,
+    "route": "shortcut",
+    "status": "failed",
+    "success": false
+  },
+  "events": [
+    {
+      "action": "briefing",
+      "delivery_tick": 0,
+      "energy": 10,
+      "route": null,
+      "state_tick": 0,
+      "status": "ready"
+    },
+    {
+      "action": "commit",
+      "delivery_tick": 3,
+      "energy": 0,
+      "route": "shortcut",
+      "state_tick": 2,
+      "status": "failed"
+    }
+  ],
+  "seed": 243883439040327543942551400763609021449,
+  "signal": "soft",
+  "terrain": "soft",
+  "transcript": [
+    {
+      "arguments": {},
+      "method": "rules",
+      "result": {
+        "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. At most one probe and one commitment; probe must precede commitment in accepted order. Commitment is immutable on acceptance.",
+        "command_schema": [
+          {
+            "action": "probe"
+          },
+          {
+            "action": "commit",
+            "route": "shortcut|detour"
+          },
+          {
+            "action": "wait"
+          }
+        ],
+        "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+        "context": {
+          "id": "costly_probe",
+          "prior_firm": 0.5,
+          "probe_energy": 3
+        },
+        "delay": 1,
+        "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+        "horizon": 30,
+        "initial_energy": 10,
+        "max_advance_ticks": 5,
+        "max_batch_size": 5,
+        "normalization": 10,
+        "penalty_per_tick": 0.25,
+        "probe": "Spend probe_energy at execution and produce the fixed episode signal. Signal equals terrain with signal_accuracy. Repeated log reads add no evidence.",
+        "routes": {
+          "detour": {
+            "duration": 6,
+            "energy": {
+              "firm": 8,
+              "soft": 8
+            },
+            "target_value": 6
+          },
+          "shortcut": {
+            "duration": 2,
+            "energy": {
+              "firm": 4,
+              "soft": 12
+            },
+            "target_value": 10
+          }
+        },
+        "signal_accuracy": 0.9,
+        "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+        "trip": "A completed route includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+      }
+    },
+    {
+      "arguments": {},
+      "method": "map",
+      "result": {
+        "context": {
+          "id": "costly_probe",
+          "prior_firm": 0.5,
+          "probe_energy": 3
+        },
+        "description": "Choose one immutable trip: shortcut to a 10-point target or detour to a separate 6-point target, both returning home.",
+        "routes": {
+          "detour": {
+            "duration": 6,
+            "energy": {
+              "firm": 8,
+              "soft": 8
+            },
+            "target_value": 6
+          },
+          "shortcut": {
+            "duration": 2,
+            "energy": {
+              "firm": 4,
+              "soft": 12
+            },
+            "target_value": 10
+          }
+        },
+        "terrain_states": [
+          "firm",
+          "soft"
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "commands": [
+          {
+            "action": "commit",
+            "route": "shortcut"
+          }
+        ]
+      },
+      "method": "uplink",
+      "result": {
+        "accepted": [
+          {
+            "action": "commit",
+            "execution_tick": 2,
+            "route": "shortcut"
+          }
+        ],
+        "sent_tick": 0
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 5,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 0,
+            "route": "shortcut",
+            "state_tick": 2,
+            "status": "failed"
+          }
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 10,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 0,
+            "route": "shortcut",
+            "state_tick": 2,
+            "status": "failed"
+          }
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 15,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 0,
+            "route": "shortcut",
+            "state_tick": 2,
+            "status": "failed"
+          }
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 20,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 0,
+            "route": "shortcut",
+            "state_tick": 2,
+            "status": "failed"
+          }
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 25,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 0,
+            "route": "shortcut",
+            "state_tick": 2,
+            "status": "failed"
+          }
+        ]
+      }
+    },
+    {
+      "arguments": {
+        "ticks": 5
+      },
+      "method": "advance",
+      "result": {
+        "current_tick": 30,
+        "entries": [
+          {
+            "action": "briefing",
+            "delivery_tick": 0,
+            "energy": 10,
+            "route": null,
+            "state_tick": 0,
+            "status": "ready"
+          },
+          {
+            "action": "commit",
+            "delivery_tick": 3,
+            "energy": 0,
+            "route": "shortcut",
+            "state_tick": 2,
+            "status": "failed"
+          }
+        ]
+      }
+    }
+  ]
+}
