@@ -17,32 +17,50 @@ Kristján asked for an environment that is closer to real Mars driving, harder f
 
 Nobody can reach every target, so which ones, in what order and by which way over the ground is the task. Everything needed is published: `rules()` gives every formula and number, `map()` the grid, and the agent's container holds the ground model as code (`/app/lightlag_surface.py`).
 
-## Where it stands (Saturday 14 November, about 18:30 Helsinki)
+## Where it stands (Saturday 14 November, about 19:15 Helsinki)
 
-All numbers are scores from 0 to 1 on one mission. Development worlds are seeds 1 to 24; the task's world is seed 2026, fixed before anything had played it.
+All numbers are scores from 0 to 1 on one mission. Development worlds are seeds 1 to 24; the task's world is seed 2026, fixed before anything had played it. Task version 0.1.0.
 
-| Controller | Development worlds | The task's world |
+**On the task's world, through Harbor:**
+
+| Who | Score | How it ended |
 |---|---|---|
-| **Reference pilot** (`pilot.py`) | **0.505** mean over 24, never lost or stranded | **0.565** through Harbor |
-| The pilot without route optimisation | 0.31 mean over 12, stranded on 6 | |
-| A straight-line driver that ignores the ground | 0.15 mean over 12, stranded on 8 | |
-| Claude Sonnet 5.5 as an agent (OpenCode in Harbor) | | 0.528 |
-| Claude Opus 5.5 as an agent | its first program replayed: 0.35 mean over 8, stranded on 2 | 0.515 and 0.216 |
-| Claude Opus 5.5, one request, one program | 0.34 mean over 24; the pilot is higher on all 24 | 0.237 |
-| Claude Haiku 5.5, one request | 0.04 mean over 4 | 0.091 |
-| Claude Sonnet 5.5, one request | 0.11 mean over 4 | 0.060 |
-| Claude Haiku 5.5 as an agent | | 0.000 |
+| **Reference pilot** (`pilot.py`) | **0.565** | 29 samples, at the lander |
+| Sonnet 5.5 agent, run 1 | 0.528 | 26 samples, at the lander. It stopped and restarted its program mid-mission; the final program started from tick 0 runs the battery flat at tick 117 |
+| Opus 5.5 agent, run 3 | 0.515 | 24 samples, at the lander, with 0.7 battery units to spare at its lowest |
+| Opus 5.5 agent, run 4 | 0.341 | 15 samples, at the lander |
+| Opus 5.5 agent, run 1 | 0.216 | 17 samples; parked at the lander, then drove off on the last tick and ended 0.6 m outside its radius: half score |
+| Sonnet 5.5 agent, run 2 | 0.147 | 8 samples, at the lander with a full battery |
+| Sonnet 5.5 agent, run 3 | 0.059 | 9 samples, 69 m from the lander when time ran out |
+| Opus 5.5 agent, run 2 | 0.000 | 17 samples, then the battery ran flat at tick 372, 143 m from the lander |
+| Haiku 5.5 agent, run 1 | 0.000 | no samples |
+| Do nothing (Harbor `nop`) | 0.000 | |
+| Walk away after a quarter of the day | 0.073 | the reference, stopped at tick 105 |
 
-The reference is above every Claude run so far, on the task's world and on every development world replayed. **The margin over the two best agent runs is small: 0.565 against 0.528 and 0.515.** Those agents wrote, in seven and twelve minutes, programs that plan almost as well as the pilot. The margin over everything else is wide.
+The seven Opus and Sonnet agent runs average **0.258**; the reference is above every one of them. One request for one program, replayed in the sandbox on the same world: Opus 0.237, Haiku 0.091, Sonnet 0.060.
 
-What it took to get the pilot there is the useful part for the write-up: its first route search settled for days spent among cheap targets near the lander, and two agent runs beat it. A beam search that builds routes forward in time, and so finds the far clusters worth a long drive, moved it from 0.48 to 0.505 on the development worlds and from 0.45 to 0.565 on the task's.
+**On other worlds:**
+
+| Controller | Result |
+|---|---|
+| Reference pilot | 0.505 mean on development worlds 1 to 24, 0.515 on twelve worlds it was never tuned on (1000 to 1011); never lost or stranded on any of them |
+| The pilot without route optimisation | 0.31 mean over 12, stranded on 6 |
+| A straight-line driver that ignores the ground | 0.15 mean over 12, stranded on 8 |
+| Opus agent 3's program (the best Opus run), replayed | 0.375 mean on development worlds 1 to 8: lost on one, stranded on one; the pilot is higher on all 8 |
+| Opus's one-request program, replayed | 0.34 mean over 24; the pilot is higher on all 24 |
+
+Kristján's other session measured the same question at scale on Modal: on 300 fresh worlds the pilot is higher than each saved Claude program on 298 to 300 of them (`docs/traverse-farm.md` on `main`). A replay measures the program an agent left behind, not the agent.
+
+**What to take from it.** A good Opus or Sonnet run writes, in a few minutes, a program that plans almost as well as the pilot: the two best runs are within 0.04 to 0.05 of it. What separates the reference is that it does this every time: it keeps the battery above a floor along the whole route, not on average over the day, and it is home with ticks to spare. Three of the seven agent runs lost all or half of their score to one such mistake (a flat battery, a rover parked just outside the lander's radius, a rover still far out when time ran out), and none of the seven used more than a quarter of its 30 minutes.
+
+What it took to get the pilot there: its first route search settled for days spent among cheap targets near the lander, and two agent runs beat it. A beam search that builds routes forward in time, and so finds the far clusters worth a long drive, moved it from 0.48 to 0.505 on the development worlds and from 0.45 to 0.565 on the task's.
 
 ## Run
 
 From the repository root. Python 3.9+, standard library only; Harbor and the sandbox need Docker.
 
 ```sh
-python3 -m unittest discover -s tests/lightlag_traverse -v            # 44 tests
+python3 -m unittest discover -s tests/lightlag_traverse -v            # 59 tests
 python3 -m lightlag_traverse.terrain 7                                # one world as a character map
 python3 -m lightlag_traverse.play --seeds 1-8 --policies pilot,greedy,straight,nothing
 harbor run -p harbor/lightlag-traverse -a oracle                      # the reference through Harbor, about a minute
@@ -64,4 +82,4 @@ python3 -m lightlag_traverse.make_task --check                        # are the 
 | `make_task.py` | Writes `harbor/lightlag-traverse/` |
 | `sandbox.py`, `sandbox_worker.py`, `oneshot.py` | Run model-written controllers in a locked-down container; build the one-request test |
 
-The demo page for this ground is being built in `viewer/traverse/` (`viewer/traverse-demo.html`); what is committed now shows scripted stand-ins, not model runs.
+The demo page for this ground is `viewer/traverse-demo.html`, one file, built by `viewer/build_traverse.py` from the saved runs under `docs/lightlag-runs/traverse-*`: the reference in gold, every Claude run on the same world beside it.
