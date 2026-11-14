@@ -16,4 +16,33 @@ Start with a cheap falsification: if a generated general solver already matches 
 
 The protected checks, source/task hashes, execution limits, prompts, exact model configuration and spend limit must be concrete before a model call. No API spend is authorized by this document, and no unrelated session's budget is reused. Preparation and offline validation are within the user's approved continued investigation.
 
-Implementation, evaluation protocol and results will be recorded here.
+## Frozen falsification package
+
+[Runner](../tools/stereo_survey_experiments/pilot.py), [plain prompt](stereo-survey-followup-results/pilot-01/plain.md), [hinted prompt](stereo-survey-followup-results/pilot-01/hinted.md), and [machine-readable protocol](stereo-survey-followup-results/pilot-01/protocol.json).
+
+- Three independent requests to `claude-opus-5-5`: two plain, one with a concrete enumeration/coverage hint. Adaptive thinking, high effort, 16,000 maximum output tokens including thinking, no tool feedback, no retry or fallback. The SDK is Anthropic 2.8.0. This measures **one-generation program synthesis**, not a full Harbor/OpenCode coding session.
+- Public geometry and replay source plus two already-used development missions (compact seed 0, expanded seed 1). No reference/search source, winning plan, optimum or held-out mission enters a request. Python standard library and those helpers are available at execution; additional solver packages are absent. These restrictions make success useful falsification but make failure weak evidence.
+- Freeze all three responses/program hashes before any fresh evaluation. Use seeds **62000–62023**, compact and expanded: 48 missions per program, with the same missions across programs. Retain all generations, syntax/extraction failures, invalid plans, runtime failures and timeouts. No manual repair or best-run replacement. Correlated profiles and repeated programs are not 144 independent missions. This range avoids a teammate's separately reserved rover seed labels; it was selected before any check mission was generated.
+- Each program gets a fresh unprivileged, network-disabled Docker container with one CPU, 512 MiB RAM, read-only files, 16 MiB scratch and a 30-second total limit including startup. Output is capped at 64 KiB. The local Python 3.12 image is pinned by digest. Mount only the submitted program, worker and public helpers; never the repository, credentials or reference. The host separately verifies the returned plan against an untouched mission.
+- Reference proof limits remain 10,000 local plans and 10 million joint checks. Report raw science, validity, exact-match count and mean fraction of certified nonzero optimum per program/profile. A capped, invalid or inconsistent reference is retained and excluded explicitly from normalization; it prevents a clean difficulty conclusion. A Docker infrastructure failure also prevents interpreting a low score as model failure.
+
+**Prospective interpretation:** a plain program attaining at least 95% of optimum in both profiles, with every plan valid and every reference certified, is enough to stop pursuing this configuration as a large model gap. Exact 48/48 success is stronger negative evidence. A successful hinted program means the apparent difficulty is readily repaired by an algorithmic hint. If all three fall short, inspect failures and run a feedback-enabled coding agent with solver access before arguing for promotion. This threshold is a follow-up decision rule, separate from the already-failed scripted-control gate; neither establishes a universal reference win on larger missions.
+
+## Offline verification and spend
+
+The [six-case preflight](stereo-survey-followup-results/pilot-01/preflight.json) passes through the actual container interface. Empty plans are valid with zero science; unknown-image plans are invalid with zero science. The reference reaches its proved optima, **44 compact / 57 expanded**, in **under two seconds each** including container overhead on this machine. These are used development cases, not fresh model results.
+
+Six focused checks cover bundle isolation, source tampering, freezing all generations before evaluation, safe extraction, public imports/read-only execution, input mutation isolation, and timeout/output/runtime failures. The 12 existing geometry, replay and reference tests also pass. The cached SDK import succeeds; no model request has been made.
+
+Proposed maximum spend: **$2 total** for all three generations. [Official standard global pricing](https://platform.claude.com/docs/en/models/opus-5-5/overview), checked 14 November, is $4 per million input tokens and $20 per million output tokens. The runner counts input tokens and reserves the full possible output charge plus a margin before each call. It records provider usage and stops on unknown prior usage. No automatic retries, caching, fast mode or regional-price override is requested. A request interrupted before usage is recorded blocks the next launch pending reconciliation.
+
+**Status: ready, awaiting an explicit stereo API allowance.** The user's continued-investigation request authorized the preparation and offline checks; no dollar amount was supplied for this follow-up. Other chats' approved budgets are not reused. No new fresh check seed has been evaluated and no model gap is claimed.
+
+To verify the prepared bundle without model calls:
+
+```sh
+python3 -m tools.stereo_survey_experiments.pilot check docs/stereo-survey-followup-results/pilot-01
+STEREO_DOCKER_TESTS=1 python3 -m unittest discover -s tests/stereo_survey_experiments -v
+```
+
+After approval, run `ask` for `plain-1`, `plain-2` and `hinted-1` with the approved total budget, then `evaluate` for each. `ask` requires `--approved-budget-usd` and an API credential supplied through the environment; never put a key in command arguments or repository files. The runner refuses to overwrite attempts or evaluations.
