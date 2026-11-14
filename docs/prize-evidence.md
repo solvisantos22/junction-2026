@@ -240,6 +240,8 @@ These are recommended evidence choices, not newly asserted official entry requir
   [twelve-row ledger](lightlag-runs/overnight-b-summary.json),
   [audits](lightlag-audits/overnight/block-b/README.md),
   [tool](../tools/lightlag_experiments/overnight_runs.py).
+  Second pair adds **0.807692 treatment / 0.615385 control**, both alive/home;
+  all four B audits are exact, B usage **$2.1651708**, eight assignments pending.
   Reported usage is not a verified balance. No Modal/Gemini use or prize entry.
 
 ## Keep recording with minimal overhead

@@ -360,6 +360,16 @@ reconciliation, integrity failures or the cumulative $12 guard. A failed
 export never authorizes proceeding from a previous summary. Credentials and
 private OpenCode state are excluded from shareable evidence.
 
+### Second pair: noisy 502, repetition 1
+
+B03 treatment scores **10.5/13 = 0.807692**; B04 control scores **8/13 =
+0.615385**, both alive at base. The paired difference is **+0.192308**.
+All four B attempts audit exactly with no infrastructure findings. Reported
+B cost is **$2.1651708**, A+B **$6.1361524**; eight assignments remain.
+The control's main reference-relative loss is an empty-queue interval at
+call 10 / tick 11. These two completed pairs still do not establish the
+six-pair treatment effect or a causal decomposition of the combined aid.
+
 ## Status
 
 Block A protocol was published at `253b263` before new attempts; all nine are
