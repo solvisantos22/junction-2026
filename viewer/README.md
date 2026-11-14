@@ -51,6 +51,8 @@ Press **M**: the three attempts and the reference on the same clock. At the end 
 | ← → | step one tick |
 | 1 2 3 4 | show that run (attempts 1–3, then the reference) |
 | M | switch between Mission and Compare |
+| Z | zoom one screen to fill the stage (press again for the next, then back to four); a double-click on a screen does the same |
+| , . | jump to the previous / next event in the run |
 | N | next mission |
 | − = | slower / faster |
 | Esc | back to the title screen |

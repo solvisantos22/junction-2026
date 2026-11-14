@@ -3,9 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lightlag · Mission control</title>
-<meta name="theme-color" content="#0b0807">
-<link rel="icon" href="data:,">
+<title>Lightlag</title>
 <!--DEV-->
 <link rel="stylesheet" href="style.css">
 <script type="importmap">{"imports": {"three": "./vendor/three.module.js"}}</script>
@@ -16,58 +14,27 @@
 <!--/DEV-->
 </head>
 <body>
-<canvas id="gl" aria-hidden="true"></canvas>
+<canvas id="gl"></canvas>
 <div id="ui">
   <header id="bar">
-    <button id="menu" title="Choose a mission (Esc)" aria-label="Choose a mission"><b>LIGHTLAG</b><span id="mname"></span><span class="menu-arrow">⌄</span></button>
-    <nav id="runs" aria-label="Recorded runs"></nav>
-    <div class="header-actions">
-      <button id="cmp" title="Compare all runs (M)" aria-pressed="false">Compare runs</button>
-      <button id="help" title="Controls and mission guide (?)" aria-label="Controls and mission guide">?</button>
-      <button id="fullscreen" title="Full screen (F)" aria-label="Enter full screen">⛶</button>
-    </div>
+    <button id="menu" title="Missions (Esc)"><b>LIGHTLAG</b><span id="mname"></span></button>
+    <nav id="runs"></nav>
+    <button id="play" title="Play / pause (space)">▶</button>
+    <div class="timeline"><canvas id="marks"></canvas><input id="scrub" type="range" min="0" max="50" step="0.01" value="0" aria-label="Time"></div>
+    <div id="clock"><b>00</b><span></span></div>
+    <button id="speed" title="Playback speed (- and =)">1×</button>
+    <button id="cmp" title="All four runs at once (M)">Compare</button>
   </header>
-  <section id="briefing" aria-label="Mission briefing">
-    <div class="objective"><span class="eyebrow">MISSION OBJECTIVE</span><b>Collect science. Bring it home.</b><span id="mission-facts"></span></div>
-    <div class="mission-progress"><b id="sample-count">0</b><span>samples<br>collected</span></div>
-    <p class="scoring">Full credit at base · Half away from base<br><strong>Battery empty = zero score</strong></p>
-  </section>
-  <nav id="view-tabs" aria-label="Mission views"></nav>
-  <main id="stage" aria-label="Mission replay"></main>
-  <footer id="transport">
-    <div class="event-strip"><span class="eyebrow">MISSION LOG</span><span id="event-status" role="status"></span><div class="event-actions"><button id="prev-event" title="Previous event ([)" aria-label="Previous mission event">‹</button><button id="next-event" title="Next event (])">Next event ›</button></div></div>
-    <div class="playback">
-      <button id="restart" title="Restart replay (R)" aria-label="Restart replay">↺</button>
-      <button id="prev-tick" title="Back one tick (←)" aria-label="Back one tick">‹</button>
-      <button id="play" title="Play / pause (Space)" aria-label="Play replay">▶ <span>Play</span></button>
-      <button id="next-tick" title="Forward one tick (→)" aria-label="Forward one tick">›</button>
-      <div class="timeline"><canvas id="marks" aria-hidden="true"></canvas><input id="scrub" type="range" min="0" max="50" step="1" value="0" aria-label="Mission tick"></div>
-      <div id="clock"><b>00</b><span></span></div>
-      <button id="speed" title="Playback speed (- and =)" aria-label="Playback speed: 1×">1×</button>
-    </div>
-    <div class="replay-note"><span>RECORDED REPLAY <i></i> Selected cases, including model wins</span><span>Space to pause <span class="desktop-hint">· ← → to step · ? for controls</span></span></div>
-  </footer>
+  <main id="stage"></main>
 </div>
-<div id="title" role="dialog" aria-modal="true" aria-labelledby="title-heading">
+<div id="title">
   <div class="in">
-    <p class="eyebrow">REMOTE OPERATIONS / MISSION REPLAY</p>
-    <h1 id="title-heading">LIGHTLAG</h1>
-    <p class="tag">Mars moves on.<br>Earth sees it <b id="titleK">3</b> ticks later.</p>
-    <p class="intro">Follow an AI rover collecting samples, meeting deadlines and finding its way home. Watch what happens when its information arrives late.</p>
-    <div class="mission-heading"><span>CHOOSE A MISSION</span><span>3 AI attempts + a reference controller</span></div>
+    <h1>LIGHTLAG</h1>
+    <p class="tag">Drive a rover on Mars. Everything you see is <b id="titleK">3</b> ticks old.</p>
     <ol id="missions"></ol>
-    <p class="help">Click a mission to watch <span>or use ↑ ↓ and Enter</span></p>
-    <p class="src">Recorded agent runs. Compare every included attempt, including the wins. The mission notes explain how each case was selected.</p>
+    <p class="help">Enter start · Space pause · ← → step · , . jump to events · 1–4 switch run · M compare · Z zoom a screen · N next mission · F full screen</p>
+    <p class="src">Recorded runs, not a simulation in this page: every tool call shown was made by the agent in that run.</p>
   </div>
 </div>
-<dialog id="guide" aria-labelledby="guide-heading">
-  <button id="close-guide" aria-label="Close guide">×</button>
-  <p class="eyebrow">MISSION GUIDE</p><h2 id="guide-heading">Every decision travels.</h2>
-  <p>Collect samples before their deadlines and finish alive at base for full credit. An empty battery cancels all collected value. Finishing alive away from base earns half credit.</p>
-  <div class="guide-views"><p><b>Mars</b>True rover state in the saved replay.</p><p><b>Earth</b>The most recently received telemetry.</p><p><b>Map</b>Sample sites, travelled path and queued drives.</p><p><b>Console</b>The agent's recorded tool calls. These indicators are read-only.</p></div>
-  <p class="guide-legend"><span class="legend-path">━ Travelled</span><span class="legend-queue">┄ Queued aim</span><span class="legend-earth">◌ Last seen</span><span class="legend-sample">● Collected</span></p>
-  <p class="guide-detail">Queued paths show commanded distances; slip can change where the rover lands. The HOME marker is a viewer estimate of minimum energy to finish at base, not a guaranteed safe route.</p>
-  <dl class="shortcuts"><div><dt>Space</dt><dd>Play / pause</dd></div><div><dt>← →</dt><dd>Step one tick</dd></div><div><dt>[ ]</dt><dd>Previous / next event</dd></div><div><dt>R</dt><dd>Restart replay</dd></div><div><dt>1–4</dt><dd>Switch run</dd></div><div><dt>M</dt><dd>Compare runs</dd></div><div><dt>C</dt><dd>Follow / overview camera</dd></div><div><dt>N</dt><dd>Next mission</dd></div><div><dt>− +</dt><dd>Playback speed</dd></div><div><dt>F</dt><dd>Full screen</dd></div><div><dt>Esc</dt><dd>Close focus / missions</dd></div></dl>
-</dialog>
 </body>
 </html>

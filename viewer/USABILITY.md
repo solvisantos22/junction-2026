@@ -1,5 +1,7 @@
 # Mission-control demo improvements
 
+> **Superseded on 14 November.** Kristján found this layout too squashed and asked for the four full-screen views back. The briefing strip, the transport strip, the per-panel buttons, the mission menu, the guide and the phone layouts described below were removed again. Two ideas survive as keys with no panels: jump between events (`,` and `.`) and zoom one screen (`Z`). This file is kept as the record of that increment; the current controls are in [README.md](README.md).
+
 Open `mars-demo.html` for the standalone demo, or serve `viewer/mars/` for development. The data builder and saved outcomes remain the source of truth.
 
 The default desktop layout gives Mars more space, with Earth's delayed view alongside and the map and recorded tool activity below. The persistent objective explains sample collection, energy and final scoring. Samples collected and the latest mission event update as the replay advances. The opening menu uses focusable mission buttons; the guide explains the views, map symbols and controls.
