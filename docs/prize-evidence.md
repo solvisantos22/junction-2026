@@ -384,8 +384,10 @@ These are recommended evidence choices, not newly asserted official entry requir
   enumeration of 2,016 strategy/state outcomes agrees. Selective exact mean
   0.6743 vs skipping 0.63, either fixed probe 0.63245, and matched entropy 0.6647667.
 - [Design, protocol and results](lightlag-allocation-experiment.md). Structural
-  result only at this increment; actual Claude trials are next. No continuous
-  rover changes, measured model gap, final rules choice or prize submission.
+  results plus the first actual Claude round: six Opus5.5/OpenCode1.19.5 sessions,
+  all acquisition/route/timing decisions optimal, all scores match references,
+  $0.3669134 reported cost. The frozen second repetitions are in progress.
+  No continuous rover changes, measured model gap, final rules choice or prize submission.
 
 ## Keep recording with minimal overhead
 

@@ -1,0 +1,34 @@
+{
+    "task": {
+        "path": "<pilot-runtime>/tasks/case_5-r1"
+    },
+    "trial_name": "case_5-r1__XLMBUpU",
+    "trials_dir": "<pilot-runtime>/jobs/model-case_5-r1",
+    "agent": {
+        "name": "opencode",
+        "model_name": "anthropic/claude-opus-5-5",
+        "kwargs": {
+            "version": "1.19.5",
+            "opencode_config": {
+                "agent": {
+                    "build": {
+                        "steps": 12
+                    }
+                },
+                "provider": {
+                    "anthropic": {
+                        "models": {
+                            "claude-opus-5-5": {
+                                "limit": {
+                                    "context": 200000,
+                                    "output": 8192
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "job_id": "ab2e8d8f-9bab-4a12-9d0d-b3cb3416fc9c"
+}

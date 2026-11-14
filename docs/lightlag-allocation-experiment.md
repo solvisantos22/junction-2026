@@ -107,15 +107,27 @@ reproduces the study into a new directory (with uncompressed JSON-lines replays)
 
 ## Model pilot in progress
 
-The first two of twelve planned sessions are complete and independently audited.
-Claude inspected a in case_1 and b in its mirrored case_2, received a soft signal
-in each, and committed to the detour at the optimal tick. Both rewards are 0.325,
-matching their protected references; both acquisitions and posterior route
-choices maximize expected reward. Reported cost so far is $0.1818758. The harder
-value-versus-uncertainty cases and the second repetitions are still pending.
-Only soft-signal branches are covered by these first two actual model trials.
+Round one is independently audited: all six acquisitions, posterior route
+choices and commitment timings are optimal and every reward equals the protected
+reference. Scores are 0.325, 0.325, 0.825, 0.825, 0.9 and 0.9. Both mirrored
+value-versus-uncertainty cases are solved and both irrelevant-inspection cases
+are skipped. Round-one reported cost is $0.3669134. The six predeclared fresh
+second repetitions are still in progress; no difficulty gap is established.
+
+The [round-one ledger](lightlag-runs/information-allocation-pilot-v1/progress-round1.json)
+retains the other six assignments as not yet exported. Observed signal coverage
+is soft in cases1/2 and firm in cases3/4; the reverse branches remain untested by
+models at this checkpoint.
 
 The [exact reference outcome distribution](lightlag-runs/information-allocation-pilot-v1/reference-distribution.json)
 predicts 1.224 failed trips across twelve independent sessions even under the
-optimal policy. Therefore realized failure counts alone do not establish bad
+optimal policy. Realized failure counts alone therefore cannot establish bad
 reasoning; acquisition, conditional route and timing are audited separately.
+
+**Spend coordination:** this round's $0.3669134 brings this coordinator's recorded
+usage to $10.5329876, including the earlier calculated synthesis charge. The
+separate Rocks $1.4873214 may or may not share the same provider balance. The
+historical user-reported $15.70 and old morning-brief headroom are not a live
+balance; reconcile the account before funding the separate nine-attempt task
+contract proposal. The current twelve-trial pilot keeps its frozen serial
+$1.00 stop-new-launches guard and $1.50 soft target.

@@ -1,0 +1,60 @@
+{
+    "schema_version": 2,
+    "task": {
+        "name": "case_6-r1",
+        "version": "0.1.0",
+        "type": "local",
+        "digest": "sha256:1fa9bb5ebcfb4c37a514a533128628c8fd8cb15fa1173105c825e58347504a30",
+        "path": "<pilot-runtime>/tasks/case_6-r1"
+    },
+    "install_only": false,
+    "timeout_multiplier": 1.0,
+    "agent": {
+        "name": "opencode",
+        "model_name": "anthropic/claude-opus-5-5",
+        "skip_model_parsing": false,
+        "skills": [],
+        "resume_trajectory": false,
+        "extra_allowed_hosts": [],
+        "kwargs": {
+            "version": "1.19.5",
+            "opencode_config": {
+                "agent": {
+                    "build": {
+                        "steps": 12
+                    }
+                },
+                "provider": {
+                    "anthropic": {
+                        "models": {
+                            "claude-opus-5-5": {
+                                "limit": {
+                                    "context": 200000,
+                                    "output": 8192
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "mcp_servers": []
+    },
+    "bridge_inputs": {},
+    "skills": [],
+    "environment": {
+        "type": "docker",
+        "force_build": false,
+        "delete": true,
+        "stream": false,
+        "cpu_enforcement_policy": "auto",
+        "memory_enforcement_policy": "auto",
+        "extra_docker_compose": [],
+        "kwargs": {},
+        "extra_allowed_hosts": []
+    },
+    "verifier": {
+        "disable": false,
+        "environment_mode": "separate"
+    }
+}

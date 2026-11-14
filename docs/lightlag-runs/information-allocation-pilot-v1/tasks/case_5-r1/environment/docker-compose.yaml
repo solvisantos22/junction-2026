@@ -1,0 +1,21 @@
+services:
+  main:
+    depends_on:
+      allocation:
+        condition: service_healthy
+  allocation:
+    build:
+      context: ./simulator
+    expose:
+      - "8000"
+    environment:
+      INFORMATION_SEED: "54083660154824175745144853539016441303"
+      INFORMATION_CONTEXT: "case_5"
+      INFORMATION_ARTIFACT_DIR: /evaluator
+      INFORMATION_TOKEN_FILE: /run/information/token
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 3s
