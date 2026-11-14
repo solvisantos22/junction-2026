@@ -280,6 +280,23 @@ class Search(unittest.TestCase):
         self.assertEqual(saved_before_each_part, [0, 2, 4])
         self.assertEqual([row["seed"] for row in played], [0, 1, 2, 3, 4])
 
+    def test_rows_saved_by_other_code_are_played_again(self):
+        calls = []
+
+        def run_many(batch):
+            calls.append(len(batch))
+            return [dict(candidate=job["candidate"], seed=job["seed"], policy="greedy", options={},
+                         reward=0.2, alive=True, at_base=True, seconds=1.0, source="new-code") for job in batch]
+
+        job = {"policy": "greedy", "candidate": "greedy", "seed": 3}
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "rows.jsonl").write_text(json.dumps(dict(job, options={}, reward=0.1, alive=True,
+                                                                     at_base=True, source="old-code")) + "\n")
+            search.Ledger(Path(folder), source="old-code").play(run_many, [job])   # same code: reused
+            played = search.Ledger(Path(folder), source="new-code").play(run_many, [job])
+        self.assertEqual(calls, [1])
+        self.assertEqual(played[0]["reward"], 0.2)
+
     def test_different_players_on_the_same_world_are_different_missions(self):
         calls = []
 
