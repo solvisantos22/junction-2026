@@ -85,27 +85,30 @@ function heading(t, title, sub) {
 // ---------------------------------------------------------------- scenes
 const SCENES = {};
 
-// Claude's own account of the run: two sentences from its closing report, and what happened at each site.
-SCENES.quote = (t, D, data) => {
+// Claude's own account of the run: two sentences from its closing report, how each site ended, and the verdict.
+SCENES.quote = (t, D, data, cues) => {
   backdrop('WHY CLAUDE STRUGGLES');
   const run = data.campaign.claude.find(r => r.id === data.quotes.run);
-  rise(t, 0.2, () => {
-    text("IN CLAUDE'S OWN WORDS", 150, 190, { size: 40, color: C.gold, spacing: 0.16 });
-    text(`OPUS 5.5 · ITS CLOSING REPORT ON THE CAMPAIGN · SCORE ${two(run.score)}`, 152, 232, { size: 25, color: C.dim, spacing: 0.13 });
+  heading(t, "IN CLAUDE'S OWN WORDS", `FROM OPUS 5.5'S CLOSING REPORT ON THE CAMPAIGN · IT WROTE ITS AUTOPILOT WITHIN MINUTES · IT SCORED ${two(run.score)}`);
+  // each quotation comes up when the voice gets to it, then the verdict
+  const cue = (i, otherwise) => (cues && cues[i] !== undefined ? cues[i] : otherwise);
+  const first = cue(0, 0.7), second = cue(1, Math.max(3.2, D * 0.4)), verdict = cue(2, D - 3.2);
+  const q = { size: 56, font: SANS, weight: 600, spacing: -0.012 };
+  rise(t, first, () => {
+    text('“', 96, 356, { size: 150, font: SANS, weight: 700, color: C.red, spacing: 0 });
+    paragraph('Energy (the main failure): the route planner only counted time. It never checked whether the battery would last.”', 190, 336, 1560, 76, q);
   });
-  const q = { size: 58, font: SANS, weight: 600, spacing: -0.012 };
-  rise(t, 0.7, () => {
-    text('“', 96, 392, { size: 150, font: SANS, weight: 700, color: C.red, spacing: 0 });
-    paragraph('Energy (the main failure): the route planner only counted time. It never checked whether the battery would last.”', 190, 372, 1560, 80, q);
-  });
-  const second = Math.max(3.2, D * 0.42);
   rise(t, second, () => {
-    text('“', 96, 652, { size: 150, font: SANS, weight: 700, color: C.red, spacing: 0 });
-    paragraph('My autopilot … ran all three missions in about 45 seconds, without me checking anything between them.”', 190, 632, 1560, 80,
-      { ...q, color: C.ink });
+    text('“', 96, 566, { size: 150, font: SANS, weight: 700, color: C.red, spacing: 0 });
+    paragraph('My autopilot … ran all three missions in about 45 seconds, without me checking anything between them.”', 190, 546, 1560, 76, q);
+  });
+  rise(t, verdict, () => {
+    rect(120, 908, 1680, 2, C.line);
+    const a = text("CLAUDE DOESN'T FAIL AT CODING.", 120, 990, { size: 58, color: C.ink, spacing: 0.1 });
+    text('IT FAILS AT PLANNING THE DAY.', 120 + a + 34, 990, { size: 58, color: C.gold, spacing: 0.1, alpha: appear(t, verdict + 1.5, 0.4) });
   });
   // the three sites of that run
-  const y = 880, labels = run.sites.map((site, i) => site.end === 'lost' ? ['BATTERY FLAT', C.red] : site.end === 'away' ? ['STRANDED', C.gold] : [`HOME · ${two(site.reward)}`, C.ice]);
+  const y = 742, labels = run.sites.map((site, i) => site.end === 'lost' ? ['BATTERY FLAT', C.red] : site.end === 'away' ? ['STRANDED', C.gold] : [`HOME · ${two(site.reward)}`, C.ice]);
   run.sites.forEach((site, i) => rise(t, second + 0.9 + i * 0.25, () => {
     const x = 190 + i * 420;
     rect(x, y, 380, 96, C.key); rect(x, y, 6, 96, labels[i][1]);
@@ -119,28 +122,35 @@ SCENES.quote = (t, D, data) => {
   });
 };
 
-// The reference: four things it does, and the battery over one day beside two Claude runs.
+// The reference: what it does, as one chain whose links light up as the voice names them, over the battery
+// through one day beside two Claude runs.
 SCENES.reference = (t, D, data, cues) => {
   backdrop('THE REFERENCE');
   heading(t, 'A PLANNER, NOT A MODEL', 'THE REFERENCE PLAYS THROUGH THE SAME FIVE TOOLS · NO HIDDEN INFORMATION');
-  const items = [
-    ['KNOWS WHERE IT WILL BE', 'A position filter. Every command is aimed at where the rover will be when the command lands, not where the last fix shows it.'],
-    ['LEARNS THE GROUND', 'Slip on each terrain from its own odometry; panel efficiency from its first charge.'],
-    ['PRICES EVERY LEG AGAINST THE SUN', 'It simulates the battery along the whole route, and waits rather than dip under its reserve.'],
-    ['HOME BEFORE THE DAY ENDS', 'No rover lost or stranded on 300 fresh worlds.'],
-  ];
-  items.forEach(([title, body], i) => rise(t, cues[i] !== undefined ? cues[i] : 0.9 + i * 1.6, () => {
-    const y = 312 + i * 176;
-    text(String(i + 1).padStart(2, '0'), 122, y + 6, { size: 58, color: C.gold, spacing: 0.04 });
-    text(title, 212, y, { size: 42, spacing: 0.09 });
-    paragraph(body, 212, y + 44, 600, 34, { size: 25, font: SANS, weight: 400, color: C.dim, spacing: 0 });
-  }));
+  const links = [['TRACKS THE ROVER', 'THROUGH THE DELAY'], ['LEARNS HOW EACH', 'SURFACE SLIPS'], ['PRICES EVERY LEG', 'AGAINST THE SUN'], ['HOME BEFORE', 'THE DAY ENDS']];
+  const left = 120, between = 58, wide = (1680 - 3 * between) / 4, top = 262, tall = 108;
+  links.forEach(([a, b], i) => {
+    const x = left + i * (wide + between), shown = appear(t, 0.5 + i * 0.12, 0.4);
+    const lit = appear(t, cues[i] !== undefined ? cues[i] : i === 3 ? D - 2.2 : 1.0 + i * 1.6, 0.4);     // the last link lights when the rover is home
+    g.save(); g.globalAlpha = shown;
+    rect(x, top, wide, tall, C.key); rect(x, top, wide, 5, C.line); rect(x, top, wide * lit, 5, C.gold);
+    for (const [words, dy] of [[a, 48], [b, 88]]) {
+      text(words, x + 26, top + dy, { size: 32, color: C.faint, spacing: 0.11, alpha: 1 - lit });
+      text(words, x + 26, top + dy, { size: 32, color: C.ink, spacing: 0.11, alpha: lit });
+    }
+    if (i < 3) {                                           // an arrow to the next link
+      const ax = x + wide + 14, ay = top + tall / 2;
+      g.strokeStyle = lit > 0.5 ? C.gold : C.faint; g.lineWidth = 4; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath();
+      g.moveTo(ax, ay); g.lineTo(ax + 28, ay); g.moveTo(ax + 18, ay - 10); g.lineTo(ax + 28, ay); g.lineTo(ax + 18, ay + 10); g.stroke();
+    }
+    g.restore();
+  });
   // battery chart
-  const B = data.battery, x0 = 960, x1 = 1800, y0 = 880, y1 = 330, T = B.ticks;
+  const B = data.battery, x0 = 200, x1 = 1760, y0 = 900, y1 = 468, T = B.ticks;
   const X = tick => lerp(x0, x1, tick / T), Y = v => lerp(y0, y1, v / B.capacity);
   const p = clamp((t - 1.2) / Math.max(3, D - 3.2), 0, 1), upto = Math.round(p * T);
   rise(t, 0.6, () => {
-    text(`BATTERY OVER THE DAY · SITE ${B.site}`, x0, 286, { size: 30, color: C.dim, spacing: 0.14 });
+    text(`BATTERY OVER THE DAY · SITE ${B.site}`, x0, 438, { size: 28, color: C.dim, spacing: 0.14 });
     rect(x0, y0, x1 - x0, 2, C.faint);
     for (const v of [0, 50, 100]) { text(`${v}%`, x0 - 16, Y(v) + 9, { size: 24, color: C.faint, align: 'right', spacing: 0.05 }); rect(x0, Y(v), x1 - x0, 1, 'rgba(243,234,217,.10)'); }
     for (const tick of [0, 105, 210, 315, 420]) text(String(tick), X(tick), y0 + 38, { size: 24, color: C.faint, align: 'center', spacing: 0.05 });
@@ -163,16 +173,25 @@ SCENES.reference = (t, D, data, cues) => {
     if (s.dead !== null && upto >= s.dead) cross(X(s.dead), Y(0), appear(t, 1.2 + (s.dead / T) * Math.max(3, D - 3.2), 0.3));   // where a battery ran flat
     else if (s.dead === null) { g.save(); g.fillStyle = color; g.beginPath(); g.arc(X(end), Y(s.battery[end]), 8, 0, Math.PI * 2); g.fill(); g.restore(); }
   }
-  // which line is which, under the chart
-  const dead = lines.map(([id]) => B.series[id].dead).filter(tick => tick !== null).sort((a, b) => a - b), home = B.series['campaign-reference'];
+  // where the reference stops and waits: its lowest point of the morning, which here is its lowest of the day
+  const home = B.series['campaign-reference'];
+  let low = 1; for (let tick = 2; tick <= T / 2; tick++) if (home.battery[tick] < home.battery[low]) low = tick;
+  const least = Math.min(...home.battery.slice(0, T + 1));
+  rise(t, 1.2 + (low / T) * Math.max(3, D - 3.2) + 0.2, () => {
+    const lx = X(low) - 170, ly = Y(74);                 // between the lines falling on its left and the reference climbing on its right
+    g.save(); g.strokeStyle = C.gold; g.lineWidth = 2; g.beginPath(); g.moveTo(X(low) + 24, ly + 12); g.lineTo(X(low) + 6, Y(home.battery[low]) - 12); g.stroke(); g.restore();
+    text(`WAITS FOR THE SUN · NEVER BELOW ${Math.floor(least / B.capacity * 100)}%`, lx, ly, { size: 28, color: C.gold, spacing: 0.12 });
+  }, 0);
+  // which line is which, under the chart, on one row
+  const dead = lines.map(([id]) => B.series[id].dead).filter(tick => tick !== null).sort((a, b) => a - b);
   rise(t, 1.0, () => {
-    const y = y0 + 96;
-    rect(x0, y - 11, 46, 5, C.gold);
-    text(`THE REFERENCE · HOME WITH ${Math.round(home.battery[T] / B.capacity * 100)}% LEFT`, x0 + 62, y, { size: 24, color: C.dim, spacing: 0.12 });
-    rect(x0, y + 27, 46, 4, C.ice);
-    const w = text('TWO CLAUDE OPUS RUNS', x0 + 62, y + 38, { size: 24, color: C.dim, spacing: 0.12 });
-    cross(x0 + 62 + w + 40, y + 29, 0.9);
-    text(`BATTERY FLAT AT TICK ${dead.join(' AND ')}`, x0 + 62 + w + 66, y + 38, { size: 24, color: C.red, spacing: 0.12 });
+    const y = y0 + 92; let x = x0;
+    rect(x, y - 11, 46, 5, C.gold); x += 62;
+    x += text(`THE REFERENCE · HOME WITH ${Math.round(home.battery[T] / B.capacity * 100)}% LEFT`, x, y, { size: 24, color: C.dim, spacing: 0.12 }) + 70;
+    rect(x, y - 11, 46, 4, C.ice); x += 62;
+    x += text('TWO CLAUDE OPUS RUNS', x, y, { size: 24, color: C.dim, spacing: 0.12 }) + 36;
+    cross(x, y - 9, 0.9); x += 28;
+    text(`BATTERY FLAT AT TICK ${dead.join(' AND ')}`, x, y, { size: 24, color: C.red, spacing: 0.12 });
   });
 };
 
@@ -237,12 +256,12 @@ SCENES.results = (t, D, data, cues) => {
 };
 
 // 300 fresh worlds on Modal: every world of every saved Claude program against the reference.
-SCENES.farm = (t, D, data) => {
+SCENES.farm = (t, D, data, cues) => {
   backdrop('AT SCALE · MODAL');
-  heading(t, 'WAS IT LUCK? 300 FRESH WORLDS', 'SIX PROGRAMS CLAUDE WROTE, REPLAYED AGAINST THE REFERENCE ON MODAL · UP TO 100 CONTAINERS AT ONCE');
   const f = data.farm, order = ['OPUS · AGENT 3', 'SONNET · AGENT 1', 'OPUS · AGENT 1', 'OPUS · ONE REQUEST', 'SONNET · ONE REQUEST', 'HAIKU · ONE REQUEST'];
+  heading(t, 'WAS IT LUCK? 300 FRESH WORLDS', `SIX CLAUDE PROGRAMS REPLAYED ON MODAL · UP TO ${f.containers} CONTAINERS · ABOUT ${f.missions_by_2115.toLocaleString('en-US')} MISSIONS IN ALL`);
   const programs = order.map(label => f.programs.find(p => p.label === label));
-  const x0 = 452, cellW = 3.7, top = 300, rowH = 74, n = f.worlds, sweep = Math.min(5.2, D * 0.45), wonX = 1590, lostX = 1772;
+  const x0 = 452, cellW = 3.7, top = 296, rowH = 70, n = f.worlds, sweep = Math.min(3.4, D * 0.3), wonX = 1590, lostX = 1772;
   rise(t, 0.9, () => {
     text('REFERENCE HIGHER', wonX, top - 20, { size: 20, color: C.faint, spacing: 0.12 });
     text('ROVERS LOST', lostX, top - 20, { size: 20, color: C.faint, spacing: 0.12 });
@@ -272,14 +291,20 @@ SCENES.farm = (t, D, data) => {
       rect(x, y - 18, 20, 20, color); x += 32; x += text(label, x, y, { size: 23, color: C.dim, spacing: 0.12 }) + 44;
     }
   });
-  const [open, lost] = f.lost_with_way_home_open, at = 1.4 + sweep;
-  const stats = [[`${f.reference_lost} / ${f.worlds}`, 'REFERENCE ROVERS LOST', C.gold], [`${Math.round(open / lost * 100)}%`, "OF CLAUDE'S LOST ROVERS STILL HAD A WAY HOME", C.red],
-    [f.missions_by_2115.toLocaleString('en-US'), `MISSIONS ON MODAL · ${f.core_hours_by_2115} CORE-HOURS`, C.ink]];
-  stats.forEach(([big, label, color], i) => rise(t, at + i * 0.35, () => {
-    const x = 122 + i * 600;
-    text(big, x, 934, { size: 104, color, spacing: 0.03 });
-    paragraph(label, x, 978, 520, 30, { size: 25, color: C.dim, spacing: 0.12 });
+  // the totals, when the voice gets to them; then what the few worlds Claude won have in common
+  const [open, lost] = f.lost_with_way_home_open, at = cues && cues[0] !== undefined ? cues[0] : 1.4 + sweep, note = cues && cues[1] !== undefined ? cues[1] : at + 3;
+  const stats = [[`${f.reference_higher_total.toLocaleString('en-US')} / ${f.pairs.toLocaleString('en-US')}`, 'MATCH-UPS IN WHICH THE REFERENCE SCORED HIGHER', C.gold, 122, 640],
+    [`${f.reference_lost}`, `REFERENCE ROVERS LOST ON ${f.worlds} WORLDS`, C.gold, 900, 360], [`${Math.round(open / lost * 100)}%`, "OF CLAUDE'S LOST ROVERS STILL HAD A WAY HOME", C.red, 1330, 470]];
+  stats.forEach(([big, label, color, x, wide], i) => rise(t, at + i * 0.35, () => {
+    text(big, x, 948, { size: 100, color, spacing: 0.03 });
+    paragraph(label, x, 990, wide, 30, { size: 25, color: C.dim, spacing: 0.12 });
   }));
+  rise(t, note, () => {
+    const y = top + 6 * rowH + 62, [fewer, more] = f.lost_of_two;
+    rect(x0, y - 24, 6, 62, C.ice);
+    text(`CLAUDE AHEAD IN ${f.claude_wins} OF ${f.pairs.toLocaleString('en-US')}, NEVER BY MORE THAN ${two(f.widest_win)} · ${f.ties} TIES`, x0 + 22, y, { size: 25, color: C.ink, spacing: 0.12 });
+    text(`${f.wins_of_two} OF THOSE ${f.claude_wins} BY THE TWO PROGRAMS THAT RAN THEIR BATTERY FLAT ON ${fewer} AND ${more} OF ${f.worlds} WORLDS`, x0 + 22, y + 34, { size: 25, color: C.dim, spacing: 0.12 });
+  });
 };
 
 // A small policy trained from scratch on Modal: it learns, and stays below the reference.

@@ -15,134 +15,142 @@ Its autopilot was written by Claude Opus.
 Score for this site: zero.
 
 5
-00:00:11,650 --> 00:00:15,548
-This is Lightlag Traverse, a reinforcement learning environment.
+00:00:11,625 --> 00:00:13,322
+This is Lightlag Traverse:
 
 6
-00:00:15,588 --> 00:00:18,435
-An agent drives a rover across Mars-like ground,
+00:00:13,362 --> 00:00:15,798
+one day of driving on Mars-like ground.
 
 7
-00:00:18,475 --> 00:00:20,935
-and every command lands three ticks late.
+00:00:15,838 --> 00:00:17,910
+Every command lands three ticks late,
 
 8
-00:00:20,975 --> 00:00:23,973
-The sun charges the battery; driving drains it.
+00:00:17,950 --> 00:00:20,825
+and every position fix is three ticks old.
 
 9
-00:00:24,013 --> 00:00:27,997
-More targets than a day allows, three sites in a row, no reset.
+00:00:21,508 --> 00:00:22,955
+The ground fights back.
 
 10
-00:00:28,037 --> 00:00:29,900
-Every rule is public.
+00:00:22,995 --> 00:00:24,943
+Wheels slip on sand and slopes,
 
 11
-00:00:30,625 --> 00:00:32,285
-Claude doesn't fail at coding.
+00:00:24,983 --> 00:00:27,818
+so a rover is rarely where its program thinks.
 
 12
-00:00:32,325 --> 00:00:34,860
-Within minutes, it writes a real autopilot.
+00:00:27,858 --> 00:00:30,581
+3 cm too far from a target is a miss;
 
 13
-00:00:34,900 --> 00:00:39,000
-It fails at planning a whole day: the route, the battery, the way home.
+00:00:30,621 --> 00:00:34,833
+ground too steep trips a safety stop that wipes every queued command.
 
 14
-00:00:39,550 --> 00:00:43,375
-Here, at 9% battery, our reference waits for the sun.
+00:00:35,558 --> 00:00:37,443
+And the only fuel is the sun.
 
 15
-00:00:43,850 --> 00:00:47,422
-Four ticks later, Claude's rover drives its battery to zero.
+00:00:37,483 --> 00:00:41,068
+At 9% battery, our reference stops and waits for it.
 
 16
-00:00:47,462 --> 00:00:49,850
-Waiting six ticks would have brought it home.
+00:00:41,108 --> 00:00:44,593
+Four ticks later, Claude's rover drives its battery to zero,
 
 17
-00:00:51,358 --> 00:00:54,568
-Claude's own report: the planner only counted time.
+00:00:44,633 --> 00:00:46,343
+and the site scores nothing.
 
 18
-00:00:54,608 --> 00:00:57,218
-Its program played all three sites in under a minute,
+00:00:46,383 --> 00:00:48,758
+Six ticks of waiting would have saved it.
 
 19
-00:00:57,258 --> 00:00:59,733
-before Claude checked a single result.
+00:00:50,216 --> 00:00:53,676
+In its own report, Claude says its planner only counted time,
 
 20
-00:01:00,858 --> 00:01:03,418
-The reference is a planner, not a model.
+00:00:53,716 --> 00:00:57,139
+and that all three sites were played before it checked one result.
 
 21
-00:01:03,458 --> 00:01:05,330
-It tracks the rover through the delay,
+00:00:57,179 --> 00:00:58,851
+Claude doesn't fail at coding.
 
 22
-00:01:05,370 --> 00:01:07,168
-learns how each terrain slips,
+00:00:58,891 --> 00:01:00,941
+It fails at planning the day.
 
 23
-00:01:07,208 --> 00:01:09,918
-and prices every leg of its route against the sun.
+00:01:02,258 --> 00:01:04,793
+The reference is a planner, not a model.
 
 24
-00:01:09,958 --> 00:01:12,458
-It is always home before the day ends.
+00:01:04,833 --> 00:01:06,681
+It tracks the rover through the delay,
 
 25
-00:01:13,683 --> 00:01:17,593
-Through Harbor and OpenCode, the reference scores 0.48.
+00:01:06,721 --> 00:01:08,518
+learns how each surface slips,
 
 26
-00:01:17,633 --> 00:01:20,743
-Seven Claude runs, across Opus, Sonnet and Haiku,
+00:01:08,558 --> 00:01:11,483
+and prices every leg of its route against the sun.
 
 27
-00:01:20,783 --> 00:01:22,993
-all score below 0.3.
+00:01:13,316 --> 00:01:16,376
+Through Harbor, the reference scores 0.48.
 
 28
-00:01:23,033 --> 00:01:24,305
-Three lost a rover.
+00:01:16,416 --> 00:01:20,851
+Seven Claude runs, from Haiku to Opus, all finish below 0.3,
 
 29
-00:01:24,345 --> 00:01:26,258
-Doing nothing scores zero.
+00:01:20,891 --> 00:01:22,413
+and three lost a rover.
 
 30
-00:01:27,458 --> 00:01:28,368
-Was that luck?
+00:01:22,453 --> 00:01:24,316
+Doing nothing scores zero.
 
 31
-00:01:28,408 --> 00:01:32,793
-On Modal, we replayed six of Claude's programs on 300 fresh worlds.
+00:01:25,558 --> 00:01:29,868
+On Modal, six of Claude's programs replayed 300 fresh worlds each.
 
 32
-00:01:32,833 --> 00:01:37,408
-The reference won at least 288 times, and never lost a rover.
+00:01:29,908 --> 00:01:34,731
+The reference scored higher 99 times in 100 and never lost a rover.
 
 33
-00:01:38,683 --> 00:01:46,205
-Also on Modal, a small policy trained from scratch improves from 0.09 to 0.38 in development,
+00:01:34,771 --> 00:01:36,455
+Claude's few wins were narrow,
 
 34
-00:01:46,245 --> 00:01:49,458
-still short of a greedy controller and the reference.
+00:01:36,495 --> 00:01:40,258
+mostly from programs that ran flat on up to half their worlds.
 
 35
-00:01:50,683 --> 00:01:52,318
-One command reruns it all,
+00:01:41,458 --> 00:01:43,993
+A policy trained there from scratch learns too:
 
 36
-00:01:52,358 --> 00:01:55,318
-and a live demo on Modal plays any world you pick.
+00:01:44,033 --> 00:01:48,433
+in development it reaches 0.38, still short of the reference.
 
 37
-00:01:55,358 --> 00:01:57,083
+00:01:49,783 --> 00:01:51,418
+One command reruns it all,
+
+38
+00:01:51,458 --> 00:01:54,418
+and a live demo on Modal plays any world you pick.
+
+39
+00:01:54,458 --> 00:01:56,183
 Can your agent make it home?
 
