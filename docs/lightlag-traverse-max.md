@@ -20,6 +20,22 @@ from lightlag_traverse_max.environment import make_env
 env = make_env(seed=7, option="max")      # option="normal" is Kristján's TraverseEnvironment, unchanged
 ```
 
+### Watch it
+
+`viewer/build_traverse_max.py` feeds Kristján's Traverse demo page, unchanged, with the four players on one world, one page per map. It plays the missions itself, in about 2 minutes. The pages are about 3 MB each and are not committed.
+
+```sh
+python3 viewer/build_traverse_max.py               # world 2026, the task's world: viewer/traverse-players-normal.html and -max.html
+python3 viewer/build_traverse_max.py --seed 500    # another world
+xdg-open viewer/traverse-players-max.html
+```
+
+On world 2026:
+- **Normal map:** the pilot and `manh_max` both score 0.565 (the same commands, so one track); greedy 0.250, straight 0.103.
+- **MAX map:** `manh_max` scores 0.431 and gets home. The pilot and greedy run out of battery (0.000); straight scores 0.030.
+
+The page was drawn for the normal map, so on the MAX map it lists a slip-check stop as "ground too steep", and after a lost packet it keeps the last position fix.
+
 The same five tools as the normal map (`rules`, `map`, `telemetry_log`, `uplink`, `advance`) and the same scoring. **A seed is the same mission on both maps:** the same ground, targets, deadlines, sun and hidden slip, panel and heading draws. The MAX map draws its own hidden values from separate random streams.
 
 ## What the MAX map adds
