@@ -151,6 +151,27 @@ class AddOnContractTest(unittest.TestCase):
         for needle in ('id="title"', 'id="missions"', 'class="timeline"', 'class="help"', "<!--DEV-->", "<!--/DEV-->"):
             self.assertIn(needle, page, needle)
 
+    def test_every_biome_but_main_mars_has_a_palette_that_stays_slight(self):
+        from lightlag_dynamic.biomes import BIOME_IDS, MAIN
+        addon = (REPO / "viewer" / "biomes" / "addon.js").read_text(encoding="utf-8")
+        block = addon[addon.index("const PALETTES = {"):]
+        block = block[:block.index("\n};")]
+        number = r"-?\d+(?:\.\d+)?"
+        triple = rf"\[({number}), ({number}), ({number})\]"
+        rows = re.findall(rf"^  (\w+):\s+\{{ ground: {triple}, sand: {triple}, rocks: {triple}, light: {triple}, "
+                          rf"haze: \[0x[0-9a-f]{{6}}, ({number})\], sun: ({number}) \}}", block, flags=re.M)
+        self.assertEqual([row[0] for row in rows], [biome for biome in BIOME_IDS if biome != MAIN])
+        for name, *values in rows:
+            numbers = [float(v) for v in values]
+            multipliers, haze, sun = numbers[:12], numbers[12], numbers[13]
+            with self.subTest(biome=name):
+                # A shift, not a new planet: nothing darker than half, nothing brighter than a quarter more.
+                self.assertTrue(all(0.45 <= m <= 1.25 for m in multipliers), multipliers)
+                self.assertTrue(0.0 < haze <= 0.4 and 0.7 <= sun <= 1.15)
+                # On the main demo's middle ground tone (#a34b2b) the result is still rust: red over twice blue.
+                red, blue = 0xa3 / 255 * numbers[0], 0x2b / 255 * numbers[2]
+                self.assertGreater(red, 2 * blue)
+
     def test_the_add_on_is_one_module_with_one_import(self):
         addon = (REPO / "viewer" / "biomes" / "addon.js").read_text(encoding="utf-8")
         self.assertEqual(re.findall(r"^import .*$", addon, flags=re.M), ["import * as THREE from 'three';"])

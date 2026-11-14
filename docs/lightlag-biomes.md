@@ -170,13 +170,14 @@ Controller 33's share by delay, and the difference from Main Mars at the same de
 - **Main Mars** holds the main demo's own three missions (Deadlines, Sand, Rocks), with Claude's attempts and the reference, taken from `build_mars.gather()` unchanged.
 - **Every other biome has one mission**, played when the page is built by four scripted controllers on the same map: controller 33 (best overall above), the frozen reference `kf_mpc`, the fixed plan and leg-and-wait. Keys 1–4 switch between them and M shows all four.
 - **Drawn on top of the main demo's scenes:** crust regions and, on Mars and the map only, the soft cells the Earth picture cannot know; sharp-rock fields and their rough cells; dune faces shaded by slope, with the steep ones labelled; relay passes as a strip under the timeline; one line of biome status in the top right of each screen.
+- **A slightly different Mars per biome.** Each biome shifts the main demo's own ground, sand, rocks, light, haze and sun a little, after the place it is modelled on, so the screen says which biome is playing: Relay Pass is late in the sol, cooler and dimmer; Hidden Valley a deeper rust; Bagnold Dunes has dark basalt sand; Troy Crust pale, bright soil; Gale Rock Field grey-purple ground and dark rock; Meridiani darker plains under a pale sky. Main Mars is left exactly as it is. A test keeps every shift small.
 - **The seed of each mission** is the first of the trial's seeds (2000 upward) on which the biome's own mechanic actually happens, for example the reference standing on a soft cell. It is picked to show the mechanic, not as a typical result; the tables above are the typical result.
 
 **Nothing of the main demo is edited.** `viewer/build_biomes.py` reads `viewer/mars/` as it is and adds one module, `viewer/biomes/addon.js`, which works through what the app already exposes. `viewer/mars-demo.html`, `viewer/mars/data.json`, `app.js`, `index.html` and `style.css` are not written; a test checks their hashes before and after a build.
 
 ```sh
 python3 viewer/build_biomes.py                              # rebuilds viewer/biomes-demo.html, about 5 seconds
-python3 -m unittest tests.viewer.test_build_biomes          # 11 tests, about 15 seconds
+python3 -m unittest tests.viewer.test_build_biomes          # 12 tests, about 15 seconds
 ```
 
 **Limits of the page:**
