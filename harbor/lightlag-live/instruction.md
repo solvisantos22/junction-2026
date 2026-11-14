@@ -24,7 +24,7 @@ Your score is the mean over all 6 missions, so it lies between 0 and 1. It is co
 - From then on one tick passes every second of real time, whether or not you call a tool.
 - Each mission lasts `max_ticks` ticks. The next one starts the moment it ends, on a new map, with a recharged rover at base. `rules`, `map` and `telemetry_log` then describe the new mission. You cannot see a map before its mission starts.
 - `advance(n)` waits until `n` more ticks have passed, never past the end of the mission. It returns `current_tick`, `episode_complete` (this mission has ended), `campaign_complete`, `mission` and every telemetry packet that arrived since your previous `advance`.
-- The whole campaign takes 5 minutes once started.
+- The whole campaign takes 5 minutes once started. Your session is limited to 30 minutes in total, preparation included, so start the campaign while at least 5 minutes remain.
 
 ## What makes it hard
 

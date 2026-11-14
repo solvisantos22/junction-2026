@@ -29,6 +29,7 @@ TASK = REPO / "harbor" / "lightlag-live"
 # level, ends at base with a score of at least 0.6 (it averages 0.50 over 9001-9040).
 MISSIONS = "9003:rush_noisy,9007:rush_noisy,9008:rush_noisy,9012:rush_noisy,9013:rush_noisy,9020:rush_noisy"
 SETTINGS = {"delay": 3, "ticks": 50, "seconds_per_tick": 1.0, "noise_level": 2.0}
+AGENT_TIMEOUT_SEC = 1800  # task.toml's [agent] timeout; the instruction tells the agent, so it is no hidden trap
 
 # target path in the task -> source path in the repository
 COPIES = {
@@ -67,7 +68,7 @@ artifacts = [{ source = "/evaluator", service = "lightlag" }]
 
 [task]
 name = "neural-network-november/lightlag-live"
-version = "0.1.0"
+version = "0.1.1"
 description = "Build an autopilot: %(count)d rover missions in a row through a signal delay, on a real-time clock, with noisy sensing."
 authors = []
 keywords = ["rl-environment", "signal-delay", "real-time", "control", "state-estimation", "mcp"]
@@ -90,7 +91,7 @@ timeout_sec = 60.0
 [verifier.env]
 
 [agent]
-timeout_sec = 1800.0
+timeout_sec = %(agent_timeout)d.0
 
 [environment]
 network_mode = "public"
@@ -356,7 +357,7 @@ Your score is the mean over all %(count)d missions, so it lies between 0 and 1. 
 - From then on one tick passes every %(seconds)s of real time, whether or not you call a tool.
 - Each mission lasts `max_ticks` ticks. The next one starts the moment it ends, on a new map, with a recharged rover at base. `rules`, `map` and `telemetry_log` then describe the new mission. You cannot see a map before its mission starts.
 - `advance(n)` waits until `n` more ticks have passed, never past the end of the mission. It returns `current_tick`, `episode_complete` (this mission has ended), `campaign_complete`, `mission` and every telemetry packet that arrived since your previous `advance`.
-- The whole campaign takes %(campaign_seconds)s once started.
+- The whole campaign takes %(campaign_seconds)s once started. Your session is limited to %(session)s in total, preparation included, so start the campaign while at least %(campaign_seconds)s remain.
 
 ## What makes it hard
 
@@ -408,7 +409,7 @@ def build(missions: str = MISSIONS, **overrides) -> Dict[str, bytes]:
     files: Dict[str, bytes] = {target: (REPO / source).read_bytes() for target, source in COPIES.items()}
     files["environment/simulator/lightlag_dynamic/__init__.py"] = STUB_SIMULATOR_INIT.encode()
     files["solution/lightlag_dynamic/__init__.py"] = STUB_SOLUTION_INIT.encode()
-    files["task.toml"] = (TASK_TOML % {"count": count}).encode()
+    files["task.toml"] = (TASK_TOML % {"count": count, "agent_timeout": AGENT_TIMEOUT_SEC}).encode()
     files["environment/docker-compose.yaml"] = (COMPOSE % dict(settings, missions=missions)).encode()
     files["environment/Dockerfile"] = AGENT_DOCKERFILE.encode()
     files["environment/.dockerignore"] = AGENT_DOCKERIGNORE.encode()
@@ -423,6 +424,7 @@ def build(missions: str = MISSIONS, **overrides) -> Dict[str, bytes]:
         "seconds": "second" if float(seconds) == 1 else "{:g} seconds".format(float(seconds)),
         "mission_seconds": duration(settings["ticks"] * float(seconds)),
         "campaign_seconds": duration(count * settings["ticks"] * float(seconds)),
+        "session": duration(AGENT_TIMEOUT_SEC),
     }).encode()
     manifest = {
         "schema_version": 1,
