@@ -1,0 +1,11 @@
+# Terminal training evidence
+
+All six original calls have returned. Five completed 8,192 missions; replay seed 43 reached its deadline after 6,880. Together they completed **47,840 missions in 1,495 batches**. No function execution error, stop marker or user pause was found. The local monitoring interruptions and recovery remain documented in the [main handoff](../README.md); they did not restart training.
+
+The unchanged continuation decision rejects both methods. PPO's mean validation gain from 2,048 to 8,192 is **−0.000812249**, with only one of three seeds improving. Replay has an incomplete third run; its other two seeds also declined. No extension was launched. Seed 43's latest completed declared validation checkpoint is **2,048**, and its partial training is not represented as an 8,192 result.
+
+All 52 downloaded terminal artifacts are retained here, including all 23 policy/validation checkpoint pairs and six reports. The [reconciliation](reconciliation.json) checks their hashes, six original call identities and deadlines, source/runtime pins, validation arithmetic, and exact recomputation of the continuation gate. All **736 retained validation missions** are reported home and alive, with no invalid calls. These are development results. This reconciliation does not replay the training physics or reconstruct optimizer updates; large batch archives, optimizer states and replay buffers remain on Modal volume `junction-learning-final`.
+
+The six unique calls report **$7.262395867** in estimated running CPU/memory cost. This excludes image build/startup/storage/egress and other experiments, and is not an invoice or account balance. App: [`ap-GGkMI4eQi8N9MVVuTef5Au`](https://modal.com/apps/solvisantos22/main/ap-GGkMI4eQi8N9MVVuTef5Au). There were no GPU jobs or model API calls. The earlier pilot's separately reported $1.592405 is not included in this figure.
+
+The [policy freeze](../policy-freeze.json), published in `d81fa88` before final-world execution, contains all six initializations and preserves this deadline outcome. It selects checkpoints by declared episode count, never by score. See the [evaluation plan](../evaluation-plan.md) for the distinct fresh-map and fixed-campaign comparisons.
