@@ -85,8 +85,7 @@ from 2.81% to 9.37%. The primary gain is 5.92 percentage points with interval
 policy returns fall from 33/48 to 28/48. All missions remain alive. The fixed
 screen fails its return condition. These are gains from a commitment rule, not
 new learning, and are separate from the original 40-map fresh comparison above.
-[Result and full limits](../lightlag-rl-persistence-results/README.md). Sölvi is
-already inspecting the saved missed returns. This review has now independently recomputed every arm’s scalar table, paired
+[Result and full limits](../lightlag-rl-persistence-results/README.md). Sölvi has now completed the saved missed-return diagnosis at `bfc4725`. This review has now independently recomputed every arm’s scalar table, paired
 map gain, bootstrap and decision gate, and all 21 published tests pass locally.
 The paired initial-policy home outcomes include 12 home-to-away cases and eight
 away-to-home cases; the net loss of four does not mean only four cases changed.
@@ -100,9 +99,14 @@ A concrete code-level hypothesis for the missed returns is worth checking:
 [`candidates`](../../lightlag_rl/adapter.py) filters targets by estimated travel
 and return time, while [`Pilot._drive`](../../lightlag_traverse/pilot.py) may
 wait for battery charge. A movement-time estimate is not necessarily the total
-mission time including charging waits. Sölvi’s saved-return diagnosis
-can distinguish that from route replanning, navigation error or late commitment.
-This review has not established which of them caused the return losses.
+mission time including charging waits. Sölvi’s newly published saved-return diagnosis finds all 94 away cases
+across the six groups end below 10 battery, with substantial late waiting in
+the initial persistent misses. He proposes reusing the reference planner’s
+`RouteProblem._leg`, which already models charging waits, for a matched
+one-goal visit-and-return feasibility test. This supports the same next
+experiment, but neither review establishes a causal fix without intervention.
+His persistence scope is complete and released; the next owner should claim
+that narrow interface experiment before changing code or training.
 
 ## What the saved full-agent failures show
 
@@ -156,9 +160,9 @@ This is a proposal for Sölvi's existing learning effort, not a second active
 training scope. A working commitment/return interface is necessary evidence before scaling;
 it does not establish that the learned policy will beat the beam reference.
 
-1. The fixed persistence comparison fails its return condition. Let Sölvi
-   finish inspecting the retained navigation/termination behavior before
-   launching more unchanged training. Preserve commitment when useful, but
+1. The fixed persistence comparison fails its return condition. Use Sölvi’s
+   completed diagnosis to test charging-aware visit-and-return feasibility
+   before launching more unchanged training. Preserve commitment when useful, but
    define an explicit, publicly observable return/termination condition in a
    separately frozen interface experiment.
 2. Use persistent goal decisions and a policy with candidate-set/route context.
