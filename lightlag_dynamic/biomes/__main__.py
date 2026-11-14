@@ -3,6 +3,7 @@
   python3 -m lightlag_dynamic.biomes --list
   python3 -m lightlag_dynamic.biomes --biome troy_crust --profile rush_noisy --seed 7 --delay 3 < script.jsonl
   python3 -m lightlag_dynamic.biomes --biome troy_crust+relay_pass --seed 7 --result /tmp/r.json < script.jsonl
+  python3 -m lightlag_dynamic.biomes --no-gps --profile rush_noisy --seed 7 < script.jsonl   # prototype
 
 Same protocol as `python3 -m lightlag_dynamic` (one JSON request per line on stdin, one reply
 per line on stdout, only the five public methods dispatchable), plus --biome. The default
@@ -41,6 +42,8 @@ def main(argv=None):
     parser.add_argument("--ticks", type=int, default=None, help="horizon; default: the profile's own")
     parser.add_argument("--noise-level", type=float, default=1.0,
                         help="multiplies the sensing noise and drift of the noisy profiles")
+    parser.add_argument("--no-gps", action="store_true",
+                        help="prototype: no position fix; a beacon range and a sun compass instead (see nogps.py)")
     parser.add_argument("--result", type=Path, help="write the final score to a new JSON file")
     parser.add_argument("--replay", type=Path, help="write the evaluator replay to a new JSON file")
     args = parser.parse_args(argv)
@@ -54,8 +57,13 @@ def main(argv=None):
     for path in (args.result, args.replay):
         if path is not None and (path.exists() or not path.parent.is_dir()):
             parser.error("output files must be new and their parent directories must exist")
-    env = make_biome_env(args.biome, args.seed, args.delay, args.profile, horizon=args.ticks,
-                         noise_level=args.noise_level)
+    make = make_biome_env
+    if args.no_gps:
+        from .nogps import make_nogps_env
+
+        def make(biome, seed, delay, profile, **kw):
+            return make_nogps_env(seed, delay, profile, biome=biome, **kw)
+    env = make(args.biome, args.seed, args.delay, args.profile, horizon=args.ticks, noise_level=args.noise_level)
     for line in sys.stdin:
         if not line.strip():
             continue

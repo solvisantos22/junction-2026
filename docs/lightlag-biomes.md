@@ -195,6 +195,108 @@ Controller 36's share by delay, and the difference from Main Mars at the same de
 
 **What this still does not show:** how a model plays any of it. The team's own model runs point at energy and command-queue bookkeeping under delay as where Claude loses points. Events that drop or cut the queue (a slip stop, a closed link, a worn wheel) press on exactly that, so the hard settings may cost an agent more than they cost a scripted controller. Only a model run can say.
 
+## No GPS: a prototype where the position has to be worked out
+
+*Added Saturday about 15:40 Helsinki, at Manh's suggestion. A sandbox prototype: not in the catalog, the trial or the demo page, and not a rules decision. Scripted players only.*
+
+```sh
+python3 -m lightlag_dynamic.biomes.nogps_players --seeds 0-19                 # every player, about 5 seconds (needs numpy)
+python3 -m lightlag_dynamic.biomes --no-gps --profile rush_noisy --seed 7 --delay 3 < script.jsonl
+python3 -m lightlag_dynamic.biomes.serve --no-gps --profile rush_noisy --seed 7 --delay 3    # over MCP
+python3 -m unittest tests.lightlag_dynamic.test_nogps                         # 10 tests, about 3 seconds
+```
+
+### Why taking the position away is not enough
+
+Today every telemetry packet carries an absolute position fix: exact on `rush`, within 0.3 m on the noisy profiles. It is GPS in all but name, and Mars has none. With a fix every tick nothing makes a player combine sensors.
+
+A probe on seeds 2100–2139 (`rush_noisy`, delay 3), with the fix made worse and the hidden heading bias made wider, through the `sensing` dials of `scenarios.make_env`:
+
+| Player | ±5° bias, 0.3 m fix (today) | ±5°, 4 m fix | ±15° bias, 0.3 m fix | ±15°, 2 m fix |
+|---|---|---|---|---|
+| Fusing filter (controller 36) | 74% | 61% | 63% | 27% |
+| The same filter, believing there is no bias | 73% | 69% | 34% | 28% |
+| Fixed plan, never reads telemetry | 54% | 54% | 25% | 25% |
+| Re-plans from each fix as if exact | 17% | 0% | 4% | 0% |
+| Leg-and-wait | 38% | 8% | 21% | 6% |
+
+- **A useless fix alone does not force fusion.** With the published ±5° bias and short legs, dead reckoning stays inside the 0.75 m target radius. The filter that ignores the bias even beats the full one.
+- **A wider bias with today's fix does:** 63% against 34% and 25%.
+- **Both together are too hard for everyone.** With no usable fix the bias cannot be observed, and the filter waits.
+- So fusion is needed only when each sensor alone is not enough and together they are. That is what the prototype is built to be.
+
+### What the rover senses instead
+
+After the launch briefing the `position` field is null. Everything below is published in `rules()["navigation"]`.
+
+| Reading | When | What it is | Why it is not enough alone |
+|---|---|---|---|
+| `wheel_odometry`, `visual_odometry` | every drive | Wheel metres, and ground metres within 5% | The commanded heading is off by a hidden bias of up to ±15° that drifts |
+| `sun_heading_deg` | every drive | The heading really driven, within 6° (a sun compass) | One reading is too coarse to steer by |
+| `beacon_range_m` | every tick | Distance to the lander's beacon at the base, within 0.25 m | A ring around the base, not a point |
+| `terrain`, battery, sample results | as today | Unchanged | Occasional |
+
+The evaluator's truth, the scoring and the replay's states use the true position, as always: a player that never reads telemetry drives the identical episode with and without the fix (tested). The option sits on any biome: `make_nogps_env(seed, delay, profile, biome="troy_crust")`.
+
+### The fusing reference
+
+`fused` in `nogps_players.py` is the Manh controllers' particle-filter controller (the planner of controller 21) with one more likelihood per new reading: the beacon range weighs each particle by how well its distance from the base fits, the sun compass weighs the heading each particle itself drove, and the terrain reading is matched against the published map. A range is a ring and a terrain reading is a region, which a particle filter can weigh as they are and a Kalman filter's Gaussian cannot. 1,000 particles; the planner is unchanged and plans on the filter's mean and covariance.
+
+The other players stand for what a player without that filter might do:
+
+| Player | What it does |
+|---|---|
+| `fused_no_range`, `fused_no_compass`, `fused_no_terrain` | The reference with one reading ignored |
+| `odometry_only` | The reference with all three ignored: wheels, cameras and sample results |
+| `dr_mean_compass` | `kf_mpc` fed a position dead-reckoned from the commanded heading plus the average compass error so far: the simplest fusion there is, about ten lines |
+| `dr_compass` | `kf_mpc` fed a position dead-reckoned from each raw compass reading |
+| `dr_commanded` | `kf_mpc` fed a position dead-reckoned from the commanded headings |
+| `blind` | Plans once from the briefing and never reads telemetry |
+
+### Result on unused seeds
+
+Seeds 2200–2239, one run, with the settings above fixed before any episode was played. Share of the maximum, and rovers home:
+
+| Player | `rush_noisy`, delay 0 | delay 3 | delay 5 | `noisy` (80 ticks), delay 3 |
+|---|---|---|---|---|
+| **`fused`** | **84%**, 100% | **56%**, 100% | **34%**, 100% | **76%**, 100% |
+| `fused_no_range` | 81%, 98% | 51%, 92% | 33%, 100% | 78%, 100% |
+| `fused_no_terrain` | 84%, 100% | 56%, 100% | 34%, 100% | 78%, 100% |
+| `fused_no_compass` | 51%, 98% | 27%, 100% | 14%, 100% | 52%, 100% |
+| `odometry_only` | 49%, 98% | 24%, 100% | 14%, 100% | 44%, 98% |
+| `dr_mean_compass` | 55%, 62% | 37%, 50% | 28%, 52% | 47%, 68% |
+| `dr_compass` | 36%, 22% | 29%, 25% | 23%, 30% | 35%, 32% |
+| `dr_commanded` | 35%, 75% | 24%, 60% | 20%, 65% | 26%, 70% |
+| `blind` | 31%, 82% | 28%, 85% | 30%, 85% | 31%, 68% |
+| With today's fix: controller 36 | 88%, 100% | 69%, 100% | 57%, 100% | 96%, 100% |
+| With today's fix: `kf_mpc` | 87%, 100% | 70%, 100% | 55%, 98% | 90%, 100% |
+
+- **Fusing is now what separates the players.** Paired over the three delays, `fused` is 17.7 points above the best player without a filter on `rush_noisy` (95% interval 14.1 to 21.6) and 25.8 above on `noisy` (19.8 to 31.7). It is 31 and 50 points above dead reckoning on the commanded headings.
+- **Only the reference always gets home.** The dead-reckoning players end outside the base radius in a quarter to three quarters of episodes and lose half their score there. The beacon says how far the base is; they do not use it.
+- **The cost of having no fix grows with the delay.** Against today's best player with a fix, `fused` gives up 4 points at delay 0, 13 at delay 3 and 23 at delay 5 on `rush_noisy`.
+- **It is a two-sensor fusion so far, not a many-sensor one.** The compass carries it: without it the reference loses 27 and 25 points. The beacon adds 2.7 points on `rush_noisy` (1.0 to 4.8) and nothing measurable on `noisy`; the terrain reading adds nothing. A second beacon, or a compass coarse enough that the range has to help, would be the next dial.
+
+**How the settings behave** (development seeds 0–19, `rush_noisy`, delay 3; `fused` against `dr_mean_compass`):
+
+| Setting | `fused` | `dr_mean_compass` |
+|---|---|---|
+| Default: compass 6°, bias ±15° | 51% | 43% |
+| Compass 2° | 61% | 59% |
+| Compass 12° | 38% | 22% |
+| Bias ±5° | 70% | 51% |
+| Bias ±25° | 43% | 36% |
+
+The beacon's noise (0.05 to 1 m) and the number of particles (300 to 3,000) change nothing beyond a point or two.
+
+### What it does not show
+
+- **No model has played it.** Claude writes code, and averaging the compass error is ten lines that already reach 37–47%. A careful agent could write the particle filter too. What the prototype adds for certain is that reading the rover's position off a packet no longer works, and that the last drive home has to be checked against the beacon.
+- **The tool descriptions still promise a position.** `lightlag_mcp/server.py` describes telemetry as it is today; it belongs to another owner and is unchanged. It has to say "no position" before any model run, or the run tests the wording.
+- **The demo page cannot show it.** Its Earth view draws the reported position, which is null here.
+- **The reference needs numpy**, like every Manh controller built on the particle filter, so it cannot run inside the Harbor task image as it is.
+- **There is no bound** for this setting, so "56%" is the best known player, not the best possible.
+- **Seeds:** 0–19 for the sensitivity table, 2100–2139 for the probe, 2200–2239 for the result. All now used.
+
 ## Limits
 
 - **No model has played a biome.** Whether a biome opens a gap between an agent and a reference is unknown.
@@ -202,7 +304,7 @@ Controller 36's share by delay, and the difference from Main Mars at the same de
 - **Bound 16 is not a bound in the biomes.** Its planner ignores their rules. On Relay Pass at delay 0 it scores below controller 36.
 - **40 seeds, one draw each.** Differences under about one point are noise.
 - **Mixed biomes** work and have one test; they were not part of the trial.
-- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting probe. All now used.
+- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting and position probes; 2200–2239 for the no-GPS result. All now used.
 
 ## Suggested next steps (not done)
 
