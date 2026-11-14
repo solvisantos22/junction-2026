@@ -1,0 +1,148 @@
+1
+00:00:00,725 --> 00:00:03,535
+Thirteen metres from home, carrying 21 samples,
+
+2
+00:00:03,575 --> 00:00:05,660
+this rover's battery runs flat.
+
+3
+00:00:05,700 --> 00:00:08,260
+Its autopilot was written by Claude Opus.
+
+4
+00:00:08,300 --> 00:00:10,475
+Score for this site: zero.
+
+5
+00:00:11,650 --> 00:00:15,548
+This is Lightlag Traverse, a reinforcement learning environment.
+
+6
+00:00:15,588 --> 00:00:18,435
+An agent drives a rover across Mars-like ground,
+
+7
+00:00:18,475 --> 00:00:20,935
+and every command lands three ticks late.
+
+8
+00:00:20,975 --> 00:00:23,973
+The sun charges the battery; driving drains it.
+
+9
+00:00:24,013 --> 00:00:27,997
+More targets than a day allows, three sites in a row, no reset.
+
+10
+00:00:28,037 --> 00:00:29,900
+Every rule is public.
+
+11
+00:00:30,625 --> 00:00:32,285
+Claude doesn't fail at coding.
+
+12
+00:00:32,325 --> 00:00:34,860
+Within minutes, it writes a real autopilot.
+
+13
+00:00:34,900 --> 00:00:39,000
+It fails at planning a whole day: the route, the battery, the way home.
+
+14
+00:00:39,550 --> 00:00:43,375
+Here, at 9% battery, our reference waits for the sun.
+
+15
+00:00:43,850 --> 00:00:47,422
+Four ticks later, Claude's rover drives its battery to zero.
+
+16
+00:00:47,462 --> 00:00:49,850
+Waiting six ticks would have brought it home.
+
+17
+00:00:51,358 --> 00:00:54,568
+Claude's own report: the planner only counted time.
+
+18
+00:00:54,608 --> 00:00:57,218
+Its program played all three sites in under a minute,
+
+19
+00:00:57,258 --> 00:00:59,733
+before Claude checked a single result.
+
+20
+00:01:00,858 --> 00:01:03,418
+The reference is a planner, not a model.
+
+21
+00:01:03,458 --> 00:01:05,330
+It tracks the rover through the delay,
+
+22
+00:01:05,370 --> 00:01:07,168
+learns how each terrain slips,
+
+23
+00:01:07,208 --> 00:01:09,918
+and prices every leg of its route against the sun.
+
+24
+00:01:09,958 --> 00:01:12,458
+It is always home before the day ends.
+
+25
+00:01:13,683 --> 00:01:17,593
+Through Harbor and OpenCode, the reference scores 0.48.
+
+26
+00:01:17,633 --> 00:01:20,743
+Seven Claude runs, across Opus, Sonnet and Haiku,
+
+27
+00:01:20,783 --> 00:01:22,993
+all score below 0.3.
+
+28
+00:01:23,033 --> 00:01:24,305
+Three lost a rover.
+
+29
+00:01:24,345 --> 00:01:26,258
+Doing nothing scores zero.
+
+30
+00:01:27,458 --> 00:01:28,368
+Was that luck?
+
+31
+00:01:28,408 --> 00:01:32,793
+On Modal, we replayed six of Claude's programs on 300 fresh worlds.
+
+32
+00:01:32,833 --> 00:01:37,408
+The reference won at least 288 times, and never lost a rover.
+
+33
+00:01:38,683 --> 00:01:46,205
+Also on Modal, a small policy trained from scratch improves from 0.09 to 0.38 in development,
+
+34
+00:01:46,245 --> 00:01:49,458
+still short of a greedy controller and the reference.
+
+35
+00:01:50,683 --> 00:01:52,318
+One command reruns it all,
+
+36
+00:01:52,358 --> 00:01:55,318
+and a live demo on Modal plays any world you pick.
+
+37
+00:01:55,358 --> 00:01:57,083
+Can your agent make it home?
+

@@ -1130,6 +1130,9 @@ function readHash() {
   if (words.includes('story') && MOMENTS.length) startStory();
 }
 window.addEventListener('hashchange', readHash);
+// The page's own controls, for a script that records it frame by frame (tools/demo_video) and for tests.
+window.LIGHTLAG_TRAVERSE_APP = { state, story, view, HOLD, MOMENTS, RUNS, T, seek, setPlaying, setSpeed, setCam, showTitle, startStory, stopStory,
+  follow(id) { const run = OTHERS.find(r => r.id === id); if (run) state.follow = run; return !!run; } };
 fitUi(); buildBoard();
 setSpeed(SPEEDS.reduce((best, speed, i) => Math.abs(speed - T / 70) < Math.abs(SPEEDS[best] - T / 70) ? i : best, 0));   // the mission plays in about 70 seconds
 readHash();

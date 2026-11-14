@@ -612,6 +612,15 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
 - **Evidence:** [write-up](lightlag-traverse.md), [package](../lightlag_traverse/README.md), [campaign task](../harbor/lightlag-traverse-campaign/), [one-site task](../harbor/lightlag-traverse/), [runs](lightlag-runs/) (`campaign-*`, `traverse-*`, `dawn-agent-*`), [campaign demo](../viewer/traverse-campaign.html), [one-site demo](../viewer/traverse-demo.html).
 - **Scope:** new files and folders only, plus my own `TEAM_STATUS.md` row; no change to `lightlag/`, `lightlag_dynamic/`, `lightlag_mcp/`, `harbor/lightlag`, the Mars demo or any teammate's file. Defaults of `lightlag_traverse` were kept while teammates' studies read it. No prize submission.
 
+### 14 November — Kristján / Claude Code: the two-minute demo video, narrated
+
+- **Human direction:** Kristján asked for "a very good demo video with voice over" showing what the team did, why Claude struggles, what the reference is, and the Modal work. Sölvi's correction to the learning line (a development result, not held out) came through the farm session and was applied. The order of the script, the pictures and the voice are Claude Code's choices and are a proposal: no person has listened to it yet.
+- **Tool:** Claude Code; the session reported its model as Claude Fable 5.2. The voice is Kokoro-82M, an open-weights text-to-speech model, run locally in Docker with no network; the check uses Whisper `base.en` through faster-whisper, also offline. No model API was called and nothing was paid for.
+- **Claude Code contribution:** `tools/demo_video/`, a pipeline that speaks the script, records the real Traverse demo page and six drawn slides frame by frame on a clock it steps itself, places every picture by the time the voice says each word, mixes the sound and writes the subtitles; the page's controls exposed for it at the end of `viewer/traverse/app.js`; and `docs/demo-video/` with the video, subtitles, a poster and a README (the script, the source of every number, what was checked).
+- **Verification:** 118.4 s against the guide's two minutes. An offline speech recogniser that had not seen the script heard 304 of its 310 words as written; the other six are spellings, near-homophones and one stray word. −16.1 LUFS, true peak −1.5 dBFS. Frames from every shot and every cut were looked at. 152 viewer and Traverse tests pass with the page's addition. **Not verified:** how it sounds to a person, and nobody has watched it in motion from start to finish.
+- **Evidence:** [video](demo-video/lightlag-traverse-demo.mp4), [README](demo-video/README.md), [pipeline](../tools/demo_video/).
+- **Scope:** new files, one addition at the end of `viewer/traverse/app.js` with its two generated pages rebuilt, and my own `TEAM_STATUS.md` row. Nothing uploaded or submitted.
+
 ### 14 November — Kristján / Codex: make the 3D mission demo easier to present
 
 - **Human direction:** Kristján asked Codex to inspect the demo and improve its looks, controls and mission presentation. Claude Code authored the existing 3D scene; this increment builds on it.
