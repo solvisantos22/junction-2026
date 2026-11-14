@@ -179,7 +179,35 @@ Tried and dropped:
 - **Penalties scaled by the trip chance.**
 - **Charging each leg its expected delay instead of dropping targets:** it also padded the legs home and gave up most targets.
 
-Seeds 700–779 and 800–879 are now used for these checks; don't reuse them as fresh seeds.
+**An executive on top (a proposal too): explicit modes switched by telemetry events,** like the rovers' fault protection or a behaviour tree's fallback node. The code is `executive(parent)` in `mars.py`. It has two modes:
+
+- **`nominal`:** the slip-aware MPC, with one change. A target is dropped only once there is evidence about its terrain: a stop seen there, or a slip estimate with spread below 0.03. Before that, going for it is the cheapest probe.
+- **`recover`:** entered after a slip stop when backing out is expected to be quicker than driving on.
+  - **How it backs out:** one-segment drives, each uplinked only once the previous one has executed, so no stop can discard them. n steps cost n × (delay + 1) ticks.
+  - **The alternative it compares against:** driving on costs (2 × delay + 1) × p / (1 − p) ticks with trip chance p.
+  - **Where it goes:** the noise is drawn once per drive, so a drive that started outside the sand stopped at its first step inside. It backs out along its own tracks, 2 steps. A drive that started inside leaves through the nearest edge of the patch on the map.
+
+  It returns to `nominal` when telemetry puts the rover on terrain that cannot trip. Every switch is logged in `mode_log` with its reason.
+
+The failure this fixes: without it, a rover stopped at a sand edge replans along the edge. Position noise of 0.3 m and heading bias clip the sand again and again, 12 stops for nothing on noisy seeds 8 and 23. Development seeds also ruled out three alternatives:
+
+- **A fixed trip-chance threshold for backing out:** it lost on seeds where the rover was metres inside.
+- **A route clearance around avoided sand:** it cost up to 1.5 points on `rush_noisy` and gained nothing once backing out was right.
+- **Treating cancelled commands as already free:** no effect.
+
+Fresh seeds 900–979, controller 24 with the layer → with the executive (rovers home of 80):
+
+| | 0.45 | 0.42 | 0.40 | 0.35 |
+|---|---|---|---|---|
+| `rush_noisy` | 72.5 → 72.5 | 70.7 → 71.4 (79 → 80) | 70.8 → 71.4 (77 → 80) | 68.4 → 69.1 (78 → 79) |
+| `noisy` | 89.7 → 89.7 | 85.0 → 87.2 (79 → 80) | 80.3 → 88.8 (77 → 80) | 75.0 → 85.9 (80 → 80) |
+
+- **Never worse than the layer.** Against plain controller 24 on `noisy`, it gains 11.5 points at 0.40 and 25.4 at 0.35.
+- **What makes the gain:** at 0.40 and 0.42 it is all recovery (recovery alone: 88.8 and 87.2). At 0.35 it is all the evidence rule (recovery alone: 75.0, the same as the layer).
+- **The keep-rule decisions above stand.** On `noisy` at 0.40 the gap to `solvi_reference` now shrinks by 2.4 points instead of 16.9, still just over the 2-point limit.
+- **Controller 1 with the executive** scores within 0.3 points of controller 24 with it on `rush_noisy`. On `noisy` it is 1–3 points lower, the gap the two plain controllers already have.
+
+Seeds 700–779, 800–879 and 900–979 are now used for these checks; don't reuse them as fresh seeds.
 
 ## Third increment: Manh controllers and swarm testing
 

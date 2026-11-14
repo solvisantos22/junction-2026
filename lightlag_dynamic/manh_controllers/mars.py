@@ -19,8 +19,11 @@ seeds 800-879, delay 3): slip_check 0.45 everywhere, 0.40-0.42 on the 50-tick ru
 only; downlink_passes period 2. None of this is a rules decision. Results and what was
 reverted: docs/lightlag-dynamic-pilot.md, section "Mars-operations tweaks".
 
+Co-designed controllers (proposals, not registered): `slip_aware(parent)` plans around the
+check; `executive(parent)` adds explicit modes on top (nominal / recover after a slip stop).
+
     env = make_mars_env(seed, 3, "rush_noisy", factors={"slip_check": {"limit": 0.40}})
-    policies()["slip_aware_c1"](PublicTools(env)).run()   # controller 1 + the slip-check layer
+    policies()["executive_c24"](PublicTools(env)).run()   # controller 24 + layer + executive
 """
 
 import math
@@ -159,6 +162,7 @@ class _SlipCheckAware:
         rules = tools.rules()
         self.slip_limit = (rules.get("onboard_slip_check") or {}).get("limit")
         self.slip_noise = max(abs(v) for v in rules["slip_noise"])
+        self.segment = rules["drive_integration_metres"]
         self.stops = {}
         self._avoid_now, self._through = set(), {}
         super().__init__(tools)
@@ -216,10 +220,129 @@ class _SlipCheckAware:
         self._through = {}
         hop = super().leg(start, goal)
         if (hop is not None and self.slip_limit is not None
-                and max(self._through.values(), default=0.0) > self.DROP_ABOVE
+                and any(self._drops(t, c) for t, c in self._through.items())
                 and math.dist(goal, self.base) > self.base_radius):
             return None  # only reachable through terrain that keeps tripping the check
         return hop
+
+    def _drops(self, terrain, chance):
+        return chance > self.DROP_ABOVE
+
+    def can_trip(self, terrain):
+        return self.slip_ranges[terrain][1] + self.slip_noise > self.slip_limit
+
+
+class _Executive(_SlipCheckAware):
+    """A small executive on top of the slip-check-aware MPC: explicit modes, switched by
+    telemetry events, like the rovers' fault protection or a behaviour tree's fallback node.
+
+        nominal --slip_limit stop, and backing out is expected to be quicker--> recover
+        recover --telemetry puts the rover on terrain that cannot trip, or the planned
+                  back-out steps are all sent--> nominal
+
+    recover backs out with one-segment drives, each uplinked only once the previous one has
+    executed, so a stop cannot discard it: n steps cost n (delay + 1) ticks. Driving on instead
+    costs one round trip (2 delay + 1 ticks) per stop, p / (1 - p) stops on average with trip
+    chance p. Recover when n (delay + 1) is the smaller cost. Which way and how far:
+      * the stopped drive started outside: the slip noise is drawn once per drive, so it
+        stopped at its first step inside, at most two steps deep; back out along its own
+        tracks (the reverse of its heading), two steps;
+      * it started inside (it may have gone metres in, often along the edge): out through the
+        nearest edge of the patch on the map, as deep as the position estimate is inside it
+        plus one standard deviation, corrected for the estimated heading bias.
+    In nominal the MPC plans as before, except EVIDENCE_TO_DROP: a target is dropped only once
+    there is evidence about the terrain (a stop seen on it, or a slip estimate whose spread is
+    below EVIDENCE_SIGMA). Before that, going for it is the cheapest probe.
+    Inactive without a published slip check. Switches are logged in mode_log.
+    """
+    EVIDENCE_SIGMA = 0.03
+    EVIDENCE_TO_DROP = True
+
+    def __init__(self, tools):
+        self.mode, self.mode_log = "nominal", []
+        self.backout_heading, self.backouts, self.backout_steps = None, 0, 0
+        super().__init__(tools)
+
+    def _switch(self, mode, reason):
+        self.mode_log.append((self.tick, mode, reason))
+        self.mode = mode
+
+    # ---- events ----
+    def absorb(self, packet):
+        super().absorb(packet)
+        if self.slip_limit is None:
+            return
+        stopped = any(e["type"] == "safety_stop" and e.get("reason") == "slip_limit" for e in packet["events"])
+        heading = self._stopped_heading(packet) if stopped and self.mode != "recover" else None
+        if heading is not None and self.can_trip(packet["terrain"]):
+            back, steps = self._way_out(packet, heading)
+            chance = self.trip_chance(packet["terrain"])
+            drive_on = (2 * self.k + 1) * chance / max(1e-9, 1.0 - chance)
+            if steps * (self.k + 1) < drive_on:
+                self.backout_heading, self.backouts, self.backout_steps = back, 0, steps
+                self._switch("recover", f"slip stop at tick {packet['tick']}: {steps} steps back "
+                                        f"({steps * (self.k + 1)} ticks) vs driving on ({drive_on:.0f})")
+        elif self.mode == "recover" and not self.can_trip(packet["terrain"]):
+            self._switch("nominal", f"on {packet['terrain']} at tick {packet['tick']}")
+
+    def _way_out(self, packet, heading):
+        """(commanded heading, steps) to leave the terrain the rover was stopped on."""
+        step = self.segment * (1.0 - self.slip(packet["terrain"]))  # ground covered by one step inside
+        if not self.can_trip(self.packets[-2]["terrain"]):
+            return (heading + 180.0) % 360.0, 2  # started outside: back along its own tracks
+        # Started inside: leave by the nearest edge. If the estimate is outside every patch while
+        # telemetry says inside, the rover is just inside the nearest one: leave toward the estimate.
+        f = getattr(self, "filter", None)
+        x, y = (f.mean[0], f.mean[1]) if f is not None else packet["position"]
+        sigma = math.sqrt(max(f.cov[0][0], f.cov[1][1])) if f is not None else 0.0
+        bias = math.degrees(f.mean[2]) if f is not None else 0.0
+        inside, near = [], []
+        for r in self.sand:
+            if r["x1"] <= x <= r["x2"] and r["y1"] <= y <= r["y2"]:
+                inside += [(x - r["x1"], 180.0), (r["x2"] - x, 0.0), (y - r["y1"], 270.0), (r["y2"] - y, 90.0)]
+            else:
+                cx, cy = min(max(x, r["x1"]), r["x2"]), min(max(y, r["y1"]), r["y2"])
+                near.append((math.hypot(x - cx, y - cy), math.degrees(math.atan2(y - cy, x - cx))))
+        if inside:
+            depth, direction = min(inside)
+        elif near:
+            depth, direction = 0.0, min(near)[1]
+        else:
+            return (heading + 180.0) % 360.0, 2
+        return (direction - bias) % 360.0, int(math.ceil((depth + sigma) / max(step, 1e-3)))
+
+    def _stopped_heading(self, packet):
+        acks = {a["command_id"]: a for a in self.acks}
+        for event in packet["events"]:
+            ack = acks.get(event.get("command_id")) if event["type"] == "command_executed" else None
+            if ack is not None and ack["command"]["action"] == "drive":
+                return ack["command"]["heading_deg"]
+        return None
+
+    # ---- acting ----
+    def ready(self):
+        if self.mode == "recover":
+            return self.packets[-1]["alive"]
+        return super().ready()
+
+    def decide(self):
+        if self.mode != "recover":
+            return super().decide()
+        if self.backouts >= self.backout_steps + 1:
+            self._switch("nominal", "back-out steps sent")
+            return super().decide()
+        live = max((a["execute_tick"] for a in self.acks if a["command_id"] not in self.cancelled), default=0)
+        if self.tick < live:
+            return  # a stop of the queued drive would discard anything sent now
+        if self.send([{"action": "drive", "heading_deg": round(self.backout_heading, 6), "metres": self.segment}]):
+            self.backouts += 1
+
+    def _drops(self, terrain, chance):
+        if not self.EVIDENCE_TO_DROP:
+            return super()._drops(terrain, chance)
+        f = getattr(self, "filter", None)
+        known = self.stops.get(terrain) or (f is not None and f.slip_sigma(terrain) < self.EVIDENCE_SIGMA)
+        return bool(known) and super()._drops(terrain, chance)
 
 
 def slip_aware(parent):
@@ -227,8 +350,14 @@ def slip_aware(parent):
     return type(f"SlipAware_{parent.__name__}", (_SlipCheckAware, parent), {})
 
 
+def executive(parent, **knobs):
+    """`parent` with the slip-check layer and the executive on top."""
+    return type(f"Executive_{parent.__name__}", (_Executive, parent), dict(knobs))
+
+
 def policies():
-    """Controllers 1 and 24 with the layer; imported lazily (the zoo is large)."""
+    """Controllers 1 and 24 with the layer, and with the executive; imported lazily (the zoo is large)."""
     from . import controllers as zoo
-    return {"slip_aware_c1": slip_aware(zoo.EKF_MPC),
-            "slip_aware_c24": slip_aware(zoo.EKF_sandodo_stayalive_aimdisc_turncost_window_MPC)}
+    c1, c24 = zoo.EKF_MPC, zoo.EKF_sandodo_stayalive_aimdisc_turncost_window_MPC
+    return {"slip_aware_c1": slip_aware(c1), "slip_aware_c24": slip_aware(c24),
+            "executive_c1": executive(c1), "executive_c24": executive(c24)}

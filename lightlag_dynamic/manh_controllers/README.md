@@ -239,7 +239,7 @@ Caveats:
 | `superlog.py` | Per-decision, per-packet and per-episode logging, with failure labels |
 | `swarm.py` | Suites, the parallel runner, the report, the command line |
 | `seeds.py` | Discriminative-seed finder: the declared criteria, the players and a ranked report |
-| `mars.py` | Mars-operations tweaks (onboard slip check, relay passes; off by default) and the slip-check-aware layer for controllers 1 and 24 (not registered); see the pilot doc, "Mars-operations tweaks" |
+| `mars.py` | Mars-operations tweaks (onboard slip check, relay passes; off by default) the slip-check-aware layer and an executive with explicit modes (nominal / recover) for controllers 1 and 24 (not registered; numbers 30–33 reserved); see the pilot doc, "Mars-operations tweaks" |
 
 Failure labels, per episode:
 
