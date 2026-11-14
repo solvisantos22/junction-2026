@@ -532,11 +532,13 @@ register("EKF_aimdisc_turncost_window_MPC_manh_controller_19", _ours(EKF_aimdisc
          note="controller 1 + aim at disc + turn-cost budget + window awareness",
          why="18, 14 and 13 each helped on their own factor and are inactive when their rule is absent, so "
              "together they should match the best of them on every scenario. They do: 77.0% averaged over the "
-             "three suites vs 75.3% for controller 1.")
+             "three suites vs 75.3% for controller 1. Held-out seeds 400-419: +1.7 points over controller 1 "
+             "(95% interval +1.4 to +2.0); no numpy needed.")
 register("CKF_aimdisc_turncost_window_MPC_manh_controller_20", _ours(CKF_aimdisc_turncost_window_MPC), built=_R3,
          note="cubature filter + aim at disc + turn-cost budget + window awareness",
-         why="As 19 on the estimator that held up best at high noise (8). Best real controller so far: 77.5% "
-             "averaged over the three suites (seeds 0-19), home in 97% of episodes.")
+         why="As 19 on the estimator that held up best at high noise (8). Best on development seeds (77.5% "
+             "averaged over the three suites), but on held-out seeds 400-419 it ties 19 (+0.1 points, interval "
+             "-0.2 to +0.4): the cubature filter adds nothing measurable.")
 register("PF_aimdisc_turncost_window_MPC_manh_controller_21", _ours(PF_aimdisc_turncost_window_MPC), built=_R3,
          note="particle filter + aim at disc + turn-cost budget + window awareness",
          why="As 19 on the estimator that held up best with large position noise (2). 77.1%; 89% with 1 m "

@@ -33,7 +33,16 @@ About 90,000 scripted episodes were run on development seeds 0–19 at delays 0,
   - **Uplink windows of 4 ticks in 16 on `rush_noisy`:** at delays 3 and 5 the blind plan, which sends everything at tick 0, wins (54–55% vs at most 45%).
   - **Turn cost:** at 0.03 per degree on `noisy`, delay 3, all three team references score 0%. Controllers 14 and 19–21, which budget turn energy, keep 75%.
 
-These are scripted results on development seeds. Confirm the winner on untouched seeds before relying on it.
+**Held-out check, seeds 400–419.** Paired by episode against `kf_mpc`, with 95% intervals from a bootstrap over seeds:
+- `EKF_aimdisc_turncost_window_MPC_manh_controller_19` gains +1.7 points (+1.4 to +2.0).
+- Controller 20 gains +1.8 points (+1.4 to +2.2).
+- 19 and 20 tie each other, so the gain comes from the planner additions, not the cubature filter.
+- 19 needs no numpy, which makes it the candidate to replace `kf_mpc` as the reference. That is a team decision.
+
+**Why Sölvi's reference wins with hidden sand.**
+- It never attempts the third target: under noise its slip learner never fires, so it budgets the worst-case slip and keeps a 5-energy reserve.
+- Ours take the third target with about 2 energy to spare, on a plan that trusts the published map, so a quarter of them die.
+- Battery telemetry is noise-free and sand doubles the cost per wheel metre, so the battery reading measures exactly how many wheel metres each drive spent on sand. No controller uses that yet; [details](../lightlag_dynamic/manh_controllers/README.md).
 
 ## Second increment: noisy sensing and a Kalman filter + MPC reference
 

@@ -43,8 +43,8 @@ python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                
 | 14 | `EKF_turncost_MPC_manh_controller_14` | Controller 1, budgets turn energy | Planners that ignore a turn cost run out of energy. 75% and always home vs 61% (turn cost 0.03, noisy, delay 3); every team controller collapses there. |
 | 15 | `EKF_terrainVO_MPC_manh_controller_15` | Controller 1 with per-terrain odometry noise | Small effect: 91% vs 89% (noisy, delay 3). |
 | 18 | `EKF_aimdisc_MPC_manh_controller_18` | Controller 1 aiming at the target disc instead of its centre | Bound 16 showed that aiming at the centre wastes about 0.5 m per leg. 86.5% vs 85.0% on base, always home. |
-| 19 | `EKF_aimdisc_turncost_window_MPC_manh_controller_19` | Controller 1 with 18, 14 and 13 together | Each addition helped on its own factor and is inactive when its rule is absent. Matches the best of the three on each factor; 77.0% averaged over the three suites. |
-| 20 | `CKF_aimdisc_turncost_window_MPC_manh_controller_20` | As 19 on the cubature filter | **Best real controller so far:** 77.5% averaged over the three suites, home in 97% of episodes. |
+| 19 | `EKF_aimdisc_turncost_window_MPC_manh_controller_19` | Controller 1 with 18, 14 and 13 together | Each addition helped on its own factor and is inactive when its rule is absent. Matches the best of the three on each factor. **Confirmed on held-out seeds 400–419:** +1.7 points over controller 1 (95% interval +1.4 to +2.0), and it needs no numpy. |
+| 20 | `CKF_aimdisc_turncost_window_MPC_manh_controller_20` | As 19 on the cubature filter | Best on development seeds (77.5% averaged over the three suites). On held-out seeds 400–419 it ties 19 (+0.1 points, interval −0.2 to +0.4): the cubature filter adds nothing measurable. |
 | 21 | `PF_aimdisc_turncost_window_MPC_manh_controller_21` | As 19 on the particle filter | 77.1%. Best at 1 m position noise: 89% (noisy, delay 3). Weak with two hidden sand patches: 38%, home 45% of the time (noisy, delay 3). |
 
 **Bounds** use privileged information through `scenarios.ScenarioEnvironment`. They are yardsticks, not entries.
@@ -62,7 +62,7 @@ python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                
 - **6, 7:** controller 1 with the failed-sample update, or the 97% wait rule, switched off. These were ablations, not new controllers.
 - **9:** controller 2 with 2000 particles. Same model, different value.
 
-## Where things stand (seeds 0–19, delays 0/3/5)
+## Where things stand (development seeds 0–19, delays 0/3/5; held-out check below)
 
 Share of the maximum score, averaged over every cell of each suite:
 
@@ -81,6 +81,20 @@ Share of the maximum score, averaged over every cell of each suite:
 | `blind` | 66.6% | 46.6% | 45.3% | 52.8% | 73% |
 | `solvi_reference` | 58.5% | 47.3% | 44.2% | 50.0% | 81% |
 | `kristjan_reference` | 50.4% | 21.0% | 18.0% | 29.8% | 31% |
+
+**Held-out check (seeds 400–419, never used for development).** Paired by episode against controller 1, 3,840 episodes per controller; the 95% interval is a bootstrap over seeds:
+
+| Controller | Development seeds 0–19 | Held-out seeds 400–419 | Home, held-out (1 → controller) |
+|---|---|---|---|
+| 18 aim at disc | +0.6 (+0.2 to +1.0) | +0.6 (+0.3 to +0.8) | 96% → 96% |
+| 19 EKF + aim + turn cost + windows | +1.6 (+1.1 to +2.0) | **+1.7 (+1.4 to +2.0)** | 96% → 97% |
+| 20 CKF + the same | +2.1 (+1.6 to +2.6) | **+1.8 (+1.4 to +2.2)** | 96% → 98% |
+| 21 PF + the same | +1.8 (+0.9 to +2.6) | +1.4 (+0.8 to +1.9) | 96% → 96% |
+| Bound 16 | +8.0 (+6.5 to +9.6) | +9.8 (+8.5 to +11.1) | 96% → 95% |
+
+- **The gain is real, and it comes from the planner additions, not the estimator.** 19 and 20 tie on held-out seeds: 20 vs 19 is +0.1 points (−0.2 to +0.4). The cubature filter's extra lead on development seeds did not replicate.
+- **Candidate for the repository reference:** 19. It is `kf_mpc` plus three pure-Python mixins, so it needs no numpy and could run inside the Harbor task image.
+- **Where 19–20 gain on held-out seeds:** turn cost +21 points; uplink windows +5 to +8. Where they lose: hidden sand, −2 to −4. Aiming at the disc removes slack that unmapped sand then needs.
 
 The suites:
 - **base:** `static`, `noisy`, `rush` and `rush_noisy` as published.
@@ -101,6 +115,12 @@ The suites:
 
 **Still unsolved, and where to build next:**
 - **Hidden sand patches.** With two patches on `noisy` at delay 3, Manh controllers score 38–56% and get home 45–85% of the time. `solvi_reference` scores 68% and gets home 90% of the time.
+  - **Why Sölvi's controller wins:** it never attempts the third target. Its slip learner requires position and odometry to agree exactly, which never happens under noise, so it always budgets the worst-case slip and keeps a 5-energy reserve. That slack absorbs unmapped sand.
+  - **Why ours fail:** they take the third target with about 2 energy to spare, on a plan that trusts the published map. Crossing a 2.5 m patch costs about 4.6 more energy than the plan expects. On two-patch `noisy` episodes at delay 3, 5 of 20 rovers die.
+  - **A bigger reserve is not the fix.** Controller 1 with a reserve of 5 scores 65% with hidden sand, but 75% instead of 94% without it.
+  - **What we had not used: the battery reading is an exact sand odometer.** Telemetry battery has no noise and sand doubles the cost per wheel metre. So (battery drop − idle) / drive cost − wheel metres gives, exactly, the wheel metres each drive spent on sand. Checked on three seeds: 0.00 on every bedrock drive.
+  - The packet's `terrain` field also reports the true terrain under the rover. It is weaker, because it is only sampled at the end of each tick.
+  - Candidate: compare that sand reading with the map. When they disagree, add the patch to the map, budget every later leg (including home) with it, and keep a model-error reserve only until the map has been checked.
   - Candidate: change detection, or a multiple-model filter, that treats a local slip surprise as unmapped sand.
 - **Uplink windows 16/4 on `rush_noisy`.** At delay 3 every Manh controller and bound 16 get home only 15–35% of the time. `blind`, which sends its whole plan at tick 0, scores 54% and always gets home.
   - Candidate: a rollout planner that sends whole plans at window openings.
