@@ -1,6 +1,6 @@
 # Final Traverse training progress
 
-As of **2026-11-14 21:40:39 UTC** / **2026-11-14 23:40:39 EET**.
+As of **2026-11-14 21:50:39 UTC** / **2026-11-14 23:50:39 EET**.
 
 Stage: **fit**. Supervisor: **monitoring**.
 
@@ -8,12 +8,12 @@ These are reused validation worlds, not the untouched final check. All three see
 
 | Run | Stage / status | Batch-file mission coverage / target | Latest validated milestone | Score | Home / alive | Invalid | Elapsed | Rough time remaining | Hard cutoff UTC |
 |---|---|---:|---:|---:|---|---:|---:|---:|---|
-| ppo-17 | fit / running | 7,616 / 8,192 | 2048 | 0.378374 | 32/32 · 32/32 | 0 | 118 min | 9 min | 2026-11-14 22:42:06 UTC |
+| ppo-17 | fit / completed | 8,192 / 8,192 | 8192 | 0.362394 | 32/32 · 32/32 | 0 | 127 min | unknown | 2026-11-14 22:42:06 UTC |
 | ppo-29 | fit / completed | 8,192 / 8,192 | 8192 | 0.375676 | 32/32 · 32/32 | 0 | 118 min | unknown | 2026-11-14 22:42:06 UTC |
-| ppo-43 | fit / running | 7,296 / 8,192 | 2048 | 0.385452 | 32/32 · 32/32 | 0 | 118 min | 15 min | 2026-11-14 22:42:06 UTC |
-| replay-17 | fit / running | 6,432 / 8,192 | 2048 | 0.377607 | 32/32 · 32/32 | 0 | 118 min | 32 min | 2026-11-14 22:42:06 UTC |
-| replay-29 | fit / running | 6,528 / 8,192 | 2048 | 0.366528 | 32/32 · 32/32 | 0 | 118 min | 30 min | 2026-11-14 22:42:06 UTC |
-| replay-43 | fit / running | 4,768 / 8,192 | 2048 | 0.364257 | 32/32 · 32/32 | 0 | 118 min | 85 min | 2026-11-14 22:42:06 UTC |
+| ppo-43 | fit / running | 8,032 / 8,192 | 2048 | 0.385452 | 32/32 · 32/32 | 0 | 128 min | 3 min | 2026-11-14 22:42:06 UTC |
+| replay-17 | fit / running | 6,880 / 8,192 | 2048 | 0.377607 | 32/32 · 32/32 | 0 | 128 min | 24 min | 2026-11-14 22:42:06 UTC |
+| replay-29 | fit / running | 6,976 / 8,192 | 2048 | 0.366528 | 32/32 · 32/32 | 0 | 128 min | 22 min | 2026-11-14 22:42:06 UTC |
+| replay-43 | fit / running | 5,120 / 8,192 | 2048 | 0.364257 | 32/32 · 32/32 | 0 | 128 min | 77 min | 2026-11-14 22:42:06 UTC |
 
 Method means use the highest checkpoint available for **all three seeds at the same training budget**:
 
