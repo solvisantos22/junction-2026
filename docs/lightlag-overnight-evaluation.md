@@ -329,6 +329,37 @@ not assume newer controller complexity automatically creates a better test.
 The candidate's broader scenario results concern different factors and are
 not contradicted by this narrower plain-profile comparison.
 
+## Block B checkpoint: first pair
+
+The first contemporaneous pair, noisy seed 504 / repetition 1, completes with
+**T 0.325 versus C 0.225**, both alive at base. That one paired difference,
+**+0.10**, is not the six-pair result. Ten assigned attempts remain. Reported
+B usage is **$1.1064664**, bringing A+B to **$5.077448**. Both full transcripts
+replay exactly and have zero infrastructure findings. All twelve assignments,
+including the pending rows and incomplete-result bounds, remain in the
+[B ledger](lightlag-runs/overnight-b-summary.json).
+
+An export check initially rejected T's call count. The frozen service caches
+its grade on the first horizon-reaching call: here call 24 advances 45→50;
+call 25 is a successful 50→50 no-op. The protected score and replay already
+agreed. A reviewed exporter correction reconstructs every service record and
+verifies that any postterminal suffix leaves the environment unchanged. The
+ledger now distinguishes **25 total calls, 24 graded calls and 1 postterminal
+call**. No model retry, task/service mutation or raw-evidence repair occurred.
+The complete audit remains mandatory. All 23 experiment tests pass, including
+malformed-count/suffix rejection; independent review also reconstructed all
+40 available saved transcripts successfully.
+
+The [preparation/export tool](../tools/lightlag_experiments/overnight_runs.py)
+does not launch models. After each finished pair, the coordinator runs
+`export-B --env-file <local-credential-file>` in the environment with Harbor
+and the frozen auditor, then checks the exit status and newly written summary.
+It refuses shortened/altered plans, retains known costs even when grading is
+invalid, and stops launches for unknown costs, provider errors, incomplete
+reconciliation, integrity failures or the cumulative $12 guard. A failed
+export never authorizes proceeding from a previous summary. Credentials and
+private OpenCode state are excluded from shareable evidence.
+
 ## Status
 
 Block A protocol was published at `253b263` before new attempts; all nine are

@@ -1,0 +1,2529 @@
+{
+  "counts": {
+    "infrastructure": {},
+    "outcome": {
+      "TARGETS_LEFT": 1
+    },
+    "reasoning": {
+      "DISCOVERY_MISSED": 1,
+      "LATE_SAMPLE": 1,
+      "QUEUE_RAN_DRY": 1,
+      "SAMPLE_MISSED": 4,
+      "STALE_AIM": 1,
+      "WAITED_WITH_EMPTY_QUEUE": 1
+    }
+  },
+  "decisions": [
+    {
+      "acks": [
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 309.14,
+            "metres": 5
+          },
+          "command_id": 1,
+          "execute_tick": 4,
+          "sent_tick": 0
+        },
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 309.14,
+            "metres": 2.9
+          },
+          "command_id": 2,
+          "execute_tick": 5,
+          "sent_tick": 0
+        }
+      ],
+      "agent_step": 3,
+      "agent_words": null,
+      "arguments": {
+        "commands": [
+          {
+            "action": "drive",
+            "heading_deg": 309.14,
+            "metres": 5
+          },
+          {
+            "action": "drive",
+            "heading_deg": 309.14,
+            "metres": 2.9
+          }
+        ]
+      },
+      "error": null,
+      "findings": [],
+      "n": 3,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 135.168022,
+              "metres": 4.946143
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 0
+        },
+        "raw_score": 7.0,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t3",
+            "tick": 5
+          },
+          {
+            "on_time": true,
+            "target_id": "t4",
+            "tick": 8
+          },
+          {
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 11
+          },
+          {
+            "on_time": true,
+            "target_id": "t2",
+            "tick": 14
+          },
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 17
+          }
+        ],
+        "tick": 0
+      },
+      "reward_lost": 0.0,
+      "tick": 0,
+      "tick_after": 0,
+      "tool": "uplink",
+      "value_after": 7.0,
+      "value_before": 7.0
+    },
+    {
+      "acks": [],
+      "agent_step": 4,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 5
+      },
+      "error": null,
+      "findings": [
+        {
+          "evidence": {
+            "advanced": [
+              0,
+              5
+            ],
+            "earliest_new_command_after_this_wait": 9,
+            "earliest_new_command_if_uplinked_now": 6,
+            "extra_idle_ticks": 3,
+            "packet": {
+              "battery": 100.0,
+              "position": [
+                20.0,
+                20.0
+              ],
+              "received_tick": 0,
+              "state_tick": 0
+            },
+            "queue_ends_tick": 5,
+            "reference_plan": {
+              "alive": true,
+              "at_base": true,
+              "first_uplink": {
+                "commands": [
+                  {
+                    "action": "sample"
+                  }
+                ],
+                "tick": 2
+              },
+              "raw_score": 7.0,
+              "samples": [
+                {
+                  "on_time": true,
+                  "target_id": "t2",
+                  "tick": 6
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t5",
+                  "tick": 9
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t3",
+                  "tick": 12
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t4",
+                  "tick": 15
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t1",
+                  "tick": 19
+                }
+              ],
+              "tick": 0
+            },
+            "rule": "first_execution_tick"
+          },
+          "kind": "reasoning",
+          "n": 4,
+          "summary": "queue ends at tick 5; waiting until 5 means the next command cannot run before tick 9 (3 more idle ticks)",
+          "tag": "QUEUE_RAN_DRY"
+        }
+      ],
+      "n": 4,
+      "ok": true,
+      "points_lost": 0.75,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 2
+        },
+        "raw_score": 7.0,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t2",
+            "tick": 6
+          },
+          {
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 9
+          },
+          {
+            "on_time": true,
+            "target_id": "t3",
+            "tick": 12
+          },
+          {
+            "on_time": true,
+            "target_id": "t4",
+            "tick": 15
+          },
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 19
+          }
+        ],
+        "tick": 0
+      },
+      "reward_lost": 0.075,
+      "tick": 0,
+      "tick_after": 5,
+      "tool": "advance",
+      "value_after": 6.25,
+      "value_before": 7.0
+    },
+    {
+      "acks": [],
+      "agent_step": 5,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 3
+      },
+      "error": null,
+      "findings": [
+        {
+          "evidence": {
+            "advanced": [
+              5,
+              8
+            ],
+            "earliest_new_command_after_this_wait": 12,
+            "earliest_new_command_if_uplinked_now": 9,
+            "extra_idle_ticks": 3,
+            "packet": {
+              "battery": 99.0,
+              "position": [
+                19.98,
+                20.1
+              ],
+              "received_tick": 5,
+              "state_tick": 2
+            },
+            "queue_ends_tick": 5,
+            "reference_plan": {
+              "alive": true,
+              "at_base": true,
+              "first_uplink": {
+                "commands": [
+                  {
+                    "action": "sample"
+                  }
+                ],
+                "tick": 5
+              },
+              "raw_score": 6.25,
+              "samples": [
+                {
+                  "on_time": true,
+                  "target_id": "t2",
+                  "tick": 9
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t4",
+                  "tick": 18
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t1",
+                  "tick": 22
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t5",
+                  "tick": 25
+                },
+                {
+                  "on_time": false,
+                  "target_id": "t3",
+                  "tick": 28
+                }
+              ],
+              "tick": 5
+            },
+            "rule": "first_execution_tick"
+          },
+          "kind": "reasoning",
+          "n": 5,
+          "summary": "advanced 5->8 with nothing queued (last command ran at tick 5)",
+          "tag": "WAITED_WITH_EMPTY_QUEUE"
+        }
+      ],
+      "n": 5,
+      "ok": true,
+      "points_lost": 1.75,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 5
+        },
+        "raw_score": 6.25,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t2",
+            "tick": 9
+          },
+          {
+            "on_time": true,
+            "target_id": "t4",
+            "tick": 18
+          },
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 22
+          },
+          {
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 25
+          },
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 28
+          }
+        ],
+        "tick": 5
+      },
+      "reward_lost": 0.175,
+      "tick": 5,
+      "tick_after": 8,
+      "tool": "advance",
+      "value_after": 4.5,
+      "value_before": 6.25
+    },
+    {
+      "acks": [
+        {
+          "command": {
+            "action": "sample"
+          },
+          "command_id": 3,
+          "execute_tick": 12,
+          "sent_tick": 8
+        },
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 95.3,
+            "metres": 5
+          },
+          "command_id": 4,
+          "execute_tick": 13,
+          "sent_tick": 8
+        },
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 95.3,
+            "metres": 4.19
+          },
+          "command_id": 5,
+          "execute_tick": 14,
+          "sent_tick": 8
+        }
+      ],
+      "agent_step": 6,
+      "agent_words": null,
+      "arguments": {
+        "commands": [
+          {
+            "action": "sample"
+          },
+          {
+            "action": "drive",
+            "heading_deg": 95.3,
+            "metres": 5
+          },
+          {
+            "action": "drive",
+            "heading_deg": 95.3,
+            "metres": 4.19
+          }
+        ]
+      },
+      "error": null,
+      "findings": [],
+      "n": 6,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 8
+        },
+        "raw_score": 4.5,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t2",
+            "tick": 12
+          },
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 22
+          },
+          {
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 25
+          },
+          {
+            "on_time": false,
+            "target_id": "t4",
+            "tick": 28
+          }
+        ],
+        "tick": 8
+      },
+      "reward_lost": 0.0,
+      "tick": 8,
+      "tick_after": 8,
+      "tool": "uplink",
+      "value_after": 4.5,
+      "value_before": 4.5
+    },
+    {
+      "acks": [],
+      "agent_step": 7,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 5
+      },
+      "error": null,
+      "findings": [],
+      "n": 7,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 11
+        },
+        "raw_score": 4.5,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t2",
+            "tick": 12
+          },
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 22
+          },
+          {
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 25
+          },
+          {
+            "on_time": false,
+            "target_id": "t4",
+            "tick": 28
+          }
+        ],
+        "tick": 8
+      },
+      "reward_lost": 0.0,
+      "tick": 8,
+      "tick_after": 13,
+      "tool": "advance",
+      "value_after": 4.5,
+      "value_before": 4.5
+    },
+    {
+      "acks": [
+        {
+          "command": {
+            "action": "sample"
+          },
+          "command_id": 6,
+          "execute_tick": 17,
+          "sent_tick": 13
+        },
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 178.1,
+            "metres": 5
+          },
+          "command_id": 7,
+          "execute_tick": 18,
+          "sent_tick": 13
+        },
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 178.1,
+            "metres": 2.63
+          },
+          "command_id": 8,
+          "execute_tick": 19,
+          "sent_tick": 13
+        },
+        {
+          "command": {
+            "action": "sample"
+          },
+          "command_id": 9,
+          "execute_tick": 20,
+          "sent_tick": 13
+        }
+      ],
+      "agent_step": 8,
+      "agent_words": null,
+      "arguments": {
+        "commands": [
+          {
+            "action": "sample"
+          },
+          {
+            "action": "drive",
+            "heading_deg": 178.1,
+            "metres": 5
+          },
+          {
+            "action": "drive",
+            "heading_deg": 178.1,
+            "metres": 2.63
+          },
+          {
+            "action": "sample"
+          }
+        ]
+      },
+      "error": null,
+      "findings": [
+        {
+          "evidence": {
+            "aimed_at": "t1",
+            "in_transit": [
+              {
+                "call": null,
+                "command": {
+                  "action": "sample"
+                },
+                "command_ids": [
+                  3
+                ],
+                "execute_ticks": [
+                  12
+                ]
+              },
+              {
+                "call": null,
+                "command": {
+                  "action": "drive",
+                  "heading_deg": 95.3,
+                  "metres": 5
+                },
+                "command_ids": [
+                  4
+                ],
+                "execute_ticks": [
+                  13
+                ]
+              },
+              {
+                "call": null,
+                "command": {
+                  "action": "drive",
+                  "heading_deg": 95.3,
+                  "metres": 4.19
+                },
+                "command_ids": [
+                  5
+                ],
+                "execute_ticks": [
+                  14
+                ]
+              }
+            ],
+            "nominal_end_after_transit": [
+              16.09,
+              23.22
+            ],
+            "nominal_end_from_packet": [
+              16.94,
+              14.07
+            ],
+            "packet": {
+              "battery": 87.1,
+              "position": [
+                24.57,
+                13.82
+              ],
+              "received_tick": 13,
+              "state_tick": 10
+            },
+            "rule": "first_execution_tick / telemetry_arrival_tick"
+          },
+          "kind": "reasoning",
+          "n": 8,
+          "summary": "aimed at t1 from the position in packet tick 10, ignoring 3 commands in transit",
+          "tag": "STALE_AIM"
+        },
+        {
+          "evidence": {
+            "ack": {
+              "call": 8,
+              "command_ids": [
+                6
+              ],
+              "execute_ticks": [
+                17
+              ]
+            },
+            "cause": "stale_aim",
+            "executed_tick": 17,
+            "nearest_target": {
+              "distance": 0.94,
+              "id": "t4"
+            },
+            "packet_planned_from": {
+              "battery": 87.1,
+              "position": [
+                24.57,
+                13.82
+              ],
+              "received_tick": 13,
+              "state_tick": 10
+            },
+            "reason": "no_unsampled_target_in_range",
+            "stale_aim": {
+              "aimed_at": "t1",
+              "in_transit": [
+                {
+                  "call": null,
+                  "command": {
+                    "action": "sample"
+                  },
+                  "command_ids": [
+                    3
+                  ],
+                  "execute_ticks": [
+                    12
+                  ]
+                },
+                {
+                  "call": null,
+                  "command": {
+                    "action": "drive",
+                    "heading_deg": 95.3,
+                    "metres": 5
+                  },
+                  "command_ids": [
+                    4
+                  ],
+                  "execute_ticks": [
+                    13
+                  ]
+                },
+                {
+                  "call": null,
+                  "command": {
+                    "action": "drive",
+                    "heading_deg": 95.3,
+                    "metres": 4.19
+                  },
+                  "command_ids": [
+                    5
+                  ],
+                  "execute_ticks": [
+                    14
+                  ]
+                }
+              ],
+              "nominal_end_after_transit": [
+                16.09,
+                23.22
+              ],
+              "nominal_end_from_packet": [
+                16.94,
+                14.07
+              ],
+              "packet": {
+                "battery": 87.1,
+                "position": [
+                  24.57,
+                  13.82
+                ],
+                "received_tick": 13,
+                "state_tick": 10
+              },
+              "rule": "first_execution_tick / telemetry_arrival_tick"
+            },
+            "true_position": [
+              25.05,
+              22.92
+            ]
+          },
+          "kind": "reasoning",
+          "n": 8,
+          "summary": "sample command 6 at tick 17 failed (stale_aim)",
+          "tag": "SAMPLE_MISSED"
+        },
+        {
+          "evidence": {
+            "ack": {
+              "call": 8,
+              "command_ids": [
+                9
+              ],
+              "execute_ticks": [
+                20
+              ]
+            },
+            "cause": "stale_aim",
+            "executed_tick": 20,
+            "nearest_target": {
+              "distance": 1.28,
+              "id": "t3"
+            },
+            "packet_planned_from": {
+              "battery": 87.1,
+              "position": [
+                24.57,
+                13.82
+              ],
+              "received_tick": 13,
+              "state_tick": 10
+            },
+            "reason": "no_unsampled_target_in_range",
+            "stale_aim": {
+              "aimed_at": "t1",
+              "in_transit": [
+                {
+                  "call": null,
+                  "command": {
+                    "action": "sample"
+                  },
+                  "command_ids": [
+                    3
+                  ],
+                  "execute_ticks": [
+                    12
+                  ]
+                },
+                {
+                  "call": null,
+                  "command": {
+                    "action": "drive",
+                    "heading_deg": 95.3,
+                    "metres": 5
+                  },
+                  "command_ids": [
+                    4
+                  ],
+                  "execute_ticks": [
+                    13
+                  ]
+                },
+                {
+                  "call": null,
+                  "command": {
+                    "action": "drive",
+                    "heading_deg": 95.3,
+                    "metres": 4.19
+                  },
+                  "command_ids": [
+                    5
+                  ],
+                  "execute_ticks": [
+                    14
+                  ]
+                }
+              ],
+              "nominal_end_after_transit": [
+                16.09,
+                23.22
+              ],
+              "nominal_end_from_packet": [
+                16.94,
+                14.07
+              ],
+              "packet": {
+                "battery": 87.1,
+                "position": [
+                  24.57,
+                  13.82
+                ],
+                "received_tick": 13,
+                "state_tick": 10
+              },
+              "rule": "first_execution_tick / telemetry_arrival_tick"
+            },
+            "true_position": [
+              17.71,
+              23.99
+            ]
+          },
+          "kind": "reasoning",
+          "n": 8,
+          "summary": "sample command 9 at tick 20 failed (stale_aim)",
+          "tag": "SAMPLE_MISSED"
+        }
+      ],
+      "n": 8,
+      "ok": true,
+      "points_lost": 0.25,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 13
+        },
+        "raw_score": 4.5,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 21
+          },
+          {
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 24
+          },
+          {
+            "on_time": false,
+            "target_id": "t4",
+            "tick": 27
+          }
+        ],
+        "tick": 13
+      },
+      "reward_lost": 0.025,
+      "tick": 13,
+      "tick_after": 13,
+      "tool": "uplink",
+      "value_after": 4.25,
+      "value_before": 4.5
+    },
+    {
+      "acks": [
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 294.5,
+            "metres": 5
+          },
+          "command_id": 10,
+          "execute_tick": 21,
+          "sent_tick": 13
+        },
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 294.5,
+            "metres": 2.5
+          },
+          "command_id": 11,
+          "execute_tick": 22,
+          "sent_tick": 13
+        },
+        {
+          "command": {
+            "action": "sample"
+          },
+          "command_id": 12,
+          "execute_tick": 23,
+          "sent_tick": 13
+        }
+      ],
+      "agent_step": 9,
+      "agent_words": null,
+      "arguments": {
+        "commands": [
+          {
+            "action": "drive",
+            "heading_deg": 294.5,
+            "metres": 5
+          },
+          {
+            "action": "drive",
+            "heading_deg": 294.5,
+            "metres": 2.5
+          },
+          {
+            "action": "sample"
+          }
+        ]
+      },
+      "error": null,
+      "findings": [
+        {
+          "evidence": {
+            "ack": {
+              "call": 9,
+              "command_ids": [
+                12
+              ],
+              "execute_ticks": [
+                23
+              ]
+            },
+            "cause": "aim",
+            "executed_tick": 23,
+            "nearest_target": {
+              "distance": 1.17,
+              "id": "t5"
+            },
+            "packet_planned_from": {
+              "battery": 87.1,
+              "position": [
+                24.57,
+                13.82
+              ],
+              "received_tick": 13,
+              "state_tick": 10
+            },
+            "reason": "no_unsampled_target_in_range",
+            "true_position": [
+              20.38,
+              17.14
+            ]
+          },
+          "kind": "reasoning",
+          "n": 9,
+          "summary": "sample command 12 at tick 23 failed (aim)",
+          "tag": "SAMPLE_MISSED"
+        }
+      ],
+      "n": 9,
+      "ok": true,
+      "points_lost": 1.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 270.371485,
+              "metres": 3.952066
+            },
+            {
+              "action": "drive",
+              "heading_deg": 270.371485,
+              "metres": 3.952066
+            },
+            {
+              "action": "drive",
+              "heading_deg": 270.371485,
+              "metres": 3.952066
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 17
+        },
+        "raw_score": 4.25,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 24
+          },
+          {
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 27
+          },
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 30
+          }
+        ],
+        "tick": 13
+      },
+      "reward_lost": 0.1,
+      "tick": 13,
+      "tick_after": 13,
+      "tool": "uplink",
+      "value_after": 3.25,
+      "value_before": 4.25
+    },
+    {
+      "acks": [],
+      "agent_step": 10,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 3
+      },
+      "error": null,
+      "findings": [],
+      "n": 10,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 239.387917,
+              "metres": 3.023265
+            },
+            {
+              "action": "drive",
+              "heading_deg": 239.387917,
+              "metres": 3.023265
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 20
+        },
+        "raw_score": 3.25,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 26
+          },
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 30
+          }
+        ],
+        "tick": 13
+      },
+      "reward_lost": 0.0,
+      "tick": 13,
+      "tick_after": 16,
+      "tool": "advance",
+      "value_after": 3.25,
+      "value_before": 3.25
+    },
+    {
+      "acks": [],
+      "agent_step": 11,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 2
+      },
+      "error": null,
+      "findings": [],
+      "n": 11,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 239.387917,
+              "metres": 3.023265
+            },
+            {
+              "action": "drive",
+              "heading_deg": 239.387917,
+              "metres": 3.023265
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 20
+        },
+        "raw_score": 3.25,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 26
+          },
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 30
+          }
+        ],
+        "tick": 16
+      },
+      "reward_lost": 0.0,
+      "tick": 16,
+      "tick_after": 18,
+      "tool": "advance",
+      "value_after": 3.25,
+      "value_before": 3.25
+    },
+    {
+      "acks": [],
+      "agent_step": 12,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 2
+      },
+      "error": null,
+      "findings": [],
+      "n": 12,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 239.387917,
+              "metres": 3.023265
+            },
+            {
+              "action": "drive",
+              "heading_deg": 239.387917,
+              "metres": 3.023265
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 20
+        },
+        "raw_score": 3.25,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 26
+          },
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 30
+          }
+        ],
+        "tick": 18
+      },
+      "reward_lost": 0.0,
+      "tick": 18,
+      "tick_after": 20,
+      "tool": "advance",
+      "value_after": 3.25,
+      "value_before": 3.25
+    },
+    {
+      "acks": [
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 243.6,
+            "metres": 4.5
+          },
+          "command_id": 13,
+          "execute_tick": 24,
+          "sent_tick": 20
+        }
+      ],
+      "agent_step": 13,
+      "agent_words": null,
+      "arguments": {
+        "commands": [
+          {
+            "action": "drive",
+            "heading_deg": 243.6,
+            "metres": 4.5
+          }
+        ]
+      },
+      "error": null,
+      "findings": [],
+      "n": 13,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 239.387917,
+              "metres": 3.023265
+            },
+            {
+              "action": "drive",
+              "heading_deg": 239.387917,
+              "metres": 3.023265
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 20
+        },
+        "raw_score": 3.25,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 26
+          },
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 30
+          }
+        ],
+        "tick": 20
+      },
+      "reward_lost": 0.0,
+      "tick": 20,
+      "tick_after": 20,
+      "tool": "uplink",
+      "value_after": 3.25,
+      "value_before": 3.25
+    },
+    {
+      "acks": [],
+      "agent_step": 14,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 1
+      },
+      "error": null,
+      "findings": [],
+      "n": 14,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 227.189652,
+              "metres": 1.60994
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 21
+        },
+        "raw_score": 3.25,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 26
+          },
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 30
+          }
+        ],
+        "tick": 20
+      },
+      "reward_lost": 0.0,
+      "tick": 20,
+      "tick_after": 21,
+      "tool": "advance",
+      "value_after": 3.25,
+      "value_before": 3.25
+    },
+    {
+      "acks": [
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 234.6,
+            "metres": 1.32
+          },
+          "command_id": 14,
+          "execute_tick": 25,
+          "sent_tick": 21
+        },
+        {
+          "command": {
+            "action": "sample"
+          },
+          "command_id": 15,
+          "execute_tick": 26,
+          "sent_tick": 21
+        }
+      ],
+      "agent_step": 15,
+      "agent_words": null,
+      "arguments": {
+        "commands": [
+          {
+            "action": "drive",
+            "heading_deg": 234.6,
+            "metres": 1.32
+          },
+          {
+            "action": "sample"
+          }
+        ]
+      },
+      "error": null,
+      "findings": [
+        {
+          "evidence": {
+            "ack": {
+              "call": 15,
+              "command_ids": [
+                15
+              ],
+              "execute_ticks": [
+                26
+              ]
+            },
+            "cause": "aim",
+            "executed_tick": 26,
+            "nearest_target": {
+              "distance": 0.98,
+              "id": "t1"
+            },
+            "packet_planned_from": {
+              "battery": 62.9,
+              "position": [
+                20.04,
+                23.36
+              ],
+              "received_tick": 21,
+              "state_tick": 18
+            },
+            "reason": "no_unsampled_target_in_range",
+            "true_position": [
+              17.41,
+              12.38
+            ]
+          },
+          "kind": "reasoning",
+          "n": 15,
+          "summary": "sample command 15 at tick 26 failed (aim)",
+          "tag": "SAMPLE_MISSED"
+        }
+      ],
+      "n": 15,
+      "ok": true,
+      "points_lost": 1.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 227.189652,
+              "metres": 1.60994
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 21
+        },
+        "raw_score": 3.25,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 26
+          },
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 30
+          }
+        ],
+        "tick": 21
+      },
+      "reward_lost": 0.1,
+      "tick": 21,
+      "tick_after": 21,
+      "tool": "uplink",
+      "value_after": 2.25,
+      "value_before": 3.25
+    },
+    {
+      "acks": [],
+      "agent_step": 16,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 2
+      },
+      "error": null,
+      "findings": [],
+      "n": 16,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 96.062286,
+              "metres": 3.789536
+            },
+            {
+              "action": "drive",
+              "heading_deg": 96.062286,
+              "metres": 3.789536
+            },
+            {
+              "action": "drive",
+              "heading_deg": 96.062286,
+              "metres": 3.789536
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 23
+        },
+        "raw_score": 2.25,
+        "samples": [
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 30
+          }
+        ],
+        "tick": 21
+      },
+      "reward_lost": 0.0,
+      "tick": 21,
+      "tick_after": 23,
+      "tool": "advance",
+      "value_after": 2.25,
+      "value_before": 2.25
+    },
+    {
+      "acks": [],
+      "agent_step": 17,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 2
+      },
+      "error": null,
+      "findings": [],
+      "n": 17,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 96.062286,
+              "metres": 3.789536
+            },
+            {
+              "action": "drive",
+              "heading_deg": 96.062286,
+              "metres": 3.789536
+            },
+            {
+              "action": "drive",
+              "heading_deg": 96.062286,
+              "metres": 3.789536
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 23
+        },
+        "raw_score": 2.25,
+        "samples": [
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 30
+          }
+        ],
+        "tick": 23
+      },
+      "reward_lost": 0.0,
+      "tick": 23,
+      "tick_after": 25,
+      "tool": "advance",
+      "value_after": 2.25,
+      "value_before": 2.25
+    },
+    {
+      "acks": [],
+      "agent_step": 18,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 1
+      },
+      "error": null,
+      "findings": [
+        {
+          "evidence": {
+            "packet": {
+              "received_tick": 24,
+              "state_tick": 21
+            },
+            "target": {
+              "appear_tick": 21,
+              "deadline_tick": 33,
+              "id": "d1",
+              "late_value": 0.75,
+              "value": 3,
+              "x": 20.68,
+              "y": 27.92
+            }
+          },
+          "kind": "reasoning",
+          "n": 18,
+          "summary": "d1 (value 3, deadline tick 33) arrived in the packet for tick 21 at tick 24; never sampled",
+          "tag": "DISCOVERY_MISSED"
+        }
+      ],
+      "n": 18,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 95.951645,
+              "metres": 3.815073
+            },
+            {
+              "action": "drive",
+              "heading_deg": 95.951645,
+              "metres": 3.815073
+            },
+            {
+              "action": "drive",
+              "heading_deg": 95.951645,
+              "metres": 3.815073
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 25
+        },
+        "raw_score": 2.25,
+        "samples": [
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 32
+          }
+        ],
+        "tick": 25
+      },
+      "reward_lost": 0.0,
+      "tick": 25,
+      "tick_after": 26,
+      "tool": "advance",
+      "value_after": 2.25,
+      "value_before": 2.25
+    },
+    {
+      "acks": [],
+      "agent_step": 19,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 3
+      },
+      "error": null,
+      "findings": [],
+      "n": 19,
+      "ok": true,
+      "points_lost": -0.25,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 65.933417,
+              "metres": 2.515606
+            },
+            {
+              "action": "drive",
+              "heading_deg": 65.933417,
+              "metres": 2.515606
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 26
+        },
+        "raw_score": 2.25,
+        "samples": [
+          {
+            "on_time": false,
+            "target_id": "t5",
+            "tick": 32
+          }
+        ],
+        "tick": 26
+      },
+      "reward_lost": -0.025,
+      "tick": 26,
+      "tick_after": 29,
+      "tool": "advance",
+      "value_after": 2.5,
+      "value_before": 2.25
+    },
+    {
+      "acks": [],
+      "agent_step": 20,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 2
+      },
+      "error": null,
+      "findings": [],
+      "n": 20,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 201.197177,
+              "metres": 0.835485
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 29
+        },
+        "raw_score": 2.5,
+        "samples": [
+          {
+            "on_time": false,
+            "target_id": "t1",
+            "tick": 34
+          },
+          {
+            "on_time": false,
+            "target_id": "t5",
+            "tick": 37
+          }
+        ],
+        "tick": 29
+      },
+      "reward_lost": 0.0,
+      "tick": 29,
+      "tick_after": 31,
+      "tool": "advance",
+      "value_after": 2.5,
+      "value_before": 2.5
+    },
+    {
+      "acks": [
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 219,
+            "metres": 0.83
+          },
+          "command_id": 16,
+          "execute_tick": 35,
+          "sent_tick": 31
+        },
+        {
+          "command": {
+            "action": "sample"
+          },
+          "command_id": 17,
+          "execute_tick": 36,
+          "sent_tick": 31
+        },
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 72,
+            "metres": 5
+          },
+          "command_id": 18,
+          "execute_tick": 37,
+          "sent_tick": 31
+        },
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 72,
+            "metres": 4.08
+          },
+          "command_id": 19,
+          "execute_tick": 38,
+          "sent_tick": 31
+        }
+      ],
+      "agent_step": 21,
+      "agent_words": null,
+      "arguments": {
+        "commands": [
+          {
+            "action": "drive",
+            "heading_deg": 219,
+            "metres": 0.83
+          },
+          {
+            "action": "sample"
+          },
+          {
+            "action": "drive",
+            "heading_deg": 72,
+            "metres": 5
+          },
+          {
+            "action": "drive",
+            "heading_deg": 72,
+            "metres": 4.08
+          }
+        ]
+      },
+      "error": null,
+      "findings": [
+        {
+          "evidence": {
+            "ack": {
+              "call": 21,
+              "command_ids": [
+                17
+              ],
+              "execute_ticks": [
+                36
+              ]
+            },
+            "executed_tick": 36,
+            "map_item": "targets[t1].deadline_tick",
+            "target": {
+              "appear_tick": 0,
+              "deadline_tick": 29,
+              "id": "t1",
+              "late_value": 0.25,
+              "value": 1,
+              "x": 16.56,
+              "y": 11.89
+            }
+          },
+          "kind": "reasoning",
+          "n": 21,
+          "summary": "t1 sampled at tick 36, deadline tick 29",
+          "tag": "LATE_SAMPLE"
+        }
+      ],
+      "n": 21,
+      "ok": true,
+      "points_lost": 0.25,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 209.859537,
+              "metres": 0.797525
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 31
+        },
+        "raw_score": 2.5,
+        "samples": [
+          {
+            "on_time": false,
+            "target_id": "t1",
+            "tick": 36
+          },
+          {
+            "on_time": false,
+            "target_id": "t5",
+            "tick": 39
+          }
+        ],
+        "tick": 31
+      },
+      "reward_lost": 0.025,
+      "tick": 31,
+      "tick_after": 31,
+      "tool": "uplink",
+      "value_after": 2.25,
+      "value_before": 2.5
+    },
+    {
+      "acks": [],
+      "agent_step": 22,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 5
+      },
+      "error": null,
+      "findings": [],
+      "n": 22,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": null,
+        "raw_score": 2.25,
+        "samples": [
+          {
+            "on_time": false,
+            "target_id": "t1",
+            "tick": 36
+          }
+        ],
+        "tick": 31
+      },
+      "reward_lost": 0.0,
+      "tick": 31,
+      "tick_after": 36,
+      "tool": "advance",
+      "value_after": 2.25,
+      "value_before": 2.25
+    },
+    {
+      "acks": [],
+      "agent_step": 23,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 4
+      },
+      "error": null,
+      "findings": [],
+      "n": 23,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": null,
+        "raw_score": 2.25,
+        "samples": [],
+        "tick": 36
+      },
+      "reward_lost": 0.0,
+      "tick": 36,
+      "tick_after": 40,
+      "tool": "advance",
+      "value_after": 2.25,
+      "value_before": 2.25
+    },
+    {
+      "acks": [],
+      "agent_step": 24,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 4
+      },
+      "error": null,
+      "findings": [],
+      "n": 24,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": null,
+        "raw_score": 2.25,
+        "samples": [],
+        "tick": 40
+      },
+      "reward_lost": 0.0,
+      "tick": 40,
+      "tick_after": 44,
+      "tool": "advance",
+      "value_after": 2.25,
+      "value_before": 2.25
+    },
+    {
+      "acks": [
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 285,
+            "metres": 0.24
+          },
+          "command_id": 20,
+          "execute_tick": 48,
+          "sent_tick": 44
+        }
+      ],
+      "agent_step": 25,
+      "agent_words": null,
+      "arguments": {
+        "commands": [
+          {
+            "action": "drive",
+            "heading_deg": 285,
+            "metres": 0.24
+          }
+        ]
+      },
+      "error": null,
+      "findings": [],
+      "n": 25,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": null,
+        "raw_score": 2.25,
+        "samples": [],
+        "tick": 44
+      },
+      "reward_lost": 0.0,
+      "tick": 44,
+      "tick_after": 44,
+      "tool": "uplink",
+      "value_after": 2.25,
+      "value_before": 2.25
+    },
+    {
+      "acks": [],
+      "agent_step": 26,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 5
+      },
+      "error": null,
+      "findings": [],
+      "n": 26,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": null,
+        "raw_score": 2.25,
+        "samples": [],
+        "tick": 44
+      },
+      "reward_lost": 0.0,
+      "tick": 44,
+      "tick_after": 49,
+      "tool": "advance",
+      "value_after": 2.25,
+      "value_before": 2.25
+    },
+    {
+      "acks": [],
+      "agent_step": 26,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 1
+      },
+      "error": null,
+      "findings": [],
+      "n": 27,
+      "ok": true,
+      "points_lost": 0.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": null,
+        "raw_score": 2.25,
+        "samples": [],
+        "tick": 49
+      },
+      "reward_lost": 0.0,
+      "tick": 49,
+      "tick_after": 50,
+      "tool": "advance",
+      "value_after": 2.25,
+      "value_before": 2.25
+    }
+  ],
+  "decomposition": {
+    "adds_up": true,
+    "decisions_raw": 4.75,
+    "stop_loss_raw": 0.0
+  },
+  "delay_ticks": 3,
+  "infrastructure": [],
+  "main_mistakes": [
+    {
+      "acks": [],
+      "agent_step": 5,
+      "agent_words": null,
+      "arguments": {
+        "ticks": 3
+      },
+      "error": null,
+      "findings": [
+        {
+          "evidence": {
+            "advanced": [
+              5,
+              8
+            ],
+            "earliest_new_command_after_this_wait": 12,
+            "earliest_new_command_if_uplinked_now": 9,
+            "extra_idle_ticks": 3,
+            "packet": {
+              "battery": 99.0,
+              "position": [
+                19.98,
+                20.1
+              ],
+              "received_tick": 5,
+              "state_tick": 2
+            },
+            "queue_ends_tick": 5,
+            "reference_plan": {
+              "alive": true,
+              "at_base": true,
+              "first_uplink": {
+                "commands": [
+                  {
+                    "action": "sample"
+                  }
+                ],
+                "tick": 5
+              },
+              "raw_score": 6.25,
+              "samples": [
+                {
+                  "on_time": true,
+                  "target_id": "t2",
+                  "tick": 9
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t4",
+                  "tick": 18
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t1",
+                  "tick": 22
+                },
+                {
+                  "on_time": true,
+                  "target_id": "t5",
+                  "tick": 25
+                },
+                {
+                  "on_time": false,
+                  "target_id": "t3",
+                  "tick": 28
+                }
+              ],
+              "tick": 5
+            },
+            "rule": "first_execution_tick"
+          },
+          "kind": "reasoning",
+          "n": 5,
+          "summary": "advanced 5->8 with nothing queued (last command ran at tick 5)",
+          "tag": "WAITED_WITH_EMPTY_QUEUE"
+        }
+      ],
+      "kind": "decision",
+      "n": 5,
+      "ok": true,
+      "points_lost": 1.75,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 5
+        },
+        "raw_score": 6.25,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t2",
+            "tick": 9
+          },
+          {
+            "on_time": true,
+            "target_id": "t4",
+            "tick": 18
+          },
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 22
+          },
+          {
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 25
+          },
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 28
+          }
+        ],
+        "tick": 5
+      },
+      "reward_lost": 0.175,
+      "tick": 5,
+      "tick_after": 8,
+      "tool": "advance",
+      "value_after": 4.5,
+      "value_before": 6.25
+    },
+    {
+      "acks": [
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 294.5,
+            "metres": 5
+          },
+          "command_id": 10,
+          "execute_tick": 21,
+          "sent_tick": 13
+        },
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 294.5,
+            "metres": 2.5
+          },
+          "command_id": 11,
+          "execute_tick": 22,
+          "sent_tick": 13
+        },
+        {
+          "command": {
+            "action": "sample"
+          },
+          "command_id": 12,
+          "execute_tick": 23,
+          "sent_tick": 13
+        }
+      ],
+      "agent_step": 9,
+      "agent_words": null,
+      "arguments": {
+        "commands": [
+          {
+            "action": "drive",
+            "heading_deg": 294.5,
+            "metres": 5
+          },
+          {
+            "action": "drive",
+            "heading_deg": 294.5,
+            "metres": 2.5
+          },
+          {
+            "action": "sample"
+          }
+        ]
+      },
+      "error": null,
+      "findings": [
+        {
+          "evidence": {
+            "ack": {
+              "call": 9,
+              "command_ids": [
+                12
+              ],
+              "execute_ticks": [
+                23
+              ]
+            },
+            "cause": "aim",
+            "executed_tick": 23,
+            "nearest_target": {
+              "distance": 1.17,
+              "id": "t5"
+            },
+            "packet_planned_from": {
+              "battery": 87.1,
+              "position": [
+                24.57,
+                13.82
+              ],
+              "received_tick": 13,
+              "state_tick": 10
+            },
+            "reason": "no_unsampled_target_in_range",
+            "true_position": [
+              20.38,
+              17.14
+            ]
+          },
+          "kind": "reasoning",
+          "n": 9,
+          "summary": "sample command 12 at tick 23 failed (aim)",
+          "tag": "SAMPLE_MISSED"
+        }
+      ],
+      "kind": "decision",
+      "n": 9,
+      "ok": true,
+      "points_lost": 1.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 270.371485,
+              "metres": 3.952066
+            },
+            {
+              "action": "drive",
+              "heading_deg": 270.371485,
+              "metres": 3.952066
+            },
+            {
+              "action": "drive",
+              "heading_deg": 270.371485,
+              "metres": 3.952066
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 17
+        },
+        "raw_score": 4.25,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 24
+          },
+          {
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 27
+          },
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 30
+          }
+        ],
+        "tick": 13
+      },
+      "reward_lost": 0.1,
+      "tick": 13,
+      "tick_after": 13,
+      "tool": "uplink",
+      "value_after": 3.25,
+      "value_before": 4.25
+    },
+    {
+      "acks": [
+        {
+          "command": {
+            "action": "drive",
+            "heading_deg": 234.6,
+            "metres": 1.32
+          },
+          "command_id": 14,
+          "execute_tick": 25,
+          "sent_tick": 21
+        },
+        {
+          "command": {
+            "action": "sample"
+          },
+          "command_id": 15,
+          "execute_tick": 26,
+          "sent_tick": 21
+        }
+      ],
+      "agent_step": 15,
+      "agent_words": null,
+      "arguments": {
+        "commands": [
+          {
+            "action": "drive",
+            "heading_deg": 234.6,
+            "metres": 1.32
+          },
+          {
+            "action": "sample"
+          }
+        ]
+      },
+      "error": null,
+      "findings": [
+        {
+          "evidence": {
+            "ack": {
+              "call": 15,
+              "command_ids": [
+                15
+              ],
+              "execute_ticks": [
+                26
+              ]
+            },
+            "cause": "aim",
+            "executed_tick": 26,
+            "nearest_target": {
+              "distance": 0.98,
+              "id": "t1"
+            },
+            "packet_planned_from": {
+              "battery": 62.9,
+              "position": [
+                20.04,
+                23.36
+              ],
+              "received_tick": 21,
+              "state_tick": 18
+            },
+            "reason": "no_unsampled_target_in_range",
+            "true_position": [
+              17.41,
+              12.38
+            ]
+          },
+          "kind": "reasoning",
+          "n": 15,
+          "summary": "sample command 15 at tick 26 failed (aim)",
+          "tag": "SAMPLE_MISSED"
+        }
+      ],
+      "kind": "decision",
+      "n": 15,
+      "ok": true,
+      "points_lost": 1.0,
+      "reference_instead": {
+        "alive": true,
+        "at_base": true,
+        "first_uplink": {
+          "commands": [
+            {
+              "action": "drive",
+              "heading_deg": 227.189652,
+              "metres": 1.60994
+            },
+            {
+              "action": "sample"
+            }
+          ],
+          "tick": 21
+        },
+        "raw_score": 3.25,
+        "samples": [
+          {
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 26
+          },
+          {
+            "on_time": false,
+            "target_id": "t3",
+            "tick": 30
+          }
+        ],
+        "tick": 21
+      },
+      "reward_lost": 0.1,
+      "tick": 21,
+      "tick_after": 21,
+      "tool": "uplink",
+      "value_after": 2.25,
+      "value_before": 3.25
+    }
+  ],
+  "max_ticks": 50,
+  "model": "anthropic/claude-opus-5-5",
+  "outcome": [
+    {
+      "evidence": {
+        "targets": [
+          {
+            "appear_tick": 21,
+            "deadline_tick": 33,
+            "id": "d1",
+            "late_value": 0.75,
+            "value": 3,
+            "x": 20.68,
+            "y": 27.92
+          },
+          {
+            "appear_tick": 0,
+            "deadline_tick": 19,
+            "id": "t3",
+            "late_value": 0.25,
+            "value": 1,
+            "x": 16.58,
+            "y": 23.4
+          },
+          {
+            "appear_tick": 0,
+            "deadline_tick": 21,
+            "id": "t4",
+            "late_value": 0.5,
+            "value": 2,
+            "x": 24.11,
+            "y": 22.85
+          },
+          {
+            "appear_tick": 0,
+            "deadline_tick": 28,
+            "id": "t5",
+            "late_value": 0.25,
+            "value": 1,
+            "x": 19.39,
+            "y": 16.52
+          }
+        ]
+      },
+      "kind": "outcome",
+      "n": null,
+      "summary": "never sampled: d1, t3, t4, t5",
+      "tag": "TARGETS_LEFT"
+    }
+  ],
+  "profile": "rush_noisy",
+  "reference": "kf_mpc",
+  "replay_matches": true,
+  "run": "overnight-b02-c-rush-noisy-seed504-r1-opus-5-5",
+  "run_findings": [],
+  "score": {
+    "agent_raw": 2.25,
+    "agent_reward": 0.225,
+    "gap_raw": 4.75,
+    "gap_reward": 0.475,
+    "max_available_value": 10.0,
+    "reference_raw": 7.0,
+    "reference_reward": 0.7,
+    "reward_txt": 0.225
+  },
+  "seed": 504,
+  "stop_tick": 50,
+  "superlog": {
+    "available": false,
+    "reason": "ModuleNotFoundError: No module named 'numpy'"
+  }
+}
