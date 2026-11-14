@@ -878,7 +878,7 @@ function updateFeed(t) {
 const MOMENTS = (DATA.moments || []).map(m => ({ ...m, run: RUNS.find(r => r.id === m.run) })).filter(m => m.run);
 const KIND = { lost: 'BATTERY FLAT', no_return: 'POINT OF NO RETURN', away: 'STRANDED', close: 'CLOSE CALL', steep: 'TOO STEEP',
   misses: 'MISSED SAMPLE', ref_wait: 'THE REFERENCE PACES ITSELF', ref_home: 'THE REFERENCE HEADS HOME' };
-const HOLD = { lost: 7, no_return: 7, away: 5.5, close: 4.5, steep: 5, misses: 4.5, ref_wait: 6, ref_home: 5 };   // seconds on screen
+const HOLD = { lost: 9, no_return: 9, away: 7.5, close: 6.5, steep: 7, misses: 6.5, ref_wait: 8, ref_home: 7 };   // seconds on screen
 const NEAR = 14;                                                       // ticks before a moment at which the story slows and turns to it
 const story = { on: false, i: 0, hold: 0, active: null, weight: 0, frame: null, end: 0 };
 const DOTS = 700, dotSpacing = 2.4;
