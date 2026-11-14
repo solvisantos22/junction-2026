@@ -1,0 +1,35 @@
+{
+  "decoded_frames_inspected": [
+    "opening",
+    "queued_return",
+    "home_at_27",
+    "death_at_47",
+    "final_at_50",
+    "idle_bill",
+    "closing"
+  ],
+  "evidence_checks": [
+    "At tick 25 both rovers are away from base; return commands execute at 26 and 27.",
+    "At tick 27 both are home, with the extra excursion still queued only for the actual run.",
+    "Actual battery is zero/dead at tick 47; the continuation is alive at home.",
+    "At tick 50, actual reward 0/10; post-hoc reward 6/10 and battery 9.33.",
+    "Battery contract says every 50-tick survivor pays 25 idle energy; returning home does not recharge.",
+    "Original 3 wins / 2 ties / 3 deficits and selected-case/post-hoc limitations remain visible."
+  ],
+  "limitations": [
+    "Silent WebM first cut; no MP4 export or external-platform compatibility test.",
+    "Playback timing is editorial, not wall-clock mission timing.",
+    "Local Chrome playback and all seven decoded checkpoint frames checked; no external upload."
+  ],
+  "media_stream_check": {
+    "audio_streams": 0,
+    "codec": "VP9 Profile 0",
+    "duration_seconds": 62,
+    "fps": 12,
+    "height": 1080,
+    "pixel_format": "yuv420p",
+    "width": 1920
+  },
+  "readability": "1920x1080 decoded frames inspected; side captions, both maps, pending queues, final rewards and limits readable without overlap.",
+  "reviewer": "Codex visual inspection"
+}

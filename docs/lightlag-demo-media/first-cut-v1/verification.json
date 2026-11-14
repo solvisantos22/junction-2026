@@ -1,0 +1,180 @@
+{
+  "capture": {
+    "javascript_errors": [],
+    "method": "Existing UI slider, deterministic synchronized ticks; camera scroll and side captions only",
+    "network_asset_requests": [],
+    "source_screenshot_format": "JPEG quality 95",
+    "unchanged_embedded_payload": true,
+    "unique_browser_frames": 90,
+    "user_profile_used": false
+  },
+  "decoded_checkpoints": [
+    {
+      "decoded_frame_sha256": "5c60a148c4d21ef00535be05169cdd6093248748c787b97bec56d53ebf700c3c",
+      "label": "opening",
+      "seconds": 2,
+      "tick": 25
+    },
+    {
+      "decoded_frame_sha256": "0471203e3429be138e71f08caa5030242bbbbbf3499e67bfa830e66d7288df01",
+      "label": "queued_return",
+      "seconds": 12,
+      "tick": 25
+    },
+    {
+      "decoded_frame_sha256": "446fc4a8f3314271bd5af15b3d1b3460b401e08f79aa84f2c4ab08983f12fbe4",
+      "label": "home_at_27",
+      "seconds": 20,
+      "tick": 27
+    },
+    {
+      "decoded_frame_sha256": "82752191ac598d921d7090f5279eb6264ba1525d3a3071d6c91b194f4d623beb",
+      "label": "death_at_47",
+      "seconds": 35,
+      "tick": 47
+    },
+    {
+      "decoded_frame_sha256": "0f07ac4c1e626bd7a7cae01aa339b0eb01c5501ee3d183621ed3e78b1d425611",
+      "label": "final_at_50",
+      "seconds": 41,
+      "tick": 50
+    },
+    {
+      "decoded_frame_sha256": "35f52f5f7318a65b1ac6c7a39c0b995ceffae1d14cf7cbfde5b0856e1e3e47ea",
+      "label": "idle_bill",
+      "seconds": 50,
+      "tick": 50
+    },
+    {
+      "decoded_frame_sha256": "869b1c5c7eea91c7bdbfc64d7a2cdcf5cdbb977b6814a26a4515c8f8f1f8b787",
+      "label": "closing",
+      "seconds": 59,
+      "tick": 50
+    }
+  ],
+  "design_commit": "b115cfcbce6106c0bfb7a0ac75357e0516c9d102",
+  "evidence_assertions": {
+    "actual_death_tick": 47,
+    "actual_final_raw_score": 0,
+    "additional_action_energy": 11.1,
+    "case": "rush-noisy-504",
+    "home_tick": 27,
+    "idle_energy_for_full_horizon_survival": 25,
+    "maximum": 10,
+    "original_eight_model_counts": {
+      "model_wins": 3,
+      "reference_wins": 3,
+      "ties": 2
+    },
+    "post_hoc_alive_at_home": true,
+    "post_hoc_cutoff_call": 20,
+    "post_hoc_final_battery": 9.33,
+    "post_hoc_final_raw_score": 6,
+    "queued_return_execution_ticks": [
+      26,
+      27
+    ],
+    "tick25_at_base": false
+  },
+  "input_sha256": {
+    "docs/lightlag-audits/fixed-seeds501-504/rush-noisy-seed504-delay3-opus-5-5/stop-check.json": "4eba8c174050f3074342f9a3995428939ab83beb55b981b05873a54696b622c9",
+    "docs/lightlag-runs/fixed-seeds501-504-summary.json": "1a9d3e74ea68975e6a95af201bdf30d3951c78f5c96365d81df63ebeeb8cc9d3",
+    "docs/lightlag-runs/rush-noisy-seed504-delay3-opus-5-5/artifacts/evaluator/replay.json": "09f9c2968dcf3681d1c3223b4dd96d07022fd0d6e8c8a9af698e65abe4af9dbb",
+    "docs/superpowers/specs/2026-11-14-lightlag-demo-recording.md": "a900cd7460c7989e4780ad9433277f3926617e7c7f0cf8e981e0af9309f48eb6",
+    "viewer/decisions.html": "51e13765f813eaa1aa84d4ebad1c499d4af6e0db6994a85c3212a7f04c337764"
+  },
+  "limits": [
+    "Selected recorded replay, not a live model rollout or failure-prevalence estimate.",
+    "Post-hoc no-new-command continuation, not a fresh successful model trial.",
+    "Tick-stepped editorial timing, not real-time mission timing.",
+    "WebM/VP9 playback verified in local Chrome; no external submission or upload."
+  ],
+  "paid_inference_calls": 0,
+  "payload_sha256": "28b263fce2bb8a18c0028cf3592f2be445fbf33c0c62384e3cd3343bacac3e03",
+  "playback_check": {
+    "advanced_in_real_time": true,
+    "ended_at_duration": true,
+    "error": null
+  },
+  "recording_script_sha256": "3d8d346def68ee22674a73abefb566a75ef5e07613b18943382003df4f9e18c1",
+  "schema_version": 1,
+  "script_path": "tools/lightlag_experiments/overnight_demo_video.py",
+  "software": {
+    "chrome": "157.0.8103.52",
+    "encoder": "ffmpeg version n7.0.1-playwright-build-1013 Copyright (c) 2000-2024 the FFmpeg developers",
+    "encoder_sha256": "e71dd6610cbc984022ff51b07a95f8d2526aba120406d8cdd0686f6421c464ac",
+    "playwright": "1.65.2",
+    "python": "3.12.16"
+  },
+  "storyboard": [
+    {
+      "caption": "One saved noisy mission. Three ticks of delay; 50-tick horizon; 100 starting energy.",
+      "end": 6,
+      "start": 0,
+      "title": "Selected case, complete context"
+    },
+    {
+      "caption": "Accepted drives will execute at ticks 26 and 27. Call 21 adds 8.1 m + a sample: 11.1 action energy.",
+      "end": 16,
+      "start": 6,
+      "title": "Tick 25: return still queued"
+    },
+    {
+      "caption": "Both rovers reach home at tick 27. The actual run still has another excursion queued for ticks 29\u201331.",
+      "end": 22,
+      "start": 16,
+      "title": "Tick 27: the return completes"
+    },
+    {
+      "caption": "The actual run leaves base and samples d1. The post-hoc branch sends no new commands after call 20.",
+      "end": 25,
+      "start": 22,
+      "title": "The extra excursion executes"
+    },
+    {
+      "caption": "The actual run has collected 9 sample points. Its battery still has to last through the mission horizon.",
+      "end": 34,
+      "start": 25,
+      "title": "Science is not final reward"
+    },
+    {
+      "caption": "The actual rover dies away from base. The checked continuation remains alive at home.",
+      "end": 38,
+      "start": 34,
+      "title": "Tick 47: energy exhausted"
+    },
+    {
+      "caption": "Actual: 0/10. Post-hoc continuation: 6/10, alive at home, with 9.33 battery.",
+      "end": 43,
+      "start": 38,
+      "title": "Tick 50: the scored result"
+    },
+    {
+      "caption": "Every 50-tick survivor pays 50 \u00d7 0.5 = 25 idle energy. Returning home neither recharges nor stops the clock.",
+      "end": 54,
+      "start": 43,
+      "title": "The fixed idle bill"
+    },
+    {
+      "caption": "This post-hoc continuation is not a fresh successful model attempt. The selected case does not estimate failure prevalence.",
+      "end": 62,
+      "start": 54,
+      "title": "A checked branch, not a new trial"
+    }
+  ],
+  "video": {
+    "bytes": 1479361,
+    "decoded_metadata": {
+      "duration": 62,
+      "height": 1080,
+      "readyState": 4,
+      "width": 1920
+    },
+    "expected_seconds": 62,
+    "file": "lightlag-selected-case.webm",
+    "format": "WebM / VP9, yuv420p, silent",
+    "fps": 12,
+    "frames": 744,
+    "sha256": "1c191da476b1e3d946e2c32a4f05b2656b5ae83f8c8743ac626b73ff5c874d45"
+  }
+}

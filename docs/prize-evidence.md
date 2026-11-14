@@ -247,6 +247,23 @@ These are recommended evidence choices, not newly asserted official entry requir
   **$2.8120282**, six assignments pending. The sample is still incomplete.
   Reported usage is not a verified balance. No Modal/Gemini use or prize entry.
 
+### E08 — 14 November — Reproducible recorded evidence clip
+
+- Codex prepared a 62-second silent first cut from the team's saved noisy-504
+  evidence and delivered decision page. The clip labels the actual model run,
+  checked post-hoc continuation and selected-case limits; all eight original
+  model outcomes remain visible as context. No new model success is implied.
+- Verification: independent full Chrome playback and eleven decoded frames,
+  exact source/payload/video hashes, independent reconstruction of the branch,
+  and root inspection of three key frames plus source/video hash checks. No network
+  assets or JavaScript/media errors. The viewer and raw evidence are unchanged.
+- Evidence: [clip, narration and reproduction](lightlag-demo-media/README.md),
+  [verification](lightlag-demo-media/first-cut-v1/verification.json),
+  [recording script](../tools/lightlag_experiments/overnight_demo_video.py).
+  WebM/VP9, 1920×1080, 1.48 MB; Chrome verified, external-platform/MP4 playback
+  untested. This is presentation work, with no inference cost or external upload.
+  The team still chooses the final submission story; no prize entry was made.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
