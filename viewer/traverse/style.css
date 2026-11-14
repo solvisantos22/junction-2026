@@ -128,3 +128,26 @@ i.kind { font-style: normal; font-weight: 400; font-size: .56em; letter-spacing:
 #cast.many li small { display: none; }
 #title .help { margin: calc(20px * var(--s)) 0 0; font-size: calc(16px * var(--s)); letter-spacing: .08em; color: var(--dim); }
 #title .src { margin: calc(6px * var(--s)) 0 0; font-size: calc(13px * var(--s)); color: var(--faint); text-transform: none; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+
+/* story mode: the caption card for a moment, and the button that starts it */
+#storybtn { display: block; margin: calc(16px * var(--s)) 0 0; padding: calc(10px * var(--s)) calc(16px * var(--s)) calc(7px * var(--s)); background: none; border: 2px solid var(--gold); color: var(--gold); font: inherit; font-size: calc(24px * var(--s)); letter-spacing: .14em; cursor: pointer; text-transform: uppercase; }
+#storybtn[hidden] { display: none; }
+#storybtn small { margin-left: calc(10px * var(--s)); font-size: calc(14px * var(--s)); letter-spacing: .08em; color: var(--dim); }
+#storybtn:hover { background: rgba(255, 178, 36, .12); }
+#moment { position: absolute; left: 50%; bottom: calc(118px * var(--s)); width: min(calc(860px * var(--s)), 88%); transform: translate(-50%, 24px); opacity: 0; pointer-events: none;
+  background: rgba(11, 8, 7, .9); border-left: 6px solid var(--red); padding: calc(14px * var(--s)) calc(20px * var(--s)) calc(12px * var(--s)); transition: opacity .35s, transform .35s; z-index: 6; }
+#moment.on { opacity: 1; transform: translate(-50%, 0); }
+#moment.gold { border-color: var(--gold); }
+#moment.warn { border-color: #ffd27a; }
+#moment i { display: flex; justify-content: space-between; font-style: normal; font-size: calc(26px * var(--s)); letter-spacing: .12em; color: var(--red); }
+#moment.gold i { color: var(--gold); }
+#moment.warn i { color: #ffd27a; }
+#moment i span { font-size: calc(15px * var(--s)); color: var(--dim); letter-spacing: .1em; align-self: center; }
+#moment b { display: block; margin: calc(2px * var(--s)) 0 calc(6px * var(--s)); font-size: calc(17px * var(--s)); letter-spacing: .1em; }
+#moment b.on { color: var(--ice); }
+#moment b.ref { color: var(--gold); }
+#moment p { margin: 0; font-size: calc(17px * var(--s)); line-height: 1.32; color: var(--ink); text-transform: none; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+#moment p.better { margin-top: calc(8px * var(--s)); color: #d7f0b0; }
+#moment.gold p.better, #moment.warn p.better { color: var(--ink); }
+#moment p.better u { display: block; text-decoration: none; font-family: inherit; font-size: calc(13px * var(--s)); letter-spacing: .12em; text-transform: uppercase; color: var(--lime); margin-bottom: calc(2px * var(--s)); }
+#moment.gold p.better u, #moment.warn p.better u { color: var(--gold); }

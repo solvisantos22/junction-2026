@@ -37,7 +37,9 @@ REPLAY_VERSION = "lightlag-traverse-replay-v1"
 KINDS = {"reference": "reference", "claude": "Claude run", "scripted": "scripted stand-in"}
 
 sys.path.insert(0, str(REPO))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lightlag_traverse.terrain import SAFE_SHARE  # noqa: E402  the share of max_tilt the map generator calls drivable
+import traverse_story  # noqa: E402  the moments story mode stops at
 
 
 def world_definition(replay: Dict[str, Any]) -> Dict[str, Any]:
@@ -191,6 +193,8 @@ def gather(folders: Sequence[Path], mission: Optional[int] = None) -> Dict[str, 
         "runs": runs,
         # the run the page opens on: the best Claude run, or the best stand-in while no model has driven
         "best": (claude or others or [{"id": None}])[0]["id"],
+        # what story mode stops at: computed from the replays, the hidden truth included (traverse_story.py)
+        "moments": traverse_story.moments(loaded),
     }
 
 
