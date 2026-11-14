@@ -191,6 +191,26 @@ class Search(unittest.TestCase):
         self.assertGreater(result["confirmation"]["gain"], 0)
         self.assertEqual(saved["confirmed"], True)
 
+    def test_a_search_on_changed_rules_plays_every_mission_on_them(self):
+        seen = []
+        inner = self.fake_run_many({0: 0.5})
+
+        def run_many(batch):
+            seen.extend(job.get("mission") for job in batch)
+            rows = inner(batch)
+            for job, row in zip(batch, rows):   # as run_job does: a row says which rules it was played on
+                row["mission"] = job["mission"]
+            return rows
+
+        with tempfile.TemporaryDirectory() as folder:
+            search.search(run_many, synthetic_defaults(), search_seeds=range(100, 120), select_seeds=range(400, 405),
+                          confirm_seeds=range(600, 610), generations=2, population=4, block=10, elites=2, finalists=1,
+                          out=Path(folder), mission={"sun_margin_ticks": 0}, log=lambda _: None)
+            plan = json.loads((Path(folder) / "plan.json").read_text())
+        self.assertTrue(seen)
+        self.assertEqual(set(json.dumps(m) for m in seen), {'{"sun_margin_ticks": 0}'})
+        self.assertEqual(plan["mission"], {"sun_margin_ticks": 0})
+
     def test_a_slower_setting_is_disqualified(self):
         names = list(search.SPACE)
         target = {names.index("plan_steps"): 1.0}            # the best reward needs the largest search budget
