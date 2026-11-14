@@ -2,8 +2,8 @@
 
 It does not work out which change happened. It reads the menu in `rules()["rule_change"]`
 and plans from the first tick as if the costliest published turning rule were already in
-force, on top of Manh's controller 36 (unchanged), which already measures slip, bridges gaps
-in telemetry and keeps an energy reserve. Only public information is used: the five tools and
+force, on top of Manh's controller 36 (unchanged), which already measures slip and keeps an
+energy reserve. Only public information is used: the five tools and
 the published menu.
 
 Needs numpy, like every controller in `lightlag_dynamic.manh_controllers`.

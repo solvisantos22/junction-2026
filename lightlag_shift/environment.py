@@ -36,6 +36,8 @@ class ShiftEnvironment(ScenarioEnvironment):
 
     def __init__(self, seed=0, config=None, profile="rush_noisy", noise_level=1.0):
         super().__init__(seed=seed, config=config, profile=profile, noise_level=noise_level)
+        if self._config.max_ticks <= CHANGE_WINDOW[1]:
+            raise ValueError("the horizon must run past the change window ({}-{} ticks)".format(*CHANGE_WINDOW))
         tick, after = draw_change(seed)
         before = {terrain: self._slip[terrain] for terrain in after}
         self.shift = {"tick": tick, "slip_before": before, "slip_after": after}

@@ -123,6 +123,15 @@ Saturday evening, with Kristján's approval for the spend. Claude Opus 5.5 throu
 - **Two clean diagnoses,** one of them exact, and on the lost-telemetry map Claude beat the prepared reference.
 - **A design flaw this exposed:** the relay change can pass unnoticed and without effect if the agent's uplinks happen to land inside passes. As set (4 ticks in 8) it is a weak entry on the menu.
 
+### Fixed after Sölvi's independent audit
+
+[The audit](research/2026-11-14-prototype-assessment.md) reproduced every scripted number above and found two real flaws, both fixed on Saturday evening:
+
+- **The relay change gave itself away.** Before the fix, acknowledgements gained a `transmit_tick` field only once the relay change had happened, so the field's appearance named the change. Now every acknowledgement carries it from the first uplink, equal to the tick it was sent while no relay is overhead. The scripted table above is unchanged by the fix (rerun on seeds 3200–3239: identical means and counts). **The four model runs above were played on the version with the cue.** On seed 3327, the relay map, Claude did not use it: it concluded the change was not relay passes.
+- **A horizon inside the change window was accepted,** and the change then never happened. Both missions now refuse a horizon that does not run past tick 30. The default horizon of 50 was never affected.
+
+The audit's other points stand: the prepared reference does not diagnose which change happened, so its success does not show that diagnosis is needed; there is no unchanged or sham case in the random distribution; and the pilot tasks were hand-patched after generation, so their manifests do not list the added modules. Treat these model runs as exploratory.
+
 ### Limits of step two
 
 - **Four model runs, one per kind of change.** Suggestive at most.

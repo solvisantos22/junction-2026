@@ -56,8 +56,14 @@ class RuleChangeEnvironment(ScenarioEnvironment):
     def __init__(self, seed=0, config=None, profile="rush_noisy", noise_level=1.0, kind=None):
         super().__init__(seed=seed, config=config, profile=profile, noise_level=noise_level)
         self._public = set(super().rules())          # what the tools say before anything changes
+        if self._config.max_ticks <= CHANGE_WINDOW[1]:
+            raise ValueError("the horizon must run past the change window ({}-{} ticks)".format(*CHANGE_WINDOW))
         self.change = draw_rule_change(seed, kind)
         self._changed = False
+        # Every acknowledgement carries `transmit_tick` from the first uplink, equal to the tick it was
+        # sent while no relay is overhead, so the field itself cannot reveal the relay change. A window
+        # open one tick in every one is always open; it changes no timing, and rules() does not list it.
+        self.factors["windows"] = (1, 1)
         if self.change["kind"] == "ground":
             # the sandbox applies this itself at the tick; expressed as a delta from today's ground
             after = self.change["slip_after"]

@@ -119,6 +119,22 @@ class EachChangeTakesEffect(unittest.TestCase):
                 self.assertEqual(ack["transmit_tick"], (sent // period + 1) * period)
         self.assertTrue(any(ack.get("transmit_tick", ack["sent_tick"]) > ack["sent_tick"] for ack in acks))
 
+    def test_every_acknowledgement_carries_transmit_tick_so_the_field_reveals_nothing(self):
+        for kind in ("ground", "turning", "link", "relay"):
+            env, acks = self.run_kind(kind)
+            self.assertTrue(all("transmit_tick" in ack for ack in acks), kind)
+            for ack in acks:
+                if kind != "relay" or ack["sent_tick"] < env.change["tick"]:
+                    self.assertEqual(ack["transmit_tick"], ack["sent_tick"], (kind, ack["sent_tick"]))
+
+    def test_a_horizon_inside_the_change_window_is_refused(self):
+        for horizon in (10, CHANGE_WINDOW[1]):
+            with self.assertRaises(ValueError):
+                RuleChangeEnvironment(seed=3200, config=Config(delay_ticks=3, max_ticks=horizon))
+        from lightlag_shift import ShiftEnvironment
+        with self.assertRaises(ValueError):
+            ShiftEnvironment(seed=3100, config=Config(delay_ticks=3, max_ticks=10))
+
     def test_the_replay_says_what_happened(self):
         for kind in KINDS:
             env, _ = self.run_kind(kind)
