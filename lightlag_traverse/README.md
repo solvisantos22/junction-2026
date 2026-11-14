@@ -75,7 +75,9 @@ On one world the two best agent runs came within 0.04 and 0.05 of the reference,
 | Haiku's one-request program, replayed | 0.030, away | 0.004, away | lost | 0.011 |
 | Sonnet agent 1's final program, replayed | lost | lost | lost | 0.000 |
 
-The replays are Kristján's other session's, on Modal (`docs/traverse-farm/campaign-worlds/` on `main`); on the same worlds the pilot there repeats its Harbor scores exactly. They measure programs written for one mission on world 2026, played without their agents. Claude agents playing the campaign itself: see [`docs/lightlag-traverse.md`](../docs/lightlag-traverse-campaign.md).
+The replays are Kristján's other session's, on Modal (`docs/traverse-farm/campaign-worlds/` on `main`); on the same worlds the pilot there repeats its Harbor scores exactly. They measure programs written for one mission on world 2026, played without their agents.
+
+**Claude agents playing the campaign itself, through Harbor (seven runs):** Sonnet 5.5 0.293 and 0.213, Opus 5.5 0.267, 0.247, 0.244 and 0.120, Haiku 5.5 0.000. The reference is above every one, the closest by 0.18. Three of the six Opus and Sonnet runs ran a battery flat at one site or two; the other three came home every time with 28 to 53% fewer samples. What each did: [`docs/lightlag-traverse-campaign.md`](../docs/lightlag-traverse-campaign.md).
 
 ## Run
 

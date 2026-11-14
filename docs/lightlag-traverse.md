@@ -2,12 +2,7 @@
 
 14 November 2026. Owner: Kristján / Claude Code (gap research chat). Code: [`lightlag_traverse/`](../lightlag_traverse/README.md), task: [`harbor/lightlag-traverse/`](../harbor/lightlag-traverse/) (version 0.1.1), demo: [`viewer/traverse-demo.html`](../viewer/traverse-demo.html). **A proposal for the team, not a rules decision.** Nothing here changes `lightlag/`, `lightlag_dynamic/`, `lightlag_mcp/` or the canonical `harbor/lightlag`.
 
-**Publication note:** this report describes the candidate pilot/task change in
-local commit `1545627`.
-That implementation remains local pending compatibility with the retained RL
-source manifests; publishing this report does not promote task 0.1.1. The
-0.1.1 behavior and 62-test count below refer to that candidate. The saved agent
-runs used task 0.1.0, as stated below.
+**Superseded.** This is the first write-up, of the one-site task alone. The current one, with the three-site campaign that Kristján froze as the submission candidate, is [`lightlag-traverse-campaign.md`](lightlag-traverse-campaign.md). The pilot change described below as task 0.1.1 (commit `1545627`) is on `main` since Kristján's merge; the saved one-site agent runs used task 0.1.0, as stated below.
 
 Kristján asked for an environment closer to real Mars driving than a 40 m square, harder for Claude, and a much stronger reference to go with it. This page is what was built, what real runs showed, and where it falls short.
 
