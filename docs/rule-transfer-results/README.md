@@ -64,3 +64,34 @@ hashed and stays unchanged. No API call or spend has occurred in this free
 screen. Existing environments, controllers, model-generated policy and teammate
 studies are unchanged. Failure analysis and any bounded continuation are recorded
 as separate increments below.
+
+## Failure analysis and continuation
+
+All 23 lost rovers finish inside the base; 19 die on idle ticks. The original
+program forecasts translation, sampling and idle drain but omits angular energy
+cost. It reads an unexpectedly large public battery drop before death in 22/23
+cases and sends further drives after that signal in 11. Near-base corrections
+can consume the remaining reserve: reaching base alone does not stop the clock
+or idle drain. These are reproducible program failures, not a measured inability
+of the model to repair its code.
+
+The relay rejections are also correct: requests at ticks 44/45 wait for relay
+transmission at 48, then would execute at 52 beyond the horizon of 50. The saved
+program honors acknowledged execution times but initially assumes it can still
+send those late corrections.
+
+[Detailed diagnostics](failure-analysis.json) include both public signals and
+explicitly labelled evaluator-only counterfactuals. The latter assume queued
+commands could be cancelled (the API has no cancellation), so they are not proof
+of an executable rescue policy. Reproduce without new episodes or model calls:
+
+```sh
+python3.12 docs/rule-transfer-results/analyze_failures.py --output /tmp/failure-analysis.json
+cmp /tmp/failure-analysis.json docs/rule-transfer-results/failure-analysis.json
+```
+
+The [bounded adaptation protocol](adaptation-protocol.md) reserves fresh seeds
+52000–52039 before opening them. It gives Opus the full rules and original code,
+one practice evaluation and a final submission, with a $1 usage guard. This is
+a repair diagnostic, not a full interactive-agent benchmark. The final program
+must be frozen before the 600-episode local comparison starts.

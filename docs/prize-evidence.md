@@ -539,6 +539,7 @@ These are recommended evidence choices, not newly asserted official entry requir
   changed-case mean .628668 versus .644859 hides that failure. Three rejected
   relay calls are retained. No live-model failure is inferred; inspect before
   the authorized conditional adaptation. Existing model code was not changed.
+- **Failure analysis:** all 23 lost rovers end inside base, 19 deplete on idle ticks; public battery discrepancies precede 22 deaths. Reconstructed from retained artifacts with no new cases. Published the bounded adaptation protocol, original-code/full-rules prompt and fresh-seed reservation before spending or opening check maps. Evaluator-only parking counterfactuals are labelled and excluded from model feedback.
 
 ## Keep recording with minimal overhead
 
