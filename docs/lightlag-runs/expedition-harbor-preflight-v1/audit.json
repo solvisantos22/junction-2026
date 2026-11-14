@@ -1,0 +1,28 @@
+{
+  "archive_hashes_verified": 102,
+  "direct_vs_mcp": {
+    "nop": {
+      "command_count": 0,
+      "exact_replay_match": true,
+      "raw_score": 0.0
+    },
+    "reference": {
+      "command_count": 21,
+      "exact_replay_match": true,
+      "raw_score": 5.6
+    }
+  },
+  "instruction_difference": "",
+  "interpretation": "Both runs use identical simulator/reference/grader code and identical old instructions. This is an infrastructure preflight, with no model outcomes or difficulty claim.",
+  "cached_preparer_caveat": "The runner imported prepare before a concurrent instruction-only edit. Both task snapshots therefore omit the new planning/accounting reminder. The oracle manifest hashes the newer on-disk prepare.py although the already-loaded INSTRUCTION constant was older. Exact generated task hashes, all simulator/reference/grader source hashes, and both full replay comparisons pass. Model tasks must be generated in a fresh process after source freeze. No infrastructure rerun is required by this instruction-only difference.",
+  "source_differences_from_current": {
+    "nop": [
+      "tools/expedition_experiments/prepare.py"
+    ],
+    "reference": []
+  },
+  "task_hashes": {
+    "nop": 33,
+    "reference": 33
+  }
+}

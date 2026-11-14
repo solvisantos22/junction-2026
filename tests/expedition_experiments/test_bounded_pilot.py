@@ -19,6 +19,17 @@ class SpendGuardTests(unittest.TestCase):
                 f.write('\n'+json.dumps(event)+'\n')
             self.assertTrue(reported_usage(path)['unknown'])
 
+    def test_malformed_complete_events_fail_closed_and_partial_utf8_waits(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / 'stream'
+            for invalid in (b'not-json\n', b'null\n', b'[]\n',
+                            b'{"type":"step_finish","part":[]}\n'):
+                path.write_bytes(invalid)
+                self.assertTrue(reported_usage(path)['unknown'])
+            path.write_bytes(b'{"type":"text","value":"\xe2')
+            self.assertFalse(reported_usage(path)['unknown'])
+            self.assertTrue(reported_usage(path, final=True)['unknown'])
+
     def test_order_unknown_censored_and_spend_stop_launch(self):
         with tempfile.TemporaryDirectory() as root:
             root = Path(root)

@@ -413,10 +413,14 @@ These are recommended evidence choices, not newly asserted official entry requir
   [package](../lightlag_expedition/). This first increment establishes mechanics,
   not a model gap. The next increment adds a public-only Bayesian KF/MPC
   reference and five controls, isolated MCP/Harbor packaging, full transcripts
-  and reported-usage launch guards. All 57 package and nine packaging/runner
+  and reported-usage launch guards. All 57 package and ten packaging/runner
   tests pass; independent review found and fixed nonfinite-input evidence loss.
-  Free development comparisons and container checks precede paid testing.
-  No canonical task or teammate physics changed.
+  Free development comparisons retain all 1,536 episodes: weighted reference
+  .453166 vs no inspection .412250, leader inspection .398719 and entropy .447593;
+  every episode alive/home. The disclosed-quality heuristic scores .425028, so
+  it is demonstrably not an upper bound. Actual isolated Harbor no-op and reference
+  pass; an instruction-cache provenance caveat is retained in the design page.
+  No canonical task or teammate physics changed. No paid expedition calls yet.
 
 ## Keep recording with minimal overhead
 

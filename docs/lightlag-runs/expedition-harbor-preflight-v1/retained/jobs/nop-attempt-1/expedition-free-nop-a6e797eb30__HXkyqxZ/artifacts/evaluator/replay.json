@@ -1,0 +1,2322 @@
+{
+  "commands": [],
+  "config": {
+    "base_radius": 0.75,
+    "delay_ticks": 3,
+    "drive_cost": 1.0,
+    "idle_cost": 0.5,
+    "initial_battery": 100.0,
+    "max_ticks": 60,
+    "sample_cost": 3.0,
+    "target_radius": 0.75
+  },
+  "dynamic": {
+    "bumpiness": 0.0,
+    "late_fraction": 0.25,
+    "noise_level": 1.0,
+    "profile": "rush_noisy",
+    "sensing": {
+      "heading_bias_deg": 5.0,
+      "heading_bias_walk_deg": 0.5,
+      "heading_errors": [],
+      "heading_noise_deg": 1.5,
+      "initial_heading_bias_deg": -2.783718464922443,
+      "position_noise_m": 0.3,
+      "visual_odometry_noise": 0.05
+    },
+    "targets": [
+      {
+        "appear_tick": 0,
+        "deadline_tick": 26,
+        "id": "t1",
+        "value": 2
+      },
+      {
+        "appear_tick": 0,
+        "deadline_tick": 18,
+        "id": "t2",
+        "value": 2
+      },
+      {
+        "appear_tick": 0,
+        "deadline_tick": 41,
+        "id": "t3",
+        "value": 3
+      },
+      {
+        "appear_tick": 0,
+        "deadline_tick": 38,
+        "id": "t4",
+        "value": 3
+      },
+      {
+        "appear_tick": 0,
+        "deadline_tick": 33,
+        "id": "t5",
+        "value": 2
+      },
+      {
+        "appear_tick": 0,
+        "deadline_tick": 25,
+        "id": "t6",
+        "value": 2
+      },
+      {
+        "appear_tick": 10,
+        "deadline_tick": 26,
+        "id": "d1",
+        "value": 3
+      },
+      {
+        "appear_tick": 22,
+        "deadline_tick": 44,
+        "id": "d2",
+        "value": 3
+      }
+    ],
+    "version": "lightlag-dynamic-v1"
+  },
+  "expedition": {
+    "inspection_executed": [],
+    "inspection_reserved_regions": [],
+    "map_generator": {
+      "base": [
+        20.0,
+        20.0
+      ],
+      "clearance_metric": "axis-aligned expanded rectangles; target spacing is Euclidean",
+      "coordinate_decimals": 2,
+      "discoveries": [
+        {
+          "appear_tick": 10,
+          "deadline_tick": 26,
+          "id": "d1",
+          "region": "r2",
+          "value": 3
+        },
+        {
+          "appear_tick": 22,
+          "deadline_tick": 44,
+          "id": "d2",
+          "region": "r3",
+          "value": 3
+        }
+      ],
+      "global_rotation_deg": [
+        0,
+        360
+      ],
+      "hazard_base_clearance_m": 2.5,
+      "hazard_clearance_m": 1.2,
+      "hazard_distance_m": [
+        4,
+        10
+      ],
+      "hazard_edge_clearance_m": 0.5,
+      "hazard_size_m": [
+        [
+          2,
+          4
+        ],
+        [
+          1,
+          2.5
+        ]
+      ],
+      "hazards": 2,
+      "height": 40,
+      "max_component_attempts": 100,
+      "max_mission_attempts": 1000,
+      "min_spacing_m": 2.0,
+      "name": "expedition-regional-v1",
+      "regional_bearing_offsets_deg": [
+        0,
+        120,
+        240
+      ],
+      "regions": {
+        "r1": {
+          "deadline_tick": [
+            18,
+            32
+          ],
+          "distance_m": [
+            4,
+            7
+          ],
+          "initial_values": [
+            2,
+            2
+          ]
+        },
+        "r2": {
+          "deadline_tick": [
+            26,
+            44
+          ],
+          "distance_m": [
+            6,
+            10
+          ],
+          "initial_values": [
+            3,
+            3
+          ]
+        },
+        "r3": {
+          "deadline_tick": [
+            22,
+            40
+          ],
+          "distance_m": [
+            5,
+            9
+          ],
+          "initial_values": [
+            2,
+            2
+          ]
+        }
+      },
+      "sampling": "uniform continuous ranges; integer inclusive deadlines; reject invalid geometry",
+      "sand_base_clearance_m": 1.5,
+      "sand_patches": 2,
+      "sand_size_m": [
+        6,
+        12
+      ],
+      "target_bearing_jitter_deg": [
+        -30,
+        30
+      ],
+      "target_edge_clearance_m": 1.0,
+      "width": 40
+    },
+    "mission_seed": 0,
+    "qualities": {
+      "r1": "rich",
+      "r2": "poor",
+      "r3": "poor"
+    },
+    "signals": {
+      "r1": "rich",
+      "r2": "poor",
+      "r3": "poor"
+    },
+    "version": "lightlag-expedition-v1",
+    "visibility": "hidden"
+  },
+  "received_telemetry": [
+    {
+      "alive": true,
+      "battery": 100.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 0,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 0,
+      "visual_odometry": 0,
+      "wheel_odometry": 0
+    },
+    {
+      "alive": true,
+      "battery": 99.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9361394215,
+        19.8557374865
+      ],
+      "received_tick": 4,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 1,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 99.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.8996382757,
+        20.0162521139
+      ],
+      "received_tick": 5,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 2,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 98.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9587662374,
+        20.2899943085
+      ],
+      "received_tick": 6,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 3,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 98.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9983658502,
+        19.689596168
+      ],
+      "received_tick": 7,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 4,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 97.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.8610293486,
+        19.9702026878
+      ],
+      "received_tick": 8,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 5,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 97.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0728112031,
+        20.1180984599
+      ],
+      "received_tick": 9,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 6,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 96.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.1611619933,
+        20.3564787833
+      ],
+      "received_tick": 10,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 7,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 96.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9941908948,
+        20.1150753634
+      ],
+      "received_tick": 11,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 8,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 95.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.6647312401,
+        19.7365489276
+      ],
+      "received_tick": 12,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 9,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 95.0,
+      "events": [
+        {
+          "target": {
+            "appear_tick": 10,
+            "base_value": 3,
+            "deadline_tick": 26,
+            "id": "d1",
+            "late_value": 0.75,
+            "region": "r2",
+            "value": 3,
+            "x": 13.29,
+            "y": 17.18
+          },
+          "type": "target_discovered"
+        }
+      ],
+      "heading_deg": 0.0,
+      "position": [
+        19.639405167,
+        20.4640214117
+      ],
+      "received_tick": 13,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 10,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 94.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9697458625,
+        20.0698614198
+      ],
+      "received_tick": 14,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 11,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 94.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.1031341778,
+        19.2095175172
+      ],
+      "received_tick": 15,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 12,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 93.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.820067211,
+        20.1765658226
+      ],
+      "received_tick": 16,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 13,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 93.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.1386603055,
+        19.5642931496
+      ],
+      "received_tick": 17,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 14,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 92.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.8625325901,
+        19.6170242482
+      ],
+      "received_tick": 18,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 15,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 92.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9386085958,
+        19.6716688142
+      ],
+      "received_tick": 19,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 16,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 91.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.7088269748,
+        20.1637698706
+      ],
+      "received_tick": 20,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 17,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 91.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.2796768276,
+        20.2674472193
+      ],
+      "received_tick": 21,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 18,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 90.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0694463848,
+        19.9525828749
+      ],
+      "received_tick": 22,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 19,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 90.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.2042076058,
+        20.0456527547
+      ],
+      "received_tick": 23,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 20,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 89.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.1686950979,
+        19.7412495461
+      ],
+      "received_tick": 24,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 21,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 89.0,
+      "events": [
+        {
+          "target": {
+            "appear_tick": 22,
+            "base_value": 3,
+            "deadline_tick": 44,
+            "id": "d2",
+            "late_value": 0.75,
+            "region": "r3",
+            "value": 3,
+            "x": 25.06,
+            "y": 16.73
+          },
+          "type": "target_discovered"
+        }
+      ],
+      "heading_deg": 0.0,
+      "position": [
+        20.0322922614,
+        19.6632434202
+      ],
+      "received_tick": 25,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 22,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 88.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0408075018,
+        19.8966414731
+      ],
+      "received_tick": 26,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 23,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 88.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.7285048239,
+        19.7228366552
+      ],
+      "received_tick": 27,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 24,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 87.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.4091994849,
+        19.9672078867
+      ],
+      "received_tick": 28,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 25,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 87.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.8016515612,
+        20.0182509794
+      ],
+      "received_tick": 29,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 26,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 86.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.301655337,
+        19.4465188022
+      ],
+      "received_tick": 30,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 27,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 86.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.3539230564,
+        20.1379625116
+      ],
+      "received_tick": 31,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 28,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 85.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.329020985,
+        19.4579089983
+      ],
+      "received_tick": 32,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 29,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 85.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.3127099982,
+        20.1109760945
+      ],
+      "received_tick": 33,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 30,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 84.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.2367099154,
+        19.6911241642
+      ],
+      "received_tick": 34,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 31,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 84.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.4137320088,
+        20.4128530226
+      ],
+      "received_tick": 35,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 32,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 83.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.93999732,
+        19.5762452673
+      ],
+      "received_tick": 36,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 33,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 83.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9458933702,
+        19.8105880102
+      ],
+      "received_tick": 37,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 34,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 82.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.7003078303,
+        19.896378979
+      ],
+      "received_tick": 38,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 35,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 82.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.3193005664,
+        19.8400924533
+      ],
+      "received_tick": 39,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 36,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 81.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.6121635095,
+        20.0695393955
+      ],
+      "received_tick": 40,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 37,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 81.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.5371244354,
+        19.9483032982
+      ],
+      "received_tick": 41,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 38,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 80.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.1714596267,
+        19.7169444103
+      ],
+      "received_tick": 42,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 39,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 80.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9046716708,
+        19.9390633886
+      ],
+      "received_tick": 43,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 40,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 79.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9603028215,
+        20.7428350377
+      ],
+      "received_tick": 44,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 41,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 79.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0243481774,
+        20.3294916634
+      ],
+      "received_tick": 45,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 42,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 78.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0781397886,
+        19.7670164725
+      ],
+      "received_tick": 46,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 43,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 78.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.7081996926,
+        20.2603794328
+      ],
+      "received_tick": 47,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 44,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 77.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9143957677,
+        19.765527092
+      ],
+      "received_tick": 48,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 45,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 77.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9418916022,
+        19.9394258005
+      ],
+      "received_tick": 49,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 46,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 76.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.8233736394,
+        20.2767671978
+      ],
+      "received_tick": 50,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 47,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 76.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.6160561259,
+        19.9465335092
+      ],
+      "received_tick": 51,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 48,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 75.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9385453349,
+        20.8604037758
+      ],
+      "received_tick": 52,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 49,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 75.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.7197033261,
+        20.1306450293
+      ],
+      "received_tick": 53,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 50,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 74.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.7685880055,
+        19.8076497262
+      ],
+      "received_tick": 54,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 51,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 74.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.7159837734,
+        19.9525345909
+      ],
+      "received_tick": 55,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 52,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 73.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0393829042,
+        20.5233757121
+      ],
+      "received_tick": 56,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 53,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 73.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.8862357806,
+        20.3163474217
+      ],
+      "received_tick": 57,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 54,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 72.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.9771114642,
+        19.9216838156
+      ],
+      "received_tick": 58,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 55,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 72.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.8653206151,
+        20.217054291
+      ],
+      "received_tick": 59,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 56,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 71.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        19.8756485727,
+        20.0903428188
+      ],
+      "received_tick": 60,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 57,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    }
+  ],
+  "result": {
+    "alive": true,
+    "at_base": true,
+    "max_available_value": 20,
+    "mission_profile": "expedition",
+    "raw_score": 0.0,
+    "sampled_targets": [],
+    "sampled_value": 0.0,
+    "samples": [],
+    "survival_factor": 1.0,
+    "tick": 60
+  },
+  "seed": 0,
+  "slip_coefficients": {
+    "bedrock": 0.04222109257625241,
+    "sand": 0.38948860073507563
+  },
+  "states": [
+    {
+      "alive": true,
+      "battery": 100.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 0,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 0,
+      "visual_odometry": 0,
+      "wheel_odometry": 0
+    },
+    {
+      "alive": true,
+      "battery": 99.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 4,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 1,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 99.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 5,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 2,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 98.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 6,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 3,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 98.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 7,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 4,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 97.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 8,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 5,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 97.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 9,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 6,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 96.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 10,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 7,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 96.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 11,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 8,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 95.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 12,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 9,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 95.0,
+      "events": [
+        {
+          "target": {
+            "appear_tick": 10,
+            "base_value": 3,
+            "deadline_tick": 26,
+            "id": "d1",
+            "late_value": 0.75,
+            "region": "r2",
+            "value": 3,
+            "x": 13.29,
+            "y": 17.18
+          },
+          "type": "target_discovered"
+        }
+      ],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 13,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 10,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 94.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 14,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 11,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 94.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 15,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 12,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 93.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 16,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 13,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 93.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 17,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 14,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 92.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 18,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 15,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 92.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 19,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 16,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 91.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 20,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 17,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 91.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 21,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 18,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 90.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 22,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 19,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 90.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 23,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 20,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 89.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 24,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 21,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 89.0,
+      "events": [
+        {
+          "target": {
+            "appear_tick": 22,
+            "base_value": 3,
+            "deadline_tick": 44,
+            "id": "d2",
+            "late_value": 0.75,
+            "region": "r3",
+            "value": 3,
+            "x": 25.06,
+            "y": 16.73
+          },
+          "type": "target_discovered"
+        }
+      ],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 25,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 22,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 88.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 26,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 23,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 88.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 27,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 24,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 87.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 28,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 25,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 87.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 29,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 26,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 86.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 30,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 27,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 86.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 31,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 28,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 85.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 32,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 29,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 85.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 33,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 30,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 84.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 34,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 31,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 84.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 35,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 32,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 83.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 36,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 33,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 83.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 37,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 34,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 82.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 38,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 35,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 82.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 39,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 36,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 81.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 40,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 37,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 81.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 41,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 38,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 80.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 42,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 39,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 80.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 43,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 40,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 79.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 44,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 41,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 79.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 45,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 42,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 78.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 46,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 43,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 78.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 47,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 44,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 77.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 48,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 45,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 77.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 49,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 46,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 76.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 50,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 47,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 76.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 51,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 48,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 75.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 52,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 49,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 75.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 53,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 50,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 74.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 54,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 51,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 74.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 55,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 52,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 73.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 56,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 53,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 73.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 57,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 54,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 72.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 58,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 55,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 72.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 59,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 56,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 71.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 60,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 57,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 71.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 61,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 58,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 70.5,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 62,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 59,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    },
+    {
+      "alive": true,
+      "battery": 70.0,
+      "events": [],
+      "heading_deg": 0.0,
+      "position": [
+        20.0,
+        20.0
+      ],
+      "received_tick": 63,
+      "sampled_targets": [],
+      "terrain": "bedrock",
+      "tick": 60,
+      "visual_odometry": 0.0,
+      "wheel_odometry": 0.0
+    }
+  ],
+  "version": "lightlag-replay-v1",
+  "world": {
+    "base": [
+      20.0,
+      20.0
+    ],
+    "default_terrain": "bedrock",
+    "hazards": [
+      {
+        "x1": 18.09,
+        "x2": 20.82,
+        "y1": 9.58,
+        "y2": 10.58
+      },
+      {
+        "x1": 17.65,
+        "x2": 19.82,
+        "y1": 14.65,
+        "y2": 17.07
+      }
+    ],
+    "height": 40.0,
+    "sand": [
+      {
+        "x1": 6.33,
+        "x2": 14.56,
+        "y1": 9.16,
+        "y2": 19.98
+      },
+      {
+        "x1": 24.44,
+        "x2": 35.81,
+        "y1": 6.3,
+        "y2": 16.81
+      }
+    ],
+    "targets": [
+      {
+        "appear_tick": 0,
+        "base_value": 2,
+        "deadline_tick": 26,
+        "id": "t1",
+        "late_value": 0.5,
+        "region": "r1",
+        "value": 2,
+        "x": 22.43,
+        "y": 24.65
+      },
+      {
+        "appear_tick": 0,
+        "base_value": 2,
+        "deadline_tick": 18,
+        "id": "t2",
+        "late_value": 0.5,
+        "region": "r1",
+        "value": 2,
+        "x": 18.34,
+        "y": 24.0
+      },
+      {
+        "appear_tick": 0,
+        "base_value": 3,
+        "deadline_tick": 41,
+        "id": "t3",
+        "late_value": 0.75,
+        "region": "r2",
+        "value": 3,
+        "x": 15.4,
+        "y": 13.24
+      },
+      {
+        "appear_tick": 0,
+        "base_value": 3,
+        "deadline_tick": 38,
+        "id": "t4",
+        "late_value": 0.75,
+        "region": "r2",
+        "value": 3,
+        "x": 13.52,
+        "y": 19.34
+      },
+      {
+        "appear_tick": 0,
+        "base_value": 2,
+        "deadline_tick": 33,
+        "id": "t5",
+        "late_value": 0.5,
+        "region": "r3",
+        "value": 2,
+        "x": 27.24,
+        "y": 17.58
+      },
+      {
+        "appear_tick": 0,
+        "base_value": 2,
+        "deadline_tick": 25,
+        "id": "t6",
+        "late_value": 0.5,
+        "region": "r3",
+        "value": 2,
+        "x": 23.34,
+        "y": 13.98
+      },
+      {
+        "appear_tick": 10,
+        "base_value": 3,
+        "deadline_tick": 26,
+        "id": "d1",
+        "late_value": 0.75,
+        "region": "r2",
+        "value": 3,
+        "x": 13.29,
+        "y": 17.18
+      },
+      {
+        "appear_tick": 22,
+        "base_value": 3,
+        "deadline_tick": 44,
+        "id": "d2",
+        "late_value": 0.75,
+        "region": "r3",
+        "value": 3,
+        "x": 25.06,
+        "y": 16.73
+      }
+    ],
+    "width": 40.0
+  }
+}

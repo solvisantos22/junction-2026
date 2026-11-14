@@ -1,0 +1,206 @@
+{
+  "all_checks_pass": true,
+  "attempts": [
+    {
+      "agent": "nop",
+      "command": [
+        "/tmp/lightlag-6974-tools/bin/harbor",
+        "run",
+        "-p",
+        "<private-runtime>/expedition-free-nop-a6e797eb30",
+        "-a",
+        "nop",
+        "-n",
+        "1",
+        "-k",
+        "1",
+        "--max-retries",
+        "0",
+        "--jobs-dir",
+        "<private-runtime>/jobs",
+        "--job-name",
+        "nop-attempt-1"
+      ],
+      "elapsed_seconds": 20.638,
+      "isolation": {
+        "container": "expedition-free-nop-a6e797eb30__hxkyqxz__env-main-1",
+        "modules_absent": {
+          "lightlag": true,
+          "lightlag_dynamic": true,
+          "lightlag_expedition": true
+        },
+        "paths_absent": {
+          "/app/lightlag": true,
+          "/app/lightlag_dynamic": true,
+          "/app/lightlag_expedition": true,
+          "/evaluator": true,
+          "/evaluator/result.json": true,
+          "/run/expedition/token": true,
+          "/solution": true,
+          "/srv/lightlag": true,
+          "/srv/lightlag_dynamic": true,
+          "/srv/lightlag_expedition": true,
+          "/tests/grade.py": true
+        },
+        "private_environment_absent": true,
+        "unauthenticated_finish_status": 404
+      },
+      "isolation_probe_attempts": [
+        {
+          "container": "expedition-free-nop-a6e797eb30__hxkyqxz__env-main-1",
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "{\"paths_absent\": {\"/srv/lightlag\": true, \"/srv/lightlag_dynamic\": true, \"/srv/lightlag_expedition\": true, \"/app/lightlag\": true, \"/app/lightlag_dynamic\": true, \"/app/lightlag_expedition\": true, \"/evaluator\": true, \"/evaluator/result.json\": true, \"/run/expedition/token\": true, \"/solution\": true, \"/tests/grade.py\": true}, \"modules_absent\": {\"lightlag\": true, \"lightlag_dynamic\": true, \"lightlag_expedition\": true}, \"private_environment_absent\": true, \"unauthenticated_finish_status\": 404}\n"
+        }
+      ],
+      "isolation_required": true,
+      "policy": "nop",
+      "returncode": 0,
+      "trials": [
+        {
+          "evaluator": {
+            "alive": true,
+            "at_base": true,
+            "max_available_value": 20,
+            "mission_profile": "expedition",
+            "raw_score": 0.0,
+            "reward": 0.0,
+            "sampled_targets": [],
+            "sampled_value": 0.0,
+            "samples": [],
+            "survival_factor": 1.0,
+            "tick": 60,
+            "tool_calls": 0
+          },
+          "exception_info": null,
+          "rewards": {
+            "reward": 0.0
+          },
+          "trial": "expedition-free-nop-a6e797eb30__HXkyqxZ",
+          "verifier_matches_evaluator": true
+        }
+      ]
+    },
+    {
+      "agent": "oracle",
+      "command": [
+        "/tmp/lightlag-6974-tools/bin/harbor",
+        "run",
+        "-p",
+        "<private-runtime>/expedition-free-oracle-a6e797eb30",
+        "-a",
+        "oracle",
+        "-n",
+        "1",
+        "-k",
+        "1",
+        "--max-retries",
+        "0",
+        "--jobs-dir",
+        "<private-runtime>/jobs",
+        "--job-name",
+        "oracle-attempt-1"
+      ],
+      "elapsed_seconds": 19.565,
+      "isolation": null,
+      "isolation_probe_attempts": [],
+      "isolation_required": false,
+      "policy": "reference",
+      "returncode": 0,
+      "trials": [
+        {
+          "evaluator": {
+            "alive": true,
+            "at_base": true,
+            "max_available_value": 20,
+            "mission_profile": "expedition",
+            "raw_score": 5.6,
+            "reward": 0.27999999999999997,
+            "sampled_targets": [
+              "d2",
+              "t1",
+              "t2",
+              "t3",
+              "t6"
+            ],
+            "sampled_value": 5.6,
+            "samples": [
+              {
+                "base_credited_value": 2,
+                "base_value": 2,
+                "credited_value": 2.0,
+                "on_time": true,
+                "quality": "rich",
+                "quality_multiplier": 1.0,
+                "region": "r1",
+                "target_id": "t1",
+                "tick": 14
+              },
+              {
+                "base_credited_value": 2,
+                "base_value": 2,
+                "credited_value": 2.0,
+                "on_time": true,
+                "quality": "rich",
+                "quality_multiplier": 1.0,
+                "region": "r1",
+                "target_id": "t2",
+                "tick": 12
+              },
+              {
+                "base_credited_value": 3,
+                "base_value": 3,
+                "credited_value": 0.6000000000000001,
+                "on_time": true,
+                "quality": "poor",
+                "quality_multiplier": 0.2,
+                "region": "r2",
+                "target_id": "t3",
+                "tick": 28
+              },
+              {
+                "base_credited_value": 2,
+                "base_value": 2,
+                "credited_value": 0.4,
+                "on_time": true,
+                "quality": "poor",
+                "quality_multiplier": 0.2,
+                "region": "r3",
+                "target_id": "t6",
+                "tick": 25
+              },
+              {
+                "base_credited_value": 3,
+                "base_value": 3,
+                "credited_value": 0.6000000000000001,
+                "on_time": true,
+                "quality": "poor",
+                "quality_multiplier": 0.2,
+                "region": "r3",
+                "target_id": "d2",
+                "tick": 34
+              }
+            ],
+            "survival_factor": 1.0,
+            "tick": 60,
+            "tool_calls": 77
+          },
+          "exception_info": null,
+          "rewards": {
+            "reward": 0.28
+          },
+          "trial": "expedition-free-oracle-a6e797eb3__eNRxLRs",
+          "verifier_matches_evaluator": true
+        }
+      ]
+    }
+  ],
+  "kind": "free Harbor infrastructure preflight; no model-difficulty claim",
+  "schema_version": 1,
+  "settings": {
+    "mission_seed": 0,
+    "seed": 0,
+    "visibility": "hidden"
+  },
+  "started_utc": "2026-11-14T12:55:40.581438+00:00"
+}

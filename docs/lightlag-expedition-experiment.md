@@ -101,3 +101,44 @@ quality-belief updates and wasted inspections separately. The public-quality
 control helps distinguish the additional information burden from the navigation
 and bookkeeping difficulty already present in Lightlag. Further development may
 respond to failures, but any claimed validation must use new frozen inputs.
+
+## Free development gate — 14 November
+
+[All 1,536 episodes](lightlag-runs/expedition-development-v1/summary.json)
+enumerate every combination of three qualities and three signals on four maps
+(0–3), with one fixed physics seed per map (100–103). The public prior and signal
+likelihood weight each world. This integrates discrete science uncertainty only;
+it is not an exact continuous-noise or unseen-map expectation. All source hashes
+remained unchanged during the 133-second study. Every episode finished alive at
+base. No paid model calls were made.
+
+| Policy | Weighted normalized score |
+|---|---:|
+| Selective reference | .453166 |
+| Highest-uncertainty inspection | .447593 |
+| Public-quality reference | .425028 |
+| No inspection (physical samples still teach) | .412250 |
+| Inspect current leader | .398719 |
+| Ignore quality | .374750 |
+
+Selective inspection improves 4.09 percentage points over no inspection and
+5.44 over leader inspection, but only .56 over the entropy strategy. It loses
+to no inspection on map 2. The first reference inspection targets a challenger
+on three maps and the leader on one. These results justify testing the composed
+mission; they do not establish that sophisticated acquisition is essential.
+
+The public-quality heuristic underperforms the hidden reference. Knowing quality
+changes its routes and departure timing, while inspection waits also change
+which discoveries and telemetry are available. This is direct evidence that the
+reference is not an optimal upper bound. Its heuristic quality limits any model
+comparison; a model beating it will be retained as a successful result.
+
+[Actual Harbor preflight](lightlag-runs/expedition-harbor-preflight-v1/summary.json)
+completed both no-op (0) and public-tools reference (.28) on fixed development
+map/physics 0/0. Live main-container checks found no simulator source, hidden
+seed/token, evaluator files or oracle; unauthenticated finish returned 404.
+The preflight predates the accounting aid: both exact saved task instructions
+use the old text, and the oracle preparer hash reflects an on-disk edit after
+its Python module was imported. Simulator/reference/grader sources match; the
+manifest records the actual task bytes. Model tasks will be generated in a
+fresh process after the final source commit, with the common aid included.

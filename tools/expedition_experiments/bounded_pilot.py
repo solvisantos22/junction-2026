@@ -26,19 +26,33 @@ def valid_cost(value):
     return type(value) in (float, int) and math.isfinite(value) and value >= 0
 
 
-def reported_usage(path):
+def reported_usage(path, final=False):
     """Read complete JSONL events; reject unknown cost, ignore an unfinished line."""
     if not path.exists():
         return {"cost_usd": 0.0, "finished_steps": 0, "unknown": False}
     seen, cost, unknown = set(), 0.0, False
-    for line in path.read_text().splitlines():
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return {"cost_usd": 0.0, "finished_steps": 0, "unknown": True}
+    lines = data.splitlines(keepends=True)
+    for line in lines:
         try:
             event = json.loads(line)
-        except ValueError:
+        except (ValueError, UnicodeDecodeError):
+            # A live writer can stop in the middle of UTF-8 or a JSON object.
+            if final or line.endswith(b"\n"):
+                unknown = True
+            continue
+        if not isinstance(event, dict):
+            unknown = True
             continue
         if event.get("type") != "step_finish":
             continue
-        part = event.get("part") or {}
+        part = event.get("part")
+        if not isinstance(part, dict):
+            unknown = True
+            continue
         identity = (event.get("sessionID"), part.get("id"))
         if identity[1] is None:
             unknown = True
@@ -113,7 +127,10 @@ def run(runtime, assignment_id, env_file, harbor):
         while process.poll() is None:
             paths = list((runtime / "jobs" / ("model-" + assignment_id)).glob("*/agent/opencode.txt"))
             if len(paths) == 1:
-                usage = reported_usage(paths[0])
+                try:
+                    usage = reported_usage(paths[0])
+                except Exception:
+                    usage = {"cost_usd": 0.0, "finished_steps": 0, "unknown": True}
                 if usage["unknown"]:
                     reason = reason or "unknown_inflight_usage"
                 elif prior + usage["cost_usd"] >= INFLIGHT_GUARD:
@@ -129,10 +146,13 @@ def run(runtime, assignment_id, env_file, harbor):
         code = process.wait()
     paths = list((runtime / "jobs" / ("model-" + assignment_id)).glob("*/agent/opencode.txt"))
     if len(paths) == 1:
-        usage = reported_usage(paths[0])
+        usage = reported_usage(paths[0], final=True)
+    if not usage or usage.get("unknown") or not usage.get("finished_steps"):
+        reason = reason or "unknown_final_usage"
     report = {"assignment_id": assignment_id, "harbor_returncode": code,
               "censored_reason": reason, "final_stream_usage": usage,
               "prior_reported_cost_usd": prior,
+              "guard_crossed_at_completion": prior + usage.get("cost_usd", 0) >= INFLIGHT_GUARD,
               "note": "Reported completed-response usage; not a provider cap or live account balance."}
     write_new(runtime / ("monitor-" + assignment_id + ".json"), report)
     return report
