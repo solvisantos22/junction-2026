@@ -64,7 +64,8 @@ class PagesTest(unittest.TestCase):
 
     def test_the_evaluation_page_holds_one_site_per_world(self):
         out = self.root / "evaluation.html"
-        build_traverse_max.evaluation(out, worlds=(505, 500), players=CHEAP, mission={"max_ticks": 60}, workers=1)
+        build_traverse_max.evaluation(out, worlds=(505, 500), players=CHEAP, mission={"max_ticks": 60}, workers=1,
+                                      programs=[])
         page = out.read_text(encoding="utf-8")
         found = re.findall(r'<script id="src-data-(\d+)" type="application/octet-stream">([^<]*)</script>', page)
         sites = [json.loads(base64.b64decode(data)) for _, data in found]
@@ -72,6 +73,22 @@ class PagesTest(unittest.TestCase):
                          [(1, 505, "SITE 1 / 2"), (2, 500, "SITE 2 / 2")])
         self.assertEqual([site["label"] for site in sites[0]["sites"]], ["SITE 1", "SITE 2"])
         self.assertNotIn("MAX map", sites[1]["pitch"])
+
+    def test_a_model_written_program_is_shown_as_a_claude_run(self):
+        from lightlag_traverse_max import sandbox
+        if not sandbox.available():
+            self.skipTest("needs bwrap, prlimit and Python 3.12")
+        program = self.root / "program.py"
+        program.write_text("def play(tools):\n    tools.uplink([{'action': 'wait'}])\n", encoding="utf-8")
+        out = self.root / "with-program.html"
+        players = [("straight", "reference", "Straight line", "played by the tests")]
+        build_traverse_max.evaluation(out, worlds=(500,), players=players, workers=1,
+                                      programs=[("opus-1", "claude-opus-5-5", "Opus 1", "a test", str(program))])
+        page = out.read_text(encoding="utf-8")
+        (data,) = re.findall(r'<script id="src-data-1" type="application/octet-stream">([^<]*)</script>', page)
+        runs = json.loads(base64.b64decode(data))["runs"]
+        self.assertEqual([(run["kind"], run["label"], run["model"]) for run in runs],
+                         [("reference", "Straight line", ""), ("claude", "Opus 1", "claude-opus-5-5")])
 
     def test_a_lost_packet_repeats_the_last_fix(self):
         replay = {"received_telemetry": [{"tick": 0, "position": [1.0, 2.0]}, {"tick": 2, "position": [3.0, 4.0]}]}

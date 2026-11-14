@@ -214,9 +214,22 @@ Manh decided on Saturday 14 November that the six baseline worlds are the team's
 - **The page:** [`viewer/traverse-evaluation-max.html`](../viewer/traverse-evaluation-max.html), committed, opens from disk. Kristján's Traverse page (`viewer/traverse/`, unchanged) shows each world as one site, keys 1–6, with the reference pilot, `manh_max`, greedy and straight line. Rebuild it (about 2 minutes) with `python3 viewer/build_traverse_max.py --evaluation`. Checked in headless Firefox, not Chrome.
 - **Kristján's pages are untouched.** `traverse-demo.html` (world 2026) and `traverse-campaign.html` (2027–2029) are the normal-map submission demo, and those worlds stay their reference.
 
+## Harbor tasks
+
+Kristján approved (through Manh) a Harbor task for the MAX map. There are two, one per group of held-out worlds:
+
+| Task | Worlds | Reference pilot (campaign score) | Doing nothing |
+|---|---|---|---|
+| [`harbor/lightlag-traverse-max-fair/`](../harbor/lightlag-traverse-max-fair/instruction.md) | 500, 510, 520 | 0.103 (36.25 of 352) | 0.000 |
+| [`harbor/lightlag-traverse-max-superhard/`](../harbor/lightlag-traverse-max-superhard/instruction.md) | 505, 509, 515 | 0.036 (12.5 of 345) | 0.000 |
+
+- **Each is Kristján's campaign task with the MAX map behind it.** Three missions in a row, scored together (value earned over value available), 45 minutes. The agent image, client, ground model, verifier, grader and reference solution (his pilot) are his, byte for byte (tested). His generator, `lightlag_traverse/make_task.py`, is imported, not changed; his two tasks are unchanged (tested).
+- **What differs:** the simulator's container also holds `lightlag_traverse_max/` and starts [`lightlag_traverse_max/server.py`](../lightlag_traverse_max/server.py): his server and campaign, with every mission on the MAX map. The seeds sit only in the simulator's `docker-compose.yaml`. The instruction is his campaign text plus the MAX section from the one-request baseline, and the server's instructions gain one paragraph on the MAX map.
+- **Regenerate** with `python3 -m lightlag_traverse_max.make_task` (`--check` reports stale copies). [`test_task.py`](../tests/lightlag_traverse_max/test_task.py) also serves a task's own simulator folder over HTTP, reaches it with the agent's own client, finishes it through the evaluator route and grades it with the task's grader. Docker is not installed on this machine, so **the images themselves have not been built or run here**, and no agent has played these tasks yet.
+
 ## Limits
 
-- **No model has written a program for the MAX map yet.** The frozen baseline above waits for its paid step. There is no Harbor task or MCP entry for the MAX map.
+- **The frozen one-request baseline is not finished.** Its paid step was stopped after 6 of 9 replies; see the baseline's README. The Harbor tasks above have not been run with an agent.
 - **24 fresh worlds, one run each.** Scores vary a lot from world to world, so differences under about 0.03 are noise.
 - **The MAX settings are the max env's values, carried over, not tuned for the Traverse.** The slip check is 0.45, the catalog's value for long missions (the 50-tick max env uses 0.40).
 - **`manh_max` is slower on the MAX map.** Each time its ground costs are rebuilt (a trip, a soft cell, the wheel size), Kristján's pilot runs its full route search again. See **Time** above.

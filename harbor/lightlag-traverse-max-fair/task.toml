@@ -1,0 +1,46 @@
+schema_version = "1.4"
+
+# The simulator's result directory. Harbor copies it out of the simulator's
+# container after the agent's container has stopped, and into the verifier's.
+# The agent's container never holds it.
+artifacts = [{ source = "/evaluator", service = "lightlag" }]
+
+[task]
+name = "neural-network-november/lightlag-traverse-max-fair"
+version = "0.1.0"
+description = "Drive a rover for one sol at each of three Mars-like sites on the MAX map (fair held-out worlds): three missions of 420 ticks, a link open only in relay passes, lost packets, wild fixes, hidden soft ground; scored over all of them."
+authors = []
+keywords = ["rl-environment", "signal-delay", "planning", "terrain", "state-estimation", "mcp", "robustness", "intermittent-link"]
+
+[metadata]
+
+[verifier]
+timeout_sec = 120.0
+# A fresh container the agent never touched reads the simulator's own result.
+environment_mode = "separate"
+
+# Runs inside the simulator's container once the agent's container is stopped:
+# closes the mission, lets the remaining ticks pass and writes the grade.
+[[verifier.collect]]
+service = "lightlag"
+command = "python -m lightlag_mcp.finish --url http://127.0.0.1:8000 --token-file /run/lightlag/token"
+timeout_sec = 60.0
+
+[verifier.env]
+
+[agent]
+timeout_sec = 2700.0
+
+[environment]
+network_mode = "public"
+build_timeout_sec = 900.0
+os = "linux"
+
+[[environment.mcp_servers]]
+name = "lightlag"
+transport = "streamable-http"
+url = "http://lightlag:8000/mcp"
+
+[environment.env]
+
+[solution.env]

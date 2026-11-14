@@ -23,12 +23,13 @@ Standard library only.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import tempfile
 import time
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
@@ -36,6 +37,7 @@ sys.path.insert(0, str(REPO / "viewer"))
 
 import build_traverse  # noqa: E402
 from lightlag_traverse.play import PublicTools, save_run  # noqa: E402
+from lightlag_traverse_max import oneshot  # noqa: E402
 from lightlag_traverse_max.environment import OPTIONS, make_env  # noqa: E402
 from lightlag_traverse_max.heldout import EVALUATION_WORLDS, FAIR_WORLDS, SUPERHARD_WORLDS  # noqa: E402
 from lightlag_traverse_max.play import policy  # noqa: E402
@@ -87,14 +89,47 @@ def filled(replay: Dict[str, Any]) -> Dict[str, Any]:
     return dict(replay, received_telemetry=log)
 
 
-def page_data(option: str, runs: Sequence[Dict[str, Any]], players: Sequence[Tuple[str, str, str, str]],
+def play_program(job: Tuple[str, int, str]) -> Dict[str, Any]:
+    """One whole MAX mission played by a model-written program, in the bubblewrap sandbox."""
+    from lightlag_traverse_max.sandbox import run
+    name, seed, policy_file = job
+    with tempfile.TemporaryDirectory(prefix="traverse-program-") as folder:
+        summary = run(Path(policy_file), Path(folder), seed, "max")
+        evaluator = Path(folder) / "artifacts" / "evaluator"
+        result = json.loads((evaluator / "result.json").read_text(encoding="utf-8"))
+        replay = json.loads((evaluator / "replay.json").read_text(encoding="utf-8"))
+    return {"player": name, "map": "max", "result": result, "replay": replay, "seconds": summary["seconds"]}
+
+
+def _call(item: Tuple[Callable[[Any], Dict[str, Any]], Any]) -> Dict[str, Any]:
+    function, job = item
+    return function(job)
+
+
+def baseline_programs(baseline: Path = REPO / "docs" / "lightlag-runs" / "max-baseline"
+                      ) -> List[Tuple[str, str, str, str, str]]:
+    """(name, model, label, how, policy file) of every frozen-baseline reply that holds a program."""
+    found = []
+    for short, model in oneshot.MODELS:
+        for k in range(1, oneshot.SAMPLES + 1):
+            folder = baseline / "replies" / "{}-{}".format(short, k)
+            meta = oneshot._meta(folder)
+            if not meta or "error" in meta or not meta.get("has_play") or not (folder / "policy.py").exists():
+                continue
+            found.append(("{}-{}".format(short, k), model, "{} {}".format(short.capitalize(), k),
+                          "one request, effort {}, written for the MAX map".format(oneshot.EFFORT),
+                          str(folder / "policy.py")))
+    return found
+
+
+def page_data(option: str, runs: Sequence[Dict[str, Any]], players: Sequence[Tuple[str, ...]],
               seed: int) -> Dict[str, Any]:
     """Kristján's page data for these runs, gathered and checked by his builder."""
     with tempfile.TemporaryDirectory(prefix="traverse-players-") as root:
-        for (name, kind, label, how), run in zip(players, runs):
+        for (name, kind, label, how, *model), run in zip(players, runs):
             replay = filled(run["replay"]) if option == "max" else run["replay"]
             save_run(Path(root) / "traverse-{}".format(name), {"result": run["result"], "replay": replay},
-                     {"kind": kind, "label": label, "model": "", "how": how,
+                     {"kind": kind, "label": label, "model": model[0] if model else "", "how": how,
                       "source": "python3 viewer/build_traverse_max.py --seed {} --maps {}".format(seed, option)})
         data = build_traverse.gather(build_traverse.run_folders(Path(root)))
     data["title"], data["brand"] = TITLES[option]
@@ -130,17 +165,25 @@ def build(seed: int = 2026, maps: Sequence[str] = OPTIONS, out_dir: Path = REPO 
 
 
 def evaluation(out: Path = REPO / "viewer" / "traverse-evaluation-max.html", worlds: Sequence[int] = EVALUATION_WORLDS,
-               players: Sequence[Tuple[str, str, str, str]] = PLAYERS, mission: Optional[Dict[str, Any]] = None,
-               workers: int = 8) -> Path:
-    """The held-out evaluation worlds on the MAX map, one site each, all in one page (keys 1-6 switch)."""
-    jobs = [(name, seed, "max", mission) for seed in worlds for name, _, _, _ in players]
+               players: Optional[Sequence[Tuple[str, str, str, str]]] = None, mission: Optional[Dict[str, Any]] = None,
+               workers: int = 8, programs: Optional[Sequence[Tuple[str, str, str, str, str]]] = None) -> Path:
+    """The held-out evaluation worlds on the MAX map, one site each, all in one page (keys 1-6 switch).
+
+    The scripted players, then every model-written program of the frozen MAX baseline (played in the
+    sandbox). Once there are programs, the scripted players shown are the reference and Manh's best."""
+    programs = baseline_programs() if programs is None else list(programs)
+    if players is None:
+        players = PLAYERS[:2] if programs else PLAYERS
+    shown = list(players) + [(name, "claude", label, how, model) for name, model, label, how, _ in programs]
+    jobs = [(play, (name, seed, "max", mission)) for seed in worlds for name, _, _, _ in players]
+    jobs += [(play_program, (name, seed, path)) for seed in worlds for name, _, _, _, path in programs]
     if workers <= 1:
-        played = [play(job) for job in jobs]
+        played = [function(job) for function, job in jobs]
     else:
         with ProcessPoolExecutor(max_workers=workers) as pool:
-            played = list(pool.map(play, jobs))
-    per_world = [played[i * len(players):(i + 1) * len(players)] for i in range(len(worlds))]
-    pages = [page_data("max", runs, players, seed) for seed, runs in zip(worlds, per_world)]
+            played = list(pool.map(_call, jobs))
+    by = {(run["player"], run["replay"]["seed"]): run for run in played}
+    pages = [page_data("max", [by[(entry[0], seed)] for entry in shown], shown, seed) for seed in worlds]
     group = {seed: "fair" for seed in FAIR_WORLDS}
     group.update({seed: "superhard" for seed in SUPERHARD_WORLDS})
     # Kristján's campaign page as it is (his headings, his text, his site buttons); only the worlds differ.

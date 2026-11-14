@@ -33,26 +33,14 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from lightlag_traverse import sandbox as kristjans
-from lightlag_traverse.server import TraverseEpisodeService
 
-from .environment import OPTIONS, make_env
+from .environment import OPTIONS
+from .server import MaxEpisodeService
 
 PYTHON = "/usr/bin/python3.12"
 ADDRESS_SPACE = 2 * 1024 ** 3
 WORKER = Path(kristjans.__file__).with_name("sandbox_worker.py")
 SURFACE = Path(kristjans.__file__).with_name("surface.py")
-
-
-class MaxEpisodeService(TraverseEpisodeService):
-    """The team's episode service (lock, transcript, grading), with a mission of either map behind it."""
-
-    def __init__(self, seed: int, artifact_dir: Optional[str] = None, option: str = "max") -> None:
-        super().__init__(seed, artifact_dir=artifact_dir)
-        # Swap the episode before any tool call, as TraverseEpisodeService does.
-        self._env = make_env(seed, option)
-        rules = self._env.rules()
-        self._max_ticks = rules["max_ticks"]
-        self._max_advance = rules["max_advance_ticks"]
 
 
 def available(python: str = PYTHON) -> bool:
