@@ -103,3 +103,9 @@ match. API dry-run validates the prompt, source/image pins and explicit local
 credential setup without contacting the provider. Neither check opens fresh
 cases or spends credits. The launch tooling and its focused error/budget tests
 are published in the next increment before the paid request.
+
+The first provider token-count request rejected a tool schema unsupported at
+the API boundary. It made **zero generation requests and spent no generation
+credits**. The [retained preflight](adaptation/adaptation.json) and
+[declared correction](adaptation-preflight-correction.md) document the adapter
+fix before the corrected launch; this is not a failed model attempt.

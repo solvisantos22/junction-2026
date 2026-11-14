@@ -272,6 +272,23 @@ class AdaptationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "exactly once"):
                 adapt.prepare_material(self.prompt, image_resolver=lambda _: IMAGE_ID)
 
+    def test_provider_schema_avoids_top_level_unions_but_runtime_is_exclusive(self):
+        # The real token-count endpoint rejected a top-level oneOf before any
+        # generation. Mock responses alone cannot detect provider schema limits.
+        for tool in adapt.TOOLS:
+            with self.subTest(tool=tool["name"]):
+                schema = tool["input_schema"]
+                self.assertEqual(schema["type"], "object")
+                self.assertFalse({"oneOf", "allOf", "anyOf"} & schema.keys())
+                self.assertEqual(set(schema["properties"]), {"code", "replacements"})
+        base = "def play(tools):\n    pass\n"
+        self.assertEqual(adapt.apply_submission(base, {"code": base}), base)
+        self.assertEqual(adapt.apply_submission(base, {"replacements": []}), base)
+        for invalid in ({}, {"code": base, "replacements": []}):
+            with self.subTest(arguments=invalid):
+                with self.assertRaisesRegex(ValueError, "exactly code or replacements"):
+                    adapt.apply_submission(base, invalid)
+
 
 if __name__ == "__main__":
     unittest.main()

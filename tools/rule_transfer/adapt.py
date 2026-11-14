@@ -44,16 +44,17 @@ submission is frozen before any fresh evaluation. Do not provide your program in
 plain text instead of the tool. Do not include private reasoning in tool fields.
 """
 SUBMISSION_SCHEMA = {
+    "description": "Provide exactly one of code or replacements; the harness rejects both or neither.",
     "type": "object", "properties": {
         "code": {"type": "string"},
         "replacements": {"type": "array", "items": {
             "type": "object", "properties": {"old": {"type": "string", "minLength": 1},
                                                 "new": {"type": "string"}},
             "required": ["old", "new"], "additionalProperties": False}}},
-    "oneOf": [{"required": ["code"]}, {"required": ["replacements"]}],
     "additionalProperties": False,
 }
-TOOLS = [{"name": name, "description": description, "input_schema": SUBMISSION_SCHEMA}
+TOOLS = [{"name": name, "description": description + " Provide exactly one of code or replacements.",
+          "input_schema": SUBMISSION_SCHEMA}
          for name, description in (
              ("evaluate_policy", "Compile and practice-test the first candidate on 20 fixed used missions."),
              ("submit_policy", "Compile and freeze the final candidate after practice feedback."))]
@@ -109,7 +110,8 @@ def prepare_material(prompt_file, image="junction-rule-adaptation-numpy", *, ima
     if dockerfile.exists():
         sources.append(dockerfile)
     protocol_file = ROOT / "docs/rule-transfer-results/adaptation-protocol.md"
-    sources.extend([protocol_file, ROOT / "docs/rule-transfer.md"])
+    sources.extend([protocol_file, ROOT / "docs/rule-transfer.md",
+                    ROOT / "docs/rule-transfer-results/adaptation-preflight-correction.md"])
     protocol = {"schema": "rule-transfer-adaptation-v1", "model": MODEL, "effort": "medium",
                 "thinking": "adaptive", "max_responses": 2, "max_output_tokens": MAX_OUTPUT,
                 "budget_cap_usd": BUDGET_USD, "input_usd_per_million": 4,
