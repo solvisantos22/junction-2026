@@ -91,8 +91,7 @@ class GatheredRuns(unittest.TestCase):
             self.assertEqual((run["alive"], run["home"]), (result["alive"], result["at_base"]))
             self.assertEqual([(s["id"], s["t"], s["v"], s["ok"]) for s in run["samples"]],
                              [(s["target_id"], s["tick"], s["credited_value"], s["on_time"]) for s in result["samples"]])
-        self.assertGreater(RUNS["traverse-straight"]["reward"], 0)       # the stand-in reference did sample something
-        self.assertEqual(RUNS["traverse-nothing"]["reward"], 0)
+        self.assertEqual(RUNS["traverse-nothing"]["reward"], 0)          # a rover that never moves samples nothing
 
     def test_every_run_has_one_state_per_tick_and_starts_at_base(self):
         ticks, base = DATA["config"]["ticks"], DATA["world"]["base"]

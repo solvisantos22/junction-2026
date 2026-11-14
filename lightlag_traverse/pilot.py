@@ -34,8 +34,10 @@ from .surface import TERRAIN_CODES, Surface, drive
 DEFAULTS: Dict[str, Any] = {
     "route": "optimise",        # "optimise", or "greedy": always the best next target by value per tick
     "terrain": True,            # False: drive straight at the goal and ignore the ground
-    "plan_steps": 300000,       # annealing moves for the first route
-    "replan_steps": 25000,      # ... and for each later one
+    "plan_steps": 300000,       # route evaluations for a full plan: at launch and when the costs change
+    "replan_steps": 25000,      # ... and for each routine replan
+    "beam": 600,                # width of the beam search that starts a full plan
+    "rebeam": 120,              # ... and a routine replan
     "replan_every": 12,         # ticks between routine replans
     "arrive_m": 0.9,            # sample when the predicted distance to the target is under this
     "floor": 5.0,               # never start a drive that would leave less battery than this
@@ -46,6 +48,7 @@ DEFAULTS: Dict[str, Any] = {
     "stop_ticks": 1,            # ticks a stop costs beyond the drive to it: the sample itself
     "energy_weight": 0.25,      # ticks one unit of energy is worth when choosing a way
     "rebuild_shift": 0.035,     # rebuild the ground costs when a slip estimate has moved this much
+    "slip_prior": 0.5,          # where in its published range to assume a terrain's slip before driving on it
 }
 
 
@@ -107,7 +110,8 @@ class Pilot:
         self.max_metres = self.rules["max_metres_per_drive"]
         self.rng = random.Random(1)
         ranges = self.physics["slip_base_ranges"]
-        self.slip = {name: 0.5 * (low + high) for name, (low, high) in ranges.items()}
+        prior = self.opt["slip_prior"]
+        self.slip = {name: low + prior * (high - low) for name, (low, high) in ranges.items()}
         self.slip_seen = {name: [1.0, self.slip[name]] for name in ranges}        # weight, mean
         low, high = self.rules["solar_efficiency_range"]
         self.efficiency, self.efficiency_known = low + 0.25 * (high - low), False
@@ -158,7 +162,7 @@ class Pilot:
         self.fields = {}
         for name in keep:
             self._field(name)
-        self.need_plan = True
+        self.need_plan = self.full_plan = True      # every cost has changed: search properly
 
     def _to(self, name: str, x: float, y: float) -> Tuple[float, float]:
         """Ticks and energy from a point to a named spot, by the cost-to-go field."""
@@ -321,7 +325,8 @@ class Pilot:
                 home_margin=int(self.opt["home_margin"]), deadline_margin=self.opt["deadline_margin"],
                 floor=self.opt["floor"] + 1.0, slack=self.opt["leg_slack"])
             previous = [open_ids.index(t) for t in self.route if t in open_ids]
-            order, _ = plan_route(problem, steps, previous, self.rng)
+            beam = self.opt["beam"] if steps >= self.opt["plan_steps"] else self.opt["rebeam"]
+            order, _ = plan_route(problem, steps, previous, self.rng, beam=beam)
             self.route = [open_ids[i] for i in order]
         self.need_plan = False
         self.last_plan = tick

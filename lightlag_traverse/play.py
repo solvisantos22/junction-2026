@@ -61,7 +61,7 @@ def quick(options: Dict[str, Any]) -> Callable[[Any], Any]:
 
 POLICIES: Dict[str, Callable[[Any], Any]] = {
     "pilot": quick({}),                                          # the reference
-    "pilot_fast": quick({"plan_steps": 40000, "replan_steps": 5000}),     # the same with less search, for sweeps
+    "pilot_fast": quick({"plan_steps": 40000, "replan_steps": 5000, "beam": 150, "rebeam": 40}),   # less search, for sweeps
     "greedy": quick({"route": "greedy"}),                        # reads the ground, no route optimisation
     "straight": quick({"route": "greedy", "terrain": False}),    # neither
     "nothing": nothing,
