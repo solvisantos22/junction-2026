@@ -134,6 +134,53 @@ This was checked against Harbor's own documentation ([docs.harborframework.com](
     Claude Opus 5.5 also scored 1.000.
   - So the container path adds nothing to the score. This is one seed, so it says nothing general about noise.
 
+## Mars-operations tweaks (sandbox, off by default)
+
+**Status:** a lab experiment, NOT a rules decision and not used by the Harbor task. The code is [`manh_controllers/mars.py`](../lightlag_dynamic/manh_controllers/mars.py) and the tests are `tests/lightlag_dynamic/test_mars.py`. Two small factors move the environment toward how Curiosity and Perseverance are actually driven. Both are published in `rules()`. With them off, or at an inert value, the episode is identical to `ScenarioEnvironment` (tested).
+
+| Factor | Effect | Basis |
+|---|---|---|
+| `slip_check {"limit": L}` | If a drive step slips more than L, the rover stops that drive and discards every queued command. Telemetry reports `safety_stop` / `slip_limit`. | Onboard fault protection. Curiosity backed out of Hidden Valley's sand in 2014 this way. |
+| `downlink_passes {"period": P}` | A packet for tick t arrives at the first multiple of P at or after t + delay. | Telemetry comes down through orbiter relay passes. |
+
+**Keep rule, declared before measuring.** Our best controller keeps at least 90% of its untweaked score, and its gap to the best baseline (Sölvi's and Kristján's references, `blind`, `cautious`) shrinks by at most 2 points. The rule was checked on development seeds 0–39, then on fresh seeds 700–779 and 800–879, on `rush_noisy` and `noisy`, delay 3.
+
+| Setting | `rush_noisy` (50 ticks) | `noisy` (80 ticks) | Decision |
+|---|---|---|---|
+| slip check 0.45 | pass | pass | keep (mildest; few trips) |
+| slip check 0.40–0.42 | pass (≥ 93.8%, gap −1.9 at most) | fail: the gap to `solvi_reference` drops from +16.6 to +5.2 (0.42) and −0.2 (0.40) | rush profiles only |
+| slip check 0.35 | fail on development seeds (87%) | fail | reverted |
+| passes P = 2 | pass | pass | keep |
+| passes P = 3 | fail on seeds 700–779 (gap −2.7) | pass | softened to P = 2 |
+
+`solvi_reference` never drives on sand, so the slip check never touches it (75.0% on `noisy` at every limit). This is the same worst-case-avoidance effect as with hidden sand.
+
+**Co-designed controller layer (a proposal, like `kf_mpc_rt`).** Without it, controller 1 replans straight back into the sand that stopped it: 6–9 stops per episode, and it ends outside the base. `slip_aware(parent)` adds three things to any `KalmanMPCController`:
+
+- **Trip chance per terrain.** The filter's slip belief, truncated to the published range, is updated by Bayes on every stop. A drive trips with q(s) = P(noise > L − s).
+- **Routing.** While the chance is above 10%, routes pay to cross that terrain.
+- **Dropping targets.** While it is above 30%, a target reachable only through it is dropped.
+
+Without a slip check the layer is its parent, command for command (tested on controllers 1 and 24). Fresh seeds 800–879, share with rovers home out of 80:
+
+| | c1 → c1 + layer | c24 → c24 + layer |
+|---|---|---|
+| `rush_noisy` 0.40 | 64.9 → 64.2 (74 → 73 home) | 65.1 → 64.7 |
+| `rush_noisy` 0.35 | 61.6 → 65.0 (71 → 77) | 61.8 → 65.1 |
+| `noisy` 0.42 | 78.8 → 78.8 (73 → 76) | 80.2 → 83.4 (72 → 77) |
+| `noisy` 0.40 | 72.8 → 75.0 (66 → 73) | 74.8 → 78.8 (67 → 74) |
+| `noisy` 0.35 | 54.1 → 75.0 (51 → 80) | 55.3 → 75.0 (51 → 80) |
+
+It gains a lot where the check bites hard. It loses at most 1.5 points where the check hardly bites, because it detours around sand that would only trip now and then.
+
+Tried and dropped:
+
+- **Avoiding a terrain only after a stop:** the first stop is the expensive one.
+- **Penalties scaled by the trip chance.**
+- **Charging each leg its expected delay instead of dropping targets:** it also padded the legs home and gave up most targets.
+
+Seeds 700–779 and 800–879 are now used for these checks; don't reuse them as fresh seeds.
+
 ## Third increment: Manh controllers and swarm testing
 
 [`lightlag_dynamic/manh_controllers/`](../lightlag_dynamic/manh_controllers/README.md) collects every meaningful controller combination built so far, named `<METHODS>_manh_controller_<N>`. Each entry records what the controller is, why it was built and what it showed. It also contains privileged-information bounds, candidate rule factors, a per-episode failure logger and a parallel swarm runner, so new controllers can be ranked on the same seeds.

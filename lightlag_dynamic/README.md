@@ -9,7 +9,7 @@ Adds sample deadlines, targets discovered mid-mission, seeded maps, a time-press
 From the repository root, Python 3.9+ (checked on 3.9.20, 3.10, 3.12 and 3.14, with identical results), no installation:
 
 ```sh
-python3 -m unittest discover -s tests/lightlag_dynamic -v                 # 54 tests, under 20 seconds (12 need numpy)
+python3 -m unittest discover -s tests/lightlag_dynamic -v                 # 61 tests, under 20 seconds (12 need numpy)
 python3 -m lightlag_dynamic.compare --delays 0 3 5 --seeds 400-419        # the three team references side by side; a few minutes
 python3 -m lightlag_dynamic.compare --profiles rush_noisy --noise-level 1.5 --bumpiness 0.1
 python3 -m lightlag_dynamic.pilot --profiles rush --delays 0 3 5 --seeds 100-139
