@@ -9,17 +9,20 @@ Adds sample deadlines, targets discovered mid-mission, seeded maps, a time-press
 From the repository root, Python 3.9+ (checked on 3.9.20, 3.10, 3.12 and 3.14, with identical results), no installation:
 
 ```sh
-python3 -m unittest discover -s tests/lightlag_dynamic -v                 # 41 tests, under 20 seconds (12 need numpy)
+python3 -m unittest discover -s tests/lightlag_dynamic -v                 # 50 tests, under 20 seconds (12 need numpy)
 python3 -m lightlag_dynamic.compare --delays 0 3 5 --seeds 400-419        # the three team references side by side; a few minutes
 python3 -m lightlag_dynamic.compare --profiles rush_noisy --noise-level 1.5 --bumpiness 0.1
 python3 -m lightlag_dynamic.pilot --profiles rush --delays 0 3 5 --seeds 100-139
 python3 -m lightlag_dynamic.crosscheck --hard                             # adds lightlag_controllers and tougher physics; several minutes
 python3 -m lightlag_dynamic --profile rush --seed 7 --delay 3 < script.jsonl   # one JSON-lines episode, same protocol as `python3 -m lightlag`
 python3 -m lightlag_dynamic.serve --profile rush_noisy --seed 7 --delay 3 # one episode over MCP (needs the mcp package, Python 3.10+)
+python3 -m lightlag_dynamic.realtime --seconds-per-tick 5 --profile rush_noisy --seed 7 --delay 3   # the same, on a real-time clock
 python3 -m lightlag_dynamic.manh_controllers --list                      # Manh's controller collection and swarm runner (needs numpy)
 ```
 
 `serve` takes the same options and environment variables as `python -m lightlag_mcp` (transport, port, artifact directory, evaluator token, token file), plus `--profile`, `--noise-level` and `--bumpiness`. Over HTTP it answers `/healthz` and is graded by `python -m lightlag_mcp.finish`, so the Harbor task in [`harbor/lightlag/`](../harbor/lightlag/) could serve a dynamic profile by starting `python -m lightlag_dynamic.serve --profile <name>` in its simulator container instead of `python -m lightlag_mcp` (with `lightlag_dynamic/` copied in). That switch is the Harbor task owner's call; nothing under `harbor/` is changed here.
+
+`realtime` is `serve` on a wall clock: one tick every `--seconds-per-tick` seconds (or `LIGHTLAG_SECONDS_PER_TICK`) from the agent's first tool call, whether or not it calls tools, so thinking costs ticks. `advance(n)` waits for n ticks instead of moving the clock and returns every packet received since the previous `advance`; `rules()` reports the clock; the tool descriptions say so. Clock steps appear in `transcript.jsonl` as `"tool": "clock"` records. It is a separate module so `serve.py`, which Sölvi's experiments copy and hash, stays unchanged. [Design and calibration](../docs/lightlag-dynamic-pilot.md#real-time-clock-thinking-costs-ticks).
 
 ## Profiles
 
@@ -57,6 +60,7 @@ Physics, timing, energy, safety stops, the five public methods and the 1 / 0.5 /
 | `kf_mpc.py` | Kalman filter + receding-horizon controller with chance constraints (details below) |
 | `compare.py` | Sölvi's, Kristján's and the KF + MPC reference, plus baselines, on the same seeds and profiles |
 | `serve.py` | `DynamicEpisodeService` and an MCP entry point: Kristján's `lightlag_mcp` server playing a dynamic profile |
+| `realtime.py` | `RealTimeEpisodeService` and its MCP entry point: the same episode on a wall clock, with the tool texts describing it |
 | `pilot.py` | Policy × profile × delay × seed matrix and summary table |
 | `crosscheck.py` | Runs `lightlag_controllers` beside these controllers, checks `lightlag.evaluation.run_episode` gives identical scores, and optionally applies the team pilot's tougher physics |
 | `manh_controllers/` | Every Manh controller combination, named `<METHODS>_manh_controller_<N>` with what, why and when; bounds, rule factors, failure logger and swarm runner. [What each one is and where things stand](manh_controllers/README.md) |

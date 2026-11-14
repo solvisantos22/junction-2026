@@ -1,6 +1,6 @@
 # Lightlag dynamic-rules pilot: deadlines, discoveries, time pressure and noisy sensing
 
-14 November 2026. First increment about 01:45 Helsinki, second increment (noisy sensing, Kalman filter + MPC) about 02:20, third increment (Manh controllers and swarm testing) about 03:30. Owner: Manh / Claude Code. Code: [`lightlag_dynamic/`](../lightlag_dynamic/README.md), tests: `tests/lightlag_dynamic/`. Runs on Sölvi's simulator in [`lightlag/`](../lightlag/README.md) and changes nothing in it, nor in `lightlag_controllers/` or `lightlag_mcp/`.
+14 November 2026. First increment about 01:45 Helsinki, second increment (noisy sensing, Kalman filter + MPC) about 02:20, third increment (Manh controllers and swarm testing) about 03:30, real-time clock about 03:45. Owner: Manh / Claude Code. Code: [`lightlag_dynamic/`](../lightlag_dynamic/README.md), tests: `tests/lightlag_dynamic/`. Runs on Sölvi's simulator in [`lightlag/`](../lightlag/README.md) and changes nothing in it, nor in `lightlag_controllers/` or `lightlag_mcp/`.
 
 **This pilot's own comparisons are all scripted controllers.** They show how the environment behaves under different rules, not whether a frontier agent struggles. The only real agent runs so far are Sölvi's [Harbor experiments](lightlag-experiments.md), which serve this package's `rush` profile: Claude Opus 5.5 scored 1.000 on seed 500 at delay 3, both on `rush` and on `rush_noisy`. The [Harbor reward check](#harbor-reward-check-what-the-model-is-graded-on) below confirms how that number is computed.
 
@@ -9,6 +9,47 @@
 AfterQuery's 14 November update ([summary](afterquery-update-2026-11-14.md)): every environment must be a [Harbor](https://github.com/harbor-framework/harbor) task (the `laude-institute/harbor` link redirects there), played with the OpenCode harness, writing one reward between 0 and 1 to `/logs/verifier/reward.txt`, with at least one Harbor run log of a real model and a short README. AfterQuery provides no inference credits.
 
 For this pilot, that means nothing here reaches the submission except through Kristján's Harbor task ([`harbor/lightlag/`](../harbor/lightlag/), [notes](lightlag-harbor.md)). `python3 -m lightlag_dynamic.serve` is a drop-in for that task's simulator command: it accepts the same settings, including `LIGHTLAG_TOKEN_FILE`, answers `/healthz`, and was graded by `python -m lightlag_mcp.finish` over HTTP in a local test (`rush_noisy`, seed 7; result and replay written). Switching the task to a dynamic profile is a team rules decision and the task owner's change; nothing under `harbor/` is edited here.
+
+## Real-time clock: thinking costs ticks
+
+[`lightlag_dynamic/realtime.py`](../lightlag_dynamic/realtime.py), added about 03:45 Helsinki. Run it with `python3 -m lightlag_dynamic.realtime --seconds-per-tick 5 --profile rush_noisy --seed 7 --delay 3`. The flags and settings are the same as `serve`, plus `LIGHTLAG_SECONDS_PER_TICK`.
+
+**Why.** In the turn-based episode only `advance` moves the clock, so an agent can think for as long as it likes between ticks. Mission control has no pause button. The recorded Opus 5.5 runs show how much free time that is:
+- each 50-tick mission took 61–126 s of wall time;
+- the median gap between game calls was 3–4 s;
+- single planning pauses lasted up to 32 s.
+
+None of that cost a tick.
+
+**What changes.**
+- One tick passes every `seconds_per_tick` seconds from the agent's first tool call. Starting at the first call means container and harness start-up never cost ticks.
+- Before any tool answers, the episode catches up to the wall clock. Commands are stamped with the tick at which they arrive.
+- `advance(n)` no longer moves the clock. It waits until n more ticks have passed, and returns every packet received since the previous `advance`, including those that arrived while the agent was thinking.
+- `rules()` reports the clock: tick length, current tick and seconds elapsed. The MCP tool texts describe the real-time clock instead of "only `advance` moves the clock".
+- Physics, scoring and `replay.json` are unchanged.
+- The transcript records each catch-up as a `"tool": "clock"` record, and every record carries `wall_seconds`.
+- It is a separate module, so `serve.py`, which Sölvi's experiments copy and hash, is untouched.
+
+Tested with a fake clock (9 tests) and live over HTTP with a 0.5 s tick, including the evaluator's finish hook.
+
+**Calibration with scripted controllers.** `rush_noisy`, delay 3, development seeds 0–19. Each tool call first spends a simulated thinking time, given in ticks:
+
+| Thinking time per call | 0 (= turn-based) | 0.1 | 0.25 | 0.5 | 1.0 |
+|---|---|---|---|---|---|
+| `kf_mpc`, share of maximum (calls) | 0.707 (63) | 0.707 | 0.739 | **0.204** (53) | 0.111 (33) |
+| Blind plan, sends everything first | 0.539 (16) | 0.539 | 0.539 | 0.537 | 0.508 |
+| Whole leg, then wait | 0.418 (60) | 0.418 | 0.418 | 0.300 | 0.283 |
+
+- **A controller that answers instantly loses nothing.** On the same seed its commands and score are identical to turn-based (tested). So the scripted reference keeps its score under real time, and the gap to an agent then includes the agent's thinking time.
+- **Reactive control without latency compensation collapses between 0.25 and 0.5 ticks of thinking per call.** `kf_mpc` decides from the tick it last saw, so its commands land late; near the horizon its uplinks are rejected. Batch planning (the blind plan) barely notices.
+- **Choosing the tick length.** Opus spent 3–4 s per game call, about 30 calls per mission. That is about 0.35 ticks per call at 10 s per tick, and 0.7 at 5 s per tick. At 2.5 s per tick the whole mission lasts 125 s, about Opus's current total time. A pilot at **10 s per tick** (8.3-minute mission) and **5 s per tick** (4.2 minutes) brackets the region where thinking starts to cost. Both fit Harbor's 1,800 s agent timeout.
+- **Caveat: scores now depend on API latency and provider load, not only on reasoning.** Report `wall_seconds` and the model's per-call latency with every real-time score, and run each paired reference in the same task.
+
+**What switching an experiment needs (team decisions; nothing changed here):**
+1. Sölvi's `prepare.py` would copy `realtime.py`, start `python -m lightlag_dynamic.realtime` and set `LIGHTLAG_SECONDS_PER_TICK`.
+2. The task's `instruction.md` says `advance` "is the only tool that moves the clock". Replace that with, for example: "The clock runs in real time: one tick every S seconds from your first tool call, whether or not you call tools. `advance(n)` waits until n more ticks have passed."
+3. The decision auditor replays `advance` arguments, so on a real-time transcript it would report a rebuild mismatch rather than a wrong audit. It needs to step the clock by `clock` records.
+4. A real-time-aware reference would make a fairer bound for an agent with thinking time: one that stamps its plan for the tick its command will arrive. `kf_mpc` still answers instantly, so it is a valid instant reference.
 
 ## Harbor reward check: what the model is graded on
 
