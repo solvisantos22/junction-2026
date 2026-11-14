@@ -7,7 +7,8 @@ import numpy as np
 from helpers import plain_chooser
 from lightlag_ppo_icm.belief import Belief
 from lightlag_ppo_icm.envs import FiveTools, finish, make_env, run_episode, share
-from lightlag_ppo_icm.ground import GridGround, RectGround
+from lightlag_ppo_icm.ground import GridGround, RectGround, _crosses
+from lightlag_ppo_icm.home import HomeField
 from lightlag_ppo_icm.task import FIRST_DRIVE, GLOBAL, SAMPLE, WAIT, RoverTask, TaskConfig
 
 CONFIG = TaskConfig()
@@ -233,6 +234,212 @@ class GuardTests(unittest.TestCase):
         self.assertEqual(commands[0], commands[1])
         self.assertEqual(sum(c["action"] == "drive" for c in commands[0]), 6)
         self.assertEqual(TaskConfig.from_dict(TaskConfig(guard=False).to_dict()).guard, False)
+
+
+class HomeGuardTests(unittest.TestCase):
+    """The home guard (TaskConfig.home_guard): off by default; on, it keeps the way home."""
+
+    def guarded(self, spec, seed, kind, home_guard=True):
+        """One episode with a simple chooser; returns (task, result, decisions, home drives).
+        decisions: (slot, the guard replaced it, time slack, energy slack) of every decision, the
+        slack being what the guard's own margins say if that slot were a wait. home drives: (way
+        home before, after) in ground metres, for every drive the guard sent, as the belief expects it."""
+        env = make_env(spec, seed)
+        config = TaskConfig(home_guard=home_guard)
+        task = RoverTask(FiveTools(env), config)
+        decisions, home_drives = [], []
+        send, home_command = task._send, task._home_command
+
+        def slack(slot):
+            kf, heading, battery, _, _, alive, risk = task._state(slot)
+            x, y, gr, gi = (float(v) for v in kf.m)
+            energy, drives = task._home_need(slot, x, y, heading, gr, gi)
+            return task.horizon - slot - task._home_slots(drives), battery - risk - energy
+
+        def watched_send(action, slot=None):
+            before = task.homed
+            margins = slack(slot) if task.field is not None else (None, None)
+            out = send(action, slot)
+            decisions.append((out, task.homed > before) + margins)
+            return out
+
+        def watched_home_command(slot):
+            command = home_command(slot)
+            if command["action"] == "drive":
+                kf = task._state(slot)[0]
+                x, y, gr, gi = (float(v) for v in kf.m)
+                reach = task.max_metres * (1.0 - task.ground.slip_at(x, y)) * math.hypot(gr, gi)
+                dx, dy, _, _, _ = task.ground.advance(x, y, command["heading_deg"], command["metres"], gr, gi, True)
+                nx, ny = x + gr * dx - gi * dy, y + gr * dy + gi * dx
+                home_drives.append((task.field.left(x, y, reach)[0], task.field.left(nx, ny, reach)[0]))
+            return command
+
+        task._send, task._home_command = watched_send, watched_home_command
+        if kind == "random":
+            rng = np.random.default_rng(seed)
+            choose = lambda obs: int(rng.integers(config.n_actions))
+        elif kind == "away":
+            choose = lambda obs: FIRST_DRIVE + len(config.metres) - 1     # east, the longest drive, always
+        elif kind == "plain":
+            choose = plain_chooser(config)
+        else:
+            choose = lambda obs: WAIT
+        task.play(choose)
+        return task, finish(env), decisions, home_drives
+
+    def test_it_is_off_by_default_and_a_policy_file_remembers_it(self):
+        self.assertFalse(TaskConfig().home_guard)
+        old = TaskConfig().to_dict()
+        del old["home_guard"]                      # a policy saved before the option existed
+        self.assertFalse(TaskConfig.from_dict(old).home_guard)
+        self.assertTrue(TaskConfig.from_dict(TaskConfig(home_guard=True).to_dict()).home_guard)
+        task = RoverTask(FiveTools(make_env("max", 300040)), CONFIG)
+        self.assertIsNone(task.field)
+        self.assertEqual(task.homed, 0)
+
+    def test_it_brings_rovers_home_that_would_not_come_home(self):
+        for spec, kind, at_least in (("rush", "random", 8), ("rush", "away", 8), ("max", "random", 7),
+                                     ("max", "away", 5)):
+            home = 0
+            for seed in range(300040, 300048):
+                _, off, _, _ = self.guarded(spec, seed, kind, home_guard=False)
+                self.assertFalse(off["at_base"], (spec, kind, seed))
+                task, on, _, _ = self.guarded(spec, seed, kind)
+                self.assertTrue(on["alive"], (spec, kind, seed))
+                self.assertGreater(task.homed, 0)
+                home += bool(on["at_base"])
+            self.assertGreaterEqual(home, at_least, (spec, kind))
+
+    def test_it_fires_when_the_way_home_stops_fitting_and_not_before(self):
+        # A rover that only ever drives away. The guard leaves it alone while there is slack for
+        # the way back, and takes over when what is left comes down to about one more drive out.
+        for spec in ("rush", "max"):
+            for seed in range(300040, 300044):
+                task, result, decisions, _ = self.guarded(spec, seed, "away")
+                worst = task._worst(0.0, task.max_metres, 20.0, 20.0, 180.0)   # one full drive at the dearest rate
+                first = next(i for i, d in enumerate(decisions) if d[1])
+                _, _, time_slack, energy_slack = decisions[0]
+                self.assertGreater(time_slack, 20, (spec, seed))
+                self.assertGreater(energy_slack, 3 * worst, (spec, seed))
+                self.assertGreater(first, 0, (spec, seed))               # it did not fire at once
+                _, _, time_slack, energy_slack = decisions[first]
+                self.assertTrue(time_slack <= 3 + task.stop_slots or energy_slack <= 3 * worst,
+                                (spec, seed, time_slack, energy_slack))
+                self.assertTrue(result["alive"])
+
+    def test_its_drives_never_take_the_rover_further_from_home(self):
+        progress = []
+        for spec, kind in (("rush", "random"), ("max", "random"), ("max", "plain"), ("max", "away")):
+            for seed in range(300040, 300046):
+                _, _, _, home_drives = self.guarded(spec, seed, kind)
+                for before, after in home_drives:
+                    self.assertLess(after, before + 1e-6, (spec, kind, seed, before, after))
+                    progress.append(before - after)
+        self.assertGreater(len(progress), 150)
+        self.assertGreater(statistics.median(progress), 0.5)     # most of a drive goes into the way home
+
+    def test_rewards_still_add_up_to_the_official_score(self):
+        for spec, kind in (("rush", "random"), ("max", "random"), ("max", "plain"), ("max", "away")):
+            for seed in range(300040, 300044):
+                task, result, _, _ = self.guarded(spec, seed, kind)
+                self.assertAlmostEqual(float(task.rewards(result).sum()), share(result), places=9)
+                self.assertAlmostEqual(float(task.rewards(result, home_pull=1.0).sum()), share(result), places=9)
+
+    def test_it_leaves_a_rover_waiting_at_base_alone_and_every_slot_is_decided_once(self):
+        for spec in ("rush", "max"):
+            for seed in range(300040, 300043):
+                commands = []
+                for home_guard in (False, True):
+                    task, result, decisions, _ = self.guarded(spec, seed, "wait", home_guard)
+                    self.assertEqual(task.homed, 0)
+                    self.assertEqual(len(task.decisions), task.horizon - task.delay)
+                    self.assertTrue(result["at_base"])
+                    commands.append([a["action"] for _, a in sorted(task.acks.items())])
+                self.assertEqual(commands[0], commands[1])
+            for seed in range(300043, 300046):
+                task, _, _, _ = self.guarded(spec, seed, "random")
+                self.assertEqual(len(task.decisions), task.horizon - task.delay)
+
+    def test_only_the_two_margins_for_getting_home_change_in_the_observation(self):
+        seen = {}
+        for home_guard in (False, True):
+            env = make_env("max", 300041)
+            task = RoverTask(FiveTools(env), TaskConfig(home_guard=home_guard))
+            first = []
+            task.play(lambda obs: first.append(obs) or WAIT)
+            seen[home_guard] = np.array(first)
+        differ = np.flatnonzero((seen[False] != seen[True]).any(axis=0))
+        self.assertTrue(set(differ) <= {GLOBAL + 5, GLOBAL + 6}, differ)
+        self.assertTrue((np.abs(seen[True][:, GLOBAL + 5:GLOBAL + 7]) <= 1.0).all())
+
+    def test_it_is_for_the_flat_family_only(self):
+        with self.assertRaises(ValueError):
+            RoverTask(FiveTools(make_env("traverse", 1)), TaskConfig(home_guard=True))
+
+
+class HomeFieldTests(unittest.TestCase):
+    def follow(self, field, x, y, reach=2.0, legs=20):
+        """Waypoint to waypoint from (x, y); returns the legs."""
+        legs_driven = []
+        for _ in range(legs):
+            if field.home(x, y):
+                break
+            wx, wy = field.waypoint(x, y, reach)
+            self.assertLessEqual(math.hypot(wx - x, wy - y), reach + 1e-9)
+            legs_driven.append((x, y, wx, wy))
+            x, y = wx, wy
+        self.assertTrue(field.home(x, y))
+        return legs_driven
+
+    def test_the_way_home_goes_around_a_hazard(self):
+        ground = RectGround(RULES, MAP)                  # the hazard lies across the way, 3 to 4 m north of the base
+        field = HomeField(ground, (20.0, 20.0), 0.75)
+        self.assertTrue(field.straight(20.0, 22.0))
+        self.assertEqual(field.left(20.0, 22.0, 2.0)[:2], (2.0, 2.0 / (1.0 - ground.firm_slip)))
+        self.assertFalse(field.straight(20.0, 27.0))
+        ground_m, wheel_m, _, sand = field.left(20.0, 27.0, 2.0)
+        self.assertGreater(ground_m, 7.5)                # longer than the straight line, which is blocked
+        self.assertLess(ground_m, 11.0)
+        self.assertGreater(wheel_m, ground_m)
+        self.assertEqual(sand, 0.0)
+        for x, y, wx, wy in self.follow(field, 20.0, 27.0):
+            self.assertFalse(_crosses(ground.blocked, x, y, wx, wy))
+        self.assertEqual(field.left(20.1, 20.1, 2.0), (0.0, 0.0, None, 0.0))   # home already
+
+    def test_where_sand_can_stop_every_step_the_way_home_keeps_clear_of_it(self):
+        area = dict(MAP, sand=[{"x1": 24.0, "y1": 15.0, "x2": 30.0, "y2": 25.0}], hazards=[], crust_regions=[])
+        loose = HomeField(RectGround(RULES, area), (20.0, 20.0), 0.75)       # no slip check: sand only costs more
+        checked = dict(RULES, onboard_slip_check={"limit": 0.4})              # sand slips up to 0.45: it can trip
+        tight = HomeField(RectGround(checked, area), (20.0, 20.0), 0.75)
+        self.assertFalse(loose.sand_stops)
+        self.assertTrue(tight.sand_stops)
+        self.assertTrue(loose.straight(33.0, 20.0))
+        self.assertFalse(tight.straight(33.0, 20.0))
+        ground_m, _, _, sand = tight.left(33.0, 20.0, 2.0)
+        self.assertGreater(ground_m, 18.0)               # around the patch, not 13 m across it
+        self.assertEqual(sand, 0.0)
+        for x, y, wx, wy in self.follow(tight, 33.0, 20.0):
+            self.assertFalse(tight.into_sand(x, y, wx, wy))
+        self.assertGreater(tight.left(27.0, 20.0, 2.0)[3], 0.0)              # on the sand: the way out is sand
+        self.follow(tight, 27.0, 20.0)
+
+    def test_a_slip_check_stop_teaches_it_that_sand_stops(self):
+        area = dict(MAP, sand=[{"x1": 24.0, "y1": 15.0, "x2": 30.0, "y2": 25.0}], hazards=[], crust_regions=[])
+        rules = dict(RULES, slip_ranges={"bedrock": [0.0, 0.05], "sand": [0.2, 0.35]},
+                     onboard_slip_check={"limit": 0.4})                       # the published range stays under it
+        field = HomeField(RectGround(rules, area), (20.0, 20.0), 0.75)
+        self.assertFalse(field.sand_stops)
+        self.assertTrue(field.straight(33.0, 20.0))
+        self.assertFalse(field.into_sand(31.0, 20.0, 29.0, 20.0))
+        field.learn_trip()
+        self.assertTrue(field.sand_stops)
+        self.assertFalse(field.straight(33.0, 20.0))
+        self.assertTrue(field.into_sand(31.0, 20.0, 29.0, 20.0))
+        self.assertGreater(field.left(33.0, 20.0, 2.0)[0], 18.0)
+
+    def test_the_field_needs_the_flat_family(self):
+        with self.assertRaises(ValueError):
+            HomeField(object(), (20.0, 20.0), 0.75)
 
 
 class BookkeepingTests(unittest.TestCase):

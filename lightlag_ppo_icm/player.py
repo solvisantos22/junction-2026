@@ -5,14 +5,16 @@
     play(PublicTools(make_max_env(seed=7, delay=3)))      # then the evaluator runs out the horizon
 
 Greedy by default (the most likely action at every slot); `sample_seed` draws the actions from
-the policy instead, as in training. Two players without a network use the same adapter, so that
-what the learning adds can be told apart from what the adapter gives:
+the policy instead, as in training. The home guard is on when the policy was trained with it;
+`home_guard` switches it on or off whatever the training did. Two players without a network use
+the same adapter, so that what the learning adds can be told apart from what the adapter gives:
 
     random_player   a uniform random action at every slot: where an untrained agent starts
     plain_player    a rule of a few lines on the observation: sample when the nearest open target
                     is in range, else drive at it, and turn for home when time or energy runs low
 """
 
+import dataclasses
 import math
 
 import numpy as np
@@ -21,9 +23,11 @@ from .agent import load_policy
 from .task import BASE, FIRST_DRIVE, GLOBAL, SAMPLE, WAIT, RoverTask, TaskConfig
 
 
-def load_player(path, sample_seed=None):
+def load_player(path, sample_seed=None, home_guard=None):
     policy, extra = load_policy(path)
     config = TaskConfig.from_dict(extra["task"])
+    if home_guard is not None:
+        config = dataclasses.replace(config, home_guard=bool(home_guard))
 
     def play(tools, env=None):
         rng = None if sample_seed is None else np.random.default_rng(sample_seed)

@@ -81,6 +81,7 @@ class RectGround:
         self.soft = _rects(public_map.get("sand", []))
         self.risky = _rects(list(public_map.get("crust_regions", [])) + list(public_map.get("rock_fields", [])))
         self.slip_mid = {name: 0.5 * (low + high) for name, (low, high) in rules["slip_ranges"].items()}
+        self.slip_high = {name: float(high) for name, (low, high) in rules["slip_ranges"].items()}
         self.wheel_cost = {name: rules["drive_cost"] * factor
                            for name, factor in rules["terrain_drive_multipliers"].items()}
         self.idle = rules["idle_cost"]

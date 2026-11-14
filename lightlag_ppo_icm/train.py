@@ -3,11 +3,14 @@
     python3 -m lightlag_ppo_icm.train --env max --out lightlag_ppo_icm/runs/max
     python3 -m lightlag_ppo_icm.train --env rush --updates 150 --out lightlag_ppo_icm/runs/rush
     python3 -m lightlag_ppo_icm.train --env max --int-coef 0 --out lightlag_ppo_icm/runs/max-plain   # PPO alone
+    python3 -m lightlag_ppo_icm.train --env max --home-guard --out lightlag_ppo_icm/runs/max-home-guard
 
 Every episode is a new map: the training seeds are drawn from --train-seeds, so the agent
 cannot memorise a mission. Every --eval-every updates the greedy policy plays the development
 seeds; the best one so far is kept as best.npz and its actor alone as policy.npz, the file the
-check and the player read. log.jsonl holds one line per update.
+check and the player read. log.jsonl holds one line per update. With --home-guard the agent
+trains and plays with the home guard of task.py on (flat 40 m family only); the policy file
+records it, so the check and the player switch it on too.
 """
 
 import argparse
@@ -74,14 +77,14 @@ def summary(episodes):
 def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128, workers=8, delay=3, seed=0,
           int_coef=0.5, int_final=0.1, lr=3e-4, lr_final=0.3, icm_lr=1e-3, ent_coef=0.005, hidden=128, headings=16,
           wait_bias=4.0, sample_bias=2.0, eval_every=20, train_seeds=TRAIN_SEEDS, dev_seeds=DEV_SEEDS,
-          max_minutes=None, quiet=False, metres="auto", home_pull=0.0):
+          max_minutes=None, quiet=False, metres="auto", home_pull=0.0, home_guard=False):
     """Train once and return the summary that is also written to <out>/summary.json."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     if (out / "log.jsonl").exists():
         raise ValueError(f"{out} already holds a run; give a new folder")
     lengths = drive_lengths(env, delay) if metres == "auto" else tuple(metres)
-    task = TaskConfig(headings=headings, metres=lengths)
+    task = TaskConfig(headings=headings, metres=lengths, home_guard=home_guard)
     agent = Agent(AgentConfig(obs_dim=task.obs_dim, n_actions=task.n_actions, hidden=hidden, lr=lr,
                               icm_lr=icm_lr, ent_coef=ent_coef, int_coef=int_coef, seed=seed,
                               icm_inputs=task.curiosity_inputs))
@@ -94,7 +97,7 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=600, episodes=128,
     settings = {"env": env, "delay": delay, "updates": updates, "episodes": episodes, "seed": seed,
                 "int_coef": int_coef, "int_final": int_final, "lr": lr, "lr_final": lr_final, "icm_lr": icm_lr,
                 "ent_coef": ent_coef, "hidden": hidden, "wait_bias": wait_bias, "sample_bias": sample_bias,
-                "home_pull": home_pull, "metres": list(task.metres),
+                "home_pull": home_pull, "home_guard": home_guard, "metres": list(task.metres),
                 "train_seeds": list(train_seeds), "dev_seeds": list(dev_seeds)}
     extra = {"task": task.to_dict(), "env": env, "delay": delay, "settings": settings}
     best, started, steps, done = {"share": -1.0, "update": 0}, time.time(), 0, 0
@@ -197,6 +200,9 @@ def main(argv=None):
     parser.add_argument("--home-pull", type=float, default=0.0, metavar="K",
                         help="pay what being home is worth along the way: a potential K times the bonus for "
                              "being home, so the pieces still add up to the official score; 0: off")
+    parser.add_argument("--home-guard", action="store_true",
+                        help="keep the energy and time to get home, and drive home when they run out "
+                             "(task.py; flat 40 m family only)")
     parser.add_argument("--eval-every", type=int, default=20)
     parser.add_argument("--train-seeds", type=seed_pair, default=TRAIN_SEEDS, help="e.g. 200000-299999")
     parser.add_argument("--dev-seeds", type=seed_pair, default=DEV_SEEDS)
