@@ -411,8 +411,12 @@ These are recommended evidence choices, not newly asserted official entry requir
   the existing simulator; five independent challenger tests.
 - [Design and developing evidence](lightlag-expedition-experiment.md),
   [package](../lightlag_expedition/). This first increment establishes mechanics,
-  not a model gap. Reference, protected adapter and free development comparisons
-  follow before any paid pilot. No canonical task or teammate physics changed.
+  not a model gap. The next increment adds a public-only Bayesian KF/MPC
+  reference and five controls, isolated MCP/Harbor packaging, full transcripts
+  and reported-usage launch guards. All 57 package and nine packaging/runner
+  tests pass; independent review found and fixed nonfinite-input evidence loss.
+  Free development comparisons and container checks precede paid testing.
+  No canonical task or teammate physics changed.
 
 ## Keep recording with minimal overhead
 
