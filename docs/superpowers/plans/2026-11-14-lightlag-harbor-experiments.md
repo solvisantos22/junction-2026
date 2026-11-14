@@ -51,7 +51,7 @@ python3 tools/lightlag_experiments/prepare.py /tmp/lightlag-rush-500-kf \
 Commands, after installing Harbor, use explicit task and external job paths:
 
 ```sh
-harbor tasks lint /tmp/lightlag-rush-500-kf
+harbor lint /tmp/lightlag-rush-500-kf
 harbor run -p /tmp/lightlag-rush-500-kf -a oracle
 harbor run -p /tmp/lightlag-rush-500-kf -a nop
 harbor run -p /tmp/lightlag-rush-500-kf -a opencode \
