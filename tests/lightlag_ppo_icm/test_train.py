@@ -13,7 +13,7 @@ from lightlag_ppo_icm.agent import Agent, load_policy
 from lightlag_ppo_icm.envs import finish, make_env, share
 from lightlag_ppo_icm.player import load_player, random_player
 from lightlag_ppo_icm.task import SAMPLE, WAIT, TaskConfig
-from lightlag_ppo_icm.train import collect, rollouts, summary, train
+from lightlag_ppo_icm.train import collect, drive_lengths, rollouts, summary, train
 
 
 class TrainingTests(unittest.TestCase):
@@ -35,6 +35,8 @@ class TrainingTests(unittest.TestCase):
         with open(os.path.join(self.out, "log.jsonl")) as log:
             rows = [json.loads(line) for line in log]
         self.assertEqual([row["update"] for row in rows], [1, 2])
+        self.assertEqual([row["steps"] for row in rows], [6 * 47, 2 * 6 * 47])     # decisions so far
+        self.assertEqual(rows[0]["batch_steps"], 6 * 47)
         for row in rows:
             for name in ("train_share", "dev_share", "entropy", "inverse_loss", "forward_loss", "int_raw"):
                 self.assertTrue(np.isfinite(row[name]), name)
@@ -47,6 +49,13 @@ class TrainingTests(unittest.TestCase):
         self.assertEqual(agent.config.obs_dim, TaskConfig.from_dict(extra["task"]).obs_dim)
         with self.assertRaises(ValueError):                             # a run folder is never reused
             train(env="max", out=self.out, updates=1, episodes=2, workers=1, quiet=True)
+
+    def test_drive_lengths_fit_the_sampling_disc(self):
+        self.assertEqual(drive_lengths("max"), (0.25, 0.5, 1.0))            # 0.5, 1 and 2 m of a 2 m drive
+        self.assertEqual(drive_lengths("rush"), (0.1, 0.2, 0.4))            # the same metres of a 5 m drive
+        self.assertEqual(drive_lengths("traverse"), (0.3333, 0.6667, 1.0))  # 1.7 and 3.3 m, then the 5 m cap
+        self.assertEqual(TaskConfig.from_dict(Agent.load(os.path.join(self.out, "last.npz"))[1]["task"]).metres,
+                         (0.25, 0.5, 1.0))
 
     def test_the_untrained_policy_starts_by_waiting_half_the_time(self):
         agent = Agent.load(os.path.join(self.out, "last.npz"))[0]

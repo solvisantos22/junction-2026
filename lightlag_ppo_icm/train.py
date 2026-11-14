@@ -19,7 +19,7 @@ from pathlib import Path
 import numpy as np
 
 from .agent import Agent, AgentConfig, Policy
-from .envs import run_episode
+from .envs import make_env, run_episode
 from .task import SAMPLE, WAIT, TaskConfig
 
 TRAIN_SEEDS = (200000, 299999)
@@ -73,13 +73,13 @@ def summary(episodes):
 def train(env="max", out="lightlag_ppo_icm/runs/max", updates=300, episodes=256, workers=8, delay=3, seed=0,
           int_coef=0.5, int_final=0.1, lr=3e-4, lr_final=0.3, icm_lr=1e-3, ent_coef=0.01, hidden=128, headings=16,
           wait_bias=4.0, sample_bias=2.0, eval_every=10, train_seeds=TRAIN_SEEDS, dev_seeds=DEV_SEEDS,
-          max_minutes=None, quiet=False):
+          max_minutes=None, quiet=False, metres="auto"):
     """Train once and return the summary that is also written to <out>/summary.json."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     if (out / "log.jsonl").exists():
         raise ValueError(f"{out} already holds a run; give a new folder")
-    task = TaskConfig(headings=headings)
+    task = TaskConfig(headings=headings, metres=drive_lengths(env, delay) if metres == "auto" else tuple(metres))
     agent = Agent(AgentConfig(obs_dim=task.obs_dim, n_actions=task.n_actions, hidden=hidden, lr=lr,
                               icm_lr=icm_lr, ent_coef=ent_coef, int_coef=int_coef, seed=seed,
                               icm_inputs=task.curiosity_inputs))
@@ -107,7 +107,8 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=300, episodes=256,
                                   [(int(s), int(d)) for s, d in zip(seeds, draws)])
                 batch, stats = agent.prepare(played, now_int)
                 stats.update(agent.update(batch, 1.0 - (1.0 - lr_final) * progress))
-                steps += stats["steps"]
+                steps += stats["steps"]    # decisions played so far, all updates together
+                stats["batch_steps"] = stats.pop("steps")
                 row = {"update": update, "steps": steps, "minutes": round((time.time() - started) / 60.0, 2),
                        "int_coef": round(now_int, 4), **{f"train_{k}": v for k, v in summary(played).items()},
                        **stats}
@@ -143,6 +144,17 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=300, episodes=256,
     return result
 
 
+def drive_lengths(env, delay=3):
+    """Drive lengths that fit the environment, as shares of its longest drive: 2/3, 4/3 and 8/3 of the
+    sampling radius, capped at the longest drive. An agent whose shortest drive is longer than the
+    sampling disc is wide can hardly land on a target (on `rush`, where a drive may be 5 m and the
+    disc is 1.5 m across, a quarter, a half and a full drive learned almost nothing)."""
+    rules = make_env(env, TRAIN_SEEDS[0], delay).rules()
+    radius, longest = float(rules["target_radius"]), float(rules["max_metres_per_drive"])
+    lengths = sorted({min(1.0, round(k * radius / longest, 4)) for k in (2.0 / 3.0, 4.0 / 3.0, 8.0 / 3.0)})
+    return tuple(lengths)
+
+
 def save_policy(path, agent, extra):
     """The actor alone, in single precision: the small file a player needs."""
     arrays = {f"actor_{i}": p.astype(np.float32) for i, p in enumerate(agent.actor.params)}
@@ -173,6 +185,9 @@ def main(argv=None):
     parser.add_argument("--ent-coef", type=float, default=0.01)
     parser.add_argument("--hidden", type=int, default=128)
     parser.add_argument("--headings", type=int, default=16)
+    parser.add_argument("--metres", type=lambda text: text if text == "auto" else tuple(float(m) for m in text.split(",")),
+                        default="auto", help="drive lengths as shares of the longest drive allowed, e.g. 0.25,0.5,1; "
+                                             "auto: 2/3, 4/3 and 8/3 of the sampling radius")
     parser.add_argument("--wait-bias", type=float, default=4.0, help="starting logit of wait (drives start at 0)")
     parser.add_argument("--sample-bias", type=float, default=2.0, help="starting logit of sample")
     parser.add_argument("--eval-every", type=int, default=10)
