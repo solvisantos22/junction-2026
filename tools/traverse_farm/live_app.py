@@ -3,11 +3,14 @@
     modal deploy tools/traverse_farm/live_app.py      # the web page, kept running by Modal
     modal run tools/traverse_farm/live_app.py --seed 871   # build one world's page here, without the web
 
-A visitor picks a world (a seed). If its page is not cached yet, Modal plays four drivers on it at
+A visitor picks a world (a seed). If its page is not cached yet, Modal plays eight drivers on it at
 once, each in its own container: the reference pilot, a textbook controller (terrain graph + Kalman
-filter, greedy targets: the pilot's `greedy` option), Opus agent 3's autopilot and the one-request
-Opus program, both Claude-written and replayed without their agents. About a minute later the page
-is the Traverse demo (viewer/build_traverse.py) for that world, cached in a Modal Volume.
+filter, greedy targets: the pilot's `greedy` option) and every saved Claude program that can drive a
+new world: the one-request programs of Opus, Sonnet and Haiku, and the autopilots Opus agents 1 and 3
+and Sonnet agent 1 wrote during their missions, replayed without their agents. The other agent runs
+drove by hand or left no program, so they can be watched only on the world they played (the
+committed demo). About a minute later the page is the Traverse demo (viewer/build_traverse.py) for
+that world, cached in a Modal Volume.
 
 Only fixed code from this repository runs: the visitor supplies a number, nothing else. The rules
 are the frozen Lightlag Traverse 0.1.0 rules, the reference task 0.1.1's pilot.
@@ -24,12 +27,25 @@ import modal
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 RUNS = REPO / "docs" / "lightlag-runs"
-PROGRAMS = ("traverse-oneshot-opus-1", "traverse-agent-opus-3")     # the Claude programs a page shows
+# The Claude programs a page shows, as farm policies: (kind, saved run, its program inside the run).
+PROGRAMS = (("program", "traverse-oneshot-opus-1", "policy.py"),
+            ("program", "traverse-oneshot-sonnet-1", "policy.py"),
+            ("program", "traverse-oneshot-haiku-1", "policy.py"),
+            ("agent", "traverse-agent-opus-1", "program/auto.py"),
+            ("agent", "traverse-agent-opus-3", "program/farm_prepare.py"),
+            ("agent", "traverse-agent-sonnet-1", "program/auto.py"))
+PAGE = "world-{}-v2.html"        # v2: eight drivers; the four-driver pages stay in the Volume, unread
 
 
 def _skip(path) -> bool:
     path = Path(path)
     return "__pycache__" in path.parts or path.suffix == ".pyc"
+
+
+def _saved_run(path) -> bool:
+    """Leave out all of a saved run but who drove it (run.json) and its program."""
+    path = Path(path)
+    return not (path.name in ("run.json", "policy.py") or "program" in path.parts)
 
 
 image = (
@@ -43,11 +59,9 @@ image = (
     .add_local_dir(REPO / "viewer" / "mars" / "vendor", "/root/farm/viewer/mars/vendor")
     .add_local_file(REPO / "viewer" / "build_traverse.py", "/root/farm/viewer/build_traverse.py")
     .add_local_file(REPO / "viewer" / "traverse_story.py", "/root/farm/viewer/traverse_story.py")
-    .add_local_dir(RUNS / "traverse-oneshot-opus-1", "/root/farm/runs/traverse-oneshot-opus-1",
-                   ignore=lambda p: Path(p).name not in ("policy.py", "run.json"))
-    .add_local_dir(RUNS / "traverse-agent-opus-3", "/root/farm/runs/traverse-agent-opus-3",
-                   ignore=lambda p: not (Path(p).name == "run.json" or "program" in Path(p).parts))
 )
+for _kind, _run, _entry in PROGRAMS:
+    image = image.add_local_dir(RUNS / _run, "/root/farm/runs/" + _run, ignore=_saved_run)
 app = modal.App("lightlag-traverse-live", image=image)
 cache = modal.Volume.from_name("lightlag-traverse-live-pages", create_if_missing=True)
 calls = modal.Dict.from_name("lightlag-traverse-live-calls", create_if_missing=True)
@@ -55,13 +69,13 @@ LOWEST, HIGHEST = 1, 1_000_000
 
 
 def _drivers():
-    """The four drivers, as farm job specs; labels are what the page shows."""
+    """The eight drivers, as farm job specs; labels are what the page shows."""
     from traverse_farm.common import parse_policies
 
     specs = {"pilot": {"policy": "pilot"},
              "greedy": {"policy": "greedy", "label": "Textbook: A* + Kalman, greedy"}}
-    specs.update(parse_policies("program:/root/farm/runs/traverse-oneshot-opus-1/policy.py,"
-                                "agent:/root/farm/runs/traverse-agent-opus-3/program/farm_prepare.py"))
+    specs.update(parse_policies(",".join("{}:/root/farm/runs/{}/{}".format(kind, run, entry)
+                                         for kind, run, entry in PROGRAMS)))
     return specs
 
 
@@ -73,7 +87,7 @@ def mission(job: dict) -> dict:
 
 @app.function(cpu=1.0, memory=2048, timeout=1200, max_containers=6, volumes={"/cache": cache})
 def build_page(seed: int) -> str:
-    """Play the four drivers on one world and save its page in the cache."""
+    """Play the eight drivers on one world and save its page in the cache."""
     import sys
     import tempfile
 
@@ -95,9 +109,9 @@ def build_page(seed: int) -> str:
         replays.write(rows, specs, Path(folder))
         world = Path(folder) / "world-{}".format(seed)
         page = build_traverse.standalone(build_traverse.gather(build_traverse.run_folders(world)))
-    Path("/cache/world-{}.html".format(seed)).write_text(page, encoding="utf-8")
+    Path("/cache/" + PAGE.format(seed)).write_text(page, encoding="utf-8")
     cache.commit()
-    return "world-{}.html".format(seed)
+    return PAGE.format(seed)
 
 
 HEAD = """<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -140,10 +154,11 @@ h2{margin:52px 0 16px;font:600 14px/1 Inter,Arial,sans-serif;letter-spacing:.2em
 .card p{margin:8px 0 0;color:var(--soft);font-size:14.5px;line-height:1.4}
 footer{margin:56px 0 0;padding:20px 0 0;border-top:1px solid var(--line);color:var(--soft);font-size:14px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
 kbd{padding:1px 7px;border-radius:6px;border:1px solid var(--line);background:var(--panel);font:600 13px/1.6 Inter,Arial,sans-serif;color:var(--text)}
-.lanes{max-width:620px;margin:36px 0 0;display:grid;gap:16px}
+.lanes{max-width:620px;margin:36px 0 0;display:grid;gap:13px}
 .lane{position:relative;height:2px;background:var(--line);border-radius:2px}
 .lane i{position:absolute;top:-5px;left:0;width:12px;height:12px;border-radius:50%;animation:drive 3.2s ease-in-out infinite alternate}
 .lane:nth-child(2) i{animation-duration:2.6s}.lane:nth-child(3) i{animation-duration:3.8s}.lane:nth-child(4) i{animation-duration:2.9s}
+.lane:nth-child(5) i{animation-duration:3.5s}.lane:nth-child(6) i{animation-duration:2.4s}.lane:nth-child(7) i{animation-duration:3.7s}.lane:nth-child(8) i{animation-duration:3.0s}
 @keyframes drive{from{left:0}to{left:calc(100% - 12px)}}
 .small{color:var(--soft);font-size:14px;margin:28px 0 0}
 @media (max-width:860px){.hero{grid-template-columns:1fr}.hero svg{max-width:420px}.drivers{grid-template-columns:1fr 1fr}.cards{grid-template-columns:1fr 1fr}}
@@ -161,8 +176,9 @@ CRATER = """<svg viewBox="0 0 760 640" role="img" aria-label="Two rover tracks a
 
 DRIVERS = [("gold", "Our planner", "Plans the whole route against the battery and the sun."),
            ("grey", "Textbook A* + Kalman", "Finds the cheapest path, then takes the best next target."),
-           ("ice", "Claude, one request", "An autopilot Opus wrote in a single answer."),
-           ("ring", "Claude, agent run", "The autopilot an Opus agent wrote during a mission.")]
+           ("ice", "Claude, one request", "Three autopilots that Opus, Sonnet and Haiku each wrote in a single answer."),
+           ("ring", "Claude, agent runs", "Three autopilots that Opus and Sonnet agents wrote during a mission.")]
+LANES = ["gold", "grey", "ice", "ice", "ice", "ring", "ring", "ring"]      # one per rover on the waiting page
 WORLDS = [(2027, "Judged site 1", "Claude's agent autopilot runs its battery flat."),
           (2028, "Judged site 2", "The closest race: 0.457 against our 0.508."),
           (2029, "Judged site 3", "Another flat battery for Claude."),
@@ -181,10 +197,10 @@ def _landing() -> str:
         seed, html.escape(tag), html.escape(text)) for seed, tag, text in WORLDS)
     body = """<section class="hero"><div>
 <p class="eyebrow">Lightlag Traverse · live on Modal</p>
-<h1>One world.<br>Four rovers.</h1>
+<h1>One world.<br>Eight rovers.</h1>
 <p class="sub">Only one always makes it home.</p>
 <p class="lead">Mars-like ground, a battery the sun refills, and every command lands three ticks late.
-Pick a world and Modal drives it four times at once. About a minute later you can watch every run.</p>
+Pick a world and Modal drives it eight times at once. About a minute later you can watch every run.</p>
 <form onsubmit="location.href='/world/'+encodeURIComponent(this.seed.value);return false;">
 <label for="seed">World number</label>
 <input id="seed" name="seed" type="number" min="__LO__" max="__HI__" placeholder="World 1 to 1,000,000" required>
@@ -193,7 +209,7 @@ Pick a world and Modal drives it four times at once. About a minute later you ca
 <section class="drivers">__DRIVERS__</section>
 <h2>Worlds worth a look</h2>
 <section class="cards">__CARDS__</section>
-<footer><span>On a replay: <kbd>Enter</kbd> starts · <kbd>Tab</kbd> follows a rover · <kbd>S</kbd> tells the story · <kbd>=</kbd> speeds up</span>
+<footer><span>On a replay: <kbd>Enter</kbd> starts · scroll zooms · drag moves · right-drag turns · click a rover to follow it · <kbd>S</kbd> tells the story · <kbd>R</kbd> resets the view</span>
 <span>Junction 2026 · AfterQuery: Break the Agent</span></footer>"""
     body = (body.replace("__LO__", str(LOWEST)).replace("__HI__", str(HIGHEST)).replace("__CRATER__", CRATER)
             .replace("__DRIVERS__", drivers).replace("__CARDS__", cards))
@@ -201,23 +217,50 @@ Pick a world and Modal drives it four times at once. About a minute later you ca
 
 
 def _waiting(seed: int, since: float) -> str:
-    lanes = "".join('<div class="lane"><i class="{}"></i></div>'.format(css) for css, _, _ in DRIVERS)
+    lanes = "".join('<div class="lane"><i class="{}"></i></div>'.format(css) for css in LANES)
+    # The page asks /status in the background and reloads only once the replay is ready, so its rovers never
+    # jump back to the start; without JavaScript it falls back to refreshing itself.
     body = """<p class="eyebrow">World __SEED__</p>
 <h1>Rovers on<br>the ground.</h1>
-<p class="lead">Four rovers are driving world __SEED__ right now, each in its own Modal container.
-A mission is 420 ticks. It takes about a minute, and this page refreshes on its own.</p>
+<p class="lead">Eight rovers are driving world __SEED__ right now, each in its own Modal container.
+A mission is 420 ticks. It takes about a minute, and the replay opens by itself.</p>
 <div class="lanes">__LANES__</div>
-<p class="small">Started __AGO__ s ago · <a href="/">Pick another world</a></p>"""
+<p class="small" id="note">Started <span id="ago">__AGO__</span> s ago · <a href="/">Pick another world</a></p>
+<script>
+(function () {
+  var start = Date.now() - __AGO__ * 1000, ago = document.getElementById("ago");
+  setInterval(function () { ago.textContent = Math.round((Date.now() - start) / 1000); }, 1000);
+  function poll() {
+    if (Date.now() - start > 600000) {
+      document.getElementById("note").innerHTML = 'This is taking longer than it should. <a href="">Try again</a> · <a href="/">Pick another world</a>';
+      return;
+    }
+    fetch("/world/__SEED__/status", { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (s) { if (s.state === "driving") setTimeout(poll, 2500); else location.reload(); })
+      .catch(function () { setTimeout(poll, 5000); });
+  }
+  setTimeout(poll, 2500);
+})();
+</script>"""
     body = (body.replace("__SEED__", str(seed)).replace("__LANES__", lanes)
             .replace("__AGO__", "{:.0f}".format(max(0.0, time.time() - since))))
     page = _page("World {} · driving".format(seed), body)
-    return page.replace('<meta charset="utf-8">', '<meta charset="utf-8"><meta http-equiv="refresh" content="4">', 1)
+    return page.replace('<meta charset="utf-8">', '<meta charset="utf-8"><noscript><meta http-equiv="refresh" content="6"></noscript>', 1)
 
 
 def _forget(seed: int) -> None:
     try:
         calls.pop(seed)
     except KeyError:
+        pass
+
+
+def _reload() -> None:
+    """See pages other containers saved; a reload that clashes with a read in flight is skipped."""
+    try:
+        cache.reload()
+    except Exception:
         pass
 
 
@@ -231,9 +274,29 @@ def _problem(message: str) -> str:
 @modal.asgi_app()
 def web():
     from fastapi import FastAPI
-    from fastapi.responses import HTMLResponse, RedirectResponse
+    from fastapi.responses import HTMLResponse, JSONResponse
 
     api = FastAPI(title="Lightlag Traverse, live", docs_url=None, redoc_url=None)
+
+    def _seed(seed: str):
+        return int(seed) if seed.isdigit() and LOWEST <= int(seed) <= HIGHEST else None
+
+    def _state(seed_n: int) -> str:
+        """ready (the page is in the cache), driving, failed, or none (no build has been asked for)."""
+        _reload()
+        if Path("/cache/" + PAGE.format(seed_n)).exists():
+            return "ready"
+        entry = calls.get(seed_n)
+        if not entry:
+            return "none"
+        try:
+            modal.FunctionCall.from_id(entry["call"]).get(timeout=0)
+        except TimeoutError:
+            return "driving"
+        except Exception:
+            return "failed"
+        _reload()                              # built: ready once this container sees the saved page
+        return "ready" if Path("/cache/" + PAGE.format(seed_n)).exists() else "driving"
 
     @api.get("/", response_class=HTMLResponse)
     def landing():
@@ -241,28 +304,29 @@ def web():
 
     @api.get("/world/{seed}")
     def world(seed: str):
-        if not seed.isdigit() or not LOWEST <= int(seed) <= HIGHEST:
+        seed_n = _seed(seed)
+        if seed_n is None:
             return HTMLResponse(_problem("A world is a whole number from {:,} to {:,}.".format(LOWEST, HIGHEST)), 400)
-        seed_n = int(seed)
-        page = Path("/cache/world-{}.html".format(seed_n))
-        cache.reload()
-        if page.exists():
-            return HTMLResponse(page.read_text(encoding="utf-8"))
-        entry = calls.get(seed_n)
-        if entry:
-            call = modal.FunctionCall.from_id(entry["call"])
-            try:
-                call.get(timeout=0)
-            except TimeoutError:
-                return HTMLResponse(_waiting(seed_n, entry["since"]))
-            except Exception:                  # the build failed: forget it, so a reload tries again
-                _forget(seed_n)
-                return HTMLResponse(_problem("Driving world {} failed. Reload to try again.".format(seed_n)), 500)
+        state = _state(seed_n)
+        if state == "ready":
             _forget(seed_n)
-            return RedirectResponse("/world/{}".format(seed_n), status_code=303)
+            return HTMLResponse(Path("/cache/" + PAGE.format(seed_n)).read_text(encoding="utf-8"))
+        if state == "failed":                  # forget it, so a reload tries again
+            _forget(seed_n)
+            return HTMLResponse(_problem("Driving world {} failed. Reload to try again.".format(seed_n)), 500)
+        if state == "driving":
+            return HTMLResponse(_waiting(seed_n, calls.get(seed_n, {}).get("since", time.time())))
         call = build_page.spawn(seed_n)
         calls[seed_n] = {"call": call.object_id, "since": time.time()}
         return HTMLResponse(_waiting(seed_n, time.time()))
+
+    @api.get("/world/{seed}/status")
+    def status(seed: str):
+        """What the waiting page asks, so that it reloads only when there is something new to show."""
+        seed_n = _seed(seed)
+        if seed_n is None:
+            return JSONResponse({"state": "bad"}, 400)
+        return JSONResponse({"state": _state(seed_n)}, headers={"Cache-Control": "no-store"})
 
     return api
 
