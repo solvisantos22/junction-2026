@@ -294,6 +294,23 @@ These are recommended evidence choices, not newly asserted official entry requir
   [corrected demo](../viewer/mars-demo.html). Claim `57862d6` preceded edits.
   No inference cost or prize entry.
 
+### R09 — 14 November — Prepare a fair reusable-policy transfer test
+
+- Codex predeclared a single Claude-written policy across forty fresh map cells
+  and built a public-only request, protected broker and constrained Docker
+  worker. Eight historical KF trajectories reproduce exactly before any fresh
+  map is inspected. One-shot synthesis is separated from online-agent results.
+- Preparation and API phases passed independent review; root reran all 15
+  preparation tests with real Docker and all 10 offline API tests. Review
+  reproduced and fixed missing-terminal-event cost accounting, SDK environment
+  header overrides and reservation overruns. No model inference occurred during
+  these tests. Exact prompt/worker/source hashes and failures are retained.
+- Evidence: [protocol](lightlag-synthesis-experiment.md),
+  [published request and checkpoint](lightlag-runs/overnight-synthesis/README.md),
+  [preparation manifest](lightlag-runs/overnight-synthesis/preparation-v1/preparation.json).
+  Evaluation review and the actual single paid response remain pending at this
+  increment. No policy result, sponsor usage or prize entry is claimed yet.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
