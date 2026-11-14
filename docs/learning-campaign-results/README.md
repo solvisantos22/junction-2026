@@ -66,3 +66,18 @@ MODAL_PROFILE=solvi-junction /tmp/junction-learning-venv/bin/python -m tools.lea
 ```
 
 If state is `error`, inspect its operation and retained artifacts; it intentionally does not retry an ambiguous launch or corrupt terminal download. Stopping the local PID prevents future local continuation decisions but does not cancel active cloud jobs; use the durable cloud stop command above to stop the campaign.
+
+## What follows training; integration coordination
+
+This experiment trains a small public-observation **goal selector** above the existing navigator. It does not fine-tune an LLM. Its deliverables are runnable policy checkpoints, audited before/after performance and learning curves; the team's strong-agent difficulty claim requires its own matched agent evidence.
+
+1. Let the frozen all-seed validation gates finish selecting training budgets; retain failed and incomplete runs.
+2. Freeze the specified initial/last/matched2048 checkpoints before opening final maps82000–82039. Run and audit all policies, the charge-aware greedy control and the unchanged beam reference on the same40 maps. Report official score, return/survival, every initialization and uncertainty. Do not choose a seed or retune after seeing final results.
+3. Publish checkpoints, reproducible evaluation commands and learning results. Keep the existing planner as reference unless a separately justified change is supported by comparable performance and reliability; learning from a weak initial policy alone does not establish reference superiority.
+4. In parallel, the task owner should finish the chosen runnable Harbor package and genuine full-agent comparison. The three-mission baseline evidence now on main is useful, but saved-program replays and oracle/nop baselines are distinct from an LLM agent playing the whole campaign. Submission/demo preparation need not wait for our final training phase.
+
+**Our campaign does not require main to stay frozen.** Cloud training uses the source snapshot published at`e8a8acb`, and continuation builds read `/tmp/junction-learning-frozen`; supervisor code is fixed at`06979e7`. New task/reference/viewer changes may be integrated on main after their own ownership and verification requirements are satisfied, without modifying these snapshots. This statement applies to our campaign; it does not override another experiment's freeze.
+
+For our final evaluation, use the original frozen training modules and source hashes. Copy only the published evaluator tool files into a matching evaluation checkout if needed; do not silently evaluate old weights with newly changed navigation or mission rules. A different final submission package gets its own labelled compatibility/comparison run. This keeps both the training evidence and the submission's version claims accurate.
+
+Latest status checked while this note was written: all three2048-mission PPO pilot jobs completed; all three replay pilot jobs are running; the local continuation supervisor is healthy. Latest teammate publication`95102a1` retains the campaign oracle0.476257, nop0 and stop-after-first0.148743 baselines, with saved-artifact consistency checks. The actual campaign runtime/viewer and fresh full-agent campaign evidence remain separate outstanding work.
