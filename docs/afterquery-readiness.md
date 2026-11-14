@@ -7,6 +7,8 @@ packages remain frozen. The bounded generation attempt is closed. See the
 [morning brief](lightlag-morning-brief.md) for the direction recommendation.
 Lightlag, the final mission and the reference choice remain provisional.
 
+Event requirements below were refreshed after [Ved's 14:01–14:02 clarification](afterquery-judging-clarifications-2026-11-14.md). The technical results remain the recorded overnight handoff.
+
 **The model/container path and auditable failures are demonstrated. The main
 remaining gap is choosing and packaging the actual judge task.** Canonical
 `harbor/lightlag` still runs the original core seed 7, which the model solved.
@@ -81,18 +83,22 @@ compute grant is separate and unused in these studies. Gemini application is
 user-reported; available balance is unverified. Do not claim sponsor use or a
 prize entry from credit redemption alone.
 
-Requirements still come from the team’s [record of Ved’s 01:35 announcement](afterquery-update-2026-11-14.md):
+The team’s [record of Ved’s 01:35 announcement](afterquery-update-2026-11-14.md) requires a
 Harbor task, a single normalized `/logs/verifier/reward.txt`, at least one actual
 model log/score, and a short README; playthrough encouraged, training optional,
-no AfterQuery inference credits. The exact judging model, effort and resource
-limits remain unresolved. General [Harbor verifier documentation](https://docs.harborframework.com/tasks/verifier)
+no AfterQuery inference credits. [Ved's 14:01–14:02 replies](afterquery-judging-clarifications-2026-11-14.md)
+clarify that judges can use models specified in the team's README, will run local
+Docker with Compose support, and expect agent timeouts in `task.toml`. No single
+model or numerical timeout cap was prescribed. Reasoning/token/resource details
+and the live demo's timing, location, eligibility and Q&A split remain unresolved.
+General [Harbor verifier documentation](https://docs.harborframework.com/tasks/verifier)
 accepts other formats, but the recorded challenge asks for the single number.
 
-The last successful authenticated watcher coverage was **04:29 Helsinki on
-14 November**. Later checks through 05:58 could not read the browser/native
-surfaces; after the usage interruption a queued check remained pending. These
-are stale source checkpoints, not evidence that announcements stayed unchanged.
-The last verified final deadline was **Sunday 15 November, 10:00 Helsinki**.
+Junction Watch completed a full authenticated check at **13:48 Helsinki on
+14 November**, after recovering the earlier access and usage-limit gaps. It
+reported submissions open, the saved Lightlag entry still Draft, and material
+links/deck empty. This chat subsequently read Ved's 14:01–14:02 replies directly.
+The verified final deadline remains **Sunday 15 November, 10:00 Helsinki**.
 The previously checked [Junction schedule/FAQ](https://2026.hackjunction.com/)
 described MIT submissions and tech prizes alongside a main track. Confirm
 current terms, repository license treatment and entry forms before submitting.

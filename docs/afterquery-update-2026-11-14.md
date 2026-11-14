@@ -1,5 +1,7 @@
 # AfterQuery update: Ved's required stack and credits
 
+**Later clarification:** Ved answered model choice, local Docker/Compose and `task.toml` timeouts at **14:01–14:02 Helsinki**. See the [verified judging clarification and current packaging handoff](afterquery-judging-clarifications-2026-11-14.md). The repository table below is the historical 01:35 snapshot; use [current readiness](afterquery-readiness.md) for later implementation evidence.
+
 **Source:** VED | AFTERQUERY, two posts at **01:35 Helsinki, Saturday 14 November 2026**, read directly in the [AfterQuery Discord channel](https://discord.com/channels/1268184974784336004/1564622313893404883). This note records the new announcement and our implications; it does not change Lightlag's rules or implement the integration.
 
 ## What Ved announced
