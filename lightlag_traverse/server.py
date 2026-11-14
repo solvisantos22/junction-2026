@@ -2,11 +2,12 @@
 
     python -m lightlag_traverse.server --seed 7 --transport stdio
     python -m lightlag_traverse.server --transport http --host 0.0.0.0 --port 8000 --artifact-dir /evaluator
+    python -m lightlag_traverse.server --seeds 7,8,9 --transport stdio      # a campaign (campaign.py)
 
 The lock, the transcript, the grading and the evaluator-only finish are `lightlag_mcp`'s
 `EpisodeService`, unchanged; only the episode behind it and the tool descriptions differ. The
-seed may come from LIGHTLAG_SEED, the artifact folder from LIGHTLAG_ARTIFACT_DIR, the token
-file from LIGHTLAG_TOKEN_FILE. Serving needs the `mcp` package (2.x); the service does not.
+seed may come from LIGHTLAG_SEED, a campaign's seeds from LIGHTLAG_SEEDS, the artifact folder
+from LIGHTLAG_ARTIFACT_DIR, the token file from LIGHTLAG_TOKEN_FILE. Serving needs the `mcp` package (2.x); the service does not.
 """
 
 from __future__ import annotations
@@ -91,19 +92,26 @@ ADVANCE_DESCRIPTION = (
     "episode_complete and the telemetry packets that arrived during those ticks."
 )
 
+# What the server tells an agent, by key; a campaign brings its own (campaign.TEXTS).
+TEXTS = {"instructions": INSTRUCTIONS, "rules": RULES_DESCRIPTION, "map": MAP_DESCRIPTION,
+         "telemetry_log": TELEMETRY_DESCRIPTION, "uplink": UPLINK_DESCRIPTION, "advance": ADVANCE_DESCRIPTION}
 
-def build_server(service: EpisodeService, evaluator_token: Optional[str] = None):
+
+def build_server(service: EpisodeService, evaluator_token: Optional[str] = None,
+                 texts: Optional[Dict[str, str]] = None):
     """An MCP server exposing exactly the five public tools of `service`.
 
     With `evaluator_token`, an HTTP deployment also gets `POST /evaluator/finish`, which closes and
     grades the mission for callers presenting that bearer token. Without one the route answers 404.
+    `texts` replaces the instructions and tool descriptions by key (see TEXTS).
     """
+    texts = dict(TEXTS, **(texts or {}))
     from mcp.server.mcpserver import MCPServer
     from mcp.server.mcpserver.exceptions import ToolError as McpToolError
     from starlette.requests import Request
     from starlette.responses import JSONResponse
 
-    server = MCPServer("lightlag", instructions=INSTRUCTIONS)
+    server = MCPServer("lightlag", instructions=texts["instructions"])
 
     def call(tool: str, arguments: Optional[Dict[str, Any]] = None) -> str:
         try:
@@ -111,23 +119,23 @@ def build_server(service: EpisodeService, evaluator_token: Optional[str] = None)
         except ToolError as failure:
             raise McpToolError(str(failure)) from None
 
-    @server.tool(name="rules", description=RULES_DESCRIPTION, structured_output=False)
+    @server.tool(name="rules", description=texts["rules"], structured_output=False)
     def rules() -> str:
         return call("rules")
 
-    @server.tool(name="map", description=MAP_DESCRIPTION, structured_output=False)
+    @server.tool(name="map", description=texts["map"], structured_output=False)
     def map_() -> str:
         return call("map")
 
-    @server.tool(name="telemetry_log", description=TELEMETRY_DESCRIPTION, structured_output=False)
+    @server.tool(name="telemetry_log", description=texts["telemetry_log"], structured_output=False)
     def telemetry_log() -> str:
         return call("telemetry_log")
 
-    @server.tool(name="uplink", description=UPLINK_DESCRIPTION, structured_output=False)
+    @server.tool(name="uplink", description=texts["uplink"], structured_output=False)
     def uplink(commands: List[Dict[str, Any]]) -> str:
         return call("uplink", {"commands": commands})
 
-    @server.tool(name="advance", description=ADVANCE_DESCRIPTION, structured_output=False)
+    @server.tool(name="advance", description=texts["advance"], structured_output=False)
     def advance(ticks: int = 1) -> str:
         return call("advance", {"ticks": ticks})
 
@@ -151,8 +159,10 @@ def build_server(service: EpisodeService, evaluator_token: Optional[str] = None)
 def main(argv: Optional[Sequence[str]] = None) -> int:
     env = os.environ.get
     parser = argparse.ArgumentParser(prog="lightlag_traverse.server",
-                                     description="Serve one Lightlag Traverse mission over MCP.")
+                                     description="Serve one Lightlag Traverse mission, or a campaign, over MCP.")
     parser.add_argument("--seed", type=int, default=int(env("LIGHTLAG_SEED")) if env("LIGHTLAG_SEED") else None)
+    parser.add_argument("--seeds", default=env("LIGHTLAG_SEEDS"),
+                        help="a campaign instead of one mission: comma-separated seeds, played in that order")
     parser.add_argument("--transport", choices=("stdio", "http"), default="stdio")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
@@ -162,10 +172,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         help="HTTP only: write a freshly generated evaluator token here when "
                              "LIGHTLAG_EVALUATOR_TOKEN is not set")
     args = parser.parse_args(argv)
-    if args.seed is None:
-        parser.error("a seed is required (--seed or LIGHTLAG_SEED)")
-
-    service = TraverseEpisodeService(seed=args.seed, artifact_dir=args.artifact_dir)
+    texts: Optional[Dict[str, str]] = None
+    if args.seeds:
+        from .campaign import TEXTS as CAMPAIGN_TEXTS, TraverseCampaignService
+        try:
+            seeds = [int(part) for part in args.seeds.split(",") if part.strip()]
+        except ValueError:
+            parser.error("--seeds must be comma-separated integers")
+        service: EpisodeService = TraverseCampaignService(seeds, artifact_dir=args.artifact_dir)
+        texts = CAMPAIGN_TEXTS
+    elif args.seed is None:
+        parser.error("a seed is required (--seed or LIGHTLAG_SEED), or seeds for a campaign (--seeds or LIGHTLAG_SEEDS)")
+    else:
+        service = TraverseEpisodeService(seed=args.seed, artifact_dir=args.artifact_dir)
     token = env("LIGHTLAG_EVALUATOR_TOKEN") or None
     if token is None and args.token_file and args.transport == "http":
         token = secrets.token_urlsafe(32)          # exists only inside this process's container
@@ -173,7 +192,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         descriptor = os.open(args.token_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
         with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
             stream.write(token)
-    server = build_server(service, evaluator_token=token)
+    server = build_server(service, evaluator_token=token, texts=texts)
 
     def finish() -> None:
         result = service.finish()
