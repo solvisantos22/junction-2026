@@ -11,7 +11,7 @@ Manh asked to carry the max env's mechanics over to Kristján's new Lightlag Tra
 From the repository root. Python 3.9+, standard library only.
 
 ```sh
-python3 -m unittest discover -s tests/lightlag_traverse_max -v        # 26 tests, under a minute
+python3 -m unittest discover -s tests/lightlag_traverse_max -v        # 31 tests, under a minute
 python3 -m lightlag_traverse_max.play --seeds 1-8 --maps normal,max --policies manh_max,pilot,greedy,straight
 ```
 
@@ -204,6 +204,16 @@ python3 -m lightlag_traverse_max.oneshot play                                  #
 python3 -m lightlag_traverse_max.oneshot report                                # rewrites the baseline's README
 ```
 
+## Held-out evaluation worlds
+
+Manh decided on Saturday 14 November that the six baseline worlds are the team's test worlds on the MAX map, held out for everyone. The rule is in [`AGENTS.md`](../AGENTS.md#held-out-evaluation-worlds-traverse-max-map), so every chat reads it after pulling.
+
+- **Test on:** fair 500, 510, 520 and superhard 505, 509, 515, MAX map. Report the mean on each group of three beside `manh_max` (0.488 fair, 0.157 superhard) and the reference pilot (0.102, 0.036).
+- **Never train, tune or select on them**, on either map: a seed is the same ground on both. The whole pool 500–523 is off limits, because the six were picked by looking at it. Kristján's 2026–2029 and 99991 stay reserved as he set them.
+- **In code:** [`lightlag_traverse_max/heldout.py`](../lightlag_traverse_max/heldout.py) holds the list. `check_training_seeds(seeds)` raises an error on any reserved world; the baseline in `oneshot.py` reads its worlds from there (tested).
+- **The page:** [`viewer/traverse-evaluation-max.html`](../viewer/traverse-evaluation-max.html), committed, opens from disk. Kristján's Traverse page (`viewer/traverse/`, unchanged) shows each world as one site, keys 1–6, with the reference pilot, `manh_max`, greedy and straight line. Rebuild it (about 2 minutes) with `python3 viewer/build_traverse_max.py --evaluation`. Checked in headless Firefox, not Chrome.
+- **Kristján's pages are untouched.** `traverse-demo.html` (world 2026) and `traverse-campaign.html` (2027–2029) are the normal-map submission demo, and those worlds stay their reference.
+
 ## Limits
 
 - **No model has written a program for the MAX map yet.** The frozen baseline above waits for its paid step. There is no Harbor task or MCP entry for the MAX map.
@@ -217,7 +227,7 @@ python3 -m lightlag_traverse_max.oneshot report                                #
 - **Development: 1–24**, part of Kristján's development range 1–99, used read-only as he does.
 - **101–124:** a first full run, before rebasing onto Kristján's beam search. They lie inside the farm's search range 100–399, so they are reported above but not used for the claim.
 - **Final: 500–523.** Unclaimed in `TEAM_STATUS.md` before this run; now used.
-- **Model baseline: superhard 505, 509, 515; fair 500, 510, 520** (chosen from 500–523 as above), **and 2026**, the task's world. Example world in the request: 99991, Kristján's, never evaluated.
+- **Model baseline: superhard 505, 509, 515; fair 500, 510, 520** (chosen from 500–523 as above), **and 2026**, the task's world. Example world in the request: 99991, Kristján's, never evaluated. The six are the team's [held-out evaluation worlds](#held-out-evaluation-worlds).
 
 ## Suggested next steps (not done)
 

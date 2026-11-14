@@ -111,6 +111,10 @@ three.js (r187, MIT licence, in `viewer/mars/vendor/`) is the only dependency. T
 - **The original seed-7 mission is no longer in this page.** Claude solves it (1.00); that run is still in `docs/lightlag-runs/opencode-opus-5-5-seed7-delay3` and in the 2D page below.
 - A replay contains the true rover states and the hidden slip values, so the page is evaluator-side material.
 
+## The held-out evaluation page (Traverse MAX map)
+
+[`traverse-evaluation-max.html`](traverse-evaluation-max.html) shows the team's six held-out MAX-map worlds in Kristján's Traverse page, unchanged: fair 500, 510, 520 and superhard 505, 509, 515, one per site (keys 1–6), each with the reference pilot, Manh's best (`manh_max`), greedy and straight line. Never train or tune on these worlds; see [`AGENTS.md`](../AGENTS.md#held-out-evaluation-worlds-traverse-max-map). Rebuild with `python3 viewer/build_traverse_max.py --evaluation` (about 2 minutes). The normal-map Traverse demo and campaign pages are separate and unchanged.
+
 ## The simple 2D page
 
 [`demo.html`](demo.html) is the earlier flat version: four runs side by side on a top-down map with a chart of how wrong each operator's view is. Build it with `python3 viewer/build.py` (see `--help`). `template.html` opened alone accepts replay files by drag and drop.

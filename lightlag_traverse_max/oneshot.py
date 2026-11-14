@@ -44,6 +44,7 @@ from zoneinfo import ZoneInfo
 
 from lightlag_traverse import oneshot as kristjans
 
+from . import heldout
 from .environment import MAX_SETTINGS, make_env
 
 REPO = Path(__file__).resolve().parent.parent
@@ -51,8 +52,8 @@ BASELINE = REPO / "docs" / "lightlag-runs" / "max-baseline"
 NAME = "MAX-map model baseline"
 
 # The protocol. Once a request has been sent, changing any of it means a new baseline under a new name.
-HARD_WORLDS = (505, 509, 515)
-FAIR_WORLDS = (500, 510, 520)
+HARD_WORLDS = heldout.SUPERHARD_WORLDS        # (505, 509, 515)
+FAIR_WORLDS = heldout.FAIR_WORLDS             # (500, 510, 520)
 TASK_WORLD = 2026
 WORLDS = HARD_WORLDS + FAIR_WORLDS + (TASK_WORLD,)
 RULES = {

@@ -62,6 +62,17 @@ class PagesTest(unittest.TestCase):
                 self.assertEqual(len(run["p"]), 2 * 61, "one position per tick")
                 self.assertEqual(len(run["seen"]) % 2, 0)
 
+    def test_the_evaluation_page_holds_one_site_per_world(self):
+        out = self.root / "evaluation.html"
+        build_traverse_max.evaluation(out, worlds=(505, 500), players=CHEAP, mission={"max_ticks": 60}, workers=1)
+        page = out.read_text(encoding="utf-8")
+        found = re.findall(r'<script id="src-data-(\d+)" type="application/octet-stream">([^<]*)</script>', page)
+        sites = [json.loads(base64.b64decode(data)) for _, data in found]
+        self.assertEqual([(s["site"], s["seed"], s["brand"]) for s in sites],
+                         [(1, 505, "SITE 1 / 2"), (2, 500, "SITE 2 / 2")])
+        self.assertEqual([site["label"] for site in sites[0]["sites"]], ["SITE 1", "SITE 2"])
+        self.assertNotIn("MAX map", sites[1]["pitch"])
+
     def test_a_lost_packet_repeats_the_last_fix(self):
         replay = {"received_telemetry": [{"tick": 0, "position": [1.0, 2.0]}, {"tick": 2, "position": [3.0, 4.0]}]}
         log = build_traverse_max.filled(replay)["received_telemetry"]

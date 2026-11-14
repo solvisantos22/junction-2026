@@ -4,6 +4,7 @@
     python3 viewer/build_traverse_max.py                  # world 2026: viewer/traverse-players-normal.html and -max.html
     python3 viewer/build_traverse_max.py --seed 500       # another world
     python3 viewer/build_traverse_max.py --maps max       # only the MAX page
+    python3 viewer/build_traverse_max.py --evaluation     # the six held-out worlds: viewer/traverse-evaluation-max.html
 
 Each page is Kristján's Traverse demo (viewer/traverse/, unchanged) fed with four runs on one map:
 the reference pilot in gold, then Manh's best (`manh_max`), greedy and straight. The missions are
@@ -36,6 +37,7 @@ sys.path.insert(0, str(REPO / "viewer"))
 import build_traverse  # noqa: E402
 from lightlag_traverse.play import PublicTools, save_run  # noqa: E402
 from lightlag_traverse_max.environment import OPTIONS, make_env  # noqa: E402
+from lightlag_traverse_max.heldout import EVALUATION_WORLDS, FAIR_WORLDS, SUPERHARD_WORLDS  # noqa: E402
 from lightlag_traverse_max.play import policy  # noqa: E402
 
 # (player, kind on the page, label, what it is)
@@ -127,13 +129,50 @@ def build(seed: int = 2026, maps: Sequence[str] = OPTIONS, out_dir: Path = REPO 
     return pages
 
 
+def evaluation(out: Path = REPO / "viewer" / "traverse-evaluation-max.html", worlds: Sequence[int] = EVALUATION_WORLDS,
+               players: Sequence[Tuple[str, str, str, str]] = PLAYERS, mission: Optional[Dict[str, Any]] = None,
+               workers: int = 8) -> Path:
+    """The held-out evaluation worlds on the MAX map, one site each, all in one page (keys 1-6 switch)."""
+    jobs = [(name, seed, "max", mission) for seed in worlds for name, _, _, _ in players]
+    if workers <= 1:
+        played = [play(job) for job in jobs]
+    else:
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            played = list(pool.map(play, jobs))
+    per_world = [played[i * len(players):(i + 1) * len(players)] for i in range(len(worlds))]
+    pages = [page_data("max", runs, players, seed) for seed, runs in zip(worlds, per_world)]
+    group = {seed: "fair" for seed in FAIR_WORLDS}
+    group.update({seed: "superhard" for seed in SUPERHARD_WORLDS})
+    # Kristján's campaign page as it is (his headings, his text, his site buttons); only the worlds differ.
+    reference = {seed: page["runs"][0]["reward"] for seed, page in zip(worlds, pages)}
+    for number, (seed, page) in enumerate(zip(worlds, pages), 1):
+        page["site"] = number
+        page["brand"] = "SITE {} / {}".format(number, len(worlds))
+        page["title"] = "Lightlag Traverse · site {}".format(number)
+        page["pitch"] = page["pitch"].replace(NOTES["max"], "")
+        page["sites"] = [{"n": n, "label": "SITE {}".format(n), "note": "reference {:.2f} here".format(reference[s])}
+                         for n, s in enumerate(worlds, 1)]
+    html = build_traverse.standalone(pages)
+    Path(out).write_text(html, encoding="utf-8")
+    print("wrote {} ({:.1f} MB): {} held-out worlds, MAX map".format(Path(out).name, len(html) / 1e6, len(worlds)))
+    for seed, page in zip(worlds, pages):
+        print("  world {:>4} {:<9} ".format(seed, group.get(seed, "")) + "  ".join(
+            "{} {:.3f}".format(run["label"], run["reward"]) for run in page["runs"]))
+    return Path(out)
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--evaluation", action="store_true",
+                        help="the six held-out evaluation worlds, MAX map, one page: viewer/traverse-evaluation-max.html")
     parser.add_argument("--seed", type=int, default=2026, help="the world (default 2026, the task's world)")
     parser.add_argument("--maps", default="normal,max", help="normal, max, or both")
     parser.add_argument("--out-dir", type=Path, default=REPO / "viewer")
     parser.add_argument("--workers", type=int, default=8)
     args = parser.parse_args(argv)
+    if args.evaluation:
+        evaluation(workers=args.workers)
+        return 0
     maps = args.maps.split(",")
     for option in maps:
         if option not in OPTIONS:
