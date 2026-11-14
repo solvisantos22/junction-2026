@@ -22,4 +22,10 @@ This is deliberately small enough for an exact reference: enumerate all feasible
 
 The source inspiration is [AstroAgentBench](https://aclanthology.org/2026.aacl-long.72.pdf), particularly its stereo products and the specification issues it reports. This is a new, simplified experiment, not a reproduction of its results, physics or benchmark.
 
-Implementation and results will be recorded here. No new model failure is established by this design.
+## Initial development
+
+The implementation is in [stereo_survey](../stereo_survey/README.md), with 12 focused tests. The retained [development run](stereo-survey-results/development.json) covers seeds 0–11 at 24 and 32 candidate images, both stereo and matched monocular scoring. No performance filtering occurred.
+
+Coverage-only greedy reaches approximately 15–17% of the proved stereo ceiling, while pair-aware greedy portfolios reach approximately 96%. The beam portfolio matches all **23 proved** stereo optima. Expanded seed 11 hit the two-million-joint-plan cap: reference and beam both scored 36, but that is only a best-known value until the exhaustive search finishes. The incomplete case stays in the report. All 24 monocular references prove optimal.
+
+This validates complementary images as a real requirement, but the planning problem is currently easy for generic pair-aware search. Complete the bounded reference proof and one fixed fresh check before the final decision. No new model failure is established, and no API/model call has been made.
