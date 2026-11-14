@@ -2,7 +2,7 @@
 """Build the traverse demo: every recorded run of one Lightlag Traverse mission, on its ground.
 
     python3 viewer/build_traverse.py                   # writes viewer/traverse/data.json and viewer/traverse-demo.html
-    python3 viewer/build_traverse.py --runs a/folder   # the folder holding the traverse-* run folders
+    python3 viewer/build_traverse.py --runs a/folder --out page.html   # other runs; leaves data.json alone
     python3 viewer/build_traverse.py --data-only       # just refresh viewer/traverse/data.json for development
     python3 viewer/build_traverse.py --campaign        # viewer/traverse-campaign.html from the campaign-* runs
 
@@ -305,11 +305,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         out.write_text(html, encoding="utf-8")
         print("wrote {} ({:.1f} MB)".format(out.name, len(html) / 1e6))
         return 0
+    default = args.runs.resolve() == RUNS.resolve() and args.out is None
     args.out = args.out or REPO / "viewer" / "traverse-demo.html"
     data = gather(run_folders(args.runs))
-    (TRAVERSE / "data.json").write_text(json.dumps(data, separators=(",", ":")), encoding="utf-8")
     world = data["world"]
-    print("wrote viewer/traverse/data.json: seed {}, {:.0f} m by {:.0f} m, {} ticks, {} targets".format(
+    if default or args.data_only:
+        # the development copy of the committed demo's data; a page built from other runs leaves it alone
+        (TRAVERSE / "data.json").write_text(json.dumps(data, separators=(",", ":")), encoding="utf-8")
+        print("wrote viewer/traverse/data.json")
+    print("seed {}, {:.0f} m by {:.0f} m, {} ticks, {} targets".format(
         data["seed"], world["width"], world["height"], data["config"]["ticks"], len(world["targets"])))
     for run in data["runs"]:
         print("  {:<30} {:<9} reward {:.3f}  samples {:>2}  {}".format(

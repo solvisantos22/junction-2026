@@ -314,6 +314,16 @@ class CampaignPages(unittest.TestCase):
             build_traverse.campaign(bad)
 
 
+class OtherRuns(unittest.TestCase):
+    def test_a_page_built_from_other_runs_leaves_the_committed_demo_data_alone(self):
+        data_file = build_traverse.TRAVERSE / "data.json"
+        before = data_file.read_bytes()
+        out = ROOT / "other-page.html"
+        self.assertEqual(build_traverse.main(["--runs", str(ROOT / "runs"), "--out", str(out)]), 0)
+        self.assertTrue(out.exists())
+        self.assertEqual(data_file.read_bytes(), before)
+
+
 class CommittedPage(unittest.TestCase):
     def test_the_committed_campaign_page_is_up_to_date(self):
         if not build_traverse.run_folders(build_traverse.RUNS, "campaign-"):
