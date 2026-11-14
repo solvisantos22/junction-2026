@@ -1254,6 +1254,80 @@ class EKF_executive_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC(
 
 
 # =============================================================================================
+# All-in-one: every layer that worked, each inactive without its rule
+# =============================================================================================
+
+class _CachedRules:
+    """Tools whose rules() reaches the simulator once. The published rules are fixed for an
+    episode. The real-time service adds a clock block to them, a reading that goes stale, so it
+    is left out of the cached copy (every acknowledgement carries a clock reading instead)."""
+
+    def __init__(self, tools):
+        self._tools, self._rules = tools, None
+
+    def rules(self):
+        if self._rules is None:
+            rules = dict(self._tools.rules())
+            rules.pop("clock", None)
+            self._rules = rules
+        return copy.deepcopy(self._rules)
+
+    def __getattr__(self, name):
+        return getattr(self._tools, name)
+
+
+class _RulesOnce:
+    """Asks for the rules once. Each mixin of a stacked controller reads the rules on first use:
+    five or six calls where controller 1 makes two. Turn-based that is free. On the real-time
+    clock every tool call costs thinking time, and at one tick per call the extra calls put the
+    stack 6.9 points below 29 (development seeds 0-39, rush and rush_noisy, delay 3). Must be the
+    first base, so that every other constructor receives the wrapped tools."""
+
+    def __init__(self, tools):
+        super().__init__(_CachedRules(tools))
+
+
+class _ReserveByEvidence(_Tight):
+    """Energy reserve matched to what the battery has shown (needs _SandOdometer).
+
+    The planner keeps RESERVE = 2.0 energy in hand at the horizon, on top of a way home budgeted
+    with slip at its mean plus 1.5 standard deviations. The oracle ladder showed that reserve is
+    larger than the information needs (bound 16 plays with 0.5). Tried on development seeds
+    (suites 0-19, plain profiles 700-899), each against 34:
+      * 1.0 always: +1.3 on the suites and +1.2 on plain profiles, but with hidden sand on the
+        50-tick rush missions deaths rose from 4.2% to 5.8%. A smaller reserve is only right
+        while the map is right;
+      * 1.5 always: +1.0 and +0.8, deaths 4.2% to 5.0%;
+      * this rule, RESERVE_CLEAN while the battery sand odometer has found no unmapped sand and
+        the stock RESERVE_FOUND from the first unmapped metre on: +0.8 and +0.6, deaths unchanged.
+    """
+    RESERVE_CLEAN = 1.0
+    RESERVE_FOUND = _lc.RESERVE
+
+    @property
+    def RESERVE(self):
+        return self.RESERVE_FOUND if getattr(self, "unmapped_found", 0.0) > 0.0 else self.RESERVE_CLEAN
+
+
+class EKF_latencyaware_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC(
+        _ArmedGuard, _WindowAware, _AimDisc, _TurnCost, _Unverified, _FadingFilter, _SandAwareFilter,
+        _SandOdometer, EKF_latencyaware_MPC):
+    """34 on the real-time-aware base of 29. A building block of 36, not registered on its own:
+    turn-based it sends exactly 34's commands."""
+
+
+class EKF_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_aimdisc_turncost_window_MPC(  # noqa: E501
+        _RulesOnce, _ReserveByEvidence,
+        _mars_executive(EKF_latencyaware_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC)):
+    """36: everything that worked, in one controller. 34 (27's estimator, guarded moves only when
+    a probe is free) on the real-time-aware base of 29, under the Mars slip-check layer and
+    executive of 33, with the rules read once and the reserve matched to the evidence.
+
+    Each layer is inactive when its rule is absent: with the reserve rule switched off
+    (RESERVE_CLEAN = 2.0) it sends exactly 34's commands turn-based (2,160 episodes checked)."""
+
+
+# =============================================================================================
 # Registry
 # =============================================================================================
 
@@ -1502,6 +1576,28 @@ register("EKF_gapgate_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_control
              "controller 1, -0.2 against 34 (a tie); faults suite (packet loss 10/25/50%, outliers 5/15%, "
              "both) +24.7 over 24 (+23.1 to +26.4), +17.1 over 34, +31.9 over controller 1, 2 deaths in 2160 "
              "episodes against 75 for 24. Bound 16 shares the gap flaw, so 35 beats it under packet loss.")
+_R8 = "2026-11-14, all-in-one (34 + real-time base + Mars layers + rules read once + reserve by evidence)"
+register("EKF_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_"
+         "aimdisc_turncost_window_MPC_manh_controller_36",
+         _ours(EKF_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_aimdisc_turncost_window_MPC),  # noqa: E501
+         built=_R8,
+         note="everything that worked, in one controller: 34 on the real-time-aware base of 29, under the Mars "
+              "slip-check layer and executive of 33, with the rules read once and an energy reserve of 1.0 "
+              "until the battery shows unmapped sand (the stock 2.0 after)",
+         why="Asked for one controller that carries every part that worked. Each layer is inactive without its "
+             "rule: with the reserve rule off it sends exactly 34's commands turn-based (2,160 episodes). Two "
+             "things had to be added. Rules once: the stacked mixins asked for the rules 5-6 times, free "
+             "turn-based but 6.9 points below 29 on the real-time clock at one tick of thinking per call. "
+             "Reserve by evidence: a 1.0 reserve gained 1.2 points but raised deaths with hidden sand on rush "
+             "missions (4.2% to 5.8%); lowering it only while no unmapped sand has been found keeps them "
+             "unchanged. One final check on fresh seeds (suites 6000-6059, plain profiles 6060-6259, Mars rules "
+             "and real-time clock 6000-6039): suites +1.0 over 34 (+0.7 to +1.3), +4.1 over controller 1 (+3.7 "
+             "to +4.4), +29.5 over solvi_reference; plain profiles +1.0 over 34 (+0.7 to +1.2), +2.7 over "
+             "controller 1; hidden sand 63.9% against 63.5% for 34, dead 2.6% both; Mars rules +3.4 over 33 "
+             "(+2.5 to +4.2); real-time clock +1.7 over 29 (+0.5 to +2.9). Not ahead in every cell: below 34 in "
+             "28 of 192 suite cells (worst -3.7), below solvi_reference in one (noisy, two hidden patches, "
+             "delay 0), 3.9 below 34 where a slip check and a hidden patch are combined (-7.7 to -0.3), and "
+             "level with 29 at two ticks of thinking per call (-1.0, -3.6 to +1.6).")
 for _name in ("solvi_reference", "kristjan_reference", "blind", "cautious"):
     register(_name, _team(_name), kind="team", logged=False, note="team controller, imported unchanged",
              why="comparison only")

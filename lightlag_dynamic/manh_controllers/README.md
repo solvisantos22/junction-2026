@@ -22,7 +22,7 @@ python3 -m lightlag_dynamic.manh_controllers --suite base  --seeds 0-19         
 python3 -m lightlag_dynamic.manh_controllers --suite noise --controllers 1 20 team   # names, numbers or kinds (manh, bound, team)
 python3 -m lightlag_dynamic.manh_controllers --suite partb --controllers 22 --append  # add a new controller to existing results
 python3 -m lightlag_dynamic.manh_controllers --suite faults --controllers 1 24 35      # lost packets and outlier fixes on rush / rush_noisy
-python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                     # 21 tests, about 15 seconds
+python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                     # 25 tests, about 15 seconds
 ```
 
 - Results go to `~/lightlag-manh-results/<suite>/`, outside the repository; use `--out` to change this, and do not commit result rows.
@@ -59,8 +59,9 @@ python3 -m unittest tests.lightlag_dynamic.test_manh_controllers                
 | 31 | `EKF_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_31` | 24 plus the same layer | Fresh seeds 800–879, `noisy`: limit 0.40 74.8% → 78.8%, 0.35 55.3% → 75.0%. Equals 24 without a slip check. |
 | 32 | `EKF_executive_slipaware_MPC_manh_controller_32` | 30 plus an executive: explicit modes switched by telemetry events. `recover` backs out of sand by one-segment drives, each sent after the previous one executed, when that beats driving on; `nominal` drops a target only with evidence about its terrain | The layer alone still crawled along sand edges and wrote off sand targets on the prior. Fresh seeds 900–979, `noisy`: limit 0.40 78.1% → 86.6%, 0.35 75.0% → 85.0%, home 80 of 80. Equals 1 without a slip check. |
 | 33 | `EKF_executive_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_33` | 31 plus the executive | **Best on the slip check.** Fresh seeds 900–979, `noisy`: limit 0.40 80.3% → 88.8% (home 77 → 80 of 80), 0.35 75.0% → 85.9%; never below 31. Equals 24 without a slip check. [Details](../../docs/lightlag-dynamic-pilot.md#mars-operations-tweaks-sandbox-off-by-default). |
-| 34 | `EKF_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC_manh_controller_34` | 27 with the guarded moves run only when a probe is free: one telemetry round trip of delay costs the current plan no value and still fits the horizon (always so on the way home). Otherwise 24's stay-alive rule | **Best overall.** Keeps 24's score on the published profiles and 27's survival on hidden sand. Fresh seeds 5000–5259: +3.2 over 1 (+2.7 to +3.8), +1.2 over 24, +0.5 over 27; plain `rush` / `rush_noisy` +0.2 over 24 (a tie) and +1.8 over 27. Not ahead in every cell: see "Controller 34" below. |
+| 34 | `EKF_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC_manh_controller_34` | 27 with the guarded moves run only when a probe is free: one telemetry round trip of delay costs the current plan no value and still fits the horizon (always so on the way home). Otherwise 24's stay-alive rule | **Best overall until 36**, which builds on it. Keeps 24's score on the published profiles and 27's survival on hidden sand. Fresh seeds 5000–5259: +3.2 over 1 (+2.7 to +3.8), +1.2 over 24, +0.5 over 27; plain `rush` / `rush_noisy` +0.2 over 24 (a tie) and +1.8 over 27. Not ahead in every cell: see "Controller 34" below. |
 | 35 | `EKF_gapgate_sandodo_stayalive_aimdisc_turncost_window_MPC_manh_controller_35` | 24 with gap bridging (acknowledged drives applied across lost telemetry packets) and a chi-square gate on position fixes in front of the filter | **Most robust to link and localiser faults; identical to 24 on the published profiles.** Fresh seeds 8000–8059: published profiles +0.02 over 24 (2 of 720 episodes differ); faults suite +24.7 over 24, +17.1 over 34, +31.9 over 1, 2 deaths in 2160 episodes against 75 for 24. See "Controller 35" below. |
+| 36 | `EKF_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_aimdisc_turncost_window_MPC_manh_controller_36` | Everything that worked, in one controller: 34 on the real-time-aware base of 29, under the Mars slip-check layer and executive of 33, with the rules read once and an energy reserve of 1.0 until the battery shows unmapped sand (the stock 2.0 after) | **Best overall, and ahead of each front's own specialist.** Each layer is inactive without its rule: with the stock reserve it sends exactly 34's commands. Fresh seeds 6000–6259, used once: suites +1.0 over 34 (+0.7 to +1.3) and +4.1 over 1; plain profiles +1.0 over 34; Mars rules +3.4 over 33 (+2.5 to +4.2); real-time clock +1.7 over 29 (+0.5 to +2.9); hidden-sand deaths as 34. Not ahead in every cell: see "Controller 36" below. 35's lost-packet bridging and fix gate are not folded in: it landed while 36 was being tested. |
 
 **Bounds** use privileged information through `scenarios.ScenarioEnvironment`. They are yardsticks, not entries.
 
@@ -359,6 +360,85 @@ Paired by episode, in points of share, with a 95% bootstrap over seeds:
 - **Lost packets:** `kf_mpc` falls below the blind plan from 10% loss on `rush_noisy`; 35 loses at most 0.06 up to 50% loss. Deaths in all 2160 fault episodes: 35 has 2, 24 has 75, `kf_mpc` 584.
 - **Outliers:** 35 keeps its fault-free score. 34 is at or below 24 there, because of the fading.
 - **Not covered:** hidden sand (35 is built on 24, not 34, so it has 24's hidden-sand limit), and the faults the gate cannot see (lost uplinks, safe mode, battery fade), which the vault note measures separately. Bound 16 is not a bound under packet loss.
+
+### Controller 36: everything that worked, in one controller (Saturday about 13:15 Helsinki)
+
+**What it is.** One class that stacks every part that tested well:
+- **34:** 27's estimator (battery sand odometer, sand-aware filter, fading), aim at the disc, turn cost, uplink windows, and guarded moves when a probe is free.
+- **The real-time-aware base of 29:** it measures its own lag, decides that much earlier, and drops commands that no longer fit the horizon.
+- **The Mars slip-check layer and executive of 33.**
+- **Two additions the stack needed** (below): the rules read once, and a reserve matched to the evidence.
+
+Left out on purpose:
+- The particle and cubature filters (2, 8, 20, 21): they win only at heavy noise.
+- 28's cautious sand pricing: it trades the third target for safety, so it stays a separate twin.
+
+Not folded in yet: 35's lost-packet bridging and position-fix gate. Controller 35 landed while 36 was being tested, so 36 has 34's behaviour under those faults (see "Controller 35" above).
+
+**Each layer is inactive without its rule.** With the reserve rule set to the stock 2.0, 36 was compared with 34 command for command, turn-based and without a slip check:
+- 1,440 development episodes (every suite scenario and plain rush, delays 0/3/5, seeds 0–7): all identical.
+- 720 episodes on fresh seeds 6000–6003: all identical.
+
+**Addition 1: the rules read once** (`_RulesOnce`). Each mixin reads the rules on first use, so the stack asked for them 5–6 times per episode where `kf_mpc` asks twice. Turn-based that is free. On the real-time clock every tool call costs thinking time. Development seeds 0–39, `rush` and `rush_noisy`, delay 3, in points against 29:
+
+| Thinking per tool call | 34 (no real-time base) | Stack, rules asked 5–6 times | Stack, rules asked once | 36 |
+|---|---|---|---|---|
+| 0.5 ticks | −3.0 | −3.9 | +0.5 | +0.9 |
+| 1 tick | −14.9 | −11.0 | +2.7 | +3.0 |
+| 2 ticks | −12.7 | −13.0 | −0.1 | −0.1 |
+| All levels (with 0) | −7.5 | −6.9 (−8.3 to −5.4) | +0.9 (−0.3 to +2.1) | +1.0 (−0.3 to +2.2) |
+
+- The cached copy leaves out the clock block that the real-time service adds to its rules, because a cached clock reading goes stale.
+- 29 itself asks twice. Reading once would gain it 1.5 points (+0.7 to +2.2) on these seeds. It was not changed here: 29 belongs to the real-time work.
+
+**Addition 2: a reserve matched to the evidence** (`_ReserveByEvidence`). The planner keeps 2.0 energy in hand at the horizon, on top of a way home budgeted with pessimistic slip. Bound 16 plays with 0.5, and a scratch test on 24 showed a smaller reserve is the one public lever that still moves the score on the published profiles. Three rules on development seeds (suites 0–19, plain profiles 700–899), each against 34:
+
+| Reserve | Suites | Plain profiles | Plain `noisy` | Hidden sand, `rush_noisy` | Dead there |
+|---|---|---|---|---|---|
+| 2.0, the stock value (34) | — | — | — | — | 4.2% |
+| 1.0 always | +1.3 | +1.2 | +3.9 | −1.2 | 5.8% |
+| 1.5 always | +1.0 | +0.8 | +2.5 | −0.2 | 5.0% |
+| **1.0 until the battery shows unmapped sand, then 2.0 (36)** | **+0.8** | **+0.6** | **+1.8** | **−0.3** | **4.2%** |
+
+- A smaller reserve is only right while the map is right. With hidden sand on the 50-tick rush missions, 1.0 always raised deaths.
+- The rule kept has no extra deaths: once the battery sand odometer finds a first unmapped metre, the stock reserve is back.
+- The gain on `noisy` is the third target of the team's fixed map fitting the budget more often.
+
+**Final check, once, on fresh seeds 6000–6259.** The suites on 6000–6059 (11,520 episodes per controller), the four plain profiles on 6060–6259 (2,400), Mars rules and the real-time clock on 6000–6039. The registered class was run in a clean checkout and reproduced the prototype on 3,056 episodes.
+
+| Fresh seeds, turn-based | `kf_mpc` | 34 | **36** | Sölvi |
+|---|---|---|---|---|
+| Plain profiles | 83.7% | 85.5% | **86.4%** | 58.2% |
+| Suites, all cells | 72.1% | 75.2% | **76.2%** | 46.7% |
+| Hidden sand | 50.0% | 63.5% | **63.9%** | 49.7% |
+| Dead, hidden sand | 22.2% | 2.6% | 2.6% | 3.1% |
+| Home, suites | 95% | 97% | 97% | 81% |
+| Dead, suites | 3.0% | 0.3% | 0.4% | 4.3% |
+
+Paired by episode, in points of share, with a 95% bootstrap over seeds:
+
+| 36 against | Suites | Plain profiles | Plain `rush` + `rush_noisy` | Hidden sand |
+|---|---|---|---|---|
+| `kf_mpc` | +4.1 (+3.7 to +4.4) | +2.7 (+2.3 to +3.1) | +1.8 (+1.3 to +2.3) | +13.9 (+11.4 to +16.3) |
+| 34 | +1.0 (+0.7 to +1.3) | +1.0 (+0.7 to +1.2) | +0.7 (+0.5 to +0.9) | +0.3 (−0.2 to +0.9) |
+| `solvi_reference` | +29.5 (+28.4 to +30.7) | +28.3 (+27.6 to +28.9) | +34.0 (+32.6 to +35.3) | +14.1 (+11.5 to +16.5) |
+
+The other two fronts, against each front's own specialist:
+
+| Front | Against the specialist | Against 34 | Against `kf_mpc` |
+|---|---|---|---|
+| **Mars rules:** 24 cells of 40 seeds (`noisy` and `rush_noisy`, delays 3 and 5; slip check 0.35, 0.40, 0.45; relay passes every 3 ticks; check with passes; check with one hidden patch) | +3.4 over 33 (+2.5 to +4.2) | +4.0 (+1.6 to +6.6) | +6.8 (+4.3 to +9.5) |
+| **Real-time clock:** 8 cells of 40 seeds (`rush` and `rush_noisy`, delay 3; 0, 0.5, 1 and 2 ticks of thinking per tool call) | +1.7 over 29 (+0.5 to +2.9) | +8.8 (+7.6 to +10.0) | +3.4 (+2.0 to +4.9) |
+
+**Where 36 is not ahead:**
+- **Suite cells** (192 cells of 60 seeds): below 34 in 28 and above in 141; below `kf_mpc` in 13; below Sölvi in 1.
+  - Worst against 34 and `kf_mpc`: `noisy` with all noise halved, delay 3 (−3.7 and −4.6).
+  - The one cell below Sölvi is `noisy` with two hidden patches at delay 0 (−5.0), the limit described under "What remains" above.
+- **A slip check together with a hidden patch:** 3.9 points below 34 (−7.7 to −0.3), though 8.3 above 33. The executive plans its way out from the mapped patches; inside an unmapped patch it knows only the thin strip the odometer has marked. Not fixed here: `mars.py` belongs to the Mars sandbox work.
+- **Two ticks of thinking per tool call:** level with 29 (−1.0, −3.6 to +1.6). The stack sends one or two more uplinks per episode than 29, and each costs two ticks.
+- **Hidden sand on `noisy`:** the share is level with 34 (+0.6, −0.5 to +1.7), but 36 is home less often (64% against 69%): it more often takes the third target and ends alive away from base.
+
+**What it is for.** One controller to keep improving instead of three lines. It is not a reference decision: `kf_mpc` stays the reference everywhere it is used.
 
 ## Discriminative seeds
 

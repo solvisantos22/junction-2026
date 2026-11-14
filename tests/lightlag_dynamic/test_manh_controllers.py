@@ -281,6 +281,151 @@ class GapGateTest(unittest.TestCase):
 
 
 @unittest.skipUnless(HAVE_NUMPY, "the Manh controllers need numpy")
+class AllInOneTest(unittest.TestCase):
+    """Controller 36: 34 on the real-time base of 29, under the Mars layers of 33, with the rules
+    read once and the reserve matched to the evidence. Each layer is inactive without its rule."""
+
+    @staticmethod
+    def _classes():
+        from lightlag_dynamic.manh_controllers import controllers as mc
+        name36 = ("EKF_executive_slipaware_latencyaware_fading_sandfilter_sandodo_armedguard_evidencereserve_"
+                  "aimdisc_turncost_window_MPC")
+        return mc.EKF_fading_sandfilter_sandodo_armedguard_aimdisc_turncost_window_MPC, getattr(mc, name36)
+
+    @staticmethod
+    def _commands(cls, env):
+        from lightlag_dynamic.tools import PublicTools
+        cls(PublicTools(env)).run()
+        while not env.advance(5)["episode_complete"]:
+            pass
+        return env.replay()["commands"]
+
+    def test_with_the_stock_reserve_it_is_34(self):
+        # Turn-based and without a slip check, the real-time base, the Mars layers and the rules
+        # cache change nothing: with the stock reserve, 34's commands, command for command.
+        from lightlag_dynamic.manh_controllers.scenarios import make_env
+        c34, c36 = self._classes()
+        stock = type("stock_reserve", (c36,), {"RESERVE_CLEAN": 2.0})
+        cases = (("rush_noisy", 3, {}), ("noisy", 5, {"hidden_patches": 1}),
+                 ("noisy", 1, {"turn_cost": 0.03, "windows": (10, 3)}))
+        for profile, seed, factors in cases:
+            with self.subTest(profile=profile, seed=seed):
+                self.assertEqual(self._commands(stock, make_env(seed, 3, profile, factors=factors)),
+                                 self._commands(c34, make_env(seed, 3, profile, factors=factors)))
+
+    def test_reserve_drops_only_while_the_map_is_right(self):
+        # Plain noisy, development seed 701: with the stock 2.0 reserve the third target does not
+        # fit (34 takes two); with 1.0 it does, and the rover is home with energy left.
+        from lightlag_dynamic.manh_controllers.scenarios import make_env
+        from lightlag_dynamic.manh_controllers.swarm import resolve, run_one
+        from lightlag_dynamic.tools import PublicTools
+        scn = {"name": "default", "profile": "noisy"}
+        n34, n36 = resolve(["34", "36"])
+        row34, _ = run_one((n34, scn, 3, 701, False))
+        row36, _ = run_one((n36, scn, 3, 701, False))
+        self.assertAlmostEqual(row34["share"], 0.75)
+        self.assertAlmostEqual(row36["share"], 1.0)
+        self.assertTrue(row36["alive"] and row36["at_base"])
+        controller = self._classes()[1](PublicTools(make_env(701, 3, "noisy")))
+        self.assertEqual(controller.RESERVE, 1.0)
+        controller.unmapped_found = 0.4  # what the battery sand odometer records
+        self.assertEqual(controller.RESERVE, 2.0)
+
+    def test_backs_out_under_the_slip_check_like_33(self):
+        # Noisy seed 8, slip check 0.40: the sand slips 0.441, so every drive in it trips the check.
+        # 34 has no Mars layer and samples nothing; 36 backs out as 33 does.
+        from lightlag_dynamic.manh_controllers import controllers as mc
+        from lightlag_dynamic.manh_controllers.mars import make_mars_env
+        from lightlag_dynamic.tools import PublicTools
+        c34, c36 = self._classes()
+        c33 = mc.EKF_executive_slipaware_sandodo_stayalive_aimdisc_turncost_window_MPC
+        shares = {}
+        for name, cls in (("33", c33), ("34", c34), ("36", c36)):
+            env = make_mars_env(8, 3, "noisy", factors={"slip_check": {"limit": 0.40}})
+            controller = cls(PublicTools(env))
+            controller.run()
+            while not env.advance(5)["episode_complete"]:
+                pass
+            result = env.replay()["result"]
+            shares[name] = result["raw_score"] / result["max_available_value"]
+        self.assertEqual([m[1] for m in controller.mode_log[:2]], ["recover", "nominal"])
+        self.assertLess(shares["34"], 0.25)
+        self.assertGreaterEqual(shares["36"], shares["33"])
+        self.assertGreaterEqual(shares["36"], 0.75)
+
+    def test_on_the_real_time_clock(self):
+        # A fake clock on which every tool call costs one tick of thinking (as in test_kf_mpc_rt.py).
+        # 36 asks for the rules once and never sends a command too late. Over development seeds 0-5
+        # on rush it scores more than 34, which has no real-time base, and more than kf_mpc.
+        from lightlag import Config
+        from lightlag_dynamic.controllers import POLICIES
+        from lightlag_dynamic.realtime import RealTimeEpisodeService
+        c34, c36 = self._classes()
+        seconds_per_tick = 5.0
+
+        class Clock:
+            def __init__(self):
+                self.t = 0.0
+
+            def __call__(self):
+                return self.t
+
+            def sleep(self, seconds):
+                self.t += seconds
+
+        class Thinking:
+            def __init__(self, service, clock):
+                self.service, self.clock, self.calls = service, clock, {}
+
+            def _call(self, tool, arguments=None):
+                self.clock.t += seconds_per_tick
+                self.calls[tool] = self.calls.get(tool, 0) + 1
+                return self.service.call(tool, arguments)
+
+            def rules(self):
+                return self._call("rules")
+
+            def map(self):
+                return self._call("map")
+
+            def telemetry_log(self):
+                return self._call("telemetry_log")
+
+            def uplink(self, commands):
+                return self._call("uplink", {"commands": commands})
+
+            def advance(self, ticks=1):
+                return self._call("advance", {"ticks": ticks})
+
+        def play(policy, seed):
+            clock = Clock()
+            service = RealTimeEpisodeService(seed=seed, seconds_per_tick=seconds_per_tick, clock=clock,
+                                             sleep=clock.sleep, profile="rush",
+                                             config=Config(delay_ticks=3, max_ticks=50))
+            tools = Thinking(service, clock)
+            late = False
+            try:
+                policy(tools)
+            except Exception as error:  # without the real-time base a late uplink ends the run
+                if "beyond the episode horizon" not in str(error):
+                    raise
+                late = True
+            result = service.finish()
+            return result["raw_score"] / result["max_available_value"], tools.calls, late
+
+        totals = {}
+        for name, policy in (("kf_mpc", POLICIES["kf_mpc"]), ("34", lambda t: c34(t).run()),
+                             ("36", lambda t: c36(t).run())):
+            runs = [play(policy, seed) for seed in range(6)]
+            totals[name] = sum(share for share, _, _ in runs)
+            if name == "36":
+                self.assertTrue(all(calls["rules"] == 1 for _, calls, _ in runs))
+                self.assertFalse(any(late for _, _, late in runs))
+        self.assertGreater(totals["36"], totals["34"])
+        self.assertGreater(totals["36"], totals["kf_mpc"])
+
+
+@unittest.skipUnless(HAVE_NUMPY, "the Manh controllers need numpy")
 class SwarmTest(unittest.TestCase):
     def test_run_and_report(self):
         from lightlag_dynamic.manh_controllers import swarm
