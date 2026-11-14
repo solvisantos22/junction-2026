@@ -1,0 +1,8 @@
+# A speech recogniser to check the finished video's sound track against its script
+# (`make check`): docker build -t lightlag-listener -f tools/demo_video/voice/Dockerfile.listen tools/demo_video/voice
+# The model is fetched while the image is built; the container then runs without a network.
+FROM python:3.12-slim
+RUN pip install --no-cache-dir faster-whisper
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('base.en', device='cpu', compute_type='int8')"
+ENV HF_HUB_OFFLINE=1
+ENTRYPOINT ["python", "/opt/listen.py"]

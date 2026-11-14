@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lightlag Traverse: film scenes</title>
+<style>
+  html, body { margin: 0; background: #0b0807; overflow: hidden; }
+  canvas { display: block; width: 1920px; height: 1080px; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// The video's drawn scenes: quote, reference, results, the Modal farm, the learning curve, the end card.
+// One canvas, every scene a pure function of time, so the recorder can step it frame by frame
+// (tools/demo_video/clock.js). Numbers come from window.FILM_DATA (tools/demo_video/data.py).
+// Open with ?scene=results&d=12 to look at one in a browser; it then plays on the real clock.
+const W = 1920, H = 1080;
+const C = { ink: '#f3ead9', dim: 'rgba(243,234,217,.62)', faint: 'rgba(243,234,217,.34)', gold: '#ffb224', ice: '#9fd8ff',
+  red: '#ff4a2f', lime: '#b6e35a', bg: '#0b0807', key: '#1a120f', shade: '#6f5a50', line: '#2e201a' };
+const DIN = '"DIN Condensed", "Avenir Next Condensed", "Roboto Condensed", "Arial Narrow", sans-serif';
+const SANS = '-apple-system, "Helvetica Neue", "Segoe UI", sans-serif';
+const MONO = '"SF Mono", Menlo, Monaco, monospace';
+const g = document.getElementById('c').getContext('2d');
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ease = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+const out = x => 1 - Math.pow(1 - clamp(x, 0, 1), 3);
+const appear = (t, at, len = 0.45) => ease((t - at) / len);
+const two = n => (+n).toFixed(2), three = n => (+n).toFixed(3);
+
+function text(s, x, y, o = {}) {
+  const { size = 40, color = C.ink, font = DIN, align = 'left', spacing = 0.07, alpha = 1, weight = 700, baseline = 'alphabetic' } = o;
+  if (alpha <= 0.003) return 0;
+  g.save();
+  g.globalAlpha *= alpha; g.fillStyle = color; g.textAlign = align; g.textBaseline = baseline;
+  g.font = `${weight} ${size}px ${font}`; g.letterSpacing = `${(size * spacing).toFixed(2)}px`;
+  g.fillText(s, x, y);
+  const width = g.measureText(s).width;
+  g.restore();
+  return width;
+}
+function measure(s, o = {}) {
+  const { size = 40, font = DIN, spacing = 0.07, weight = 700 } = o;
+  g.save(); g.font = `${weight} ${size}px ${font}`; g.letterSpacing = `${(size * spacing).toFixed(2)}px`;
+  const width = g.measureText(s).width; g.restore(); return width;
+}
+function wrap(s, maxWidth, o = {}) {
+  const words = s.split(' '), lines = []; let line = '';
+  for (const word of words) {
+    const trial = line ? line + ' ' + word : word;
+    if (measure(trial, o) > maxWidth && line) { lines.push(line); line = word; } else line = trial;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+function paragraph(s, x, y, maxWidth, lineHeight, o = {}) {
+  const lines = wrap(s, maxWidth, o);
+  lines.forEach((line, i) => text(line, x, y + i * lineHeight, o));
+  return lines.length * lineHeight;
+}
+function rect(x, y, w, h, color, alpha = 1) { if (alpha <= 0.003) return; g.save(); g.globalAlpha *= alpha; g.fillStyle = color; g.fillRect(x, y, w, h); g.restore(); }
+function rise(t, at, draw, dy = 22, len = 0.5) {          // a block that fades in while it settles
+  const k = appear(t, at, len); if (k <= 0.003) return;
+  g.save(); g.globalAlpha *= k; g.translate(0, (1 - out((t - at) / len)) * dy); draw(k); g.restore();
+}
+
+// ---------------------------------------------------------------- what every scene shares
+function backdrop(chapter) {
+  g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
+  const glow = g.createRadialGradient(W * 0.5, H * 0.56, 80, W * 0.5, H * 0.56, 1150);
+  glow.addColorStop(0, 'rgba(120,52,28,.30)'); glow.addColorStop(0.55, 'rgba(60,26,15,.16)'); glow.addColorStop(1, 'rgba(11,8,7,0)');
+  g.fillStyle = glow; g.fillRect(0, 0, W, H);
+  rect(0, 0, W, 54, '#000');
+  const brand = text('LIGHTLAG', 24, 39, { size: 34, spacing: 0.2 });
+  text('TRAVERSE', 24 + brand + 16, 39, { size: 26, color: C.red, spacing: 0.2 });
+  if (chapter) text(chapter, W - 28, 38, { size: 26, color: C.dim, align: 'right', spacing: 0.16 });
+  rect(0, 54, W, 2, C.line);
+}
+function heading(t, title, sub) {
+  rise(t, 0.15, () => text(title, 120, 168, { size: 76, spacing: 0.085 }));
+  if (sub) rise(t, 0.45, () => text(sub, 122, 214, { size: 27, color: C.dim, spacing: 0.13 }));
+}
+
+// ---------------------------------------------------------------- scenes
+const SCENES = {};
+
+// Claude's own account of the run: two sentences from its closing report, and what happened at each site.
+SCENES.quote = (t, D, data) => {
+  backdrop('WHY CLAUDE STRUGGLES');
+  const run = data.campaign.claude.find(r => r.id === data.quotes.run);
+  rise(t, 0.2, () => {
+    text("IN CLAUDE'S OWN WORDS", 150, 190, { size: 40, color: C.gold, spacing: 0.16 });
+    text(`OPUS 5.5 · ITS CLOSING REPORT ON THE CAMPAIGN · SCORE ${two(run.score)}`, 152, 232, { size: 25, color: C.dim, spacing: 0.13 });
+  });
+  const q = { size: 58, font: SANS, weight: 600, spacing: -0.012 };
+  rise(t, 0.7, () => {
+    text('“', 96, 392, { size: 150, font: SANS, weight: 700, color: C.red, spacing: 0 });
+    paragraph('Energy (the main failure): the route planner only counted time. It never checked whether the battery would last.”', 190, 372, 1560, 80, q);
+  });
+  const second = Math.max(3.2, D * 0.42);
+  rise(t, second, () => {
+    text('“', 96, 652, { size: 150, font: SANS, weight: 700, color: C.red, spacing: 0 });
+    paragraph('My autopilot … ran all three missions in about 45 seconds, without me checking anything between them.”', 190, 632, 1560, 80,
+      { ...q, color: C.ink });
+  });
+  // the three sites of that run
+  const y = 880, labels = run.sites.map((site, i) => site.end === 'lost' ? ['BATTERY FLAT', C.red] : site.end === 'away' ? ['STRANDED', C.gold] : [`HOME · ${two(site.reward)}`, C.ice]);
+  run.sites.forEach((site, i) => rise(t, second + 0.9 + i * 0.25, () => {
+    const x = 190 + i * 420;
+    rect(x, y, 380, 96, C.key); rect(x, y, 6, 96, labels[i][1]);
+    text(`SITE ${i + 1}`, x + 28, y + 40, { size: 26, color: C.dim, spacing: 0.16 });
+    text(labels[i][0], x + 28, y + 80, { size: 36, color: labels[i][1], spacing: 0.1 });
+    text(`${site.samples} SAMPLES`, x + 352, y + 40, { size: 22, color: C.faint, align: 'right', spacing: 0.12 });
+  }));
+  rise(t, second + 1.7, () => {
+    text("FROM THE AGENT'S LAST MESSAGE,", 1480, y + 40, { size: 22, color: C.faint, spacing: 0.12 });
+    text('SAVED WITH THE RUN', 1480, y + 72, { size: 22, color: C.faint, spacing: 0.12 });
+  });
+};
+
+// The reference: four things it does, and the battery over one day beside two Claude runs.
+SCENES.reference = (t, D, data, cues) => {
+  backdrop('THE REFERENCE');
+  heading(t, 'A PLANNER, NOT A MODEL', 'THE REFERENCE PLAYS THROUGH THE SAME FIVE TOOLS · NO HIDDEN INFORMATION');
+  const items = [
+    ['KNOWS WHERE IT WILL BE', 'A position filter. Every command is aimed at where the rover will be when the command lands, not where the last fix shows it.'],
+    ['LEARNS THE GROUND', 'Slip on each terrain from its own odometry; panel efficiency from its first charge.'],
+    ['PRICES EVERY LEG AGAINST THE SUN', 'It simulates the battery along the whole route, and waits rather than dip under its reserve.'],
+    ['HOME BEFORE THE DAY ENDS', 'No rover lost or stranded on 300 fresh worlds.'],
+  ];
+  items.forEach(([title, body], i) => rise(t, cues[i] !== undefined ? cues[i] : 0.9 + i * 1.6, () => {
+    const y = 312 + i * 176;
+    text(String(i + 1).padStart(2, '0'), 122, y + 6, { size: 58, color: C.gold, spacing: 0.04 });
+    text(title, 212, y, { size: 42, spacing: 0.09 });
+    paragraph(body, 212, y + 44, 600, 34, { size: 25, font: SANS, weight: 400, color: C.dim, spacing: 0 });
+  }));
+  // battery chart
+  const B = data.battery, x0 = 960, x1 = 1800, y0 = 880, y1 = 330, T = B.ticks;
+  const X = tick => lerp(x0, x1, tick / T), Y = v => lerp(y0, y1, v / B.capacity);
+  const p = clamp((t - 1.2) / Math.max(3, D - 3.2), 0, 1), upto = Math.round(p * T);
+  rise(t, 0.6, () => {
+    text(`BATTERY OVER THE DAY · SITE ${B.site}`, x0, 286, { size: 30, color: C.dim, spacing: 0.14 });
+    rect(x0, y0, x1 - x0, 2, C.faint);
+    for (const v of [0, 50, 100]) { text(`${v}%`, x0 - 16, Y(v) + 9, { size: 24, color: C.faint, align: 'right', spacing: 0.05 }); rect(x0, Y(v), x1 - x0, 1, 'rgba(243,234,217,.10)'); }
+    for (const tick of [0, 105, 210, 315, 420]) text(String(tick), X(tick), y0 + 38, { size: 24, color: C.faint, align: 'center', spacing: 0.05 });
+    text('TICK', x0 - 22, y0 + 38, { size: 22, color: C.faint, align: 'right', spacing: 0.12 });
+    // the sun's share of its peak, behind everything
+    g.save(); g.beginPath(); g.moveTo(x0, y0);
+    for (let tick = 0; tick <= T; tick += 3) g.lineTo(X(tick), lerp(y0, y1 + 40, B.sun[tick]));
+    g.lineTo(x1, y0); g.closePath(); g.fillStyle = 'rgba(255,178,36,.10)'; g.fill(); g.restore();
+    text('SUN', X(210), lerp(y0, y1 + 40, 1) + 34, { size: 22, color: 'rgba(255,178,36,.55)', align: 'center', spacing: 0.16 });
+  });
+  const lines = [['campaign-agent-opus-2', C.ice, 3, 0.55], ['campaign-agent-opus-4', C.ice, 4, 1], ['campaign-reference', C.gold, 5, 1]];
+  const cross = (px, py, k) => { g.save(); g.globalAlpha *= k; g.strokeStyle = C.red; g.lineWidth = 6; g.lineCap = 'round'; g.beginPath();
+    g.moveTo(px - 13, py - 13); g.lineTo(px + 13, py + 13); g.moveTo(px + 13, py - 13); g.lineTo(px - 13, py + 13); g.stroke(); g.restore(); };
+  for (const [id, color, width, alpha] of lines) {
+    const s = B.series[id], end = Math.min(upto, s.dead === null ? T : s.dead);
+    if (end < 1) continue;
+    g.save(); g.globalAlpha = alpha * appear(t, 1.1); g.strokeStyle = color; g.lineWidth = width; g.lineJoin = 'round'; g.beginPath();
+    for (let tick = 0; tick <= end; tick++) { const px = X(tick), py = Y(s.battery[tick]); if (tick) g.lineTo(px, py); else g.moveTo(px, py); }
+    g.stroke(); g.restore();
+    if (s.dead !== null && upto >= s.dead) cross(X(s.dead), Y(0), appear(t, 1.2 + (s.dead / T) * Math.max(3, D - 3.2), 0.3));   // where a battery ran flat
+    else if (s.dead === null) { g.save(); g.fillStyle = color; g.beginPath(); g.arc(X(end), Y(s.battery[end]), 8, 0, Math.PI * 2); g.fill(); g.restore(); }
+  }
+  // which line is which, under the chart
+  const dead = lines.map(([id]) => B.series[id].dead).filter(tick => tick !== null).sort((a, b) => a - b), home = B.series['campaign-reference'];
+  rise(t, 1.0, () => {
+    const y = y0 + 96;
+    rect(x0, y - 11, 46, 5, C.gold);
+    text(`THE REFERENCE · HOME WITH ${Math.round(home.battery[T] / B.capacity * 100)}% LEFT`, x0 + 62, y, { size: 24, color: C.dim, spacing: 0.12 });
+    rect(x0, y + 27, 46, 4, C.ice);
+    const w = text('TWO CLAUDE OPUS RUNS', x0 + 62, y + 38, { size: 24, color: C.dim, spacing: 0.12 });
+    cross(x0 + 62 + w + 40, y + 29, 0.9);
+    text(`BATTERY FLAT AT TICK ${dead.join(' AND ')}`, x0 + 62 + w + 66, y + 38, { size: 24, color: C.red, spacing: 0.12 });
+  });
+};
+
+// The campaign's scores: the reference, seven Claude agent runs, two baselines.
+SCENES.results = (t, D, data, cues) => {
+  backdrop('RESULTS');
+  const idle = cues && cues[0] !== undefined ? appear(t, cues[0], 0.35) : 0;       // the moment "doing nothing scores zero" is said
+  heading(t, 'THREE SITES · ONE SCORE', 'THROUGH HARBOR + OPENCODE · THREE MISSIONS IN A ROW · NO RESET, NO PRACTICE RUN');
+  const c = data.campaign, x0 = 560, scale = 1850, top = 300, rowH = 66;
+  const rows = [{ label: 'REFERENCE', sub: 'PLANNER', score: c.reference.score, color: C.gold, sites: c.reference.sites, at: 0.7 }];
+  c.claude.forEach((run, i) => rows.push({ label: run.label.split(' · ')[0].toUpperCase(), sub: run.label.split(' · ')[1].toUpperCase(), score: run.score,
+    color: C.ice, sites: run.sites, at: 1.7 + i * 0.32, silent: run.sites.every(s => s.samples === 0) }));
+  const nothing = c.baselines.find(r => r.id.includes('nothing')), early = c.baselines.find(r => r.id.includes('stop'));
+  rows.push({ label: 'STOP AFTER SITE 1', sub: '', score: early.score, color: C.shade, at: 4.6, gap: 22 });
+  rows.push({ label: 'DO NOTHING', sub: '', score: nothing.score, color: C.shade, at: 4.9, gap: 22, lit: idle });
+  text('SITE', 1660, top - 26, { size: 22, color: C.faint, spacing: 0.16, alpha: appear(t, 1.2) });
+  ['1', '2', '3'].forEach((n, i) => text(n, 1742 + i * 52, top - 26, { size: 22, color: C.faint, align: 'center', alpha: appear(t, 1.2) }));
+  rows.forEach((row, i) => {
+    const y = top + i * rowH + (row.gap || 0), k = appear(t, row.at, 0.3), grow = out((t - row.at - 0.1) / 0.9);
+    if (k <= 0.003) return;
+    g.save(); g.globalAlpha = k;
+    if (row.lit) { rect(98, y + 8, 8, 40, C.ink, row.lit); text(row.label, 122, y + 40, { size: 38, color: C.ink, spacing: 0.09, alpha: row.lit }); }
+    text(row.label, 122, y + 40, { size: 38, color: row.color === C.shade ? C.dim : row.color, spacing: 0.09, alpha: 1 - (row.lit || 0) });
+    if (row.sub) text(row.sub, 122 + measure(row.label, { size: 38, spacing: 0.09 }) + 18, y + 40, { size: 24, color: C.faint, spacing: 0.12 });
+    rect(x0, y + 10, 1040, 36, 'rgba(243,234,217,.05)');
+    rect(x0, y + 10, Math.max(3, row.score * scale * grow), 36, row.lit ? C.ink : row.color);
+    text(three(row.score * grow), x0 + Math.max(3, row.score * scale * grow) + 18, y + 41, { size: 40, color: row.color === C.shade && !row.lit ? C.dim : C.ink, spacing: 0.05 });
+    if (row.sites) row.sites.forEach((site, n) => {                  // how each site ended
+      const cx = 1742 + n * 52, cy = y + 28, show = appear(t, row.at + 0.7 + n * 0.12, 0.25);
+      g.save(); g.globalAlpha *= show;
+      if (row.silent) { rect(cx - 9, cy - 2, 18, 4, C.faint); }
+      else if (site.end === 'lost') { g.strokeStyle = C.red; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); g.moveTo(cx - 10, cy - 10); g.lineTo(cx + 10, cy + 10); g.moveTo(cx + 10, cy - 10); g.lineTo(cx - 10, cy + 10); g.stroke(); }
+      else { g.fillStyle = row.color; g.strokeStyle = row.color; g.lineWidth = 4; g.beginPath(); g.arc(cx, cy, 11, 0, Math.PI * 2); if (site.end === 'home') g.fill(); else g.stroke(); }
+      g.restore();
+    });
+    g.restore();
+  });
+  // the reference's score carried down past every Claude run
+  const refX = x0 + c.reference.score * scale, mark = appear(t, 3.9, 0.6);
+  g.save(); g.globalAlpha = mark * 0.8; g.strokeStyle = C.gold; g.lineWidth = 2; g.setLineDash([8, 8]); g.beginPath();
+  g.moveTo(refX, top + rowH); g.lineTo(refX, top + rowH + (rowH * 7 - 14) * out((t - 3.9) / 0.8)); g.stroke(); g.restore();
+  // the gap to the closest Claude run, drawn on that run's row, and the claim at the foot of the line
+  const best = c.claude.reduce((a, b) => (b.score > a.score ? b : a)), gy = top + (1 + c.claude.indexOf(best)) * rowH;
+  const from = x0 + best.score * scale + 18 + measure(three(best.score), { size: 40, spacing: 0.05 }) + 22, to = refX - 10;
+  rise(t, 4.5, k => {
+    g.save(); g.strokeStyle = C.gold; g.lineWidth = 3; g.beginPath();
+    g.moveTo(from, gy + 38); g.lineTo(to, gy + 38); g.moveTo(from, gy + 29); g.lineTo(from, gy + 47); g.moveTo(to, gy + 29); g.lineTo(to, gy + 47); g.stroke(); g.restore();
+    text(`${two(c.reference.score - best.score)} BELOW`, (from + to) / 2, gy + 30, { size: 25, color: C.gold, align: 'center', spacing: 0.1 });
+  }, 0);
+  rise(t, 4.9, () => text('EVERY CLAUDE RUN IS BELOW 0.30', refX - 24, top + rowH * 7 + 40, { size: 30, color: C.gold, align: 'right', spacing: 0.12 }));
+  rise(t, 5.4, () => {
+    const y = 1012; let x = 122;
+    g.save(); g.fillStyle = C.ice; g.beginPath(); g.arc(x + 11, y - 9, 11, 0, Math.PI * 2); g.fill(); g.restore(); x += 36;
+    x += text('HOME', x, y, { size: 24, color: C.dim, spacing: 0.13 }) + 44;
+    g.save(); g.strokeStyle = C.red; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); g.moveTo(x, y - 19); g.lineTo(x + 20, y + 1); g.moveTo(x + 20, y - 19); g.lineTo(x, y + 1); g.stroke(); g.restore(); x += 36;
+    x += text('BATTERY FLAT: THAT SITE SCORES 0', x, y, { size: 24, color: C.dim, spacing: 0.13 }) + 44;
+    g.save(); g.strokeStyle = C.ice; g.lineWidth = 4; g.beginPath(); g.arc(x + 11, y - 9, 11, 0, Math.PI * 2); g.stroke(); g.restore(); x += 36;
+    x += text('STRANDED: HALF', x, y, { size: 24, color: C.dim, spacing: 0.13 }) + 44;
+    rect(x, y - 11, 18, 4, C.faint); x += 32;
+    text('NO COMMAND SENT', x, y, { size: 24, color: C.dim, spacing: 0.13 });
+  });
+};
+
+// 300 fresh worlds on Modal: every world of every saved Claude program against the reference.
+SCENES.farm = (t, D, data) => {
+  backdrop('AT SCALE · MODAL');
+  heading(t, 'WAS IT LUCK? 300 FRESH WORLDS', 'SIX PROGRAMS CLAUDE WROTE, REPLAYED AGAINST THE REFERENCE ON MODAL · UP TO 100 CONTAINERS AT ONCE');
+  const f = data.farm, order = ['OPUS · AGENT 3', 'SONNET · AGENT 1', 'OPUS · AGENT 1', 'OPUS · ONE REQUEST', 'SONNET · ONE REQUEST', 'HAIKU · ONE REQUEST'];
+  const programs = order.map(label => f.programs.find(p => p.label === label));
+  const x0 = 452, cellW = 3.7, top = 300, rowH = 74, n = f.worlds, sweep = Math.min(5.2, D * 0.45), wonX = 1590, lostX = 1772;
+  rise(t, 0.9, () => {
+    text('REFERENCE HIGHER', wonX, top - 20, { size: 20, color: C.faint, spacing: 0.12 });
+    text('ROVERS LOST', lostX, top - 20, { size: 20, color: C.faint, spacing: 0.12 });
+  });
+  programs.forEach((program, r) => {
+    const y = top + r * rowH, k = appear(t, 0.7 + r * 0.08, 0.3);
+    if (k <= 0.003) return;
+    g.save(); g.globalAlpha = k;
+    text(program.label, 122, y + 37, { size: 31, spacing: 0.1 });
+    const done = clamp((t - 1.0 - r * 0.12) / sweep, 0, 1), upto = Math.round(done * n);
+    rect(x0, y, n * cellW, 50, 'rgba(243,234,217,.045)');
+    for (let i = 0; i < upto; i++) {
+      const cell = program.cells[i];
+      g.fillStyle = cell === 'x' ? C.red : cell === 'c' ? C.ice : cell === '=' ? C.shade : C.gold;
+      g.globalAlpha = k * (cell === 'r' ? 0.82 : 1);
+      g.fillRect(x0 + i * cellW, y, cellW - 0.8, 50);
+    }
+    g.globalAlpha = k * appear(t, 1.0 + r * 0.12 + sweep, 0.4);        // the row's counts, once its worlds are all in
+    const ahead = text(`${program.reference_higher}`, wonX, y + 40, { size: 42, color: C.gold, spacing: 0.04 });
+    text(`/ ${n}`, wonX + ahead + 10, y + 40, { size: 24, color: C.faint, spacing: 0.08 });
+    text(program.lost ? `${program.lost}` : '0', lostX, y + 40, { size: 42, color: program.lost ? C.red : C.faint, spacing: 0.04 });
+    g.restore();
+  });
+  rise(t, 1.2, () => {
+    let x = x0; const y = top + 6 * rowH + 14;
+    for (const [color, label] of [[C.gold, 'THE REFERENCE SCORED HIGHER'], [C.red, "CLAUDE'S ROVER RAN ITS BATTERY FLAT"], [C.ice, "CLAUDE'S PROGRAM SCORED HIGHER"]]) {
+      rect(x, y - 18, 20, 20, color); x += 32; x += text(label, x, y, { size: 23, color: C.dim, spacing: 0.12 }) + 44;
+    }
+  });
+  const [open, lost] = f.lost_with_way_home_open, at = 1.4 + sweep;
+  const stats = [[`${f.reference_lost} / ${f.worlds}`, 'REFERENCE ROVERS LOST', C.gold], [`${Math.round(open / lost * 100)}%`, "OF CLAUDE'S LOST ROVERS STILL HAD A WAY HOME", C.red],
+    [f.missions_by_2115.toLocaleString('en-US'), `MISSIONS ON MODAL · ${f.core_hours_by_2115} CORE-HOURS`, C.ink]];
+  stats.forEach(([big, label, color], i) => rise(t, at + i * 0.35, () => {
+    const x = 122 + i * 600;
+    text(big, x, 934, { size: 104, color, spacing: 0.03 });
+    paragraph(label, x, 978, 520, 30, { size: 25, color: C.dim, spacing: 0.12 });
+  }));
+};
+
+// A small policy trained from scratch on Modal: it learns, and stays below the reference.
+SCENES.learning = (t, D, data) => {
+  backdrop('AT SCALE · MODAL');
+  heading(t, 'AND A POLICY THAT LEARNS', `TRAINED FROM SCRATCH WITH PPO ON MODAL · 3 SEEDS · ${data.learning.validation_worlds} DEVELOPMENT WORLDS, NOT HELD OUT`);
+  const L = data.learning, x0 = 250, x1 = 1380, y0 = 900, y1 = 300, top = 0.6, max = L.missions[L.missions.length - 1];
+  const X = m => lerp(x0, x1, m / max), Y = v => lerp(y0, y1, v / top);
+  rise(t, 0.5, () => {
+    rect(x0, y0, x1 - x0, 2, C.faint);
+    for (const v of [0, 0.2, 0.4, 0.6]) { text(two(v), x0 - 18, Y(v) + 9, { size: 25, color: C.faint, align: 'right', spacing: 0.05 }); rect(x0, Y(v), x1 - x0, 1, 'rgba(243,234,217,.09)'); }
+    for (const m of L.missions) text(m.toLocaleString('en-US'), X(m), y0 + 40, { size: 25, color: C.faint, align: 'center', spacing: 0.05 });
+    text('TRAINING MISSIONS', (x0 + x1) / 2, y0 + 84, { size: 23, color: C.faint, align: 'center', spacing: 0.16 });
+    text('SCORE', x0 - 18, y1 - 26, { size: 23, color: C.faint, align: 'right', spacing: 0.16 });
+  });
+  const level = (value, color, label, at, dash) => {
+    const k = appear(t, at, 0.5); if (k <= 0.003) return;
+    g.save(); g.globalAlpha = k; g.strokeStyle = color; g.lineWidth = 3; g.setLineDash(dash); g.beginPath(); g.moveTo(x0, Y(value)); g.lineTo(lerp(x0, x1, out((t - at) / 0.8)), Y(value)); g.stroke(); g.restore();
+    text(label, x1 + 26, Y(value) + 10, { size: 30, color, alpha: k, spacing: 0.1 });
+  };
+  level(L.reference, C.gold, `REFERENCE ${three(L.reference)}`, 0.9, []);
+  level(L.greedy, C.dim, `GREEDY CONTROLLER ${three(L.greedy)}`, 1.2, [10, 8]);
+  const p = clamp((t - 1.5) / Math.max(2.5, D - 4), 0, 1), reach = p * max;
+  const path = (scores, color, width, alpha) => {
+    g.save(); g.globalAlpha = alpha; g.strokeStyle = color; g.lineWidth = width; g.lineJoin = 'round'; g.lineCap = 'round'; g.beginPath(); g.moveTo(X(0), Y(scores[0]));
+    for (let i = 1; i < L.missions.length; i++) {
+      const a = L.missions[i - 1], b = L.missions[i];
+      if (reach <= a) break;
+      const f = clamp((reach - a) / (b - a), 0, 1); g.lineTo(X(lerp(a, b, f)), Y(lerp(scores[i - 1], scores[i], f)));
+    }
+    g.stroke(); g.restore();
+  };
+  if (t > 1.5) { for (const run of L.ppo) path(run.scores, C.lime, 2, 0.35); path(L.ppo_mean, C.lime, 6, 1); }
+  // the mean's first and last score: the first beside the axis, clear of the lines that start there
+  rise(t, 1.5, () => { g.fillStyle = C.lime; g.beginPath(); g.arc(X(0), Y(L.ppo_mean[0]), 9, 0, Math.PI * 2); g.fill(); text(three(L.ppo_mean[0]), X(0) - 20, Y(L.ppo_mean[0]) + 13, { size: 38, color: C.lime, align: 'right', spacing: 0.05 }); });
+  if (p >= 1) rise(t, 1.5 + Math.max(2.5, D - 4), () => { g.fillStyle = C.lime; g.beginPath(); g.arc(X(max), Y(L.ppo_mean[2]), 10, 0, Math.PI * 2); g.fill(); text(three(L.ppo_mean[2]), X(max) - 18, Y(L.ppo_mean[2]) + 62, { size: 52, color: C.lime, align: 'right', spacing: 0.05 }); });
+  rise(t, 2.2, () => {
+    const used = paragraph('It chooses which target to go for next. After 2,048 missions it is just short of a greedy controller and well short of the reference.',
+      x1 + 26, Y(0.2) - 56, 450, 36, { size: 26, font: SANS, weight: 400, color: C.dim, spacing: 0 });
+    paragraph('A development result: the held-out worlds stay closed until the weights are frozen.',
+      x1 + 26, Y(0.2) - 56 + used + 18, 450, 36, { size: 26, font: SANS, weight: 400, color: C.faint, spacing: 0 });
+  });
+};
+
+// The last card: the name, the command that reruns it, the question.
+SCENES.end = (t, D, data, cues) => {
+  g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
+  const glow = g.createRadialGradient(W / 2, H * 0.46, 60, W / 2, H * 0.46, 1100);
+  glow.addColorStop(0, 'rgba(140,58,30,.36)'); glow.addColorStop(1, 'rgba(11,8,7,0)'); g.fillStyle = glow; g.fillRect(0, 0, W, H);
+  rise(t, 0.1, () => { text('LIGHTLAG', W / 2, 232, { size: 176, align: 'center', spacing: 0.2 }); text('TRAVERSE', W / 2, 376, { size: 176, color: C.red, align: 'center', spacing: 0.2 }); }, 30, 0.7);
+  // the command that reruns the reference, typed out, and what it prints
+  const command = '$ harbor run -p harbor/lightlag-traverse-campaign -a oracle', typed = Math.round(clamp((t - 0.7) / 1.3, 0, 1) * command.length);
+  const x = 270, wide = 1380;
+  rise(t, 0.6, () => {
+    rect(x, 446, wide, 144, '#120c0a'); rect(x, 446, wide, 2, C.line); rect(x, 588, wide, 2, C.line);
+    text(command.slice(0, typed) + (typed < command.length ? '▌' : ''), x + 40, 506, { size: 34, font: MONO, weight: 500, color: C.ink, spacing: 0 });
+    text('reward 0.476 · about two minutes · the same score on a laptop, on Modal and through Harbor', x + 40, 558,
+      { size: 24, font: MONO, weight: 400, color: C.lime, spacing: 0, alpha: appear(t, 2.1) });
+  });
+  // the live demo, when the voice gets to it
+  const live = cues && cues[0] !== undefined ? cues[0] : 2.6;
+  rise(t, live, () => {
+    rect(x, 618, wide, 96, '#120c0a'); rect(x, 618, 8, 96, C.gold);
+    text('LIVE ON MODAL', x + 40, 660, { size: 30, color: C.gold, spacing: 0.16 });
+    text('PICK ANY WORLD · FOUR CONTROLLERS DRIVE IT', x + 40 + measure('LIVE ON MODAL', { size: 30, spacing: 0.16 }) + 26, 659, { size: 24, color: C.dim, spacing: 0.13 });
+    text(data.live_url || '', x + 40, 698, { size: 25, font: MONO, weight: 400, color: C.ink, spacing: 0 });
+  });
+  const ask = cues && cues[1] !== undefined ? cues[1] : live + 1.6;
+  rise(t, ask, () => text('CAN YOUR AGENT MAKE IT HOME?', W / 2, 852, { size: 82, color: C.gold, align: 'center', spacing: 0.16 }), 26, 0.6);
+  rise(t, ask + 0.5, () => text('JUNCTION 2026 · AFTERQUERY · BREAK THE AGENT', W / 2, 946, { size: 27, color: C.dim, align: 'center', spacing: 0.2 }));
+};
+
+// ---------------------------------------------------------------- the loop
+const query = new URLSearchParams(location.search);
+const film = window.__scene = { name: query.get('scene') || 'results', duration: parseFloat(query.get('d')) || 12, cues: [], fade: 0, start: null };
+function frame(now) {
+  if (film.start === null) film.start = now;
+  const t = (now - film.start) / 1000;
+  g.save(); g.clearRect(0, 0, W, H);
+  (SCENES[film.name] || SCENES.results)(t, film.duration, window.FILM_DATA, film.cues);
+  g.restore();
+  if (film.fade > 0.003) { g.save(); g.globalAlpha = film.fade; g.fillStyle = '#000'; g.fillRect(0, 0, W, H); g.restore(); }
+  requestAnimationFrame(frame);
+}
+document.fonts.ready.then(() => requestAnimationFrame(frame));
+</script>
+</body>
+</html>

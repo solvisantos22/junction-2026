@@ -12,7 +12,7 @@ The detailed sponsor briefs were last read directly on the logged-in platform on
 |---|---|---|---|
 | **AfterQuery — Break the Agent** | Primary provisional challenge. Kristján delivered original-task model evidence (Opus 1.0); Codex integrated the dynamic task and ran fresh Opus trials on `rush` and `rush_noisy`, both 1.0. All match their reference: no model gap demonstrated on these examples. [Requirements and gaps](afterquery-readiness.md). | Harbor task/version, real model logs/configuration, 0–1 verifier score plus raw diagnostics, fair reference/baseline comparisons, exploit probes and demo. | Lightlag draft recorded; final submission not verified. |
 | **[Best Use of Codex](https://hackjunction.app/participate/45/tech-challenges/49)** | Recommended additional entry; substantial development/review work is evidenced below. Last-read brief asks for meaningful use to build, iterate and ship. | Concrete task/prompt summary → Codex change → review/test → commit/result. Keep a few safe genuine session captures and one concise development story. | Selection/submission and any evidence/form specifics still need a live check. No mandatory screenshot format is established by this log. |
-| **[Modal](https://hackjunction.app/participate/45/tech-challenges/40) OR [Verda](https://hackjunction.app/participate/45/tech-challenges/56)** | Conditional infrastructure candidate. Sölvi's Modal grant is confirmed in the [credit notes](../SPONSOR_OPTIONS.md), but no Modal deployment/job evidence is recorded. The new experiment ran in local Docker. | Actual deployment/job ID and configuration, what ran, logs/metrics, live demo or results, and why the service mattered. Verda's last-read brief also asks for a process summary link in its Discord channel; capture that requirement, but do not post automatically. | Not verified entered; choose based on real infrastructure needs. |
+| **[Modal](https://hackjunction.app/participate/45/tech-challenges/40) OR [Verda](https://hackjunction.app/participate/45/tech-challenges/56)** | Conditional infrastructure candidate. Sölvi's Modal grant is confirmed in the [credit notes](../SPONSOR_OPTIONS.md). **Modal jobs are now recorded:** Kristján's Traverse rollout farm (about 6,000 missions, about 105 core-hours; app IDs in its entry below) and Sölvi's RL training (R19 and the learning campaign). Batch jobs only so far: no live deployed endpoint, which is 15% of the Modal score. | Actual deployment/job ID and configuration, what ran, logs/metrics, live demo or results, and why the service mattered. Verda's last-read brief also asks for a process summary link in its Discord channel; capture that requirement, but do not post automatically. | Not verified entered; choose based on real infrastructure needs. |
 | **[Gemini](https://hackjunction.app/participate/45/tech-challenges/48)** | Conditional if it meaningfully operates/evaluates the environment and fits AfterQuery's permitted-model requirements. User confirms the team credit application is submitted; no Gemini run or approved balance is verified. | Exact model/API configuration, role in the system, actual usage/run artifacts, outcome and a visible explanation of its value. Verify that benchmark use satisfies the current prize brief. | Not verified entered; usable API funding remains unknown. |
 | **[Gemma](https://hackjunction.app/participate/45/tech-challenges/47) / [Nemotron](https://hackjunction.app/participate/45/tech-challenges/46)** | Parked unless open-model evaluation or training becomes part of the actual project. Training is not a prerequisite for the new AfterQuery minimum. | Exact qualifying model/version/endpoint, real integration and measured results. The previously noted Nemotron model-name mismatch must be resolved before claiming eligibility. | Not verified entered. |
 | **Other sponsors** | Keep the full [sponsor inventory](../SPONSOR_OPTIONS.md) available; no extra database, audio, web-data or hardware feature is proposed just for a checkbox. | Add a row only when the service has a useful implemented role; record any separate submission requirement. | No entry inferred from tool availability or redeemed credits. |
@@ -308,10 +308,261 @@ These are recommended evidence choices, not newly asserted official entry requir
 - Evidence: [protocol](lightlag-synthesis-experiment.md),
   [published request and checkpoint](lightlag-runs/overnight-synthesis/README.md),
   [preparation manifest](lightlag-runs/overnight-synthesis/preparation-v1/preparation.json).
-  Evaluation review is now complete: all 42 checks pass, including interrupted
-  attempt retention, null-score bounds and non-fabricated reproducibility. The
-  actual single paid response remains pending at this increment. No policy
-  result, sponsor usage or prize entry is claimed yet.
+  Evaluation review is complete: all 42 checks pass, including interrupted
+  attempt retention, null-score bounds and non-fabricated reproducibility.
+- Actual provider outcome: the one Claude Opus 5.5 response used 5,989 input
+  and 24,000 thinking tokens, hit its cap and produced no code. Calculated
+  cost $0.503956; all 80 planned episodes remain unrun/null. No retry or repair.
+  Independent artifact review confirmed exact request, usage, stream and
+  hashes. This leaves transfer performance unknown; no model controller was
+  delivered and no Harbor success is claimed. No prize entry.
+
+### R10 — 14 November — Cross-check teammate Rocks evidence
+
+- Codex independently checked Kristján’s three saved Rocks model runs and KF
+  reference: exact protected rewards, model/session identity, task/source
+  hashes, costs, 147 public calls and 83 model-visible responses. Manh’s auditor
+  reconstructs all four full replays with no infrastructure findings.
+- Model rewards 0.846154, 0.519231 and 0.692308 versus reference 0.769231;
+  all four finish alive/home. Actual model execution belongs to Kristján’s
+  OpenCode/Claude work; this review made no provider calls. His saved model
+  usage totals $1.4873214, tracked separately from the overnight coordinator.
+- Evidence: [reports and explicit limits](lightlag-audits/overnight/team-rocks/README.md).
+  Initial installer failures and pre-outcome map selection remain teammate
+  reports because the missing launch records cannot be reconstructed from
+  these four trials. No prize entry or population-reliability claim.
+
+### R11 — 14 November — Selective-information mechanism prototype
+
+- Human direction: Sölvi chose learning before commitment, informed by actual
+  Claude failures, and requested evaluation before expansion.
+- Codex implemented an isolated delayed probe/route-choice environment and
+  public-only Bayesian reference policies, including a matched control that
+  ignores the acquired signal. Independent review checked information exposure,
+  atomic commitments, timing, realized grading and probability weighting.
+- Verification: 29 tests; 64 weighted outcome branches and 640 seeded episodes;
+  root reconstructed all 704 saved replays and checked nine source hashes.
+  Selective exact mean 0.5596875 versus never 0.53875 and always 0.51375.
+- [Code](../lightlag_information/) and [results/limits](lightlag-information-choice.md).
+  Four hand-designed development contexts; no Claude run, sponsor API use,
+  continuous-rover improvement, final task choice or prize entry is claimed.
+
+### R12 — 14 November — Protected Claude information-choice pilot
+
+- Human direction: Sölvi requested actual model testing of the approved
+  learning-before-commitment prototype before expanding it.
+- Codex implemented the isolated MCP simulator and Harbor package, froze four
+  context trials with seed commitments, ran controls and container isolation
+  checks, and audited public decisions, exact replays, grades and source hashes.
+- Claude contribution: four actual `anthropic/claude-opus-5-5` playthroughs using
+  OpenCode 1.19.5 / Harbor 0.25. It chose when to probe, used the uncertain case's
+  soft signal, and selected the optimal route and commitment timing in all four.
+  Scores 0.325/0.9/0.4/0 equal the protected references. The zero is stochastic
+  loss under the expected-reward objective, not a reasoning error.
+- Verification: 40 package + 3 packaging tests; separate simulator/verifier;
+  actual reference/no-op preflight; independent replay, task-hash, grade, usage
+  and commitment audit. Four planned sessions completed, no retry/replacement or
+  observed truncation. Total **reported API cost $0.2266114**, not a checked invoice.
+- Evidence: [protocol/package commit `a7f72ef`](https://github.com/solvisantos22/junction-2026/commit/a7f72ef),
+  [results and handoff](lightlag-information-pilot.md),
+  [ledger and artifacts](lightlag-runs/information-claude-pilot-v1/summary.json).
+- Limits: four hand-designed development cases, one session each; no model
+  difficulty gap or population reliability established. Competing information
+  sources are proposed next; no final task choice or prize submission made.
+
+### R13 — 14 November — Allocating one inspection between two unknowns
+
+- Human direction: Sölvi approved the next bounded experiment after the first
+  information-choice pilot exposed no reasoning gap.
+- Codex implemented the two-independent-route abstraction, one shared targeted
+  probe, exact public-information reference, fair controls and protected Harbor
+  package. Six mirrored cases and twelve model assignments were frozen before
+  model outcomes. Matched controls separate choosing a target from buying an
+  unnecessary inspection and from using its signal.
+- Verification: 38 package + 3 packaging tests; all 864 weighted branches and
+  1,080 seeded episodes retained, all 1,944 replays reconstructed. Independent
+  enumeration of 2,016 strategy/state outcomes agrees. Selective exact mean
+  0.6743 vs skipping 0.63, either fixed probe 0.63245, and matched entropy 0.6647667.
+- [Design, protocol and results](lightlag-allocation-experiment.md). Structural
+  results plus twelve actual Opus 5.5/OpenCode 1.19.5 sessions: all acquisition,
+  route and timing decisions optimal; every score matches its reference (mean
+  0.675). All 24 replay/grade/hash audits and 12 commitments pass; no retries,
+  invalid calls or observed truncations. **Reported API cost $0.6699462.**
+- Limits: 5/8 context/signal branches sampled; a current-leader target heuristic
+  remains compatible with the cases. Optimal observed actions do not prove an
+  internal reasoning algorithm or a difficult benchmark. No continuous rover
+  changes, measured model gap, final rules choice or prize submission.
+
+### R14 — 14 November — Compose scarce information with continuous rover control
+
+- Human direction: Sölvi approved the challenger-information check and requested
+  a substantially harder task using the same strong model. Final project/rules
+  selection remains with the team.
+- Codex closed the prior-leader coverage hole using two new explicit fixtures in
+  the unchanged allocation simulator: 672 branches and 54 nearby parameter
+  combinations pass. Exact reward .594375 for challenger inspection versus
+  .492375 for leader inspection and .51 for skipping; no model calls.
+- Codex implemented a separate continuous rover experiment: three shared regional
+  qualities, two imperfect delayed inspections, eight targets, discoveries,
+  deadlines and return-energy constraints. Physical samples also teach region
+  quality; hidden/public-quality modes preserve paired physics and grading.
+- Verification: 19 environment/generator tests including 100 map seeds, hidden
+  state isolation, atomic queues, quality scoring and all-rich equivalence to
+  the existing simulator; five independent challenger tests.
+- [Design and developing evidence](lightlag-expedition-experiment.md),
+  [package](../lightlag_expedition/). This first increment establishes mechanics,
+  not a model gap. The next increment adds a public-only Bayesian KF/MPC
+  reference and five controls, isolated MCP/Harbor packaging, full transcripts
+  and reported-usage launch guards. All 57 package and 21 packaging/runner
+  tests pass; independent review found and fixed nonfinite-input evidence loss.
+  Free development comparisons retain all 1,536 episodes: weighted reference
+  .453166 vs no inspection .412250, leader inspection .398719 and entropy .447593;
+  every episode alive/home. The disclosed-quality heuristic scores .425028, so
+  it is demonstrably not an upper bound. Actual isolated Harbor no-op and reference
+  pass; an instruction-cache provenance caveat is retained in the design page.
+  No canonical task or teammate physics changed.
+- Actual strong-model pilot: three Opus 5.5/OpenCode 1.19.5 sessions score
+  .55/.5575/.29 against .46/.46/.31 protected references. All alive/home, no
+  invalid calls or observed truncation. The fourth planned assignment is unrun
+  because **$1.5588192 reported usage** crossed the $1.50 new-launch guard.
+  Seven protected replay/grade audits, four no-inspection controls and all four
+  commitments verify. Initial live-spend monitoring limitation is retained.
+- [Frozen protocol and results](lightlag-runs/expedition-claude-pilot-v1/summary.json),
+  [interpretation and next decision](lightlag-expedition-handoff.md). The model
+  beats both controls twice and trails by .02 once; this is not a convincing
+  strong-model gap. Codex preserved the negative finding and proposes six regions
+  with two inspections after repairing comparator limits. No further paid pilot
+  or final project/rules selection is claimed.
+
+### R15 — 14 November — Six regions with two inspections
+
+- Human direction: Sölvi approved repairing the reference's inspection scheduling
+  and expanding to six science regions, retaining the strong-model requirement.
+- Codex implemented a separate fourteen-target survey generator and environment
+  with six independent regional qualities and the same two-inspection budget.
+  Physical sampling remains informative; existing rover physics and all frozen
+  experiments are unchanged. A development/check protocol precedes policy outcomes.
+- Verification: 22 environment/generator tests, including 100 geometry seeds,
+  six-region hidden-state isolation, delayed learning, atomic reservations,
+  constant-36 scoring and physical equivalence without inspections.
+- [Contract and developing evidence](lightlag-survey-experiment.md),
+  [predeclared gate](lightlag-survey-gate.md), [package](../lightlag_survey/).
+  The separate scheduling reference and 16 focused tests now pass independent
+  review; three repair-runner checks preserve errors and verify replay fidelity.
+  Sample/pose forecasting approximations are explicit and shared across controls.
+  The first 128 old-map repair episodes reconstruct exactly but expose a
+  regression: adaptive mean raw7.68594→7.225, deaths1→2; no-probe improves.
+  All negative evidence is retained while the comparator is diagnosed before
+  the six-region matrix. No model gap, new Claude API call, task promotion or
+  final project choice is claimed.
+- Follow-up: Codex review identified underestimated sand-boundary costs,
+  correlated-pose bounds and reuse of pending-drive reserves; the public-only
+  correction passes 25 focused tests (38 including runners). [Code `6192e8e`](https://github.com/solvisantos22/junction-2026/commit/6192e8e).
+  The complete 128-case rerun removes all new-reference deaths/failed returns,
+  but its raw mean 7.17031 remains below the old 7.68594; its no-probe control is
+  7.12344. Both versions, full transcripts and replays are retained. The sealed
+  six-region runner has 10 tests and independent review; no paid model claim.
+- Completed free study: 576 development episodes establish six competitive
+  regions and select fixed r5+r6; source/selection seal pushed in
+  [`6760d3c`](https://github.com/solvisantos22/junction-2026/commit/6760d3c)
+  before the 128 held-out episodes. The check fails every aggregate acquisition
+  margin: adaptive 9.96250 versus no-probe 9.79219, entropy 10.09687 and fixed 9.80156.
+  All 704 survey episodes return alive/home and reconstruct; all negative outcomes
+  retained. Human-approved harder-task direction remains provisional; Codex's
+  evidence does not justify a paid call under this protocol. No new API spending.
+  [Decision and handoff](lightlag-survey-handoff.md).
+
+### R16 — 14 November — Research before the next mechanism
+
+- Human direction: after the survey failed its information-value gate, Sölvi
+  asked for online prior art and alternative directions before committing to a
+  long campaign or repeated-mistake task.
+- Codex contribution: primary-source searches across memory, continual learning,
+  active experimentation, physical identification and workflow recovery; three
+  parallel domain reviews and an independently checked synthesis. Current strong
+  agent successes are retained alongside failures and scaffold limitations.
+- Decision support: the report proposes a short changed-dynamics versus faulty-
+  sensing diagnosis test, with unchanged controls, before expanding a campaign.
+  This is a recommendation; Sölvi/the team have not selected or implemented it.
+- Verification: source versions, model/harness distinctions, outcome denominators
+  and local document links checked. No external benchmark reproduction, new
+  environment implementation, API spending or prize submission.
+- Evidence: [research and handoff](research/2026-11-14-next-mechanism-review.md).
+
+### R17 — 14 November — Assess teammate prototypes before another build
+
+- **Human direction:** Sölvi asked to assess the ground-change and sample-chain
+  prototypes, then discuss the direction again before committing to more work.
+- **Codex contribution:** two parallel implementation/evidence reviews;
+  independent reproduction of all 72 retained sample-chain missions and 504
+  policy records, all 400 published ground-controller episodes, and one fixed
+  80-episode public-range diagnostic. Integrated the later teammate update:
+  reproduced 800 four-rule-variant episodes and all six saved pilot transcripts,
+  physical replays and grades. Retained the negative diagnostic and identified
+  the ground filter's initial-range assumption, a short-horizon contract edge and
+  the sample probe's Python runtime requirement.
+- **Human decisions:** assessment was requested; no subsequent mechanism,
+  environment expansion or paid model pilot has been selected by this work.
+- **Verification:** 10 sample-chain and 18 current shift tests pass in the stated
+  runtimes; saved plans, scores, search counts, source hashes and ground replay
+  hashes reproduce. Local documentation links and Git whitespace checks pass.
+  Original controller checks are scripted; the three newly landed Opus attempts
+  are teammate-run exploratory evidence. Their outcomes reproduce, but explicitly
+  stale task hashes and an incomplete source manifest prevent claiming complete
+  frozen-task provenance. The later variant's safe prepared reference does not
+  diagnose which rule changed.
+- **Artifact:** [assessment and handoff](research/2026-11-14-prototype-assessment.md),
+  [scripts and retained evidence](prototype-assessment/README.md). Current
+  sample-chain version should be shelved; ground change remains an unproven
+  hypothesis. No API spend, candidate source edit, project selection or prize
+  submission. Teammate implementations and attribution are preserved.
+
+### R18 — 14 November — Replay an existing Opus autopilot before another build
+
+- **Human direction:** Sölvi approved testing the previously strongest saved
+  Opus program against the four-rule mission, inspecting failures, and adapting
+  it only if warranted before a separate fresh check.
+- **Codex contribution:** predeclared policy selection and retirement criteria;
+  a separate Docker broker with public-only access, full-horizon grading and
+  explicit failure statuses; retained per-case evidence and an independent
+  transcript/replay/metrics audit. Existing policy and teammate code unchanged.
+- **Initial verification:** eight real-Docker integration checks pass, covering
+  interface equivalence, isolation, paused simulation time, policy failures,
+  invalid calls, limits and cleanup. The full free replay follows this verified
+  runner increment; no new model result is claimed by preparation.
+- **Artifacts:** [frozen protocol](rule-transfer.md),
+  [results and handoff](rule-transfer-results/README.md),
+  [isolated tools](../tools/rule_transfer/). No API spend or prize submission.
+- **Verified free result:** 400 total episodes and 47,414 public calls
+  independently reconstructed; 14 tests pass. Saved Opus beats Prepared on
+  ground, link and relay changes, but has 23/40 deaths with turning costs. Its
+  changed-case mean .628668 versus .644859 hides that failure. Three rejected
+  relay calls are retained. No live-model failure is inferred; inspect before
+  the authorized conditional adaptation. Existing model code was not changed.
+- **Failure analysis:** all 23 lost rovers end inside base, 19 deplete on idle ticks; public battery discrepancies precede 22 deaths. Reconstructed from retained artifacts with no new cases. Published the bounded adaptation protocol, original-code/full-rules prompt and fresh-seed reservation before spending or opening check maps. Evaluator-only parking counterfactuals are labelled and excluded from model feedback.
+
+- **Adaptation tooling verified before API:** 33 focused tests pass, including 12 fake-provider budget/failure tests and seven fresh-check integrity tests. A real NumPy-image replay matches the prior control exactly. Full prompt and fixed rules independently reviewed; no hidden fresh-instance input. No new spend during preparation.
+
+- **Paid continuation and attribution:** Claude Opus 5.5 received the full original code, published rules and Codex's failure analysis, with adaptive thinking/medium effort and a 16,000-token response cap. The first free token-count request rejected an unsupported schema; Codex fixed and retained that preflight before the corrected launch. The one generated response spent all 16,000 output tokens on thinking and supplied no program. Reported usage: 17,914 input/16,000 output, **$0.391656**. No retry, practice episode or fresh case followed. This is a resource-censored experiment, not a model-capability failure. [Retained usage and verification](rule-transfer-results/adaptation-v2/), [decision/handoff](rule-transfer-results/README.md).
+- **Final verification:** 34 focused tests; independent audit confirms all 70 current and declared-revision source pins, prompt/tool hashes, budget calculation, preserved initial preflight and absence of private thinking in public artifacts. Fresh seeds 52000–52039 remain unused. No task promotion, other-team credit attribution or prize submission. Codex's contribution includes identifying that its own generation cap prevented the planned repair evaluation; no improvement is claimed.
+
+### R19 — 14 November — Small-model RL on the existing Traverse mission
+
+- **Human direction:** Sölvi confirmed that the teammate had not started training, chose a small rover-control model and asked how it fits AfterQuery. Codex checked the saved brief: optional smaller-model training supports the submission; the frontier-agent comparison remains separate. Sölvi configured his Modal login.
+- **Codex contribution:** a public-observation neural target selector over the unchanged navigator, paired-map policy-gradient training with the official terminal reward, a fixed before/after protocol with separate check maps, a bounded CPU Modal launcher, source/checkpoint provenance and independent audits. The trained model is a 256-parameter NumPy policy, not a language model.
+- **Actual Modal use:** one four-core/8 GiB CPU job, [ap-e9VDJ99Y3AAjaY30NcNemX](https://modal.com/apps/solvisantos22/main/ap-e9VDJ99Y3AAjaY30NcNemX), using Sölvi's profile and the published resource/source freeze. Completed 512 missions and 16 updates in 466.74 trainer seconds (468.24 including wrapper); zero retries, no GPU or model API. Running CPU/memory estimate **$0.03285**, excluding build/startup/storage/egress; not a verified invoice. [Retained metadata](lightlag-rl-results/modal/pilot-01/modal-job.json).
+- **Verification:** all 30 focused tests pass, including numerical gradient, checkpoint/source-drift and isolated cloud-launch tests. [Training audit](lightlag-rl-results/modal/pilot-01/training/audit.json) reconstructs 21,078 choices and all 16 optimizer updates against 34 source pins. [Fresh audit](lightlag-rl-results/check/audit.json) reconstructs 240 complete physics replays and 8,559 choices from retained features. Training physics and feature extraction were not independently replayed; limitations remain explicit.
+- **Result:** initial mean .016744 → trained .024835; paired gain .008091, map-bootstrap 95% interval [.004038, .012592]. The declared screen **fails** the .03 gain and return-count thresholds (62/80 → 58/80); no deaths or invalid calls. Greedy scores .232840 but returns less often. Independent read-only review reproduces the comparison. [Saved-trace diagnosis](lightlag-rl-results/diagnosis.json) motivates testing persistent target choices; no follow-up training or environment edit was made. Check seeds 72000–72039 consumed.
+- **Artifacts and scope:** [protocol](lightlag-rl.md), [final decision and reproducible handoff](lightlag-rl-results/README.md), [learning code](../lightlag_rl/), [Modal launcher](../tools/lightlag_rl/modal_job.py). Only target selection learns; navigation and safeguards stay fixed. One training seed, no frontier-gap claim, final task choice, canonical environment change or prize submission. Preparation used eight real smoke episodes and twelve smoke comparison episodes on already-used maps 1/2; those weights were retained only for verification.
+
+### R20 — 14 November — Test persistent goals before more RL training
+
+- **Human direction:** Sölvi approved testing goal persistence, suggested Rainbow as a possible learner and reported $300 total shared team Modal credit. This task used local compute only; that credit figure is user-reported, not a verified balance or allocation.
+- **Codex contribution:** an isolated goal-commitment wrapper, fixed paired development protocol, comparison runner, independent replay/choice audit and saved-return diagnosis. Existing environment, navigator, weights and first training experiment remained unchanged. [Protocol](lightlag-rl-persistence.md), [wrapper](../lightlag_rl_persistence/chooser.py), [runner/auditor](../tools/rl_persistence/).
+- **Measured result:** all 240 declared missions completed on 24 previously visited training maps. Initial-policy score 1.85% → 7.76%; paired gain .059166, map-bootstrap 95% interval [.048852, .069154], positive on all 24 maps. The **declared screen fails** its extra return condition (33/48 → 29/48). No deaths or invalid calls. Official score already halves credit when away, so the reward improvement includes that penalty. This is a fixed-rule intervention, not new learning or an unseen-map result.
+- **Verification:** all 21 focused tests pass, including exact pass-through replay/RNG equivalence. [Twenty-case smoke audit](lightlag-rl-persistence-results/smoke/audit.json); [production audit](lightlag-rl-persistence-results/development/audit.json) reconstructs all physics/grades and 10,479 proposal/effective-choice records against 42 source pins. Independent review reproduces pairing, bootstrap, gates and artifact hashes. Candidate/feature extraction and choice-to-command linkage remain source-pinned, not independently regenerated.
+- **Diagnosis and decision:** [reproduced saved-trace analysis](lightlag-rl-persistence-results/diagnosis.json) finds all 94 away cases end below 10 battery; initial persistent misses are a median 36.30 m from home. Recharge delay is a follow-up hypothesis, not established causation. Preserve the failed screen and test public charging-time feasibility separately before scaling training. [Final handoff](lightlag-rl-persistence-results/README.md).
+- **Evidence and scope:** runnable source frozen at [e1661e7](https://github.com/solvisantos22/junction-2026/commit/e1661e7); audited production results published in [972bfd9](https://github.com/solvisantos22/junction-2026/commit/972bfd9). **Zero Modal/API spend in this task**, no new training, fresh check maps, Rainbow implementation, canonical change, final project choice or prize submission. A small capped multi-seed training comparison is only a recommendation for the next protocol.
 
 ## Keep recording with minimal overhead
 
@@ -361,6 +612,15 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
 - **Evidence:** [write-up](lightlag-traverse.md), [package](../lightlag_traverse/README.md), [campaign task](../harbor/lightlag-traverse-campaign/), [one-site task](../harbor/lightlag-traverse/), [runs](lightlag-runs/) (`campaign-*`, `traverse-*`, `dawn-agent-*`), [campaign demo](../viewer/traverse-campaign.html), [one-site demo](../viewer/traverse-demo.html).
 - **Scope:** new files and folders only, plus my own `TEAM_STATUS.md` row; no change to `lightlag/`, `lightlag_dynamic/`, `lightlag_mcp/`, `harbor/lightlag`, the Mars demo or any teammate's file. Defaults of `lightlag_traverse` were kept while teammates' studies read it. No prize submission.
 
+### 14 November — Kristján / Claude Code: the two-minute demo video, narrated
+
+- **Human direction:** Kristján asked for "a very good demo video with voice over" showing what the team did, why Claude struggles, what the reference is, and the Modal work. Sölvi's correction to the learning line (a development result, not held out) came through the farm session and was applied. The order of the script, the pictures and the voice are Claude Code's choices and are a proposal: no person has listened to it yet.
+- **Tool:** Claude Code; the session reported its model as Claude Fable 5.2. The voice is Kokoro-82M, an open-weights text-to-speech model, run locally in Docker with no network; the check uses Whisper `base.en` through faster-whisper, also offline. No model API was called and nothing was paid for.
+- **Claude Code contribution:** `tools/demo_video/`, a pipeline that speaks the script, records the real Traverse demo page and six drawn slides frame by frame on a clock it steps itself, places every picture by the time the voice says each word, mixes the sound and writes the subtitles; the page's controls exposed for it at the end of `viewer/traverse/app.js`; and `docs/demo-video/` with the video, subtitles, a poster and a README (the script, the source of every number, what was checked).
+- **Verification:** 118.4 s against the guide's two minutes. An offline speech recogniser that had not seen the script heard 304 of its 310 words as written; the other six are spellings, near-homophones and one stray word. −16.1 LUFS, true peak −1.5 dBFS. Frames from every shot and every cut were looked at. 152 viewer and Traverse tests pass with the page's addition. **Not verified:** how it sounds to a person, and nobody has watched it in motion from start to finish.
+- **Evidence:** [video](demo-video/lightlag-traverse-demo.mp4), [README](demo-video/README.md), [pipeline](../tools/demo_video/).
+- **Scope:** new files, one addition at the end of `viewer/traverse/app.js` with its two generated pages rebuilt, and my own `TEAM_STATUS.md` row. Nothing uploaded or submitted.
+
 ### 14 November — Kristján / Codex: make the 3D mission demo easier to present
 
 - **Human direction:** Kristján asked Codex to inspect the demo and improve its looks, controls and mission presentation. Claude Code authored the existing 3D scene; this increment builds on it.
@@ -369,3 +629,163 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
 - **Integrated follow-up:** [UI commit `8c5299c`](https://github.com/solvisantos22/junction-2026/commit/8c5299c). After the reserve correction and Claude Code’s Rocks mission landed, all 29 viewer tests and 38 browser checks passed across three missions and twelve saved outcomes. The standalone file was opened with networking disabled, with no HTTP requests or runtime errors.
 - **Scope:** presentation and interaction work only. No model/API spend, new experiment, inferred performance gain or new prize submission.
 - **Outcome:** superseded the same day. Kristján found the result too squashed and asked Claude Code to return to the four full-screen views; the briefing strip, transport strip, panel buttons, menu, guide and phone layouts were removed. Event jumping and single-screen zoom were kept as keyboard shortcuts.
+
+### 14 November — Manh / Claude Code: selectable Mars biomes, an early controller test and a biome edition of the 3D demo
+
+- **Human direction:** Manh asked Claude Code to turn the terrain-unit brainstorm into biomes one can choose, to keep today's environment as "Main Mars", to say which controller did best overall, and to add the choice to the 3D demo. Mid-task Manh asked that nothing be pushed before they had reviewed it, so that Kristján's demo would not be disturbed; the work therefore stayed on a local branch until Manh gave the go-ahead to push.
+- **Claude Code contribution:** `lightlag_dynamic/biomes/` (catalog, environment, JSON-lines runner, MCP entry, trial runner): Main Mars unchanged plus six published biomes, two of them new mechanics (Troy Crust, Bagnold Dunes); the calibration sweep and its keep rule; the early test and its write-up; `viewer/build_biomes.py` and `viewer/biomes/addon.js`, which add a biome row and biome drawing to the 3D demo without editing any of its files. Claude Code proposed building the demo part as a separate page and add-on after Manh's request not to disturb the main demo.
+- **What the early test found:** on 40 unused seeds controller 33 had the best mean share of controllers 1–34. After controllers 35 and 36 were registered the same afternoon they were played on the same seeds (55,440 scripted episodes in all): controller 36 is best overall, 75.2% against 73.0% for the frozen reference (+2.2 points, 95% interval +1.4 to +3.2) and 74.9% for 33 (+0.4, +0.1 to +0.7). [Results, settings and limits](lightlag-biomes.md).
+- **Human judgment that changed the write-up:** Manh read the results and said the biomes looked too easy. Claude Code checked: the default settings were kept only where controllers that ignore the biome still score 85% of their Main Mars score, so they cost such a player 2–7 points. A probe on unused seeds 2100–2139 found one hard setting that is fair today (Hidden Valley on `noisy` at slip limit 0.30: the rule-aware controller keeps 79%, `kf_mpc` falls to 33%). The write-up now says so; no setting was changed.
+- **Verification:** 24 biome tests (one through a real MCP client) and 11 demo tests; all 95 `lightlag_dynamic` tests and 40 viewer tests pass. Main Mars is identical to `DynamicEnvironment` (rules, map, telemetry, replay). A build of the biome page leaves the main demo's five files byte-identical (hash test). The page was walked through in headless Firefox: title screen, a Main Mars mission, every biome, the compare view and playback, with no script errors. Not checked in Chrome.
+- **Evidence:** [package](../lightlag_dynamic/biomes/), [biome tests](../tests/lightlag_dynamic/test_biomes.py), [trial report](lightlag-biomes/trial-report.md), [demo builder](../viewer/build_biomes.py), [add-on](../viewer/biomes/addon.js), [demo page](../viewer/biomes-demo.html).
+- **Manh's idea, prototyped:** Manh suggested hiding the rover's pose so that sensors have to be fused, and that a particle filter would suit many sensors. Claude Code first checked the idea with the existing dials (removing the fix alone does not force fusion; a wider heading bias does), then built a no-GPS option (beacon range and sun compass instead of the position fix) and a particle-filter reference on the Manh controllers' filter. On unused seeds 2200–2239 the reference scores 56% and 76% and always gets home; the best player without a filter 37% and 47%. Ten tests. Limits are in the write-up: no model has played it, and the compass does most of the work. Manh then said a GPS could stay if it were very noisy next to the other sensors; Claude Code added that as a setting (2 m fix, 12° compass), chosen on a development grid and confirmed on unused seeds 2300–2339: the fix and the compass are each worth 5–7 points to the reference, and the frozen reference, which leans on the fix alone, is 11–15 below it.
+- **Prepared for a model run, not run:** Manh approved preparing the weak-GPS option for a model run. Claude Code made the biome MCP entry serve tool texts that match the episode's sensors without editing `lightlag_mcp`, wrote a task generator after Sölvi's, and dry-ran the generated task without Docker: the simulator's own command, the oracle solution, the collect hook and the verifier give the direct-run reward, and the fusing reference scores the same through the HTTP server as directly. With today's fix the generated instruction is byte for byte the dynamic experiment's. Seeds 2400–2403 were fixed for the pilot before any episode was played on them. Eleven generator tests and five tool-text tests. Not built or run in Docker; no model run and no API spend, which remains a team decision. [Tool texts](../lightlag_dynamic/biomes/wording.py), [generator](../tools/biome_experiments/prepare.py), [dry-run tests](../tests/biome_experiments/test_prepare.py).
+- **Manh's next ideas, built and measured:** Manh pasted a list of robot sensors, asked which ones would add to the fusion, and said the rover should be able to overshoot its mark. Claude Code proposed three sensors and two ways to overshoot, each with a one-line reason; Manh chose the gyroscope and a hidden wheel-size error, then asked for the second beacon to be explained and turned it into any number of beacons. Claude Code built all three as settings that are off by default (pushed settings are fingerprint-tested unchanged), extended the particle-filter reference, chose one setting on development seeds and confirmed it once on unused seeds 2500–2539. What it found, reported as measured: the wheel-size error is the largest single effect on today's environment (controller 36 and the frozen reference lose about 20 points), several beacons count (5–9 points), and the gyroscope Manh chose adds nothing measurable to the reference. Manh's question whether beacons need a bigger map was answered from the map itself (40 × 40 m, work within 9 m of the base): no. [Write-up](lightlag-biomes.md), [settings](../lightlag_dynamic/biomes/nogps.py), [players](../lightlag_dynamic/biomes/nogps_players.py).
+- **The wheel scale prepared as a model-run task, not run:** Manh approved preparing the wheel-size error on today's environment for a model run. Claude Code made it an option of its own that changes nothing else in today's telemetry, gave it truthful tool texts and a generator switch, dry-ran the generated task without Docker, and fixed six seeds with their scripted scores. While doing so it re-checked one row it had pushed an hour earlier (a filter that had also read a beacon and a compass), found it the same within a point on today's telemetry alone, and corrected the row and its note. No model run and no API spend. [Rule](../lightlag_dynamic/biomes/wheels.py), [tests](../tests/lightlag_dynamic/test_wheels.py).
+- **Follow-up the same afternoon:** Manh asked for a slightly different colour palette per biome, so that the screen shows which biome is playing while still looking like Mars. Claude Code added it to the add-on only (ground, sand, rocks, light, haze and sun shifted a little per biome; Main Mars unchanged), with a test that keeps every shift small. Manh looked at a comparison sheet before it was pushed.
+- **The max env and a controller for it (Saturday evening):** Manh asked what the environment holds in total, approved letting lost packets and wild fixes work inside the biomes, then asked for the fusing particle filter to be combined with controller 37's tuned layers so that one controller handles every mechanic, and to push once it reached a decent level. Claude Code let the lab's two link faults pass the Mars layer (one line, tested identical to the lab's faults in Main Mars), wrote the max-env preset and built `max_navigator`. It has the particle filter with lost-packet bridging, a robust fix likelihood, crust-aware terrain matching and the wheel scale read off the battery, under 37's planning layers. Five changes came from tracing failed missions on development seeds 0–59 and 1100–1299: dune sand counted as a trap, trip chances from the true slip, no waiting to confirm a landing, an energy reserve of 5 after rovers died at base, and longer back-out drives. Ideas that lost on the same seeds are reported too: routing around crust, marking soft cells, chaining legs across relay passes. **Fresh check on unused seeds 2600–2639, keep rule declared beforehand:** 29.0% of the available value against 11.2% for the fusing reference (+17.8 points, 95% +11.8 to +23.7), 8.5% for controller 37 and 6.4% for `kf_mpc`; one rover in 40 died. Twelve tests; `fused` is fingerprint-identical after the filter hook. No model run, no API spend. [Write-up](lightlag-biomes.md#the-max-env-everything-on-at-once-and-a-controller-for-it), [controller](../lightlag_dynamic/biomes/max_players.py), [preset](../lightlag_dynamic/biomes/maxenv.py), [tests](../tests/lightlag_dynamic/test_max_env.py).
+- **Scope and limits:** a sandbox option, not a rules decision. Scripted controllers only; no model has played a biome; no API spend, Harbor change or new prize submission. Only the max-env controller reads any of the new published areas (crust regions and dune faces), and the default settings are mild by the keep rule.
+- **A MAX map option for Kristján's Lightlag Traverse (Saturday evening):** Manh asked Claude Code to pull Kristján's new Traverse, add the max env to it as a choice between the normal map and a MAX map, measure four players on both (his best controller, the frozen reference, the greedy controller and the straight-line driver), and push. Claude Code wrote `lightlag_traverse_max/` in new files only. The MAX map is a subclass of Kristján's environment: the same world for a seed, every rule published, and a test that it equals his environment with every setting off. `manh_max` is Kristján's pilot with the max-env controller's layers carried over, plus fixes found by tracing failed missions on development worlds 1–24: stale commands across relay passes, a wider trip check, edges judged by their steepest slope, rules for getting unstuck and earlier homecoming. A runner compares players on both maps. Claude Code checked that `kf_mpc` cannot drive the Traverse and said so rather than substituting it silently, and described the straight-line driver as deterministic, not random. Kristján pushed a beam search for his pilot during the work; Claude Code rebased onto it and re-ran rather than report the older numbers. It also moved the final check off worlds 101–124 after finding them inside the farm's search range. **Fresh worlds 500–523:** on the MAX map `manh_max` scores 0.313 against 0.072 for the reference pilot (+0.241, 95% +0.197 to +0.285, higher on 23 of 24). On the normal map both score 0.498 (the same commands). Weak spot reported: 7 of 24 MAX missions ended away from the lander. 13 new tests and Kristján's 59 pass. No model run, no API spend. [Write-up](lightlag-traverse-max.md), [code](../lightlag_traverse_max/), [tests](../tests/lightlag_traverse_max/test_max_map.py). Manh then asked for a way to watch them. Claude Code wrote [`viewer/build_traverse_max.py`](../viewer/build_traverse_max.py), which feeds Kristján's unchanged Traverse page with the four players, one page per map. It did not run his build script, which would have overwritten his data file and refuses MAX runs (lost packets leave gaps in their telemetry). Both pages were checked in headless Firefox; three tests. Manh then asked for the MAX map's hardest worlds as a frozen baseline for Opus, Sonnet and Haiku, offering his own API key. Claude Code ranked the worlds of 500–523 by `manh_max`'s MAX score and re-scored the candidates after Kristján's pilot changed; Manh picked three superhard worlds (505, 509, 515) and three fair ones near 0.5 (500, 510, 520). Claude Code froze the request, worlds and protocol before any paid call: Kristján's one-request text with the MAX rules, 3 replies per model. Docker was missing, so it ran the programs under bubblewrap instead and checked that this replays Kristján's Docker run byte for byte. A re-freeze is allowed only before any request is sent, and the first freeze is kept in the record. A free dry run played his three saved normal-map programs (superhard / fair: Opus 0.038 / 0.049, Sonnet 0.029 / 0.020, Haiku 0.014 / 0.003, against 0.157 / 0.488 for `manh_max`). 15 more tests. The paid step ($10 cap) waits for Manh's key. [Baseline](lightlag-runs/max-baseline/README.md). Manh then asked that teammates always evaluate on these worlds and that the page they open use them. Claude Code put the list in one module with a check that refuses training on any reserved world (500–523 on both maps, because a seed is the same ground on both, plus Kristján's 2026–2029 and 99991), added the rule to `AGENTS.md`, and built a six-world page on Kristján's unchanged Traverse app (`viewer/traverse-evaluation-max.html`, checked in headless Firefox). It left Kristján's normal-map demo and campaign pages as the submission demo instead of switching them to MAX worlds, and said so. 5 more tests. With Kristján's approval, relayed by Manh, Claude Code then wrote Harbor tasks for the MAX map: two three-mission campaigns on the fair and superhard worlds, generated by importing Kristján's task generator unchanged and putting the MAX map behind his server and campaign. Docker is missing here, so it tested the task by serving its own simulator folder over HTTP and reaching it with the agent's own client, then finishing and grading it; it states that the images were not built. Reference pilot campaign scores: 0.103 fair, 0.036 superhard. 6 more tests.
+
+
+### 14 November — Kristján / Codex: certified challenge research
+
+- **Human direction:** Kristján asked for recent research and a cooler challenge where agents struggle while a reference reliably succeeds, including whether to change or enlarge the environment.
+- **Codex contribution:** audited the latest live/autopilot, information-choice and survey results; read recent primary research on space planning, production scheduling, generalized planning and optimization agents; proposed a complete sample-to-downlink mission with a publicly specified exact reference. Explicitly retained counterevidence, older-model limits and task-specification confounds.
+- **Artifacts and finding:** [research and decision](research/2026-11-14-certified-challenges.md), [isolated exact-solver probe](../tools/certified_challenge_probe/README.md), [fresh results](../tools/certified_challenge_probe/results/check.json). Reference proves the optimum on all 48 fresh missions, but generic beam search reaches 99.35% / 97.29% at eight/twelve jobs. Both fail the declared difficulty gate; the simple scheduling candidate is rejected for promotion. This is useful negative evidence, not an LLM failure. Compatible-observation products remain a research hypothesis; no environment is selected for the team.
+- **Verification and scope:** ten focused tests, independent tiny brute-force comparisons, and a post-write audit of all source hashes, 72 generated missions, 504 policy records and summaries pass. Protocol and source were published before the check in [465d91e](https://github.com/solvisantos22/junction-2026/commit/465d91e). Paper claims checked against primary abstracts/tables and evaluation conditions. No API/model spend, simulator changes, demo changes or prize submission.
+
+
+### 14 November — Kristján / Codex: stereo-survey experiment
+
+- **Human direction:** Kristján approved testing the stereo-survey mission proposed in the certified-challenge research.
+- **Codex contribution:** a separate public-geometry mission, chronological replay, bounded exact reference, pair-aware greedy and beam controls, and a matched monocular comparison. The objective counts useful stereo coverage rather than photographs taken.
+- **Initial verification:** 12 focused tests, including known-angle geometry and all-subset comparisons on six tiny missions under both objectives. The [development study](stereo-survey-results/development.json) retains 24 missions: beam matches all 23 proved stereo optima, with one reference capped at two million joint plans; all 24 monocular references prove optimal. No LLM failure is inferred from weak coverage-only controls.
+- **Final result:** [fixed fresh check](stereo-survey-results/check.json), with protocol published first in [845cac7](https://github.com/solvisantos22/junction-2026/commit/845cac7). All 48 stereo and 48 matched monocular reference optima proved and replayed. On stereo, coverage-only greedy reaches 28.05% / 18.63%, greedy portfolio 92.10% / 93.67%, and the predeclared beam portfolio 100% / 100% (compact / expanded). Both difficulty gates fail, so this configuration is rejected for promotion or a paid pilot. No LLM failure is claimed.
+- **Final verification:** source-hash, regeneration, replay, product and summary audit covers 72 unique missions and 1,168 saved policy records, including derived portfolio copies and one repeated development case. The original capped proof remains intact; the unchanged algorithm later completes that development case after 2,348,648 joint evaluations. CLI generate/solve/verify round trip passes. A CLI-only pre-change source is archived by hash.
+- **Artifacts and scope:** [design, results and handoff](stereo-survey.md), [package](../stereo_survey/README.md). Scope complete. Existing rover, shift experiment, demo and canonical task untouched; no model/API spend or prize submission.
+
+### 14 November — Kristján / Codex: stereo program-synthesis follow-up
+
+- **Human direction:** Kristján asked to continue the stereo investigation and assess whether it remains a good lead. Codex distinguished the existing negative search-difficulty result from the unmeasured question of whether an agent can formulate and implement the solver.
+- **Delivered preparation:** [frozen protocol and interpretation](stereo-survey-followup.md), two public-rules prompts, a protected Docker evaluator, source/program hashes, fixed fresh seeds, strict failure retention and a bounded three-request launcher. The paper's observation-construction setting and older-model/feedback limitations are stated explicitly; no difficulty is inferred from a toy baseline or a one-shot failure.
+- **Verification:** six boundary tests and all 12 existing stereo tests pass. Six free container preflight cases accept empty plans, reject invalid plans and reproduce reference optima 44/57 on two used development missions. Timeout, output flooding, private imports and attempted public-file mutation are checked. No generated program executes on the host.
+- **Authorization and protocol update:** Kristján subsequently authorized Anthropic API use and asked for committed/pushed Markdown findings. Before any stereo request or fresh evaluation, [v2](stereo-survey-followup-results/pilot-02/protocol.json) raises the output allowance to 64,000 tokens and sets a $5 batch ceiling after a separate task exhausted 16,000 thinking tokens without code. Same prompts, three attempts and 48 fixed fresh missions; old unused preparation retained. Four protocol/extraction checks and all six free Docker preflight cases pass for v2. No paid call or new model result at this checkpoint; environment and demo unchanged.
+
+- **Final paid result:** user-authorized three Opus 5.5 generations cost $1.023160 in total; every response ended normally and all programs were frozen/pushed before fresh evaluation ([269217a](https://github.com/solvisantos22/junction-2026/commit/269217a)). Both plain programs and the hinted control reach **48/48 proved optima each**, with all 144 model-case records valid and no timeout, runtime error, retry or manual repair. [Audit](stereo-survey-followup-results/pilot-02/audit.json) reproduces hashes, missions, reference/submission replays, summaries and reported usage. The bounded version is retired as a difficulty candidate; [final Markdown findings](stereo-survey-followup.md) identify reusable objectives, exact targets and evaluation tools without claiming an untested transfer. Scope released; no canonical task, rover controller or demo change.
+
+
+### 14 November — Kristján / Codex: five-minute local main-push watcher
+
+- **Human direction:** Kristján requested an agent every five minutes to check this computer for committed work missing from main and push it.
+- **Codex contribution:** configured a dedicated Codex task and macOS LaunchAgent using an unchanged copy of the existing Junction Watch adapter; wrote instructions for local-branch/worktree inspection, isolated verification and integration, normal pushes, remote confirmation and blocker reporting. The adapter itself is prior team work, not newly authored here.
+- **Human decisions and limits:** five-minute cadence and publishing committed work are Kristján's request. No automatic end date was requested. Uncommitted work, active Git operations, unfinished checkpoints and uncertain conflicts are preserved; no project/rules decision or paid experiment is authorized by the watcher.
+- **Verification:** all 26 existing adapter tests pass; installed adapter bytes match the repository version; private file modes, plist validation and matching 300-second config/loaded timer are checked. A real launchd dispatch resumed the dedicated task, which found all seven local branch tips and seven worktree HEADs already on `origin/main` at `269217a`. The agent atomically acknowledged completion and delivered its setup report. No candidate needed publishing, so no automatic project-code push is claimed.
+- **Artifact:** [operation, limitations and pause/stop commands](main-push-watch.md). Runtime configuration, task identifiers and logs remain private on Kristján's Mac.
+- **Alert timing follow-up:** two real verified integrations exceeded the five-minute dispatch interval and raised premature health alerts. Codex separated the installed private adapter's alert threshold (900 seconds) from dispatch (300 seconds), preserving pending reservations and existing acknowledgements. All 26 inherited tests plus five focused timing/validation tests pass. Live status confirms enabled scheduling and the second integration's completed acknowledgement; shared event-watch source/runtime unchanged.
+- **Archived-source check follow-up:** the watcher correctly preserved but deferred farm commits because three saved Sonnet source lines have trailing spaces. Parent Codex verified each exact line in the original trajectory, confirmed both complete archive files still matched the inspected bytes, parsed them without execution, and found no whitespace issue in the other candidate files. The watcher now records a narrow archival-format exception and continues focused tests, preserving original model evidence rather than formatting it. No authorship of the farm code or model programs is claimed.
+- **Immediate push check, campaign records:** at Kristján's request to check and push again, Codex separated the completed baseline records from a campaign implementation that still failed retained-source compatibility. All 53 files from Claude Code's `b5b7ee7` are exact original blobs. Nine missions, 39 JSON files and 3,221 transcript rows pass saved-artifact consistency checks; original scores and authorship remain attributed to their source. [Scope, results and verification](campaign-baselines.md). No new physics replay, model call or cloud job, and no claim that the blocked runtime was promoted.
+- **Retained harsher-day agent evidence:** the watcher independently published the 45 exact saved-run files from Claude Code's `b846b63`: two Opus 5.5 runs scored 0.407328 and 0.424569, and one Sonnet 5.5 run scored 0, on the sunrise-to-sunset day that the Traverse owner tried and did not adopt. Codex used the existing reference-review auditor to reproduce all three physics replays and grades from accepted commands, parsed 27 JSON files and 3,605 transcript rows, and passed 22 existing viewer tests. All three nonzero agent-exit exceptions remain in the records. [Source hashes, verification and limits](dawn-runs-verification.json). Original experiments belong to their source authors; no new model call, cloud job, archived-program execution or rules change was made.
+- **Explicit full-branch integration:** Kristján then specifically requested `git merge worktree-claude-gap-research` on `main`. Codex coordinated a watcher handoff, merged current remote work and the full branch in [`0130fa6`](https://github.com/solvisantos22/junction-2026/commit/0130fa6), and updated the earlier pending-publication notes. All 75 Traverse and 28 viewer tests pass; farm runs 38 tests with one optional skip; all seven feasibility tests pass. Historical RL checks retain one source-pin failure (30 tests) and one persistence class-setup error (12 tests run): the pilot, task generator and server differ from both original 34-file source manifests. Frozen hashes/results remain unchanged; this integration does not claim those compatibility checks pass. Traverse code and saved experiments retain their original authorship. No new training, model call or cloud job.
+- **Contextual results publication:** Codex integrated the completed research evidence from [`5557935`](https://github.com/solvisantos22/junction-2026/commit/55579352b027fc5e0c1ad1bf4f132dcc4fa5375b), preserving the source author and the separate paused-training claim. Six existing contextual tests pass; 405 source files remain byte-identical, all 724 saved physical trajectories and grades replay, the paired-map summary/bootstrap reproduce, and all 120 feasibility score decompositions match 240 hashed source cases. All 56 historical source pins match the original `55654bb` study version; the explicitly merged main has the already documented three changed Traverse files plus the campaign module. [Verification and reproduction limits](lightlag-rl-feasible-results/publication-verification.json). Frozen evidence is unchanged. This check does not claim to repeat optimizer reconstruction or teacher/controller audits; no new training, model call or cloud job was run.
+
+
+- **Point-of-no-return evidence publication:** under Kristján's standing watcher request, Codex verified Claude Code's [saved analysis and demo-script increment](https://github.com/solvisantos22/junction-2026/commit/7f804632e551025a1c666685950209138074221c). All 2,100 rows cover seven players on worlds 600–899 exactly once; the analysis summaries, evaluation tables and paired bootstrap comparisons reproduce exactly, including all 526 recorded program errors. The 1,500 deterministic comparison rows match the earlier comparison, and the saved source fingerprint matches its original code version. Three existing analysis tests and unrestricted whitespace checks pass. The source authors retain credit for the experiments and script; Codex checked the saved evidence without rerunning archived programs or cloud jobs. The demo's campaign figures remain explicitly provisional pending the owner's final table; no rules decision or independent replay of every home analysis is claimed.
+
+- **Final campaign evidence publication:** under the same standing watcher request, Codex integrated Claude Code's [seven campaign runs and completed report](https://github.com/solvisantos22/junction-2026/commit/62e4afb71435ab8f6d6d7ee97a3f895a67c7259c) with the [final demo script and farm usage correction](https://github.com/solvisantos22/junction-2026/commit/0b04a44a7b24c80b52c3482e47f90fc7fb1f4cc3). All 140 archived files remain byte-identical to their source. All 21 physical trajectories and grades reconstruct from accepted commands; 98 JSON files and 18,794 transcript rows parse, and all seven recorded agent-exit exceptions remain. Twenty-eight existing Traverse viewer tests pass, including byte-exact regeneration of the campaign page; unrestricted whitespace and local document-link checks pass. The saved farm rows total 5,971 missions and 105.08 core-hours, and the campaign records report $4.153 in model cost; neither is a billing-account audit. The original authors retain experiment and viewer credit. Codex ran no model program, new training, cloud job or rules change; the campaign's final numbers now replace the earlier provisional demo figures.
+
+- **Controller comparison and submission-draft publication:** under Kristján's standing watcher request, Codex verified Claude Code's [submission draft and campaign comparison](https://github.com/solvisantos22/junction-2026/commit/1c48d9a622ba5421f9e6ebe727b55ab5e12f0279) and [300-world controller comparison](https://github.com/solvisantos22/junction-2026/commit/2a92f569c600632524d6e40586784630edfefe11). All 1,212 saved rows have complete player/world coverage and match the frozen source fingerprint; both evaluation tables and paired bootstrap comparisons reproduce exactly, as does the fresh-world analysis summary. Three existing analysis tests, unrestricted whitespace checks and 18 local document targets pass; all eight source files remain byte-identical. The original authors retain experiment and draft credit. The README remains a draft for team agreement, and the separate video claim includes no unfinished implementation. No new experiment, model program, training or cloud job ran; individual hidden home analyses and external submission-platform requirements were not independently rechecked.
+
+### 14 November — Kristján / Codex: RL-reference and Traverse failure review
+
+- **Human direction:** Kristján asked whether to train an RL reference, inspect Sölvi’s existing work, and investigate mechanisms that references handle more reliably than Claude. Training and rules decisions remain with their existing owners.
+- **Codex contribution:** independently reran Sölvi’s retained training/evaluation audits, reviewed the learner and active persistence wrapper, and wrote a read-only command-replay auditor for all eight saved Traverse model runs plus the reference and two controls. Derived an arithmetic score-gap breakdown and a bounded next-training/confirmation proposal. Sölvi’s model, learner and prior auditors and Claude Code’s simulator, pilot and original agent runs remain their contributions.
+- **Verification:** 16 optimizer updates, 512 recorded training episodes and 21,078 draws reconstruct; all 240 RL evaluation physics replays and 8,559 recorded-feature choices reproduce. Eight existing persistence tests pass. All 11 Traverse replays/grades reconstruct; independent arithmetic, document links and injected wrong-grade rejection pass. Process-exit exceptions, Haiku output-length truncation and the one-map/post-tuning limits are retained.
+- **Result and human decisions:** the RL learning screen still fails; the seven completed Opus/Sonnet runs’ mean score gap decomposes into 69.14% sample-value difference and 30.86% terminal penalties, an accounting identity rather than a causal rescue. Recommends using the existing persistence diagnostic and its missed-return follow-up before further learning, preserving the beam reference and confirming any mechanism on fresh full-agent runs. No new model generation, training, cloud spend, rules promotion or prize submission.
+- **Artifacts:** [review and handoff](research/2026-11-14-rl-reference-and-failures.md), [reproducible auditor](../tools/reference_gap_review/audit.py), [retained review data](reference-gap-review/review.json), [rerun training audit](reference-gap-review/rl-training-audit.json), [rerun check audit](reference-gap-review/rl-check-audit.json).
+
+- **Persistence follow-up in the same review:** as Sölvi’s result landed, Codex independently recomputed all arm means, paired home outcomes, the 24-map primary gain/bootstrap and failed return gate; reran all 240 physics/grade and 10,479-choice checks and all 21 published tests. The score gains are from unchanged weights under a commitment rule, not new RL learning. Initial-policy home transitions include 12 home-to-away and eight away-to-home cases. Sölvi retains the missed-return diagnosis and training scope. [Independent statistics](reference-gap-review/persistence-summary.json), [replay audit](reference-gap-review/persistence-audit.json).
+
+### 14 November — Kristján / Claude Code: Traverse rollout farm on Modal
+
+- **Human direction:** Kristján asked Claude Code to use his Modal credit to create an RL model that would do very well at Lightlag Traverse. Claude Code proposed starting with a rollout farm that plays many missions in parallel, to measure the reference pilot against Claude's saved programs on fresh worlds and to search the pilot's options. Kristján said to build it, asked for frequent commits, and logged in to Modal himself. The Traverse owner's session asked for the paired comparison first, then for Opus agent 3 and Sonnet agent 1 to be rebuilt from their trajectories and added, then for a pilot-only run under its proposed harsher day.
+- **Tool:** Claude Code (the session reports its model as Claude Opus 5.5), with the Modal 1.6.4 client. No model API calls: the Claude programs replayed were written in earlier, already recorded runs.
+- **Claude Code contribution:** [`tools/traverse_farm/`](../tools/traverse_farm/): one mission per job, a Modal app and a local process pool, paired comparison with bootstrap intervals, a ledger that saves part by part and resumes, missions on changed rules, and per-program diagnostics (where it stopped, when the battery ran out, the end of its output). It also has an option search with selection and confirmation on unseen worlds, not yet run. 31 tests. The two agent programs were rebuilt from their trajectories, with a labelled wrapper repeating Opus agent 3's by-hand setup. Before any result was used, Claude Code found and fixed its own bug: saved program rows shared one key, so programs dropped out of tables and would have been mixed up on a rerun.
+- **What it found:** on 300 fresh worlds (600–899), paired, the reference pilot (0.502) beats all six saved Claude programs on 288–300 of the 300 worlds and never loses a rover. The programs score 0.321 (one-request Opus), 0.309 (Opus agent 1), 0.265 (Sonnet agent 1, 91 rovers lost), 0.221 (Opus agent 3, 157 lost), 0.094 (one-request Sonnet) and 0.039 (one-request Haiku). Under the owner's proposed harsher day the pilot scores 0.435, never lost, and is stranded on 2 worlds. These replay programs without their agents, so they measure the programs, not the agents. [Results and limits](traverse-farm.md).
+- **Modal jobs:**
+  - smoke against the laptop `ap-kew5v67eaVvOdeMDDAbtzZ`
+  - task-world replays `ap-GnrGDGApXmzHdabvZmKkJ7` and `ap-xv5BaJGa8rfv96Cl9sx7ZQ`
+  - comparison `ap-gBRd5446NAlbSopK5sdrI4` (1500 missions in 7 minutes) and `ap-758nYv4YvdQRCYPMuSAv1V` (600 in 23 minutes)
+  - harsher day `ap-T2EvbsPSpwUE9Jy1mFCOiH`
+  - farm check on the owner's worlds 1–8 `ap-aXFI1zwa4J4dBGGioCveZx`
+- **Modal configuration:** CPU functions with 1 core and 1 GiB each, up to 100 containers (the workspace limit, reached; further missions queued), a 30-minute timeout, and a Debian-slim Python 3.12 image holding the repository's `lightlag`, `lightlag_traverse` and the farm. Model-written programs run only inside these containers; the local command refuses them.
+- **Usage, not checked against a bill:** about 6,000 missions and 105 core-hours of mission time by 21:15 (the sum of per-mission times over every saved row, including the point-of-no-return run `ap-HeqHK3dHG5bKO0hFzbv9lU` and the stopped option search; container start-up and idle time not included), roughly $6 at Modal's published CPU and memory rates.
+- **Why Modal mattered:** the 2100-mission comparison took about 30 minutes of wall time instead of hours on a laptop, and it kept model-written code off the laptop.
+- **Verification:**
+  - 16 missions scored identically on Modal and on the laptop.
+  - Opus agent 3's rebuilt program reproduces its Harbor score on the task's world (0.515), and the owner's eight scores on worlds 1–8.
+  - Missions in containers that Modal preempted were replayed from the start; a mission is deterministic per world, so this changes no result.
+- **Evidence:** [write-up](traverse-farm.md), [comparison rows](traverse-farm/programs-1/), [harsher-day rows](traverse-farm/sun-margin-0/), [code](../tools/traverse_farm/), [tests](../tests/traverse_farm/).
+- **Live deployed demo (added 22:15, at Kristján's request):** `modal deploy tools/traverse_farm/live_app.py`, app `lightlag-traverse-live`, https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run. A visitor picks any world; Modal drives the reference, a textbook controller (terrain graph + Kalman filter, greedy targets) and two Claude-written autopilots on it in parallel containers and serves the Traverse demo page for that world, cached in a Modal Volume. Only fixed code from the repository runs; the visitor supplies only the world number. Checked: the landing page, a cached world, a new world built live, and a refused malformed request.
+- **Controller ladder (22:00):** on 300 fresh worlds a textbook controller (terrain graph + Kalman filter, greedy targets) scores 0.314 and strands 140 rovers, like the best saved Claude programs; route planning lifts it to 0.489; the reference's reserve adds 0.013 and prevents 10 flat batteries (app `ap-Z31svlFPlHs0F1fT95mFf7`).
+- **Scope:** no change to `lightlag_traverse/`, the Harbor task or any teammate's file; no Harbor run, model API spend or prize submission.
+
+### 14 November — Kristján / Codex: charging-aware RL follow-up
+
+- **Human direction:** Kristján approved the review’s next steps: check charging-aware visit/return feasibility, then conditionally try contextual planner-initialized learning and fair model comparisons.
+- **Codex contribution:** an isolated public-information candidate filter using the existing reference route model, a frozen paired development protocol, a bounded local runner with complete traces and a physics/scaffold re-execution auditor. Sölvi’s policies, persistence wrapper and original experiments, and Claude Code’s navigator and route model retain their original attribution.
+- **Verification at implementation checkpoint:** seven focused tests pass; 20 smoke missions complete with no deaths or invalid calls. All 20 physics replays and 879 choices/features/commands re-execute exactly; all 21 inherited persistence tests pass. Production comparison has not yet run; no new learning or frontier-model claim.
+- **Artifacts:** [protocol](lightlag-rl-feasible.md), [helper and runner](../lightlag_rl_feasible/adapter.py), [results and reproduction](lightlag-rl-feasible-results/README.md). No canonical rule change, cloud job, model API spend or prize submission.
+
+- **Completed fixed feasibility comparison:** protocol/helper published first at `5b5dcb2`; all 240 missions and 10,659 choices/features/commands reproduce, including exact equivalence of all 120 old controls. Charging-aware runs return alive/home120/120 versus70/120; fixed final weights score .093678 → .115034, paired gain .021355 with map-bootstrap95% [.010901,.031750]. Initial and greedy controls also improve; no deaths/invalid calls. This passes the declared development screen on reused maps. It is an interface improvement with unchanged policy weights, not new learning or a fresh Claude result. [Full result/audit](lightlag-rl-feasible-results/README.md).
+
+- **Contextual learning implementation:** [fixed three-seed protocol](lightlag-rl-contextual.md), public candidate/route context, planner teacher collection, imitation-only checkpoints and terminal-reward RL delivered in isolated packages. Reuses Sölvi’s gradient/Adam math and the unchanged reference navigator. Six focused tests and the 54-mission used-map smoke pass: all physics replay, all three optimizer updates and 536 training draws reconstruct, all 42 teacher/evaluation scaffolds re-execute. Production code is published before any reserved training/check map is opened. [Reproduction and scope](lightlag-rl-feasible-results/contextual.md).
+
+- **Completed contextual pilot:** code/smoke published at `55654bb` before 20 teacher missions, three fixed initializations, 600 total imitation epochs and 384 RL missions / 24 updates. On 16 matched fresh worlds (320 evaluations), untrained .092619 → imitation .282207 → RL .279219; greedy .326323, unchanged reference .509094. Every evaluation returns alive/home. The primary RL-minus-imitation gain is −.002988, 95% [−.014367,.006583], so the declared promotion screen fails and the original planner remains the reference. All seeds/checkpoints and negative results retained; no post-check tuning.
+- **Final verification and handoff:** all 600 imitation epochs, 24 RL updates and 18,380 training draws reconstruct; all 724 teacher/training/evaluation physics replays and all 340 teacher/evaluation scaffolds reproduce. Six new focused tests, the 54-mission smoke and all frozen input/source checks pass. [Full results, audit, checkpoints and limits](lightlag-rl-feasible-results/contextual.md). Check maps 74000–74015 are consumed. Sölvi’s larger scratch-learning campaign is separate; no fresh full-agent Claude claim, new rule, cloud/API spend or prize submission.
+
+### 14 November — Sölvi / Codex: contextual learning campaign
+
+- **Human direction:** Sölvi asked to investigate Rainbow and alternatives, then use Modal credits for meaningful training before submission; reported $300 shared team credit.
+- **Codex contribution:** researched original Rainbow/PPO/demonstration-learning papers; implemented a public candidate-context model, scratch PPO and Double DQN with prioritized replay and three-step returns, persistent goal options, reproducible training/resume and bounded Modal launcher. Reuses Kristján’s newly published charging-feasibility helper and Claude Code’s original Traverse environment/navigation; does not claim those contributions.
+- **Verification:** 36 focused tests pass, including exact optimizer/replay checkpoint continuation, masks, terminal reward and launch deadline/duplicate-job guards. Both algorithms completed a 32-mission smoke on already-used maps 1/2; these are engineering checks, not fresh learning evidence.
+- **Decisions/evidence:** [frozen protocol](learning-campaign.md), [code](../lightlag_learning/train.py), [preflight](learning-campaign-results/preflight/). Three initialization seeds, explicit validation gates, fresh final maps and bounded CPU phases; no GPU/LLM API or project promotion. Cloud receipts/results will be appended only after actual execution.
+
+- **Actual campaign launch:** source `d13bcd7` and freeze `e8a8acb` published before six2048-mission Modal jobs were submitted. [Receipt](learning-campaign-results/pilot-receipt.json), [live handoff/app](learning-campaign-results/README.md). First three PPO workers confirmed running, replay jobs queued; no completed production learning result or billed-cost claim yet. Independent preflight action/update reconstruction and32→64 replay resume pass.
+
+- **Verified continuation/evidence increment:**61 tests pass; [preflight audit](learning-campaign-results/preflight/audit.json) exactly reconstructs96 smoke missions,705 training choices,88 validation choices and3updates, with full archives retained. Published bounded continuation supervisor and final evaluation/audit tools. [Early PPO validation](learning-campaign-results/early-validation.json) at512 missions improves across all3seeds (.0874→.3440 averaged); [64 matched control missions](learning-campaign-results/validation-controls/report.json) are fully physics-audited: greedy .3806, beam .5143, allhome. These are reused validation, not final wins or frontier-model gaps. Supervisor actually started from frozen code and checked alive/monitoring; final maps remain unopened, costs await terminal receipts.
+
+
+### 14 November — Manh / Claude Code: a PPO + ICM baseline tester for the max env
+
+- **Human direction:** Manh asked Claude Code for a PPO + ICM reinforcement-learning agent as a baseline tester, while another of Manh's chats was building the max environment for the traverse. As before, Manh reviews before anything is pushed, so the work stayed on a local branch until Manh gave the go-ahead to push.
+- **Claude Code contribution:** `lightlag_ppo_icm/`, new files only. PPO and an Intrinsic Curiosity Module written in NumPy with hand-derived gradients, each checked against finite differences; an adapter that turns the five public tools into observations, actions and rewards (one decision per execution slot across relay passes, a four-number Kalman filter for position, wheel scale and heading bias, a battery guard, the official score cut into per-decision rewards that add up to it exactly); training on several processes; a check that plays a trained policy beside the scripted players on the same seeds; and a report of how a policy spends its commands. Claude Code chose NumPy over installing a deep-learning framework, found Sölvi's `lightlag_rl/` on `main` before starting and kept clear of it, and reserved its seeds in `TEAM_STATUS.md` before any run.
+- **What the measurements changed on the way:** the first runs scored nothing because an untrained agent drives the battery flat and a dead rover scores 0, so a battery guard was added; a replay showed the first curious agent bumping a hazard because the observation echoed its own last command, so the curiosity module now sees only where the rover is; a run on `rush` stalled at 4% until the drive lengths were made to fit the sampling disc; and a count of the trained agent's commands showed why it never comes home (it has spent its energy by mid-mission), which an optional reward for approaching the base did not fix in three further runs.
+- **Results, as measured:** on 40 fresh missions of the max env (seeds 2700-2739, used once) the PPO + ICM policy scores 11.0%, level with three scripted players, above the frozen `kf_mpc` (6.2%), below a hand rule of a few lines on the same adapter (15.3%) and below `max_navigator` (28.2%); random actions on the same adapter score 0.1%. PPO without curiosity scores 10.7%: no measurable difference. One training run per setting. [Tables, logs and limits](../lightlag_ppo_icm/README.md).
+- **Verification:** 47 tests (gradients, a bandit the learner must solve, curiosity fading on seen transitions, the adapter's slots, rewards and belief against the simulator's replay, the guard, a two-update training run, the check and the player), passing on Python 3.14 with numpy 2.5 and Python 3.12 with numpy 1.26. The tests of the max env it reads still pass.
+- **Evidence:** [package](../lightlag_ppo_icm/), [tests](../tests/lightlag_ppo_icm/), [trained policies, run logs and check rows](../lightlag_ppo_icm/policies/).
+- **Scope and limits:** a sandbox baseline, not a rules or reference decision. No model or API call, no cloud compute, no Harbor change, no prize submission. The adapter is hand-written and carries part of the result; the write-up says how much by playing a hand rule and random actions through the same adapter.
+
+### 14 November — Sölvi / Codex: final Traverse training compatibility
+
+- **Human decision:** Sölvi paused larger training for the final task; Kristján froze normal Traverse and the final home-return controller. Keep the submission reference unchanged and resume only a separately pinned experiment.
+- **Codex contribution:** recovered the completed six-run pilot, distinguished unchanged physics from changed controller behavior, implemented isolated final-version training/launch/staging/evaluation tools, and ran a matched112-mission compatibility study with full physics and controller audits. All56 paired grades match;28 home-return traces change. Both declared compatibility gates pass.
+- **Verification/artifacts:** [protocol](learning-final.md), [compatibility and verification](learning-final-results/compatibility/README.md), [preflight and handoff](learning-final-results/README.md). Both algorithms complete32-mission local smoke runs on worlds1/2; source/runtime pins, checkpoint recovery, bounded reservations, pause handling and evidence tampering are tested. Final82000–82039 maps remain unopened.
+- **Limits:** engineering/used-map evidence only; no fresh generalization, planner superiority or LLM-training claim. The new larger Modal run is pending publication of its source freeze. Old pilot cost/results belong to its original navigator and remain separately labelled. No model API call or prize submission in this increment.
+
+- **Published launch follow-up:** implementation `becbf3e`, source/runtime freeze `2257871`, [six-job receipt](learning-final-results/fit-receipt.json), [Modal app](https://modal.com/apps/solvisantos22/main/ap-GGkMI4eQi8N9MVVuTef5Au). All six fresh final-version jobs verified running. Codex prepared and verified 51 tests, compatibility evidence and the bounded all-seed continuation monitor; Sölvi authorized larger training after the team finalized the task. Maximum running-compute envelope $18.185472 plus ancillary charges, not measured spend. Old completed-pilot estimate $1.592405 is separately retained in its [closure evidence](learning-campaign-results/pilot/README.md). Final checks and any campaign showcase remain pending.
+
+### 14 November — Sölvi / Codex: continue after training
+
+- **Human direction:** Sölvi asked whether Codex would continue once training finishes.
+- **Contribution:** added a separate one-time completion watcher using the installed Codex CLI to resume this same chat for final policy freezing, evaluation, audit and publication. It observes the existing monitor, preserves the frozen training setup, respects pauses, and reserves dispatch before attempting it so crashes cannot cause repeated prompts.
+- **Verification:** 13 focused tests pass; an independent review found no duplicate-dispatch or pause-bypass blocker. A live local poll returned waiting, and the detached watcher process is active. [Implementation](../tools/learning_final/wake.py), [tests](../tests/learning_final/test_wake.py), [operation and limits](learning-final-results/README.md#continue-this-chat-when-training-settles). No actual test prompt or new cloud job was sent. Future resume requires the Mac, Codex and usage allowance to remain available.
+
+### 14 November — Sölvi / Codex: visible training checkpoints
+
+- **Human direction:** Sölvi asked for checkpoints their teammates could follow while working on the demo and submission, then relayed a 07:30 Helsinki request for a clean comparison, paragraph, figure and Modal evidence.
+- **Contribution:** implemented read-only collection of immutable policy/validation pairs with receipt, hash, map and reward-arithmetic checks; retains all six runs and compares methods only at a common checkpoint for all three initialization seeds. [Timestamped team progress](learning-final-results/progress.md) distinguishes observed batch-file coverage, validated checkpoints and rough estimates.
+- **First published snapshot:** final-version PPO mean .087395 → .380123 at2048 missions, all96 validation cases home/alive, zero invalid calls. Replay's matched three-seed512 checkpoint is .276713, also96/96 home/alive. These are reused validation worlds, not a final-test result or reference win. Seven collector tests pass, with independent review.
+- **Handoff correction:**72000–72039 were already consumed by the earlier experiment; this campaign reserves82000–82039 for the once-only final comparison after policy freezing. No new training or model API call is introduced by progress reporting.
+
+- **Automatic publication verified:** reporter implementation `73b84fc`; first live update `637764d` adds the complete three-seed replay2048 mean .369464 alongside PPO .380123, each96/96 home/alive and zero invalid calls on reused validation. All24 collector/publisher tests pass. The separate fixed-runtime process publishes narrow verified commits every15minutes or on common checkpoints/status changes, and stops by03:40UTC. No training change, new model API call or final-map evaluation.
