@@ -98,9 +98,16 @@ These are recommended evidence choices, not newly asserted official entry requir
 - Codex froze eight isolated Harbor tasks, checked all source hashes against
   the earlier pilots, ran eight matched Harbor references and 32 direct
   public-tool controls, and checked exported scores/manifests/credential absence.
-- Reference-only increment: all eight Harbor runs match direct scores, range
-  **0.615385–0.833333**, alive at base, no exceptions. Model runs pending; no
-  model deficit inferred from these controls. No inference cost in this increment.
+- Reference increment `5925236`: all eight Harbor runs match direct scores,
+  range **0.615385–0.833333**, alive at base, no exceptions. Independent Codex
+  review reproduced all 32 direct controls and approved the evidence.
+- First model batch, **2/8 attempts**: OpenCode **1.19.5** / Anthropic Claude
+  Opus **5.5** on seed 501 scored **0.0** on rush (reference **0.833333**) and
+  **0.791667** on noisy (reference **0.666667**), reported cost **$1.1291272**.
+  Manh's auditor reconstructs both exactly, with zero infrastructure findings.
+  Codex connected the rush failure to full-horizon battery budgeting, checked
+  the explanation against the protected replay, and preserved the model win
+  on noisy. The remaining six attempts are pending; no general gap claim.
 - [Predeclared protocol, results and limitations](lightlag-fixed-seed-comparison.md),
   [machine-readable evidence](lightlag-runs/fixed-seeds501-504-summary.json).
 - Team components retain their original authorship; Codex's contribution is

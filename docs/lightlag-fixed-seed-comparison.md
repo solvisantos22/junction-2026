@@ -83,8 +83,94 @@ will not by itself demonstrate a model deficit: compare each with its matched
 reference, and distinguish missed value from failures of the harness.
 [Machine-readable reference and direct evidence](lightlag-runs/fixed-seeds501-504-summary.json).
 
-## Execution status
+An independent Codex reviewer reproduced all 32 direct controls exactly and
+checked the eight Harbor exports against raw artifacts, source/task hashes,
+score records and credential/path scans. Reference evidence was published as
+`5925236` before starting the model attempts.
 
-Reference verification complete; **0 of 8 model attempts run**. Model outcomes
-and audits will be published in ascending-seed batches. No model result is
-inferred from these scripted controls.
+## Reproduce
+
+For each seed in 501–504 and each profile in `rush`, `rush_noisy`, generate a
+fresh task outside the checkout. The commands below illustrate one cell;
+repeat with distinct task/job directories. Use the task's recorded source
+commit when reproducing this comparison, and pass your local credentials-file
+path in place of `.env`. Never commit that file.
+
+```sh
+python3 tools/lightlag_experiments/prepare.py /tmp/lightlag-rush-501 \
+  --profile rush --seed 501 --delay 3 --policy kf_mpc
+harbor lint /tmp/lightlag-rush-501
+harbor run -p /tmp/lightlag-rush-501 -a oracle \
+  --jobs-dir /tmp/lightlag-fixed-jobs --job-name rush-501-reference \
+  --n-concurrent 1 --n-attempts 1 --max-retries 0
+harbor run -p /tmp/lightlag-rush-501 -a opencode \
+  -m anthropic/claude-opus-5-5 --ak version=1.19.5 --env-file .env \
+  --jobs-dir /tmp/lightlag-fixed-jobs --job-name rush-501-opus \
+  --n-concurrent 1 --n-attempts 1 --max-retries 0
+```
+
+The supplemental direct rows use `lightlag_dynamic.tools.run_episode` and
+`lightlag_dynamic.controllers.POLICIES` for `kf_mpc`, `open_loop`, `leg_and_wait`
+and `do_nothing`, with the exact settings above. Full result dictionaries and
+public tool-call counts are retained in the summary JSON.
+
+After sanitizing a completed model run into its evidence folder, audit that
+folder with `python3 -m lightlag_audit <run-folder> --out <separate-audit-dir>`.
+The auditor's index contains the supplied runs only, so this comparison uses
+its own directory and retains the team's existing audit index.
+
+## Model results (in progress)
+
+**2 of 8** predeclared attempts complete; seed 502 is running, seeds 503–504
+remain scheduled. Reported API cost so far: **$1.1291272**. Each completed run
+used the pinned agent/model, one attempt, no retries, and the same task digest
+and manifest as its matched reference.
+
+| Seed | Profile | Claude reward | Reference reward | Reference − Claude | Rover calls | Reported USD | Audit |
+|---|---|---:|---:|---:|---:|---:|---|
+| 501 | `rush` | [0.000000](lightlag-runs/rush-seed501-delay3-opus-5-5/) | 0.833333 | +0.833333 | 19 | 0.4185480 | [Report](lightlag-audits/fixed-seeds501-504/rush-seed501-delay3-opus-5-5/audit.md) |
+| 501 | `rush_noisy` | [0.791667](lightlag-runs/rush-noisy-seed501-delay3-opus-5-5/) | 0.666667 | -0.125000 | 32 | 0.7105792 | [Report](lightlag-audits/fixed-seeds501-504/rush-noisy-seed501-delay3-opus-5-5/audit.md) |
+
+Positive gaps favor the reference; negative gaps favor Claude. Costs are the
+agent's reported usage, not independently checked invoices or credit balances.
+The summary JSON lists all unrun cells explicitly. No failed attempt is replaced.
+
+## Decision-audit observations
+
+On **rush seed 501**, Claude collected all seven targets (10.5 of 12 available
+points before the survival multiplier), returned home at tick 25 with battery
+11.521, and exhausted the battery at tick **49**. The published idle drain is
+0.5 per tick through horizon 50; stopping at base does not stop that drain.
+The final reward is therefore **0.0**, versus KF + MPC's **10/12**.
+
+The auditor localizes the reference-relative 10-point loss to **call 11 at tick
+15**, which committed to a detour for discovery d1. Its sample executed at tick
+23, after deadline 21. The audit labels that late sample; the terminal zero is
+caused by exhaustion of the full-horizon energy budget, not by lateness alone.
+Its alternative skips d1 and finishes alive at home with 10 points. This is
+attribution under the KF + MPC continuation, not proof that zero reward became
+irreversible at call 11. A [post-hoc salvage check](lightlag-audits/fixed-seeds501-504/rush-seed501-delay3-opus-5-5/salvage-check.json)
+replays through call 11 or 12 and sends nothing further: the rover survives
+away from base with 6.041 battery and **5.25/12** after the away-from-base
+multiplier. After call 13's homeward uplink, the same continuation dies. The replay
+shows battery 0.021 at tick 48 and zero at 49. Claude's final self-report admits
+the missing energy budget but misstates target totals as 11.5/14; this report
+uses the protected evaluator's **10.5/12**, not that arithmetic.
+
+On **rush_noisy seed 501**, Claude scored **9.5/12**, above the reference's **8/12**,
+and survived at base. The auditor lists no main mistakes relative to that
+reference. The noise condition is a separate fresh model attempt; this pair
+alone does not show that noise improves performance or isolate stochastic
+model behavior from profile effects.
+
+Both audits reconstruct the saved runs exactly, have zero infrastructure
+findings, and their per-decision losses sum to the reference/model gap. Optional
+`superlog` labels are unavailable because numpy is absent in this local audit
+interpreter; the core replay checks and decision audit completed normally.
+
+## Current interpretation and handoff
+
+The first pair reveals a concrete, auditable energy-budget failure and a model
+win over the reference. Preserve both. Finish the predeclared set before a
+cross-seed conclusion; keep the original reference and rules fixed. Final
+mission/profile selection remains a team decision.
