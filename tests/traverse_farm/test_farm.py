@@ -1,0 +1,246 @@
+"""The Traverse rollout farm: jobs, program isolation, the search and the local command.
+
+    python3 -m unittest discover -s tests/traverse_farm -v
+
+Standard library only. Modal itself is not needed; the Modal app is only imported when the
+package is installed. Model-written code is never run here: the program tests use tiny stand-ins.
+"""
+
+import json
+import math
+import os
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+from unittest import mock
+
+REPO = Path(__file__).resolve().parent.parent.parent
+sys.path[:0] = [str(REPO / "tools"), str(REPO)]
+
+from traverse_farm import jobs, search  # noqa: E402
+from traverse_farm.common import parse_policies, parse_seeds  # noqa: E402
+
+ALLOW = {"TRAVERSE_FARM_ALLOW_PROGRAMS": "1"}
+
+
+class Parsing(unittest.TestCase):
+    def test_seeds(self):
+        self.assertEqual(parse_seeds("100-103,7"), [100, 101, 102, 103, 7])
+
+    def test_policies_keep_json_options_whole(self):
+        policies = parse_policies('pilot,greedy,pilot:{"floor": 6, "home_margin": 5}')
+        self.assertEqual(policies['pilot:{"floor": 6, "home_margin": 5}'], {"policy": "pilot", "options": {"floor": 6, "home_margin": 5}})
+        self.assertEqual(policies["greedy"], {"policy": "greedy"})
+
+    def test_program_and_agent_specs_read_their_files(self):
+        with tempfile.TemporaryDirectory() as folder:
+            one = Path(folder) / "traverse-oneshot-x" / "policy.py"
+            one.parent.mkdir()
+            one.write_text("def play(tools):\n    pass\n")
+            agent = Path(folder) / "traverse-agent-y" / "program"
+            agent.mkdir(parents=True)
+            (agent / "auto.py").write_text("print(1)\n")
+            (agent / "helper.py").write_text("X = 1\n")
+            (agent / "lightlag_client.py").write_text("raise SystemExit\n")
+            policies = parse_policies("program:{},agent:{}".format(one, agent / "auto.py"))
+        self.assertEqual(policies["program:traverse-oneshot-x"]["program"], "def play(tools):\n    pass\n")
+        spec = policies["agent:traverse-agent-y"]
+        self.assertEqual((spec["entry"], sorted(spec["files"])), ("auto.py", ["auto.py", "helper.py"]))
+
+
+class Jobs(unittest.TestCase):
+    def test_a_scripted_job_returns_a_graded_row_with_its_code_version(self):
+        row = jobs.run_job({"policy": "nothing", "seed": 100, "candidate": "idle"})
+        self.assertEqual((row["reward"], row["alive"], row["at_base"], row["candidate"]), (0.0, True, True, "idle"))
+        self.assertEqual(len(row["source"]), 12)
+        self.assertIn("Python", row["host"])
+
+    def test_an_option_the_pilot_does_not_have_is_refused(self):
+        with self.assertRaises(ValueError):
+            jobs.policy_name({"policy": "pilot", "options": {"no_such_option": 1}})
+        with self.assertRaises(ValueError):
+            jobs.policy_name({"policy": "greedy", "options": {"floor": 3}})
+
+    def test_crashes_come_back_as_rows(self):
+        rows = jobs.local_map([{"policy": "pilot", "options": {"no_such_option": 1}, "seed": 100}], workers=1)
+        self.assertIn("no_such_option", rows[0]["crash"])
+
+
+class Programs(unittest.TestCase):
+    def run_program(self, source=None, files=None, entry=None, time_limit=30):
+        job = {"policy": "program", "seed": 100, "time_limit": time_limit}
+        if files:
+            job.update(files=files, entry=entry)
+        else:
+            job["program"] = source
+        with mock.patch.dict(os.environ, ALLOW):
+            return jobs.run_job(job)
+
+    def test_refused_outside_the_container(self):
+        with mock.patch.dict(os.environ, {"TRAVERSE_FARM_ALLOW_PROGRAMS": ""}):
+            with self.assertRaises(PermissionError):
+                jobs.run_job({"policy": "program", "program": "def play(tools):\n    pass\n", "seed": 100})
+
+    def test_a_failing_program_is_still_graded(self):
+        row = self.run_program("def play(tools):\n    tools.rules()\n    raise RuntimeError('boom')\n")
+        self.assertEqual(row["error"], "RuntimeError: boom")
+        self.assertEqual((row["reward"], row["public_calls"]), (0.0, 1))
+
+    def test_a_program_that_never_returns_is_stopped(self):
+        if not hasattr(__import__("signal"), "SIGALRM"):
+            self.skipTest("needs SIGALRM")
+        row = self.run_program("def play(tools):\n    while True:\n        pass\n", time_limit=1)
+        self.assertIn("time limit", row["error"])
+
+    def test_an_agent_script_gets_a_stand_in_client(self):
+        script = ("from lightlag_client import connect\n"
+                  "from lightlag_surface import Surface\n"
+                  "with connect('http://lightlag:8000/mcp') as tools:\n"
+                  "    tools.rules()\n"
+                  "    tools.advance(5)\n")
+        row = self.run_program(files={"auto.py": script}, entry="auto.py")
+        self.assertIsNone(row["error"])
+        self.assertEqual(row["public_calls"], 2)
+
+    def test_replies_are_copies_so_a_program_cannot_edit_the_world(self):
+        source = ("def play(tools):\n"
+                  "    world = tools.map()\n"
+                  "    world['base'][0] = -999\n"
+                  "    assert tools.map()['base'][0] != -999, 'the world changed'\n")
+        self.assertIsNone(self.run_program(source)["error"])
+
+    def test_nothing_a_program_imports_leaks_into_the_next_job(self):
+        self.run_program("import lightlag_surface\ndef play(tools):\n    pass\n")
+        for name in ("policy", "lightlag_surface", "lightlag_client"):
+            self.assertNotIn(name, sys.modules)
+
+
+def synthetic_defaults():
+    defaults = {"route": "optimise", "terrain": True, "stop_ticks": 1}
+    for name, (scale, low, high) in search.SPACE.items():
+        defaults[name] = int(round((low + high) / 2)) if scale.endswith("int") else round((low + high) / 2, 4)
+    return defaults
+
+
+class Search(unittest.TestCase):
+    def fake_run_many(self, target, calls=None):
+        """Reward rises towards `target` in the unit cube; seconds grow with plan_steps."""
+        def run_many(batch):
+            if calls is not None:
+                calls.append(len(batch))
+            rows = []
+            for job in batch:
+                point = search.encode(job["options"])
+                distance = sum((point[i] - t) ** 2 for i, t in target.items())
+                noise = ((job["seed"] * 7919) % 101) / 101 * 0.02
+                rows.append(dict({k: job[k] for k in ("candidate", "generation", "block") if k in job},
+                                 seed=job["seed"], policy="pilot", options=job["options"], reward=0.6 - 0.3 * distance + noise,
+                                 alive=True, at_base=True, seconds=job["options"]["plan_steps"] / 30000))
+            return rows
+        return run_many
+
+    def test_it_finds_and_confirms_a_better_setting(self):
+        names = list(search.SPACE)
+        target = {names.index("floor"): 0.9, names.index("energy_weight"): 0.1}
+        with tempfile.TemporaryDirectory() as folder:
+            result = search.search(self.fake_run_many(target), synthetic_defaults(), search_seeds=range(100, 130),
+                                   select_seeds=range(400, 410), confirm_seeds=range(600, 640), generations=3,
+                                   population=10, block=10, elites=3, finalists=2, out=Path(folder), log=lambda _: None)
+            saved = json.loads((Path(folder) / "confirmation.json").read_text())
+        self.assertTrue(result["confirmation"]["confirmed"])
+        self.assertGreater(result["confirmation"]["gain"], 0)
+        self.assertEqual(saved["confirmed"], True)
+
+    def test_a_slower_setting_is_disqualified(self):
+        names = list(search.SPACE)
+        target = {names.index("plan_steps"): 1.0}            # the best reward needs the largest search budget
+        defaults = synthetic_defaults()
+        result = search.search(self.fake_run_many(target), defaults, search_seeds=range(100, 130), select_seeds=range(400, 410),
+                               confirm_seeds=range(600, 620), generations=3, population=10, block=10, elites=3,
+                               finalists=2, max_slowdown=1.2, log=lambda _: None)
+        chosen = result["confirmation"].get("options")
+        if chosen:
+            self.assertLessEqual(chosen["plan_steps"], 1.2 * defaults["plan_steps"] + 1)
+
+    def test_a_stopped_search_resumes_without_replaying_worlds(self):
+        calls = []
+        run_many = self.fake_run_many({0: 0.5}, calls)
+        with tempfile.TemporaryDirectory() as folder:
+            policies = {"a": {"policy": "pilot", "options": synthetic_defaults()}}
+            policies["a"]["options"] = {k: v for k, v in policies["a"]["options"].items() if k in search.SPACE}
+            search.evaluate(run_many, policies, list(range(10)), out=Path(folder))
+            search.evaluate(run_many, policies, list(range(10)), out=Path(folder))
+        self.assertEqual(calls, [10])
+
+    def test_different_players_on_the_same_world_are_different_missions(self):
+        calls = []
+
+        def run_many(batch):
+            calls.append([job["policy"] for job in batch])
+            return [dict(candidate=job["candidate"], seed=job["seed"], policy=job["policy"], options={},
+                         reward=0.1 if job["policy"] == "greedy" else 0.2, alive=True, at_base=True, seconds=1.0)
+                    for job in batch]
+
+        with tempfile.TemporaryDirectory() as folder:
+            result = search.evaluate(run_many, {"greedy": {"policy": "greedy"}, "straight": {"policy": "straight"}},
+                                     [5], out=Path(folder))
+        self.assertEqual(sorted(calls[0]), ["greedy", "straight"])
+        self.assertEqual((result["table"]["greedy"]["mean"], result["table"]["straight"]["mean"]), (0.1, 0.2))
+
+    def test_programs_are_told_apart_by_their_code(self):
+        a = {"policy": "program", "program": "def play(t):\n    pass\n", "seed": 1}
+        b = {"policy": "program", "program": "def play(t):\n    t.rules()\n", "seed": 1}
+        self.assertNotEqual(jobs.job_key(a), jobs.job_key(b))
+        self.assertEqual(jobs.job_key(a), jobs.job_key(dict(a, candidate="x")))
+
+    def test_a_missing_option_is_named(self):
+        defaults = synthetic_defaults()
+        del defaults["beam"]
+        with self.assertRaisesRegex(ValueError, "beam"):
+            search.check_space(defaults)
+
+    def test_paired_bootstrap_brackets_a_clear_gain(self):
+        low, high = search.bootstrap([0.05 + 0.01 * ((i * 37) % 5 - 2) for i in range(100)])
+        self.assertTrue(0 < low < 0.05 < high)
+
+    def test_the_unit_cube_round_trips_inside_the_bounds(self):
+        options = synthetic_defaults()
+        again = search.decode(search.encode(options))
+        for name, (scale, low, high) in search.SPACE.items():
+            self.assertTrue(low <= again[name] <= high)
+            self.assertTrue(math.isclose(again[name], options[name], rel_tol=0.01, abs_tol=1))
+
+
+class LocalCommand(unittest.TestCase):
+    def test_evaluate_plays_and_prints_a_table(self):
+        out = subprocess.run([sys.executable, str(REPO / "tools/traverse_farm/local.py"), "evaluate",
+                              "--policies", "nothing,straight", "--seeds", "100-101", "--workers", "2"],
+                             capture_output=True, text=True, timeout=300)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertIn("straight", out.stdout)
+
+    def test_it_refuses_to_run_model_written_code(self):
+        with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as handle:
+            handle.write("def play(tools):\n    pass\n")
+        out = subprocess.run([sys.executable, str(REPO / "tools/traverse_farm/local.py"), "evaluate",
+                              "--policies", "program:" + handle.name, "--seeds", "100"],
+                             capture_output=True, text=True, timeout=120)
+        os.unlink(handle.name)
+        self.assertEqual(out.returncode, 2)
+        self.assertIn("only on Modal", out.stderr)
+
+
+@unittest.skipUnless(__import__("importlib").util.find_spec("modal"), "the modal package is not installed")
+class ModalApp(unittest.TestCase):
+    def test_the_app_defines_its_function_and_commands(self):
+        sys.path.insert(0, str(REPO / "tools" / "traverse_farm"))
+        import modal_app
+        self.assertEqual(modal_app.app.name, "lightlag-traverse-farm")
+        for name in ("mission", "smoke", "evaluate", "search"):
+            self.assertTrue(hasattr(modal_app, name), name)
+
+
+if __name__ == "__main__":
+    unittest.main()
