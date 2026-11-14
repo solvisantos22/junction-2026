@@ -370,6 +370,23 @@ These are recommended evidence choices, not newly asserted official entry requir
   difficulty gap or population reliability established. Competing information
   sources are proposed next; no final task choice or prize submission made.
 
+### R13 — 14 November — Allocating one inspection between two unknowns
+
+- Human direction: Sölvi approved the next bounded experiment after the first
+  information-choice pilot exposed no reasoning gap.
+- Codex implemented the two-independent-route abstraction, one shared targeted
+  probe, exact public-information reference, fair controls and protected Harbor
+  package. Six mirrored cases and twelve model assignments were frozen before
+  model outcomes. Matched controls separate choosing a target from buying an
+  unnecessary inspection and from using its signal.
+- Verification: 38 package + 3 packaging tests; all 864 weighted branches and
+  1,080 seeded episodes retained, all 1,944 replays reconstructed. Independent
+  enumeration of 2,016 strategy/state outcomes agrees. Selective exact mean
+  0.6743 vs skipping 0.63, either fixed probe 0.63245, and matched entropy 0.6647667.
+- [Design, protocol and results](lightlag-allocation-experiment.md). Structural
+  result only at this increment; actual Claude trials are next. No continuous
+  rover changes, measured model gap, final rules choice or prize submission.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.

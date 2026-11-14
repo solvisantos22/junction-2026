@@ -74,3 +74,28 @@ If Claude succeeds, retain that finding. Any further expansion requires a new
 decision based on the evidence. No difficulty gap is claimed in advance.
 
 The [twelve-trial protocol and seed commitments](lightlag-runs/information-allocation-pilot-v1/protocol.json) are published before model execution.
+
+## Structural result
+
+The gate passes. All 864 probability-weighted branches match the exact
+reference; all 1,080 separate seeded smoke episodes are retained. Root
+reconstructed all 1,944 complete replays and checked 13 source hashes.
+Independent review separately simulated all 21 relevant direct/conditional
+strategies over all 16 joint outcomes in each context (2,016 episodes), confirming
+the acquisition optima. Extra waiting adds no information and cannot improve
+reward here. Both-soft terrain, wrong signals and zero-reward failures remain
+in the evidence.
+
+All 38 environment/reference/service tests and three packaging tests pass.
+The protected Harbor reference preflight scores 0.825 on case_3, seed0; matched
+local policy behavior and separate grading agree. Paid trials are pending the
+remaining no-op and actual container isolation checks.
+
+[Structural summary](lightlag-runs/information-allocation-v1/summary.json),
+[weighted rows](lightlag-runs/information-allocation-v1/exact_rows.jsonl),
+[seeded rows](lightlag-runs/information-allocation-v1/seeded_rows.jsonl) and
+[all replays, gzip](lightlag-runs/information-allocation-v1/replays.jsonl.gz) are
+retained. The [archive manifest](lightlag-runs/information-allocation-v1/replay-archive.json)
+records compressed and uncompressed hashes. `python3 -m
+lightlag_information_allocation.study --output /tmp/new-allocation-study`
+reproduces the study into a new directory (with uncompressed JSON-lines replays).

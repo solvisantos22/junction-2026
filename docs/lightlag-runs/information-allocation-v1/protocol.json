@@ -1,0 +1,493 @@
+{
+  "contexts": {
+    "case_1": {
+      "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. One probe TOTAL across both routes, before at most one commitment. Commitment is immutable on acceptance.",
+      "command_schema": [
+        {
+          "action": "probe",
+          "route": "a|b"
+        },
+        {
+          "action": "commit",
+          "route": "a|b|detour"
+        },
+        {
+          "action": "wait"
+        }
+      ],
+      "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+      "context": {
+        "id": "case_1",
+        "prior_a": 0.5,
+        "prior_b": 0.2,
+        "probe_energy": 1,
+        "value_a": 10,
+        "value_b": 10
+      },
+      "delay": 1,
+      "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+      "horizon": 30,
+      "independence": "The ground states of a and b are independent. Each route has one fixed imperfect signal, generated independently conditional on its own ground state. Inspecting one route does not update the other route's ground probability.",
+      "initial_energy": 10,
+      "max_advance_ticks": 5,
+      "max_batch_size": 5,
+      "normalization": 10,
+      "penalty_per_tick": 0.25,
+      "priors_firm": {
+        "a": 0.5,
+        "b": 0.2
+      },
+      "probe": "Spend probe_energy at execution to inspect a OR b. Its fixed signal equals that route's terrain with signal_accuracy. A probe event names probe_route. One shared inspection budget; inspecting both routes or repeating a probe is forbidden. Repeated log reads add no evidence.",
+      "routes": {
+        "a": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        },
+        "b": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        },
+        "detour": {
+          "duration": 6,
+          "energy": {
+            "firm": 8,
+            "soft": 8
+          },
+          "target_value": 6
+        }
+      },
+      "signal_accuracy": 0.9,
+      "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+      "trip": "Choose one target via a, b or the safe detour; each trip includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+    },
+    "case_2": {
+      "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. One probe TOTAL across both routes, before at most one commitment. Commitment is immutable on acceptance.",
+      "command_schema": [
+        {
+          "action": "probe",
+          "route": "a|b"
+        },
+        {
+          "action": "commit",
+          "route": "a|b|detour"
+        },
+        {
+          "action": "wait"
+        }
+      ],
+      "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+      "context": {
+        "id": "case_2",
+        "prior_a": 0.2,
+        "prior_b": 0.5,
+        "probe_energy": 1,
+        "value_a": 10,
+        "value_b": 10
+      },
+      "delay": 1,
+      "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+      "horizon": 30,
+      "independence": "The ground states of a and b are independent. Each route has one fixed imperfect signal, generated independently conditional on its own ground state. Inspecting one route does not update the other route's ground probability.",
+      "initial_energy": 10,
+      "max_advance_ticks": 5,
+      "max_batch_size": 5,
+      "normalization": 10,
+      "penalty_per_tick": 0.25,
+      "priors_firm": {
+        "a": 0.2,
+        "b": 0.5
+      },
+      "probe": "Spend probe_energy at execution to inspect a OR b. Its fixed signal equals that route's terrain with signal_accuracy. A probe event names probe_route. One shared inspection budget; inspecting both routes or repeating a probe is forbidden. Repeated log reads add no evidence.",
+      "routes": {
+        "a": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        },
+        "b": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        },
+        "detour": {
+          "duration": 6,
+          "energy": {
+            "firm": 8,
+            "soft": 8
+          },
+          "target_value": 6
+        }
+      },
+      "signal_accuracy": 0.9,
+      "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+      "trip": "Choose one target via a, b or the safe detour; each trip includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+    },
+    "case_3": {
+      "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. One probe TOTAL across both routes, before at most one commitment. Commitment is immutable on acceptance.",
+      "command_schema": [
+        {
+          "action": "probe",
+          "route": "a|b"
+        },
+        {
+          "action": "commit",
+          "route": "a|b|detour"
+        },
+        {
+          "action": "wait"
+        }
+      ],
+      "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+      "context": {
+        "id": "case_3",
+        "prior_a": 0.65,
+        "prior_b": 0.55,
+        "probe_energy": 1,
+        "value_a": 10,
+        "value_b": 9
+      },
+      "delay": 1,
+      "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+      "horizon": 30,
+      "independence": "The ground states of a and b are independent. Each route has one fixed imperfect signal, generated independently conditional on its own ground state. Inspecting one route does not update the other route's ground probability.",
+      "initial_energy": 10,
+      "max_advance_ticks": 5,
+      "max_batch_size": 5,
+      "normalization": 10,
+      "penalty_per_tick": 0.25,
+      "priors_firm": {
+        "a": 0.65,
+        "b": 0.55
+      },
+      "probe": "Spend probe_energy at execution to inspect a OR b. Its fixed signal equals that route's terrain with signal_accuracy. A probe event names probe_route. One shared inspection budget; inspecting both routes or repeating a probe is forbidden. Repeated log reads add no evidence.",
+      "routes": {
+        "a": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        },
+        "b": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 9
+        },
+        "detour": {
+          "duration": 6,
+          "energy": {
+            "firm": 8,
+            "soft": 8
+          },
+          "target_value": 6
+        }
+      },
+      "signal_accuracy": 0.9,
+      "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+      "trip": "Choose one target via a, b or the safe detour; each trip includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+    },
+    "case_4": {
+      "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. One probe TOTAL across both routes, before at most one commitment. Commitment is immutable on acceptance.",
+      "command_schema": [
+        {
+          "action": "probe",
+          "route": "a|b"
+        },
+        {
+          "action": "commit",
+          "route": "a|b|detour"
+        },
+        {
+          "action": "wait"
+        }
+      ],
+      "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+      "context": {
+        "id": "case_4",
+        "prior_a": 0.55,
+        "prior_b": 0.65,
+        "probe_energy": 1,
+        "value_a": 9,
+        "value_b": 10
+      },
+      "delay": 1,
+      "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+      "horizon": 30,
+      "independence": "The ground states of a and b are independent. Each route has one fixed imperfect signal, generated independently conditional on its own ground state. Inspecting one route does not update the other route's ground probability.",
+      "initial_energy": 10,
+      "max_advance_ticks": 5,
+      "max_batch_size": 5,
+      "normalization": 10,
+      "penalty_per_tick": 0.25,
+      "priors_firm": {
+        "a": 0.55,
+        "b": 0.65
+      },
+      "probe": "Spend probe_energy at execution to inspect a OR b. Its fixed signal equals that route's terrain with signal_accuracy. A probe event names probe_route. One shared inspection budget; inspecting both routes or repeating a probe is forbidden. Repeated log reads add no evidence.",
+      "routes": {
+        "a": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 9
+        },
+        "b": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        },
+        "detour": {
+          "duration": 6,
+          "energy": {
+            "firm": 8,
+            "soft": 8
+          },
+          "target_value": 6
+        }
+      },
+      "signal_accuracy": 0.9,
+      "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+      "trip": "Choose one target via a, b or the safe detour; each trip includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+    },
+    "case_5": {
+      "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. One probe TOTAL across both routes, before at most one commitment. Commitment is immutable on acceptance.",
+      "command_schema": [
+        {
+          "action": "probe",
+          "route": "a|b"
+        },
+        {
+          "action": "commit",
+          "route": "a|b|detour"
+        },
+        {
+          "action": "wait"
+        }
+      ],
+      "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+      "context": {
+        "id": "case_5",
+        "prior_a": 0.95,
+        "prior_b": 0.6,
+        "probe_energy": 1,
+        "value_a": 10,
+        "value_b": 10
+      },
+      "delay": 1,
+      "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+      "horizon": 30,
+      "independence": "The ground states of a and b are independent. Each route has one fixed imperfect signal, generated independently conditional on its own ground state. Inspecting one route does not update the other route's ground probability.",
+      "initial_energy": 10,
+      "max_advance_ticks": 5,
+      "max_batch_size": 5,
+      "normalization": 10,
+      "penalty_per_tick": 0.25,
+      "priors_firm": {
+        "a": 0.95,
+        "b": 0.6
+      },
+      "probe": "Spend probe_energy at execution to inspect a OR b. Its fixed signal equals that route's terrain with signal_accuracy. A probe event names probe_route. One shared inspection budget; inspecting both routes or repeating a probe is forbidden. Repeated log reads add no evidence.",
+      "routes": {
+        "a": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        },
+        "b": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        },
+        "detour": {
+          "duration": 6,
+          "energy": {
+            "firm": 8,
+            "soft": 8
+          },
+          "target_value": 6
+        }
+      },
+      "signal_accuracy": 0.9,
+      "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+      "trip": "Choose one target via a, b or the safe detour; each trip includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+    },
+    "case_6": {
+      "acceptance": "Validate the entire batch, including execution at or before horizon, atomically. One probe TOTAL across both routes, before at most one commitment. Commitment is immutable on acceptance.",
+      "command_schema": [
+        {
+          "action": "probe",
+          "route": "a|b"
+        },
+        {
+          "action": "commit",
+          "route": "a|b|detour"
+        },
+        {
+          "action": "wait"
+        }
+      ],
+      "command_timing": "First execution is sent_tick + delay + 1; FIFO, one command per tick, after earlier reservations.",
+      "context": {
+        "id": "case_6",
+        "prior_a": 0.6,
+        "prior_b": 0.95,
+        "probe_energy": 1,
+        "value_a": 10,
+        "value_b": 10
+      },
+      "delay": 1,
+      "grading": "A completed trip by horizon earns max(0, target_value - penalty_per_tick * completion_tick) / normalization; all other outcomes earn zero. Scores are realized.",
+      "horizon": 30,
+      "independence": "The ground states of a and b are independent. Each route has one fixed imperfect signal, generated independently conditional on its own ground state. Inspecting one route does not update the other route's ground probability.",
+      "initial_energy": 10,
+      "max_advance_ticks": 5,
+      "max_batch_size": 5,
+      "normalization": 10,
+      "penalty_per_tick": 0.25,
+      "priors_firm": {
+        "a": 0.6,
+        "b": 0.95
+      },
+      "probe": "Spend probe_energy at execution to inspect a OR b. Its fixed signal equals that route's terrain with signal_accuracy. A probe event names probe_route. One shared inspection budget; inspecting both routes or repeating a probe is forbidden. Repeated log reads add no evidence.",
+      "routes": {
+        "a": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        },
+        "b": {
+          "duration": 2,
+          "energy": {
+            "firm": 4,
+            "soft": 12
+          },
+          "target_value": 10
+        },
+        "detour": {
+          "duration": 6,
+          "energy": {
+            "firm": 8,
+            "soft": 8
+          },
+          "target_value": 6
+        }
+      },
+      "signal_accuracy": 0.9,
+      "telemetry": "Briefing at tick 0 is known; every later event arrives at state_tick + delay. Reading is free.",
+      "trip": "Choose one target via a, b or the safe detour; each trip includes return home. Completion tick is commitment execution tick + route duration. Expenditure occurs on departure; insufficient energy drains battery to zero and fails the trip. No idle drain."
+    }
+  },
+  "controls": {
+    "blind_selected_probe": "Match selective acquisition target, resource cost and timing but ignore its signal.",
+    "entropy_matched_gate": "Match selective probe/skip choice; when probing choose the prior closest to 0.5.",
+    "least_useful_matched_gate": "Match selective probe/skip choice; when probing choose the lower-value inspection.",
+    "least_useful_probe": "Always choose the lower-value inspection and then use its signal; it is not guaranteed irrelevant.",
+    "most_uncertain": "Always inspect the terrain prior closest to 0.5, then use its signal."
+  },
+  "exact_enumeration": {
+    "aggregate": "Equal weight across contexts; probability weight within each context.",
+    "rows": 864,
+    "state_fields": [
+      "terrain_a",
+      "terrain_b",
+      "signal_a",
+      "signal_b"
+    ],
+    "values": [
+      "firm",
+      "soft"
+    ],
+    "weight": "Product of independent route priors and each signal likelihood conditional on its own terrain."
+  },
+  "gate": "Selective matches analytical branch expectations, dominates each declared policy per context, strictly beats never/fixed-a/fixed-b in aggregate and chooses a/b/none across contexts.",
+  "next_step": "Only after structural validation, separately freeze a protected model pilot. Retain all successes and failures; no automatic expansion.",
+  "paid_provider_calls": 0,
+  "policies": [
+    "selective",
+    "never_probe",
+    "probe_a",
+    "probe_b",
+    "least_useful_probe",
+    "blind_selected_probe",
+    "most_uncertain",
+    "entropy_matched_gate",
+    "least_useful_matched_gate"
+  ],
+  "schema_version": 1,
+  "scope": "Two independent route unknowns, one shared inspection; constructed development cases, not continuous rover control or a model benchmark.",
+  "seeded_smoke": {
+    "interpretation": "Separate deterministic smoke matrix, paired across policies; not independent model repetitions.",
+    "rows": 1080,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ]
+  },
+  "source_hashes": {
+    "lightlag_information_allocation/__init__.py": "c94b26f1876d92cc42c3fa0b0485d6cd3e9fe5a6c7d7ced10c291e729519a6c2",
+    "lightlag_information_allocation/environment.py": "bbb5f0a021e60186faca3dedbb8b441077b3562f2c2859d8f53dd1027696fc5c",
+    "lightlag_information_allocation/model.py": "c92f4d8982cdebed863d63ce52c55c1ff8a45a46aced7b2e31b24b0b1112e5d3",
+    "lightlag_information_allocation/policies.py": "f62e71a7f8fedb03e6ec519f506a79358183d465f0047753c77186398a1c589e",
+    "lightlag_information_allocation/serve.py": "b5319a065512384f7b55620b32667a86475a0fd2092c604e8f0f165d9cf44ee8",
+    "lightlag_information_allocation/server.py": "2646b1562b506881cd5afffacfd8e3cf64e67edb2649e1fbed9eb251bc9ac2cd",
+    "lightlag_information_allocation/service.py": "4fa8345661676dc777c25abbd42732a3fb16737d0d1d2a32ddbaf9b45ed8dadd",
+    "lightlag_information_allocation/study.py": "38a6124f1652554d35d9b38f9f69c0a6867664246dae1c6536e736baaaae955b",
+    "tests/lightlag_information_allocation/test_environment.py": "d702476aa833b82d070e554f3fd07d9ee59c0914f52b334d6fe9974d5760571e",
+    "tests/lightlag_information_allocation/test_policies.py": "2073ff81bfc038c5b2dc6f03832cb59c49b5420441610f0e34530de496d36dc7",
+    "tests/lightlag_information_allocation/test_server.py": "802c6fce819a1b97889c36f0a13b8b7416f81607cd561afe227c6f0b4962c0b3",
+    "tests/lightlag_information_allocation/test_service.py": "506c394f0ae93c70b295f267a5acb81b3e1e1d3b4b6022d478e6111706e739e7",
+    "tests/lightlag_information_allocation/test_study.py": "d63b12d3ef2b1e02cdf4ce2a351df6a901260f17631b7c1fc0d93ca0000e80d8"
+  },
+  "study_id": "information-allocation-v1",
+  "ties": "Acquisition prefers none, then a, then b; route ties are lexical; least-useful and entropy ties prefer a."
+}
