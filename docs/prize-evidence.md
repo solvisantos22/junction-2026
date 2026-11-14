@@ -450,8 +450,11 @@ These are recommended evidence choices, not newly asserted official entry requir
   The separate scheduling reference and 16 focused tests now pass independent
   review; three repair-runner checks preserve errors and verify replay fidelity.
   Sample/pose forecasting approximations are explicit and shared across controls.
-  Full free comparisons are next. No model gap, paid call, task promotion or
-  final project choice is claimed by these implementation increments.
+  The first 128 old-map repair episodes reconstruct exactly but expose a
+  regression: adaptive mean raw7.68594→7.225, deaths1→2; no-probe improves.
+  All negative evidence is retained while the comparator is diagnosed before
+  the six-region matrix. No model gap, new Claude API call, task promotion or
+  final project choice is claimed.
 
 ## Keep recording with minimal overhead
 

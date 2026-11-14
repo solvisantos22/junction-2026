@@ -83,3 +83,26 @@ uncertainty, and future fixes/undiscovered positions are not forecast. Actual
 delivered failures still update the KF. Diagnostic values and return checks are
 heuristic predictions, not calibrated expectations or guarantees. These limits
 apply equally to the adaptive and simpler acquisition policies.
+
+## First comparator-repair result: retain the regression
+
+The first [128-episode repair comparison](lightlag-runs/survey-reference-repair-v1/summary.json)
+uses 32 previously declared development cases (old three-region maps 0–3,
+episode seeds 100–107), each played by both references and both no-probe variants.
+All public transcripts/replays reconstruct, all sources match `584809a`, and no
+controller/harness errors occurred.
+
+| Policy | Mean raw science after survival | Deaths | Alive and home |
+|---|---:|---:|---:|
+| Frozen reference | 7.68594 | 1/32 | 30/32 |
+| First scheduling revision | 7.22500 | 2/32 | 29/32 |
+| Frozen no-probe | 6.24375 | 2/32 | 30/32 |
+| Revised no-probe | 6.78750 | 1/32 | 31/32 |
+
+The revised adaptive reference is worse overall, despite supporting useful
+inspection overlap. This result is not replaced or relabeled as an improvement.
+A rover can be at base but dead after terminal idle drain; alive-and-home above
+requires both. Physical return/battery regressions are being diagnosed before
+launching the six-region development matrix. Any revised code and rerun will
+use a new output directory and keep this source version and all outcomes.
+No additional Claude API calls have been made.
