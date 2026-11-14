@@ -76,6 +76,19 @@ class Jobs(unittest.TestCase):
         self.assertEqual(jobs.job_key(plain), '{"options": {}, "policy": "pilot", "program": null, "seed": 1}')
         self.assertNotEqual(jobs.job_key(plain), jobs.job_key(dict(plain, mission={"sun_margin_ticks": 0})))
 
+    def test_the_max_map_is_another_mission_on_the_same_seed(self):
+        row = jobs.run_job({"policy": "nothing", "seed": 100, "map": "max"})
+        self.assertEqual((row["map"], row["alive"], row["reward"]), ("max", True, 0.0))
+        self.assertEqual(row["trips"], 0)
+        plain = {"policy": "pilot", "seed": 1}
+        self.assertNotEqual(jobs.job_key(plain), jobs.job_key(dict(plain, map="max")))
+        with self.assertRaises(ValueError):
+            jobs.run_job({"policy": "nothing", "seed": 100, "map": "mars"})
+        with mock.patch.dict(os.environ, ALLOW):
+            seen = jobs.run_job({"policy": "program", "seed": 100, "map": "max",
+                                 "program": "def play(tools):\n    assert 'slip_check' in str(tools.rules()) or True\n"})
+        self.assertEqual((seen["map"], seen["error"]), ("max", None))
+
     def test_crashes_come_back_as_rows(self):
         rows = jobs.local_map([{"policy": "pilot", "options": {"no_such_option": 1}, "seed": 100}], workers=1)
         self.assertIn("no_such_option", rows[0]["crash"])

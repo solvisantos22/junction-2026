@@ -45,6 +45,7 @@ image = (
     .add_local_dir(REPO / "lightlag", "/root/farm/lightlag", ignore=_skip)       # lightlag.model, used by Traverse
     .add_local_dir(SOURCE / "lightlag_traverse", "/root/farm/lightlag_traverse", ignore=_skip)
     .add_local_dir(HERE, "/root/farm/traverse_farm", ignore=_skip)
+    .add_local_dir(REPO / "lightlag_traverse_max", "/root/farm/lightlag_traverse_max", ignore=_skip)   # Manh's MAX map
 )
 app = modal.App("lightlag-traverse-farm", image=image)
 MAX_CONTAINERS = 100
@@ -104,7 +105,7 @@ def smoke(seeds: str = "600-607", policies: str = "pilot,greedy"):
 
 @app.local_entrypoint()
 def evaluate(policies: str = "pilot,greedy,straight", seeds: str = "600-799", out: str = "", baseline: str = "pilot",
-             mission: str = "", analyse: bool = False):
+             mission: str = "", analyse: bool = False, map: str = ""):
     """Several policies on the same worlds, each also compared world by world with `baseline`.
     `program:<path>` plays a model-written file defining play(tools); `agent:<folder>/<entry.py>` an agent's script.
     `mission` changes the rules for every mission, as JSON: '{"sun_margin_ticks": 0}'."""
@@ -114,7 +115,8 @@ def evaluate(policies: str = "pilot,greedy,straight", seeds: str = "600-799", ou
     from traverse_farm.common import format_table, format_versus, parse_policies, parse_seeds
 
     result = search.evaluate(_run_many, parse_policies(policies), parse_seeds(seeds), out=Path(out) if out else None,
-                             baseline=baseline, mission=json.loads(mission) if mission else None, analyse=analyse)
+                             baseline=baseline, mission=json.loads(mission) if mission else None, analyse=analyse,
+                             board=map or None)
     print(format_table(result["table"]))
     if result["versus"]:
         print(format_versus(baseline, result["versus"]))

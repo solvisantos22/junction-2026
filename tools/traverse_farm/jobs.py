@@ -140,6 +140,8 @@ def job_key(item: Dict[str, Any]) -> str:
         key["mission"] = item["mission"]
     if item.get("analyse"):   # a row with the analysis is not the same as one without it
         key["analyse"] = True
+    if item.get("map"):       # the MAX map is another mission on the same seed
+        key["map"] = item["map"]
     return json.dumps(key, sort_keys=True)
 
 
@@ -273,11 +275,25 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
     mission = job.get("mission") or None   # rule changes for this mission, e.g. {"sun_margin_ticks": 0}
     if mission:
         row["mission"] = mission
+    board = job.get("map") or None         # None: the Traverse map; "max": Manh's MAX map (lightlag_traverse_max)
+    if board not in (None, "max"):
+        raise ValueError("unknown map {!r}: leave it out, or use 'max'".format(board))
+    if board and mission:
+        raise ValueError("the MAX map takes no rule changes here")
+    if board:
+        row["map"] = board
+
+    def environment():
+        if board == "max":
+            from lightlag_traverse_max.environment import make_env
+            return make_env(seed, "max")
+        return play.TraverseEnvironment(seed, mission=mission)
+
     want = bool(job.get("keep_replay") or job.get("analyse"))   # the evaluator's replay, for the demo or the analysis
     replay = None
     started = time.time()
     if job["policy"] == "program":
-        env = play.TraverseEnvironment(seed, mission=mission)
+        env = environment()
         tools = play.PublicTools(env)
         ran = _run_program(job, tools, job.get("time_limit", 1500))
         seconds, calls = time.time() - started, tools.calls
@@ -293,14 +309,20 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
             row["died_tick"] = next(s["tick"] for s in replay["states"] if not s["alive"])
         if ran["error"] or not result["alive"]:
             row["printed"] = ran["printed"]
-    elif not mission:
+    elif not mission and not board:
         run = play.run_episode(play.policy(policy_name(job)), seed, keep_replay=want)
         result, seconds, calls = run["result"], run["seconds"], run["public_calls"]
         row["error"] = None
         replay = run.get("replay")
-    else:   # play.run_episode, on the changed rules
-        controller = play.policy(policy_name(job))
-        env = play.TraverseEnvironment(seed, mission=mission)
+    else:   # play.run_episode, on changed rules or the MAX map
+        if board == "max":
+            from lightlag_traverse_max.play import policy as max_policy
+            name = job["policy"] if job["policy"] == "manh_max" and not job.get("options") else (
+                "manh_max:" + json.dumps(job["options"], sort_keys=True) if job["policy"] == "manh_max" else policy_name(job))
+            controller = max_policy(name)
+        else:
+            controller = play.policy(policy_name(job))
+        env = environment()
         tools = play.PublicTools(env)
         started = time.time()
         controller(tools)          # as there, a policy's error propagates: it must not turn into a low score
@@ -311,6 +333,8 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
         row["error"] = None
         if want:
             replay = env.replay()
+    if board == "max":
+        row["trips"] = getattr(env, "_slip_trips", None)   # MAX-map slip-check stops, as lightlag_traverse_max.play counts them
     if job.get("analyse"):   # could the rover still have got home, tick by tick (see analysis.py)
         from .analysis import home_margin
         row.update(analyse=True, home=home_margin(replay))

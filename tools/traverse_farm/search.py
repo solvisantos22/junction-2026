@@ -300,13 +300,16 @@ def search(run_many: RunMany, defaults: Dict[str, Any], *, search_seeds: Sequenc
 
 def evaluate(run_many: RunMany, policies: Dict[str, Dict[str, Any]], seeds: Sequence[int],
              out: Optional[Path] = None, baseline: Optional[str] = "pilot",
-             mission: Optional[Dict[str, Any]] = None, analyse: bool = False) -> Dict[str, Any]:
+             mission: Optional[Dict[str, Any]] = None, analyse: bool = False,
+             board: Optional[str] = None) -> Dict[str, Any]:
     """Several policies on the same worlds. `policies`: name -> job fields (policy, options, program...).
     If `baseline` is one of them, every other policy is also compared with it world by world.
     `mission` changes the rules for every mission (for example {"sun_margin_ticks": 0}); `analyse` adds,
     for every mission, whether the rover could still have got home tick by tick (analysis.py)."""
     ledger = Ledger(out)
     extra = dict({"mission": mission} if mission else {}, **({"analyse": True} if analyse else {}))
+    if board:   # "max": Manh's MAX map (lightlag_traverse_max)
+        extra["map"] = board
     jobs = [dict(spec, candidate=name, seed=seed, **extra) for name, spec in policies.items() for seed in seeds]
     rows = run_many(jobs) if out is None else ledger.play(run_many, jobs)
     table = {name: summarise(rows, name) for name in policies}

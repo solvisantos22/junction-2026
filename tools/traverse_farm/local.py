@@ -41,6 +41,7 @@ def main(argv=None) -> int:
     ev.add_argument("--baseline", default="pilot", help="compare every other policy with this one, world by world")
     ev.add_argument("--mission", type=json.loads, help='change the rules for every mission, as JSON: \'{"sun_margin_ticks": 0}\'')
     ev.add_argument("--analyse", action="store_true", help="also check, tick by tick, whether each rover could still get home")
+    ev.add_argument("--map", choices=["max"], help="play Manh's MAX map (lightlag_traverse_max) instead")
     se = commands.add_parser("search", help="search the pilot's options, then confirm on unseen worlds")
     se.add_argument("--generations", type=int, default=2)
     se.add_argument("--population", type=int, default=4)
@@ -60,7 +61,7 @@ def main(argv=None) -> int:
         if any(spec["policy"] == "program" for spec in policies.values()):
             parser.error("program policies run only on Modal (tools/traverse_farm/modal_app.py)")
         result = search.evaluate(run_many, policies, parse_seeds(args.seeds), out=args.out, baseline=args.baseline,
-                                 mission=args.mission, analyse=args.analyse)
+                                 mission=args.mission, analyse=args.analyse, board=args.map)
         print(format_table(result["table"]))
         if result["versus"]:
             print(format_versus(args.baseline, result["versus"]))
