@@ -209,6 +209,24 @@ matching, costs, protected scores, raw-to-sanitized exports and exact audit
 reproduction. [All checkpoint audits](lightlag-audits/overnight/README.md) and
 [all run rows](lightlag-runs/overnight-a-summary.json) retain the evidence.
 
+## Block A interim checkpoint: eight of nine attempts
+
+A05–A08 add rewards **0.769231, 0, 0, 0.807692**. Together the first eight
+attempts report **$3.4394028**; all eight reproduce exactly without infrastructure
+findings. A09 remains running, so this is still not the finished block.
+
+- Rush 501 now has all three prospective repeats: **0, 0.833333, 0**. Two
+  battery deaths recur under unchanged instructions. A07 collects 10.5 science
+  points but reaches zero battery at tick 50 away from base; it is a different
+  route from A01, which dies at home at 49.
+- Noisy 502 repeats are **0.461538, 0.769231, 0.807692** against reference
+  0.769231: one deficit, one tie, one win. The original queue failure is not a
+  uniformly recurring outcome.
+- Noisy 504 has **0.75, 0** so far. A06 makes a long late excursion, samples d1
+  at tick 34 after its deadline 33, and dies at tick 48 away from base. The
+  audit's large `LATE_SAMPLE` attribution includes the subsequent continuation
+  loss; lateness alone does not explain erasing all science value.
+
 ## Status
 
 Block A protocol was published at `253b263` before new attempts. The live
