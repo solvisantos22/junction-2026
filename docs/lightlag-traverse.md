@@ -1,8 +1,16 @@
 # Lightlag Traverse: a long mission on Mars-like ground, and what Claude did on it
 
+**Superseded** by [`lightlag-traverse-campaign.md`](lightlag-traverse-campaign.md), which adds the three-site campaign that Kristján froze as the submission candidate and its seven Claude agent runs. This page is the earlier write-up of the one-site task.
+
 14 November 2026. Owner: Kristján / Claude Code (gap research chat). Code: [`lightlag_traverse/`](../lightlag_traverse/README.md), task: [`harbor/lightlag-traverse/`](../harbor/lightlag-traverse/) (version 0.1.1), demo: [`viewer/traverse-demo.html`](../viewer/traverse-demo.html). **A proposal for the team, not a rules decision.** Nothing here changes `lightlag/`, `lightlag_dynamic/`, `lightlag_mcp/` or the canonical `harbor/lightlag`.
 
-**Superseded.** This is the first write-up, of the one-site task alone. The current one, with the three-site campaign that Kristján froze as the submission candidate, is [`lightlag-traverse-campaign.md`](lightlag-traverse-campaign.md). The pilot change described below as task 0.1.1 (commit `1545627`) is on `main` since Kristján's merge; the saved one-site agent runs used task 0.1.0, as stated below.
+**Integration note:** Kristján requested the full Traverse branch merge into
+`main`, completed in [`0130fa6`](https://github.com/solvisantos22/junction-2026/commit/0130fa6).
+It includes the task 0.1.1 pilot (`1545627`) and campaign task 0.1.0.
+The merged Traverse suite passes all 75 tests; the 62-test count below records
+the earlier checkpoint. Historical RL source-pin checks still require their
+original source version, and their saved hashes and results remain unchanged.
+The saved agent runs below used task 0.1.0.
 
 Kristján asked for an environment closer to real Mars driving than a 40 m square, harder for Claude, and a much stronger reference to go with it. This page is what was built, what real runs showed, and where it falls short.
 
