@@ -103,9 +103,9 @@ alone does not choose or promote a mission.
 An independent readiness audit found one interface-clarity defect: shared MCP
 descriptions promise a full map and exact visual odometry, whereas dynamic
 rules correctly describe discoveries and noise. A description-only correction
-has passed review in an isolated worktree and will be integrated after B is
-fully exported. It changes no simulator or grader behavior; no evidence shows
-that it caused a historical failure. Old task manifests remain authoritative.
+is now integrated after B finished and passed independent review. All 29 MCP
+and Harbor tests pass. It changes no simulator or grader behavior; no evidence
+shows that it caused a historical failure. Old task manifests remain authoritative.
 
 Do not turn up drain, remove scripting or add real-time penalties just to
 defeat saved traces. If a reusable policy closes the gap, narrow the story to
@@ -165,8 +165,7 @@ view. See [readiness](afterquery-readiness.md) for the submission contract.
 
 ## Active handoff
 
-Run the reviewed bounded synthesis experiment, integrate the isolated
-wording correction after independent B review, update this
+Run the reviewed bounded synthesis experiment and update this
 brief/readiness and reconcile final costs. Current claims and integration
 state are in [TEAM_STATUS.md](../TEAM_STATUS.md). No final project, mission,
 reference, deployment or prize choice has been made on behalf of the team.

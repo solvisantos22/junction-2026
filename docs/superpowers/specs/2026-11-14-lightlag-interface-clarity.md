@@ -38,3 +38,20 @@ the diff to prove only descriptive constants and the generated copy changed.
 Independent review precedes integration. Record the package-byte change and
 retain the old manifests so later model evidence cannot be confused with the
 corrected version. Final mission/profile adoption remains the team's decision.
+
+## Delivered correction and historical reproduction
+
+Integrated as `64fe6db` after Block B was complete and independently verified.
+AST comparison confirms only `INSTRUCTIONS`, `MAP_DESCRIPTION` and
+`TELEMETRY_DESCRIPTION` changed, with the generated canonical copy identical.
+Fresh checks: 18 MCP tests, 11 Harbor tests, copy synchronization and whitespace
+checks all pass. Independent review also checked core/rush/noisy MCP schemas,
+responses, scores and replays, including partial-drive odometry.
+
+The corrected server SHA-256 is
+`a15c05da870cca1ae8a9f8f3bae718a076b8c301757d249bf48abe22cf5e7e59`.
+Package bytes changed; historical A/B tasks and evidence did not. For the B
+exporter's unchanged-source check, use checkout `6fb112f`, not this corrected
+package revision. Do not rewrite old manifest hashes to match current code.
+The synthesis experiment separately imports the declared `02e4f70` snapshot.
+No new paid model run was needed to verify this description-only correction.

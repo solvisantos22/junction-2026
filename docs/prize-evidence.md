@@ -264,6 +264,20 @@ These are recommended evidence choices, not newly asserted official entry requir
   untested. This is presentation work, with no inference cost or external upload.
   The team still chooses the final submission story; no prize entry was made.
 
+### E09 — 14 November — Accurate public tool descriptions
+
+- Codex found and corrected three shared MCP descriptions: dynamic maps can
+  disclose targets later, visual odometry may be noisy, and credited science
+  follows the episode's sampling rules. Kristján's tool/service implementation
+  and Manh's dynamic rules remain unchanged. This is a contract-clarity fix,
+  not an explanation assigned retrospectively to model failures.
+- Prepared in isolation during paid evaluation, integrated only after all B
+  attempts and exports finished. Independent review approved; 18 MCP and 11
+  Harbor tests pass, generated copy matches, AST check limits changes to three
+  descriptive constants. Historical tasks/manifests are preserved.
+- Evidence: code `64fe6db`, [design and verification](superpowers/specs/2026-11-14-lightlag-interface-clarity.md).
+  No inference cost, final profile choice or prize entry.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
