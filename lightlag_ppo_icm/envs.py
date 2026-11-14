@@ -77,3 +77,20 @@ def run_episode(spec, seed, choose, delay=3, config=None, record=False, home_pul
     if record:
         out["ext"] = task.rewards(result, home_pull).astype(np.float32)
     return out
+
+
+def run_target_episode(spec, seed, choose, config=None, record=False):
+    """One traverse mission played by an agent that picks targets (targets.py), with
+    `choose(observation, mask) -> action`. Same result keys as run_episode."""
+    from .targets import TargetTask
+    if spec != "traverse":
+        raise ValueError("target choices are built for the traverse (normal map) only")
+    env = make_env(spec, seed)
+    task = TargetTask(FiveTools(env), config)
+    task.play(choose)
+    result = finish(env)
+    out = {"seed": seed, "share": share(result), "alive": bool(result["alive"]), "at_base": bool(result["at_base"]),
+           "samples": len(result.get("samples", [])), "decisions": len(task.decisions)}
+    if record:
+        out["ext"] = task.rewards(result).astype(np.float32)
+    return out

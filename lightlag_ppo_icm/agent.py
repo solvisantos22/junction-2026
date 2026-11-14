@@ -20,6 +20,11 @@ Burda et al. 2018), so its weight `int_coef` means the same thing all through tr
 policy is trained on  ext_scale * extrinsic + int_coef * intrinsic  with one value network.
 With int_coef = 0 this is plain PPO, which is the ablation the tester offers.
 
+Action masks are optional: an episode may carry `masks` (one row of allowed actions per decision),
+and the policy then never picks a masked action, in play or in the PPO loss (its logit is pushed to
+-1e9, so its probability, its gradient and its share of the entropy are zero). The target mode on
+the traverse (targets.py) masks the targets the rover could not come back from.
+
 `icm_inputs` matters: if the observation echoes the agent's last action, the inverse model
 reads the action straight off that echo, the features hold nothing about the world, and
 curiosity ends up rewarding whatever makes the echo jump. The task adapter therefore shows the
@@ -90,23 +95,29 @@ class Policy:
         if len(self.arrays) % 2 or len(self.arrays) < 2:
             raise ValueError("a policy is a list of weight and bias arrays")
 
-    def logits(self, obs):
+    def logits(self, obs, mask=None):
         h = np.asarray(obs, dtype=np.float64)
         last = len(self.arrays) // 2 - 1
         for i in range(last + 1):
             h = h @ self.arrays[2 * i] + self.arrays[2 * i + 1]
             if i < last:
                 h = np.tanh(h)
-        return h
+        return masked(h, mask)
 
-    def act(self, obs, rng=None):
-        """(action, log-probability). With an rng the action is sampled, without it the mode."""
-        logp = log_softmax(self.logits(obs))
+    def act(self, obs, rng=None, mask=None):
+        """(action, log-probability). With an rng the action is sampled, without it the mode.
+        With a mask (allowed actions True) a masked action is never chosen."""
+        logp = log_softmax(self.logits(obs, mask))
         if rng is None:
             action = int(np.argmax(logp))
         else:
             action = min(len(logp) - 1, int(np.searchsorted(np.cumsum(np.exp(logp)), rng.random())))
         return action, float(logp[action])
+
+
+def masked(logits, mask):
+    """The logits with every action the mask forbids pushed to -1e9 (no mask: unchanged)."""
+    return logits if mask is None else np.where(mask, logits, -1e9)
 
 
 def discounted(rewards, gamma):
@@ -172,12 +183,12 @@ class Agent:
         return 0.5 * ((predicted - phi_next) ** 2).sum(axis=1).astype(np.float64)
 
     # ---- losses and their gradients (checked against finite differences in the tests) ----------
-    def ppo_loss(self, obs, actions, old_logp, adv, ret):
-        """(loss, parts, gradients for actor.params + critic.params)."""
+    def ppo_loss(self, obs, actions, old_logp, adv, ret, mask=None):
+        """(loss, parts, gradients for actor.params + critic.params). `mask`: allowed actions, or None."""
         c, n = self.config, len(obs)
         rows = np.arange(n)
         logits, actor_cache = self.actor.forward(obs)
-        logp_all = log_softmax(logits)
+        logp_all = log_softmax(masked(logits, mask))
         p = np.exp(logp_all)
         logp = logp_all[rows, actions]
         ratio = np.exp(logp - old_logp)
@@ -241,6 +252,10 @@ class Agent:
         actions = np.concatenate([e["actions"] for e in episodes]).astype(np.int64)
         logp = np.concatenate([e["logp"] for e in episodes]).astype(np.float64)
         ext = np.concatenate([e["ext"] for e in episodes]).astype(np.float64)
+        masks = None
+        if any("masks" in e for e in episodes):
+            masks = np.concatenate([e["masks"] if "masks" in e else np.ones((n, c.n_actions), dtype=bool)
+                                    for e, n in zip(episodes, lengths)]).astype(bool)
         ends = np.cumsum(lengths)
         starts = ends - lengths
         has_next = np.ones(len(obs), dtype=bool)
@@ -259,7 +274,7 @@ class Agent:
         for a, b in zip(starts, ends):
             adv[a:b], ret[a:b] = gae(rewards[a:b], values[a:b], c.gamma, c.lam)
         batch = {"obs": obs, "actions": actions, "logp": logp, "adv": adv, "ret": ret,
-                 "next_obs": next_obs, "has_next": has_next}
+                 "next_obs": next_obs, "has_next": has_next, "masks": masks}
         variance = float(ret.var())
         stats = {"steps": int(len(obs)), "episodes": len(episodes),
                  "ext_return": float(ext.sum() / len(episodes)),
@@ -282,8 +297,9 @@ class Agent:
                     continue
                 adv = batch["adv"][idx]
                 adv = (adv - adv.mean()) / (adv.std() + 1e-8)
+                mask = None if batch.get("masks") is None else batch["masks"][idx]
                 _, parts, grads = self.ppo_loss(batch["obs"][idx], batch["actions"][idx],
-                                                batch["logp"][idx], adv, batch["ret"][idx])
+                                                batch["logp"][idx], adv, batch["ret"][idx], mask)
                 parts["grad_norm"] = self.opt.step(grads, lr=c.lr * lr_scale)
                 pairs = idx[batch["has_next"][idx]]
                 if len(pairs) >= 2:
