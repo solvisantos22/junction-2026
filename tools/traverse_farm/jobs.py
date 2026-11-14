@@ -79,7 +79,7 @@ class _CopyingTools:
     """The five tools, handing out and taking in JSON copies, as the MCP server does."""
 
     def __init__(self, tools: Any) -> None:
-        self._tools = tools
+        self._tools, self.tick = tools, 0
 
     @staticmethod
     def _copy(value: Any) -> Any:
@@ -98,7 +98,9 @@ class _CopyingTools:
         return self._copy(self._tools.uplink(self._copy(commands)))
 
     def advance(self, ticks=1):
-        return self._copy(self._tools.advance(ticks))
+        reply = self._copy(self._tools.advance(ticks))
+        self.tick = reply["current_tick"]   # the last tick the program saw, for its row
+        return reply
 
     def tool_names(self):
         return ["rules", "map", "telemetry_log", "uplink", "advance"]
@@ -182,10 +184,30 @@ def _main_thread() -> bool:
     return threading.current_thread() is threading.main_thread()
 
 
-def _run_program(job: Dict[str, Any], tools: Any, time_limit: Optional[float]) -> Optional[str]:
+class _Tail(io.StringIO):
+    """Stands in for a program's stdout and stderr, keeping only the end of what it printed."""
+
+    def __init__(self, size: int = 2000) -> None:
+        super().__init__()
+        self.size = size
+
+    def write(self, text: str) -> int:
+        if self.tell() > 8 * self.size:   # trim now and then, so a chatty program cannot fill the memory
+            rest = self.getvalue()[-self.size:]
+            self.seek(0)
+            self.truncate()
+            super().write(rest)
+        return super().write(text)
+
+    def tail(self) -> str:
+        return self.getvalue()[-self.size:]
+
+
+def _run_program(job: Dict[str, Any], tools: Any, time_limit: Optional[float]) -> Dict[str, Any]:
     """Run a model-written controller once: `play(tools)` from "program", or an agent's script.
 
-    Returns None, or the program's failure as text: a failure is a result, never a harness crash.
+    Returns the program's failure as text (None if it ended normally: a failure is a result, never
+    a harness crash), the last tick it saw, and the end of what it printed.
     """
     if os.environ.get("TRAVERSE_FARM_ALLOW_PROGRAMS") != "1":
         raise PermissionError("program jobs run model-written code; only inside the isolated farm container")
@@ -206,10 +228,10 @@ def _run_program(job: Dict[str, Any], tools: Any, time_limit: Optional[float]) -
     saved_path, saved_modules, saved_cwd = list(sys.path), set(sys.modules), os.getcwd()
     sys.path.insert(0, str(work))
     sys.modules["lightlag_client"] = _client_shim(tools)
-    error = None
+    error, printed = None, _Tail()
     try:
         os.chdir(work)
-        with contextlib.redirect_stdout(io.StringIO()), _time_limit(time_limit):
+        with contextlib.redirect_stdout(printed), contextlib.redirect_stderr(printed), _time_limit(time_limit):
             if script is not None:
                 runpy.run_path(str(script), run_name="__main__")
             else:
@@ -230,7 +252,7 @@ def _run_program(job: Dict[str, Any], tools: Any, time_limit: Optional[float]) -
             sys.modules.pop(name, None)
         sys.modules.pop("lightlag_client", None)
         shutil.rmtree(work, ignore_errors=True)
-    return error
+    return {"error": error, "tick": tools.tick, "printed": printed.tail()}
 
 
 def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
@@ -244,11 +266,18 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
     if job["policy"] == "program":
         env = play.TraverseEnvironment(seed)
         tools = play.PublicTools(env)
-        row["error"] = _run_program(job, tools, job.get("time_limit", 1500))
+        ran = _run_program(job, tools, job.get("time_limit", 1500))
         seconds, calls = time.time() - started, tools.calls
         while not env.advance(5)["episode_complete"]:
             pass
         result = env.evaluate()
+        # Where the program stopped steering, when the rover's battery ran out (None: it did not),
+        # and, if either went wrong, the end of what the program printed.
+        row.update(error=ran["error"], program_tick=ran["tick"], died_tick=None)
+        if not result["alive"]:
+            row["died_tick"] = next(s["tick"] for s in env.replay()["states"] if not s["alive"])
+        if ran["error"] or not result["alive"]:
+            row["printed"] = ran["printed"]
     else:
         run = play.run_episode(play.policy(policy_name(job)), seed)
         result, seconds, calls = run["result"], run["seconds"], run["public_calls"]

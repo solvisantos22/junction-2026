@@ -141,10 +141,10 @@ def versus(rows: List[Dict[str, Any]], baseline: str, candidates: Iterable[str])
 
 # ---- bookkeeping --------------------------------------------------------------------------
 class Ledger:
-    """Every row on disk as it arrives, so an interrupted search resumes without replaying worlds."""
+    """Rows on disk as each part of a run finishes, so an interrupted run resumes without replaying worlds."""
 
-    def __init__(self, folder: Optional[Path]):
-        self.folder, self.rows, self.done = folder, [], {}
+    def __init__(self, folder: Optional[Path], part: int = 400):
+        self.folder, self.rows, self.done, self.part = folder, [], {}, part
         if folder:
             folder.mkdir(parents=True, exist_ok=True)
             path = folder / "rows.jsonl"
@@ -163,15 +163,18 @@ class Ledger:
             if k not in self.done and k not in queued:
                 queued.add(k)
                 todo.append(job)
-        fresh = run_many(todo) if todo else []
-        if self.folder and fresh:
-            with (self.folder / "rows.jsonl").open("a", encoding="utf-8") as stream:
-                for row in fresh:
-                    stream.write(json.dumps(row, sort_keys=True) + "\n")
-        for row in fresh:
-            self.rows.append(row)
-            if "reward" in row:
-                self.done[_mission_key(row)] = row
+        fresh = []
+        for start in range(0, len(todo), self.part):   # saved part by part: a stopped run keeps what it played
+            part = run_many(todo[start:start + self.part])
+            if self.folder and part:
+                with (self.folder / "rows.jsonl").open("a", encoding="utf-8") as stream:
+                    for row in part:
+                        stream.write(json.dumps(row, sort_keys=True) + "\n")
+            for row in part:
+                self.rows.append(row)
+                if "reward" in row:
+                    self.done[_mission_key(row)] = row
+            fresh.extend(part)
         out = []
         for job in jobs:   # relabel cached rows with this job's candidate/generation tags
             cached = self.done.get(_mission_key(job))
