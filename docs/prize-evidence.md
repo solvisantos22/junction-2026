@@ -707,6 +707,8 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
 
 - **Completed fixed feasibility comparison:** protocol/helper published first at `5b5dcb2`; all 240 missions and 10,659 choices/features/commands reproduce, including exact equivalence of all 120 old controls. Charging-aware runs return alive/home120/120 versus70/120; fixed final weights score .093678 → .115034, paired gain .021355 with map-bootstrap95% [.010901,.031750]. Initial and greedy controls also improve; no deaths/invalid calls. This passes the declared development screen on reused maps. It is an interface improvement with unchanged policy weights, not new learning or a fresh Claude result. [Full result/audit](lightlag-rl-feasible-results/README.md).
 
+- **Contextual learning implementation:** [fixed three-seed protocol](lightlag-rl-contextual.md), public candidate/route context, planner teacher collection, imitation-only checkpoints and terminal-reward RL delivered in isolated packages. Reuses Sölvi’s gradient/Adam math and the unchanged reference navigator. Six focused tests and the 54-mission used-map smoke pass: all physics replay, all three optimizer updates and 536 training draws reconstruct, all 42 teacher/evaluation scaffolds re-execute. Production code is published before any reserved training/check map is opened. [Reproduction and scope](lightlag-rl-feasible-results/contextual.md).
+
 ### 14 November — Sölvi / Codex: contextual learning campaign
 
 - **Human direction:** Sölvi asked to investigate Rainbow and alternatives, then use Modal credits for meaningful training before submission; reported $300 shared team credit.
