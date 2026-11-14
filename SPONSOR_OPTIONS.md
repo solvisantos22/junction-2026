@@ -4,6 +4,8 @@ Checked Friday 13 November, approximately 22:10 Helsinki, against all 20 Develop
 
 **Update, Saturday 14 November at 01:35 Helsinki:** Ved announced that **AfterQuery will not supply inference credits**. Harbor packaging, a 0–1 text reward and at least one scored Harbor model run are now explicit. See the [announcement and Lightlag implications](docs/afterquery-update-2026-11-14.md). Other sponsor rows below retain their Friday verification date; they are not confirmation of a redeemed balance.
 
+**Modal update, Saturday 14 November around 02:05 Helsinki:** the participant offer was rechecked and Sölvi's **$100 redemption request was submitted**. The form confirmed processing and said confirmation would arrive by email. The grant has **not yet been verified as applied**. The offer remains $100 of CPU/GPU compute per participant, valid for one year; each teammate needs an existing Modal workspace to claim through the [participant resource](https://hackjunction.app/participate/45/hackerpacks/62). No payment method was added or compute started during the claim.
+
 ## Recommendation for our AfterQuery project
 
 **Start with AfterQuery + Best Use of Codex + one compute provider.** Modal is my initial preference for a deployed evaluation/demo; Verda is particularly attractive if we reach the optional model-training stretch. Add a model prize only when that model does useful, visible work in the project.
@@ -36,7 +38,7 @@ These are fit judgments, not confirmed eligibility decisions or estimates of win
 | [OpenAI](https://hackjunction.app/participate/45/hackerpacks/70) | **$100 / 2,500 Codex usage credits per participant**, 30 days after redemption, one-use personal link; works on Free accounts | Development tooling. **This offer excludes API credits and a paid subscription.** Separate from the prize above. |
 | [Google DeepMind](https://hackjunction.app/participate/45/hackerpacks/68) | Gemini API credits; amount not specified. [Apply once per team](https://forms.gle/bByXvjGkW9WZuYwW9). Challenge page says up to **400 teams**, participants 18+ | Apply early if Gemini is a serious option. Access instructions are supplied to eligible teams. |
 | [Anthropic](https://hackjunction.app/participate/45/hackerpacks/67) | **$20 Claude API credits per participant**; redemption link in the resource entry | Development evaluations or additional model comparisons, subject to AfterQuery harness rules. |
-| [Modal](https://hackjunction.app/participate/45/hackerpacks/62) | **$100 CPU/GPU credits per participant**, valid one year after redemption; Python SDK, Sandboxes, endpoints, storage/queues | Run isolated episodes, parallel evaluations, hosted models and demo endpoints. |
+| [Modal](https://hackjunction.app/participate/45/hackerpacks/62) | **$100 CPU/GPU credits per participant**, valid one year after redemption; rechecked Saturday 02:05. Sölvi's request is processing, not yet a confirmed balance. | Run isolated episodes, evaluations and hosted models. Current Harbor docs list Modal support for Docker Compose tasks; Lightlag compatibility still needs a real test. See the compute/API distinction below. |
 | [Verda](https://hackjunction.app/participate/45/hackerpacks/71) | **€200 credits**, signup + claim form; inference API, CPU/GPU instances, clusters, containers and batch jobs | Alternative compute platform. Verda's tech brief also advertises a hosted NVIDIA Nemotron endpoint. |
 | [Featherless API](https://hackjunction.app/participate/45/hackerpacks/51) | **$50 API credits** via the Junction coupon; hosted open-weight models | Fast route to comparing open models; Gemma prize page explicitly links this provider. |
 | [Featherless GPU](https://hackjunction.app/participate/45/hackerpacks/52) | Bare-metal GPU credits for **selected teams**, amount unspecified; discuss needs with their representatives | Optional training compute; availability is not guaranteed for everyone. |
@@ -52,6 +54,12 @@ These are fit judgments, not confirmed eligibility decisions or estimates of win
 | [Wendy](https://hackjunction.app/participate/45/hackerpacks/56) | Open-source deployment tools for robots/edge devices; simulator available | Useful for a robotics direction, not a dependency for our current software-environment ideas. |
 | [Qualia](https://hackjunction.app/participate/45/hackerpacks/53) | Robot-demo episode curation; temporary event environment closes after **7 days** | Relevant to robot training data; export anything worth keeping. |
 | [Scailab](https://hackjunction.app/participate/45/hackerpacks/50) | Free event Scaipipe access by form; synthetic vision data, annotation, training/evaluation | Relevant if we select a computer-vision environment. |
+
+## Modal compute versus model API costs
+
+Modal's current Harbor example uses `harbor run --env modal`, and Harbor lists Modal support for multi-container tasks through Docker-in-Docker Compose. This is a documented integration path for our sidecar-based task, not a verified Lightlag deployment. Pin the tested Harbor version and check lifecycle, artifact collection and verifier behavior. [Modal example](https://modal.com/docs/examples/harbor_evals), [Harbor support table](https://docs.harborframework.com/tasks/multi-container)
+
+Dedicated Modal endpoints are billed for compute; Shared Endpoints are billed per token. Standard plan-included credits do not cover Shared Endpoint tokens. The Junction offer describes CPU/GPU credits, and its form did not establish separate token-API coverage, so budget it as compute until that is confirmed. Calls to an external model provider need that provider's API access/budget. [Modal endpoint modes](https://modal.com/docs/guide/endpoints), [Shared Endpoint pricing](https://modal.com/docs/guide/shared-endpoints)
 
 ## Other tech prizes and their conditions
 
