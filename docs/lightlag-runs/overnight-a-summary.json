@@ -50,16 +50,17 @@
     },
     {
       "deaths": 1,
-      "deficits": 1,
-      "mean_reward": 0.375,
+      "deficits": 2,
+      "mean_reward": 0.45,
       "model_wins": 1,
-      "n_completed": 2,
+      "n_completed": 3,
       "n_planned": 3,
       "original_exploratory_reward": 0.0,
       "profile": "rush_noisy",
       "prospective_rewards": [
         0.75,
-        0.0
+        0.0,
+        0.6
       ],
       "reference_reward": 0.7,
       "seed": 504,
@@ -71,19 +72,11 @@
   "max_concurrent": 2,
   "max_retries": 0,
   "model": "anthropic/claude-opus-5-5",
-  "n_completed": 8,
+  "n_completed": 9,
   "n_planned": 9,
-  "nominal_credit_after_reported_usage_usd": 12.2605972,
-  "pending": [
-    {
-      "index": 9,
-      "job": "overnight-a09-rush_noisy-504-r3",
-      "profile": "rush_noisy",
-      "repetition": 3,
-      "seed": 504
-    }
-  ],
-  "reported_cost_usd": 3.4394028,
+  "nominal_credit_after_reported_usage_usd": 11.7290184,
+  "pending": [],
+  "reported_cost_usd": 3.9709816,
   "runs": [
     {
       "agent": {
@@ -849,6 +842,102 @@
       "tool_calls": 24,
       "trial_id": "061be8ec-0cf4-4fa9-80b4-b093f71619f1",
       "trial_name": "rush_noisy-502__gu9ciR3"
+    },
+    {
+      "agent": {
+        "model_info": {
+          "name": "claude-opus-5-5",
+          "provider": "anthropic"
+        },
+        "name": "opencode",
+        "version": "1.19.5"
+      },
+      "agent_metrics": {
+        "total_cached_tokens": 656099,
+        "total_completion_tokens": 2612,
+        "total_cost_usd": 0.5315788,
+        "total_prompt_tokens": 656155,
+        "total_steps": 28
+      },
+      "alive": true,
+      "at_base": true,
+      "audit": {
+        "decomposition_adds_up": true,
+        "evidence": "overnight/overnight-a09-rush-noisy-seed504-r3-opus-5-5",
+        "infrastructure_findings": 0,
+        "main_decisions": [
+          {
+            "call": 9,
+            "points_lost": 1.0,
+            "tags": [
+              "STALE_AIM",
+              "SAMPLE_MISSED"
+            ],
+            "tick": 9
+          },
+          {
+            "call": 20,
+            "points_lost": 0.25,
+            "tags": [
+              "SAMPLE_MISSED",
+              "DISCOVERY_MISSED"
+            ],
+            "tick": 24
+          }
+        ],
+        "reference_minus_model": 0.1,
+        "replay_matches": true
+      },
+      "block": "A",
+      "duration_seconds": 273.983738,
+      "evidence": "overnight-a09-rush-noisy-seed504-r3-opus-5-5",
+      "exception": null,
+      "finished_at": "2026-11-14T03:00:40.910536Z",
+      "index": 9,
+      "job": "overnight-a09-rush_noisy-504-r3",
+      "maximum": 10,
+      "original_exploratory_reward": 0.0,
+      "profile": "rush_noisy",
+      "raw_score": 6.0,
+      "reference_evidence": "rush-noisy-seed504-delay3-kf-mpc",
+      "reference_raw": 7.0,
+      "reference_reward": 0.7,
+      "repetition": 3,
+      "reported_cost_usd": 0.5315788,
+      "reward": 0.6,
+      "samples": [
+        {
+          "credited_value": 1,
+          "on_time": true,
+          "target_id": "t1",
+          "tick": 23
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t2",
+          "tick": 6
+        },
+        {
+          "credited_value": 2,
+          "on_time": true,
+          "target_id": "t4",
+          "tick": 14
+        },
+        {
+          "credited_value": 1,
+          "on_time": true,
+          "target_id": "t5",
+          "tick": 20
+        }
+      ],
+      "seed": 504,
+      "started_at": "2026-11-14T02:56:06.926798Z",
+      "task_digest": "sha256:c960c90023db5762665d899102baeeb17cf4e302a1e81c9cb76951c164fcc181",
+      "tick": 50,
+      "tool_calls": 27,
+      "trial_id": "156259c1-4344-4788-aed6-8bb27ca06dbf",
+      "trial_name": "rush_noisy-504__Ln3pc25"
     }
   ],
   "schema_version": 1,

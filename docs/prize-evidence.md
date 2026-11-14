@@ -160,7 +160,10 @@ These are recommended evidence choices, not newly asserted official entry requir
   [audit index](lightlag-audits/overnight/README.md). Five attempts remain in
   this declared block at that checkpoint. A05–A08 now add **0.769231, 0, 0,
   0.807692**, bringing reported usage to **$3.4394028** for eight attempts;
-  all eight replay exactly without infrastructure findings. A09 remains.
+  all eight replay exactly without infrastructure findings. A09 completes the
+  block at **0.6**, alive at base. Final A total: **$3.9709816**, 2 wins, 2 ties,
+  5 deficits and 3 battery deaths; all nine exact replays, no infrastructure
+  findings. All original selection triggers stay separate from repeat counts.
 - Usage reports are not verified balances. No Modal/Gemini use or prize entry.
 
 ### E07 — 14 November — Decision-focused offline replay demo

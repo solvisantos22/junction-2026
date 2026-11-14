@@ -249,8 +249,43 @@ findings. A09 remains running, so this is still not the finished block.
   audit's large `LATE_SAMPLE` attribution includes the subsequent continuation
   loss; lateness alone does not explain erasing all science value.
 
+## Block A complete: all nine declared attempts
+
+All nine fresh sessions finished without provider or execution exceptions.
+Every saved public transcript reconstructs its complete replay exactly; every
+audit reports zero infrastructure findings. Reported usage is **$3.9709816**.
+There were no retries, replacements or early efficacy stopping.
+
+| Selected case | Original model (selection trigger) | Three NEW rewards, in order | New mean | Deaths | Frozen reference |
+|---|---:|---|---:|---:|---:|
+| rush 501 | 0 | 0, 0.833333, 0 | 0.277778 | 2/3 | 0.833333 |
+| rush_noisy 502 | 0.634615 | 0.461538, 0.769231, 0.807692 | 0.679487 | 0/3 | 0.769231 |
+| rush_noisy 504 | 0 | 0.75, 0, 0.6 | 0.45 | 1/3 | 0.7 |
+
+The nine repeats contain **2 model wins, 2 ties, 5 deficits**, including three
+battery deaths, against the unchanged reference. The original outcomes are
+not included in those counts. This establishes conditional recurrence on the
+selected energy cases, not the prevalence of failure over generated maps.
+The original noisy-502 deficit does not recur uniformly, and audit heuristics
+do not establish that the one new deficit has the same cause.
+
+A09 ends alive at base with four on-time samples and 6/10 reward. It misses
+science rather than losing survival. Its audited one-point main loss is a
+failed sample; an inferred aiming explanation remains a heuristic. Preserve
+this outcome alongside both the death and the 0.75 win on the same map.
+
+The available evidence supports a testable accounting/commitment hypothesis,
+not a broad inability to perform delayed control. B was fixed before its own
+outcomes and now tests whether a generic prompt aid changes these diagnostic
+results. It uses new contemporaneous controls rather than choosing the most
+favorable historical baseline. The user's nominal remaining credit after A is
+**$11.7290184** (reported starting balance minus reported usage, not an account
+balance check). The cumulative launch guard remains $12 for A plus all later
+blocks.
+
 ## Status
 
-Block A protocol was published at `253b263` before new attempts. The live
-[summary](lightlag-runs/overnight-a-summary.json) records completed attempts,
-pending cases and reported usage; partial results are not the finished block.
+Block A protocol was published at `253b263` before new attempts; all nine are
+now complete in the [summary](lightlag-runs/overnight-a-summary.json). Block B
+was published at `6e1cfe3` before its outcomes. The earlier interim checkpoints
+above are retained as history; the completed table is authoritative for A.
