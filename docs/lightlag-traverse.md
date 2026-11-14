@@ -2,6 +2,13 @@
 
 14 November 2026. Owner: Kristján / Claude Code (gap research chat). Code: [`lightlag_traverse/`](../lightlag_traverse/README.md), task: [`harbor/lightlag-traverse/`](../harbor/lightlag-traverse/) (version 0.1.1), demo: [`viewer/traverse-demo.html`](../viewer/traverse-demo.html). **A proposal for the team, not a rules decision.** Nothing here changes `lightlag/`, `lightlag_dynamic/`, `lightlag_mcp/` or the canonical `harbor/lightlag`.
 
+**Publication note:** this report describes the candidate pilot/task change in
+local commit `1545627`.
+That implementation remains local pending compatibility with the retained RL
+source manifests; publishing this report does not promote task 0.1.1. The
+0.1.1 behavior and 62-test count below refer to that candidate. The saved agent
+runs used task 0.1.0, as stated below.
+
 Kristján asked for an environment closer to real Mars driving than a 40 m square, harder for Claude, and a much stronger reference to go with it. This page is what was built, what real runs showed, and where it falls short.
 
 ## Bottom line
@@ -55,7 +62,7 @@ None of the seven Opus and Sonnet runs used more than a quarter of its 30 minute
 
 ## The same programs on other worlds
 
-A score on one world says little about a program. Kristján's other session built a farm on Modal and played the reference and seven saved Claude programs on the same 300 fresh worlds (seeds 600 to 899), paired. The full table, method and caveats are in [`traverse-farm.md`](traverse-farm.md); the summary:
+A score on one world says little about a program. Kristján's other session built a farm on Modal and played the reference and six saved Claude programs on the same 300 fresh worlds (seeds 600 to 899), paired. The full table, method and caveats are in [`traverse-farm.md`](traverse-farm.md); the summary:
 
 | Policy | Mean | Rovers lost | Ended away | Higher / same / lower than the reference |
 |---|---|---|---|---|
