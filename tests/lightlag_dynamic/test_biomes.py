@@ -332,6 +332,23 @@ class EntryPointTest(unittest.TestCase):
                          play(make_biome_env(MAIN, 3, 3, "rush")).evaluate()["raw_score"])
 
 
+    def test_a_biome_through_a_real_mcp_client(self):
+        try:
+            from lightlag_mcp.client import connect
+            from lightlag_mcp.server import build_server
+        except ImportError:
+            self.skipTest("the mcp package is not installed")
+        service = BiomeEpisodeService(seed=7, biome="troy_crust+relay_pass", profile="rush_noisy",
+                                      config=Config(delay_ticks=3, max_ticks=50))
+        with connect(build_server(service)) as tools:
+            self.assertEqual(sorted(tools.tool_names()), ["advance", "map", "rules", "telemetry_log", "uplink"])
+            self.assertEqual([b["id"] for b in tools.rules()["biome"]], ["troy_crust", "relay_pass"])
+            self.assertIn("crust_regions", tools.map())
+            POLICIES["kf_mpc"](tools)
+        direct = play(make_biome_env("troy_crust+relay_pass", 7, 3, "rush_noisy")).evaluate()
+        self.assertEqual(service.finish()["raw_score"], direct["raw_score"])
+
+
 @unittest.skipUnless(HAVE_NUMPY, "the trial plays the Manh controllers, which need numpy")
 class TrialTest(unittest.TestCase):
     def test_trial_ranks_controllers_per_biome(self):

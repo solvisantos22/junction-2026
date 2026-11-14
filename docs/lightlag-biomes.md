@@ -20,7 +20,7 @@ python3 -m lightlag_dynamic.biomes --list                                     # 
 python3 -m lightlag_dynamic.biomes --biome troy_crust --profile rush_noisy --seed 7 --delay 3 < script.jsonl
 python3 -m lightlag_dynamic.biomes.serve --biome relay_pass --profile rush --seed 7 --delay 3   # over MCP
 python3 -m lightlag_dynamic.biomes.trial --seeds 2000-2039                    # the early test below (needs numpy)
-python3 -m unittest tests.lightlag_dynamic.test_biomes                        # 23 tests, about 5 seconds
+python3 -m unittest tests.lightlag_dynamic.test_biomes                        # 24 tests, about 6 seconds
 ```
 
 In Python: `make_biome_env("troy_crust", seed=7, delay=3, profile="rush_noisy")`. Biomes mix with `+`, for example `troy_crust+relay_pass`. `gale_rock_field+hidden_valley` is refused, because the rough-ground drive loop does not run the onboard slip check.
