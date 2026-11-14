@@ -158,15 +158,19 @@ class RewardTests(unittest.TestCase):
     def test_the_pull_toward_home_moves_reward_earlier_without_changing_the_total(self):
         for spec, seed in (("rush", 300008), ("rush_noisy", 300010), ("max", 300011)):
             task, _, result, _, _, _ = play(spec, seed, plain_chooser(CONFIG))
-            plain, pulled = task.rewards(result), task.rewards(result, home_pull=True)
+            plain = task.rewards(result)
             self.assertEqual(len(task.trace), len(task.decisions))
-            self.assertAlmostEqual(float(pulled.sum()), share(result), places=9, msg=spec)
-            self.assertAlmostEqual(float(pulled.sum()), float(plain.sum()), places=9)
+            for strength in (1.0, 4.0):
+                pulled = task.rewards(result, home_pull=strength)
+                self.assertAlmostEqual(float(pulled.sum()), share(result), places=9, msg=spec)
+                self.assertAlmostEqual(float(pulled.sum()), float(plain.sum()), places=9)
+            np.testing.assert_allclose(task.rewards(result, home_pull=4.0) - plain,
+                                       4.0 * (task.rewards(result, home_pull=1.0) - plain), atol=1e-12)
         # rush 300008: the rule samples, then drives home. On the way home the pull pays, and the
         # last decision, which without it carries the whole bonus for being home, carries less.
         task, _, result, _, _, _ = play("rush", 300008, plain_chooser(CONFIG))
         self.assertTrue(result["at_base"] and result["samples"])
-        plain, pulled = task.rewards(result), task.rewards(result, home_pull=True)
+        plain, pulled = task.rewards(result), task.rewards(result, home_pull=1.0)
         last_sample = max(i for i, (_, action) in enumerate(task.decisions) if action == SAMPLE)
         distances = [d for _, d in task.trace]
         approaching = [i for i in range(last_sample + 1, len(distances) - 1) if distances[i + 1] < distances[i] - 0.5]
@@ -175,7 +179,7 @@ class RewardTests(unittest.TestCase):
         self.assertLess(pulled[-1], plain[-1])
         # No value sampled: nothing to pull with.
         task, _, result, _, _, _ = play("rush", 300008, lambda obs: FIRST_DRIVE)
-        np.testing.assert_array_equal(task.rewards(result, home_pull=True), task.rewards(result))
+        np.testing.assert_array_equal(task.rewards(result, home_pull=1.0), task.rewards(result))
 
     def test_the_plain_chooser_scores_from_the_observation_alone(self):
         rows = [run_episode("rush", seed, plain_chooser(CONFIG)) for seed in range(300012, 300020)]

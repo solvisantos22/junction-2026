@@ -35,15 +35,16 @@ Reward: the official score, cut into pieces so that the rewards of an episode ad
 raw_score / max_available_value exactly: half of each sample's credited value when it is taken,
 and at the last decision the rest (plus the other half at base, minus it if the rover died).
 
-Optional (rewards(..., home_pull=True)): the half that being home is worth is paid out along the
+Optional (rewards(..., home_pull=k)): the half that being home is worth is paid out along the
 way instead of only at the end. With the potential
 
-    phi = 1/2 * (value sampled so far / all value) * D / (D + distance to base),   D = 8 base radii
+    phi = k * 1/2 * (value sampled so far / all value) * D / (D + distance to base),   D = 8 base radii
 
 each decision also gets phi(next) - phi(now), and the last one gives phi back. The pieces still
 add up to the official score (the potential starts and ends at 0), and no policy becomes better or
-worse by it (Ng, Harada and Russell 1999); it only tells the agent sooner. Distance and value are
-the adapter's own belief, not the evaluator's truth.
+worse by it (Ng, Harada and Russell 1999); it only tells the agent sooner. k = 1 is exactly the
+bonus for being home; a larger k pulls harder and takes more back at the end. Distance and value
+are the adapter's own belief, not the evaluator's truth.
 """
 
 from dataclasses import dataclass
@@ -79,9 +80,9 @@ class TaskConfig:
     def curiosity_inputs(self):
         """The observation entries the curiosity module sees: the clock, the battery, the ground
         under the rover, whether it is alive, how many targets are open, the value sampled so far,
-        then the base, the targets and the view. Left out: the previous command and the last heading (echoes of the agent's own
-        action), and the adapter's bookkeeping about the link, stops and the belief, which jumps for
-        reasons that are not worth being curious about."""
+        then the base, the targets and the view. Left out: the previous command and the last
+        heading (echoes of the agent's own action), and the adapter's bookkeeping about the link,
+        stops and the belief, which jumps for reasons that are not worth being curious about."""
         return (0, 1, 6, 7, 12, 21, 22) + tuple(range(GLOBAL, self.obs_dim))
 
     def to_dict(self):
@@ -251,7 +252,7 @@ class RoverTask:
                 self.credited[near[1]] = self._worth(near[1], slot)
         return slot
 
-    def rewards(self, result, home_pull=False):
+    def rewards(self, result, home_pull=0.0):
         """The extrinsic reward of every decision; they add up to raw_score / max_available_value.
         With `home_pull`, what being home is worth is paid along the way (see the module text)."""
         out = np.zeros(len(self.decisions))
@@ -266,7 +267,7 @@ class RoverTask:
         out[-1] += (result["survival_factor"] - 0.5) * value / total
         if home_pull:
             scale = 8.0 * self.base_radius
-            phi = np.array([0.5 * min(1.0, taken / total) * scale / (scale + distance)
+            phi = np.array([float(home_pull) * 0.5 * min(1.0, taken / total) * scale / (scale + distance)
                             for taken, distance in self.trace] + [0.0])
             out += phi[1:] - phi[:-1]
         return out

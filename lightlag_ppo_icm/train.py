@@ -43,7 +43,7 @@ def collect(job):
             return action
 
         episode = run_episode(job["env"], seed, choose, job["delay"], config, record=not job["greedy"],
-                              home_pull=job.get("home_pull", False))
+                              home_pull=job.get("home_pull", 0.0))
         if not job["greedy"]:
             episode.update(obs=np.asarray(obs, dtype=np.float32), actions=np.asarray(actions, dtype=np.int16),
                            logp=np.asarray(logps, dtype=np.float32))
@@ -51,7 +51,7 @@ def collect(job):
     return out
 
 
-def rollouts(pool, workers, actor, task, env, delay, episodes, greedy=False, home_pull=False):
+def rollouts(pool, workers, actor, task, env, delay, episodes, greedy=False, home_pull=0.0):
     """Episodes [(seed, sampling seed), ...] spread over the workers; results in the same order."""
     chunks = [episodes[i::workers] for i in range(workers) if episodes[i::workers]]
     jobs = [{"actor": actor, "task": task.to_dict(), "env": env, "delay": delay, "episodes": chunk,
@@ -74,13 +74,14 @@ def summary(episodes):
 def train(env="max", out="lightlag_ppo_icm/runs/max", updates=300, episodes=256, workers=8, delay=3, seed=0,
           int_coef=0.5, int_final=0.1, lr=3e-4, lr_final=0.3, icm_lr=1e-3, ent_coef=0.01, hidden=128, headings=16,
           wait_bias=4.0, sample_bias=2.0, eval_every=10, train_seeds=TRAIN_SEEDS, dev_seeds=DEV_SEEDS,
-          max_minutes=None, quiet=False, metres="auto", home_pull=False):
+          max_minutes=None, quiet=False, metres="auto", home_pull=0.0):
     """Train once and return the summary that is also written to <out>/summary.json."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     if (out / "log.jsonl").exists():
         raise ValueError(f"{out} already holds a run; give a new folder")
-    task = TaskConfig(headings=headings, metres=drive_lengths(env, delay) if metres == "auto" else tuple(metres))
+    lengths = drive_lengths(env, delay) if metres == "auto" else tuple(metres)
+    task = TaskConfig(headings=headings, metres=lengths)
     agent = Agent(AgentConfig(obs_dim=task.obs_dim, n_actions=task.n_actions, hidden=hidden, lr=lr,
                               icm_lr=icm_lr, ent_coef=ent_coef, int_coef=int_coef, seed=seed,
                               icm_inputs=task.curiosity_inputs))
@@ -132,7 +133,8 @@ def train(env="max", out="lightlag_ppo_icm/runs/max", updates=300, episodes=256,
                             f"home {100 * row['train_home']:3.0f}%  samples {row['train_samples']:.2f}  "
                             f"entropy {row['entropy']:.2f}  curiosity {row['int_raw']:.4f}")
                     if "dev_share" in row:
-                        line += f"  | dev {100 * row['dev_share']:5.1f}% (best {100 * best['share']:.1f}% at {best['update']})"
+                        line += (f"  | dev {100 * row['dev_share']:5.1f}% "
+                                 f"(best {100 * best['share']:.1f}% at {best['update']})")
                     print(line, flush=True)
                 if out_of_time:
                     break
@@ -192,9 +194,9 @@ def main(argv=None):
                                              "auto: 2/3, 4/3 and 8/3 of the sampling radius")
     parser.add_argument("--wait-bias", type=float, default=4.0, help="starting logit of wait (drives start at 0)")
     parser.add_argument("--sample-bias", type=float, default=2.0, help="starting logit of sample")
-    parser.add_argument("--home-pull", action="store_true",
-                        help="pay what being home is worth along the way (a potential; the pieces still add up "
-                             "to the official score)")
+    parser.add_argument("--home-pull", type=float, default=0.0, metavar="K",
+                        help="pay what being home is worth along the way: a potential K times the bonus for "
+                             "being home, so the pieces still add up to the official score; 0: off")
     parser.add_argument("--eval-every", type=int, default=10)
     parser.add_argument("--train-seeds", type=seed_pair, default=TRAIN_SEEDS, help="e.g. 200000-299999")
     parser.add_argument("--dev-seeds", type=seed_pair, default=DEV_SEEDS)

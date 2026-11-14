@@ -65,7 +65,7 @@ def share(result):
     return result["raw_score"] / result["max_available_value"] if result["max_available_value"] else 0.0
 
 
-def run_episode(spec, seed, choose, delay=3, config=None, record=False, home_pull=False):
+def run_episode(spec, seed, choose, delay=3, config=None, record=False, home_pull=0.0):
     """Play one episode with `choose(observation) -> action`. Returns the score and, with `record`,
     the per-decision rewards. The chooser sees observations only: no environment, no seed."""
     env = make_env(spec, seed, delay)
