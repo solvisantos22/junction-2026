@@ -62,6 +62,22 @@ The pilot scores higher than every saved Claude program on 288 to 300 of the 300
 
 Read with care: an agent's program was written during its own mission on world 2026 and is replayed here on worlds it never saw, with no agent watching. This measures the program, not the agent, which in a mission could notice trouble and step in. The one-request programs were written without seeing any world, so for them fresh worlds are a fair test.
 
+## The campaign's worlds, 2027–2029
+
+At the Traverse owner's request, for its three-mission campaign task (`harbor/lightlag-traverse-campaign/` 0.1.0, commit `3bff7b2` on the Traverse branch): the pilot and the six saved programs on exactly the campaign's worlds, each world as a single mission under the unchanged 0.1.0 rules, played with that commit's Traverse code (Modal app `ap-EBzft92juMbdAafja7f7U1`, rows in [`traverse-farm/campaign-worlds/`](traverse-farm/campaign-worlds/)). "Campaign" is the campaign's own score: the value credited in all three missions over the value there was in all three.
+
+| Policy | 2027 | 2028 | 2029 | Campaign |
+|---|---|---|---|---:|
+| Reference pilot | 0.459 lander | 0.508 lander | 0.460 lander | 0.476 |
+| One-request Opus 1 | 0.375 lander | 0.417 lander | 0.292 lander | 0.362 |
+| Opus agent 1 | 0.280 lander | 0.216 away | 0.186 away | 0.227 |
+| Opus agent 3 | 0.000 lost | 0.457 lander | 0.000 lost | 0.157 |
+| One-request Sonnet 1 | 0.099 lander | 0.069 away | 0.151 lander | 0.106 |
+| One-request Haiku 1 | 0.030 away | 0.004 away | 0.000 lost | 0.011 |
+| Sonnet agent 1 | 0.000 lost | 0.000 lost | 0.000 lost | 0.000 |
+
+The pilot's three missions repeat the campaign's Harbor reference run mission for mission (0.459, 0.508, 0.460; campaign 0.476), a check of the farm against Harbor. Every program scores below the pilot on every one of the three worlds. These are the saved programs, written for one mission on world 2026 and replayed without their agents, one world at a time: a measure of the programs, not of agents playing the campaign. Opus agent 1's score varies from run to run (see Demo worlds).
+
 ## Demo worlds: whole missions on fresh ground
 
 Two fresh worlds recorded whole for the demo, on the published 0.1.0 rules (the rules the saved programs were written for): the pilot as the reference, and three agent programs replayed without their agents (Modal app `ap-j4LFeiVghpOyQhGreAsUnH`). Open the page, press Enter, and Tab or click a name to follow that rover.
