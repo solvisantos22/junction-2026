@@ -562,6 +562,8 @@ These are recommended evidence choices, not newly asserted official entry requir
 - **Verification at preparation:** eight tests pass, including full seed-1 replay and RNG equivalence with persistence disabled, full-horizon official grading with persistence enabled, target removal/reordering, home release, invalid proposals and episode isolation. Production diagnostic has not run at this increment.
 - **Scope and limits:** a goal-interface intervention on reused training maps; no new training, cloud/API spend, frontier-gap result, environment promotion or prize submission. Rainbow is a sourced follow-up candidate, not implemented or claimed used.
 
+- **Verified pipeline:** all 21 focused tests pass. The [20-case smoke audit](lightlag-rl-persistence-results/smoke/audit.json) reconstructs full physics/grades and 877 proposal/effective-choice records against 42 source pins. Candidate/feature extraction and choice-to-command linkage are source-pinned; limitations retained. [Results/handoff](lightlag-rl-persistence-results/README.md). No production diagnostic result claimed yet.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
