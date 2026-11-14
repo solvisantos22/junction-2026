@@ -16,6 +16,14 @@ failed checks, substantive conflicts and uncertain ownership are reported and
 deferred. It never force-pushes or changes project rules. A task still being in
 progress does not prevent a finished, verified increment from being published.
 
+Saved model source may retain trailing whitespace from its original trajectory.
+The watcher records the unrestricted whitespace-check findings, verifies the
+flagged lines against that trajectory, checks the archived file bytes and parses
+the source without executing it. When those are the only findings, it can repeat
+the whitespace check excluding those exact archive files and continue the other
+required checks. It preserves the evidence bytes; this exception does not waive
+test failures, conflict markers, or whitespace in project code.
+
 ## Local operation
 
 The installed macOS LaunchAgent is `com.krissi.junction-main-push-2026`, with
