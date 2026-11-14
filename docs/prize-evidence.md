@@ -564,6 +564,8 @@ These are recommended evidence choices, not newly asserted official entry requir
 
 - **Verified pipeline:** all 21 focused tests pass. The [20-case smoke audit](lightlag-rl-persistence-results/smoke/audit.json) reconstructs full physics/grades and 877 proposal/effective-choice records against 42 source pins. Candidate/feature extraction and choice-to-command linkage are source-pinned; limitations retained. [Results/handoff](lightlag-rl-persistence-results/README.md). No production diagnostic result claimed yet.
 
+- **Completed diagnostic:** [240 missions and audit](lightlag-rl-persistence-results/development/audit.json), all at full horizon, no deaths/invalid calls. Initial-policy score 1.85% → 7.76%; paired gain .059166 (95% .048852–.069154), positive on 24/24 reused maps. **Declared screen fails** the return check 33/48 → 29/48. All 10,479 proposals/effective choices audited. The neural weights were unchanged; this is a commitment-rule effect, not new learning. No Modal/API spend; saved-return diagnosis follows.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
