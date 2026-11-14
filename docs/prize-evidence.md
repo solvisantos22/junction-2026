@@ -517,6 +517,23 @@ These are recommended evidence choices, not newly asserted official entry requir
   hypothesis. No API spend, candidate source edit, project selection or prize
   submission. Teammate implementations and attribution are preserved.
 
+### R18 — 14 November — Replay an existing Opus autopilot before another build
+
+- **Human direction:** Sölvi approved testing the previously strongest saved
+  Opus program against the four-rule mission, inspecting failures, and adapting
+  it only if warranted before a separate fresh check.
+- **Codex contribution:** predeclared policy selection and retirement criteria;
+  a separate Docker broker with public-only access, full-horizon grading and
+  explicit failure statuses; retained per-case evidence and an independent
+  transcript/replay/metrics audit. Existing policy and teammate code unchanged.
+- **Initial verification:** eight real-Docker integration checks pass, covering
+  interface equivalence, isolation, paused simulation time, policy failures,
+  invalid calls, limits and cleanup. The full free replay follows this verified
+  runner increment; no new model result is claimed by preparation.
+- **Artifacts:** [frozen protocol](rule-transfer.md),
+  [results and handoff](rule-transfer-results/README.md),
+  [isolated tools](../tools/rule_transfer/). No API spend or prize submission.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
