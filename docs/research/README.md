@@ -22,6 +22,14 @@ and an isolated exact-solver probe. Read both before choosing the next mechanism
 The [ground-change prototype](../lightlag-shift.md) is another existing teammate
 effort to assess; neither candidate has yet demonstrated a current-model gap.
 
+Learning methods: [Which learning methods could beat our environments?](2026-11-14-learning-methods-brainstorm.md)
+— 14 November, Manh / Claude Code. Five picks to accept or deny: a home guard
+that saves the energy for the trip home, copying a teacher before RL, search
+plus a learned value, attention routing networks, and a teacher that sees the
+hidden values. Advises keeping PPO with curiosity switched off, and lists about
+245 checked papers, competitions and award winners. A brainstorm; nothing
+trained, no team decision.
+
 The earlier reviews below are retained as historical decision support. Their
 candidate rankings predate the implemented Lightlag experiments.
 
