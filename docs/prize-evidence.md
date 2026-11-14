@@ -555,6 +555,13 @@ These are recommended evidence choices, not newly asserted official entry requir
 - **Result:** initial mean .016744 → trained .024835; paired gain .008091, map-bootstrap 95% interval [.004038, .012592]. The declared screen **fails** the .03 gain and return-count thresholds (62/80 → 58/80); no deaths or invalid calls. Greedy scores .232840 but returns less often. Independent read-only review reproduces the comparison. [Saved-trace diagnosis](lightlag-rl-results/diagnosis.json) motivates testing persistent target choices; no follow-up training or environment edit was made. Check seeds 72000–72039 consumed.
 - **Artifacts and scope:** [protocol](lightlag-rl.md), [final decision and reproducible handoff](lightlag-rl-results/README.md), [learning code](../lightlag_rl/), [Modal launcher](../tools/lightlag_rl/modal_job.py). Only target selection learns; navigation and safeguards stay fixed. One training seed, no frontier-gap claim, final task choice, canonical environment change or prize submission. Preparation used eight real smoke episodes and twelve smoke comparison episodes on already-used maps 1/2; those weights were retained only for verification.
 
+### R20 — 14 November — Test persistent goals before more RL training
+
+- **Human direction:** Sölvi approved testing goal persistence, suggested Rainbow as a possible learner and reported $300 total shared team Modal credit. This diagnostic uses local compute only; the credit amount is user-reported, not a verified balance.
+- **Codex contribution:** isolated goal-commitment wrapper, fixed paired development protocol and controls. Existing environment, navigator, frozen weights and first training experiment remain unchanged. [Protocol](lightlag-rl-persistence.md), [wrapper](../lightlag_rl_persistence/chooser.py).
+- **Verification at preparation:** eight tests pass, including full seed-1 replay and RNG equivalence with persistence disabled, full-horizon official grading with persistence enabled, target removal/reordering, home release, invalid proposals and episode isolation. Production diagnostic has not run at this increment.
+- **Scope and limits:** a goal-interface intervention on reused training maps; no new training, cloud/API spend, frontier-gap result, environment promotion or prize submission. Rainbow is a sourced follow-up candidate, not implemented or claimed used.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
