@@ -6,7 +6,7 @@ Harbor task, KF + MPC reference and decision auditor.
 ## Predeclared protocol
 
 The user approved the next comparison after Claude solved both seed-500 pilots.
-This protocol and the claim in `TEAM_STATUS.md` are published before inspecting
+This protocol and the claim in `TEAM_STATUS.md` were published as `02e4f70` before inspecting
 any score on the new seed set. The choice is the next four consecutive seeds,
 **501, 502, 503, 504**; no selection based on performance. Seed 501 was previously
 used in a generator test at delay 5, not as a model outcome in this comparison.
@@ -55,8 +55,36 @@ and one model attempt per condition, not evidence of broad generalization or
 run-to-run reliability. Difficulty tuning and final mission choice remain team
 decisions. Do not change rules during this comparison.
 
+## Reference verification
+
+All eight generated tasks passed Harbor lint. They were generated from clean
+commit `02e4f70`; every source-file hash matches the seed-500 pilots. Only the
+predeclared seed/profile configuration and task name vary. Harbor **0.25.0**,
+MCP **2.3.0**, Python **3.12.16**, Docker server **29.7.2**; container base tags
+remain unpinned. No implementation code changed.
+
+Eight Harbor reference runs reached tick 50, alive at base, with no execution
+exceptions. All match their direct public-tool counterparts to reward-file
+precision. The other three policies below were run directly, not in Harbor.
+
+| Seed | Profile | KF + MPC (Harbor) | Blind (direct) | Whole-leg waiting (direct) | No-op (direct) |
+|---|---|---:|---:|---:|---:|
+| 501 | `rush` | [0.833333](lightlag-runs/rush-seed501-delay3-kf-mpc/) | 0.583333 | 0.583333 | 0.000000 |
+| 501 | `rush_noisy` | [0.666667](lightlag-runs/rush-noisy-seed501-delay3-kf-mpc/) | 0.416667 | 0.541667 | 0.000000 |
+| 502 | `rush` | [0.615385](lightlag-runs/rush-seed502-delay3-kf-mpc/) | 0.538462 | 0.538462 | 0.000000 |
+| 502 | `rush_noisy` | [0.769231](lightlag-runs/rush-noisy-seed502-delay3-kf-mpc/) | 0.538462 | 0.269231 | 0.000000 |
+| 503 | `rush` | [0.750000](lightlag-runs/rush-seed503-delay3-kf-mpc/) | 0.625000 | 0.593750 | 0.000000 |
+| 503 | `rush_noisy` | [0.625000](lightlag-runs/rush-noisy-seed503-delay3-kf-mpc/) | 0.625000 | 0.406250 | 0.000000 |
+| 504 | `rush` | [0.700000](lightlag-runs/rush-seed504-delay3-kf-mpc/) | 0.600000 | 0.575000 | 0.000000 |
+| 504 | `rush_noisy` | [0.700000](lightlag-runs/rush-noisy-seed504-delay3-kf-mpc/) | 0.600000 | 0.275000 | 0.000000 |
+
+These reference scores range from 0.615385 to 0.833333. A model score below 1.0
+will not by itself demonstrate a model deficit: compare each with its matched
+reference, and distinguish missed value from failures of the harness.
+[Machine-readable reference and direct evidence](lightlag-runs/fixed-seeds501-504-summary.json).
+
 ## Execution status
 
-Predeclared; no new outcomes yet. Publish verified reference evidence first,
-then model results and audits in small increments. Final handoff will state
-what the measured gaps support and which decisions remain open.
+Reference verification complete; **0 of 8 model attempts run**. Model outcomes
+and audits will be published in ascending-seed batches. No model result is
+inferred from these scripted controls.

@@ -90,6 +90,22 @@ These are recommended evidence choices, not newly asserted official entry requir
   handoff recommends additional predeclared seeds and decision auditing before
   choosing final rules. No Modal/Gemini use or additional-prize entry is implied.
 
+### R03 — 14 November — Fixed seed comparison beyond the pilots
+
+- The user approved a fixed additional seed comparison. Sölvi / Codex published
+  claim/protocol `02e4f70` before outcomes: seeds 501–504, both `rush` profiles,
+  unchanged rules and original KF + MPC, eight planned fresh Claude attempts.
+- Codex froze eight isolated Harbor tasks, checked all source hashes against
+  the earlier pilots, ran eight matched Harbor references and 32 direct
+  public-tool controls, and checked exported scores/manifests/credential absence.
+- Reference-only increment: all eight Harbor runs match direct scores, range
+  **0.615385–0.833333**, alive at base, no exceptions. Model runs pending; no
+  model deficit inferred from these controls. No inference cost in this increment.
+- [Predeclared protocol, results and limitations](lightlag-fixed-seed-comparison.md),
+  [machine-readable evidence](lightlag-runs/fixed-seeds501-504-summary.json).
+- Team components retain their original authorship; Codex's contribution is
+  experiment orchestration and verification. No Modal/Gemini use or prize entry.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
