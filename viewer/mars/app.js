@@ -175,6 +175,7 @@ const MAT = {
   metal: new THREE.MeshStandardMaterial({ color: 0x8d8a86, roughness: 0.4, metalness: 0.8 }),
   solar: new THREE.MeshStandardMaterial({ color: 0x1b2f6b, roughness: 0.3, metalness: 0.6, emissive: 0x0a1433, emissiveIntensity: 0.6 }),
   gold: new THREE.MeshStandardMaterial({ color: 0xd19a3a, roughness: 0.45, metalness: 0.85 }),
+  accent: new THREE.MeshStandardMaterial({ color: 0xff7a2a, roughness: 0.5, metalness: 0.2, emissive: 0x4a1800, emissiveIntensity: 0.7 }),
   lens: new THREE.MeshStandardMaterial({ color: 0x0d1b22, emissive: 0x5ce1ff, emissiveIntensity: 1.6, roughness: 0.2 }),
   pad: new THREE.MeshStandardMaterial({ color: 0x3a302c, roughness: 0.9, metalness: 0.1 }),
   holo: new THREE.MeshBasicMaterial({ color: C.holo, transparent: true, opacity: 0.13, depthWrite: false, fog: false }),
@@ -258,30 +259,41 @@ function cyl(rt, rb, h, material, x = 0, y = 0, z = 0, seg = 16) {
   mesh.position.set(x, y, z); mesh.castShadow = true; mesh.receiveShadow = true;
   return mesh;
 }
-// A six-wheeled rover facing +x, about 2.4 m long.
+// A six-wheeled rover facing +x, about 2.6 m long, with rocker-bogie suspension.
 function makeRover() {
   const rover = new THREE.Group(), body = new THREE.Group();
-  body.add(box(1.3, 0.3, 0.82, MAT.white, 0, 0.66, 0));
-  body.add(box(1.5, 0.045, 1.02, MAT.solar, -0.05, 0.86, 0));
-  body.add(box(0.34, 0.3, 0.42, MAT.metal, -0.78, 0.74, 0));           // power unit
-  body.add(box(0.5, 0.12, 0.5, MAT.gold, 0.5, 0.56, 0));               // instrument bay
-  body.add(cyl(0.035, 0.045, 0.82, MAT.metal, 0.5, 1.28, 0.26, 8));    // mast
+  body.add(box(1.36, 0.26, 0.88, MAT.white, 0, 0.78, 0));                 // chassis
+  body.add(box(1.36, 0.07, 0.88, MAT.gold, 0, 0.615, 0));                 // foil underside
+  body.add(box(1.4, 0.035, 0.94, MAT.solar, 0, 0.93, 0));                 // deck
+  body.add(box(0.2, 0.04, 0.94, MAT.accent, -0.28, 0.935, 0));            // mission stripe
+  const power = new THREE.Group();                                         // power unit with cooling fins
+  power.add(box(0.52, 0.2, 0.28, MAT.metal));
+  for (const k of [-1, 0, 1]) power.add(box(0.48, 0.3, 0.02, MAT.dark, 0, 0, k * 0.11));
+  power.position.set(-0.88, 0.95, 0); power.rotation.z = 0.5; body.add(power);
+  body.add(cyl(0.04, 0.05, 0.98, MAT.metal, 0.46, 1.42, 0.3, 8));         // mast
   const head = new THREE.Group();
-  head.add(box(0.3, 0.17, 0.4, MAT.white));
-  for (const z of [-0.1, 0.1]) { const eye = cyl(0.05, 0.05, 0.05, MAT.lens, 0.16, 0, z, 12); eye.rotation.z = Math.PI / 2; head.add(eye); }
-  head.position.set(0.5, 1.74, 0.26); body.add(head);
-  const dish = cyl(0.27, 0.05, 0.1, MAT.white, -0.36, 1.2, -0.24, 18); dish.rotation.set(0.5, 0, 0.35); body.add(dish);
-  body.add(cyl(0.02, 0.02, 0.36, MAT.metal, -0.36, 1.02, -0.24, 6));
-  const arm = box(0.62, 0.06, 0.06, MAT.metal, 0.92, 0.6, -0.2); arm.rotation.z = -0.5; body.add(arm);
-  const wheels = [];
+  head.add(box(0.32, 0.18, 0.44, MAT.white));
+  head.add(box(0.06, 0.2, 0.46, MAT.accent, -0.14, 0, 0));
+  for (const z of [-0.11, 0.11]) { const eye = cyl(0.055, 0.055, 0.05, MAT.lens, 0.17, 0, z, 12); eye.rotation.z = Math.PI / 2; head.add(eye); }
+  head.position.set(0.46, 1.98, 0.3); body.add(head);
+  const dish = cyl(0.3, 0.05, 0.1, MAT.white, -0.34, 1.34, -0.26, 6); dish.rotation.set(0.5, 0, 0.35); body.add(dish);   // high-gain antenna
+  body.add(cyl(0.02, 0.02, 0.4, MAT.metal, -0.34, 1.13, -0.26, 6));
+  body.add(cyl(0.015, 0.015, 0.5, MAT.metal, -0.6, 1.2, 0.34, 6));        // whip antenna
+  const shoulder = new THREE.Group();                                      // folded sampling arm
+  const upper = box(0.6, 0.06, 0.06, MAT.metal, 0.3, 0, 0), lower = box(0.5, 0.05, 0.05, MAT.metal, 0.56, -0.14, 0), turret = cyl(0.11, 0.11, 0.16, MAT.gold, 0.34, -0.22, 0, 10);
+  lower.rotation.z = 0.62; turret.rotation.x = Math.PI / 2; shoulder.add(upper, lower, turret);
+  shoulder.position.set(0.62, 0.76, -0.34); shoulder.rotation.z = -0.25; body.add(shoulder);
+  for (const z of [-0.3, 0.3]) { const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 8), new THREE.MeshBasicMaterial({ color: 0xfff2c8, fog: false })); lamp.position.set(0.69, 0.8, z); body.add(lamp); }
+  const wheels = [], hubs = [[0.76, 0.3], [0.04, 0.3], [-0.72, 0.3]], bogie = [0.4, 0.52], pivot = [-0.14, 0.66];
+  const strut = (a, b, side) => { const dx = b[0] - a[0], dy = b[1] - a[1], beam = box(Math.hypot(dx, dy), 0.06, 0.06, MAT.metal, (a[0] + b[0]) / 2, (a[1] + b[1]) / 2, side * 0.52); beam.rotation.z = Math.atan2(dy, dx); body.add(beam); };
   for (const side of [-1, 1]) {
-    body.add(box(1.36, 0.07, 0.07, MAT.metal, 0, 0.46, side * 0.5));
-    for (const x of [0.6, 0, -0.6]) {
-      body.add(box(0.06, 0.26, 0.06, MAT.metal, x, 0.36, side * 0.5));
+    strut(hubs[0], bogie, side); strut(bogie, hubs[1], side); strut(bogie, pivot, side); strut(pivot, hubs[2], side);
+    for (const [x, y] of hubs) {
       const wheel = new THREE.Group();
-      const tyre = cyl(0.25, 0.25, 0.2, MAT.dark, 0, 0, 0, 14); tyre.rotation.x = Math.PI / 2; wheel.add(tyre);
-      for (let k = 0; k < 7; k++) { const tread = box(0.07, 0.035, 0.21, MAT.metal); const a = k * TAU / 7; tread.position.set(Math.cos(a) * 0.25, Math.sin(a) * 0.25, 0); tread.rotation.z = a + Math.PI / 2; wheel.add(tread); }
-      wheel.position.set(x, 0.25, side * 0.58);
+      const tyre = cyl(0.3, 0.3, 0.22, MAT.dark, 0, 0, 0, 16); tyre.rotation.x = Math.PI / 2; wheel.add(tyre);
+      const cap = cyl(0.13, 0.13, 0.24, MAT.metal, 0, 0, 0, 10); cap.rotation.x = Math.PI / 2; wheel.add(cap);
+      for (let k = 0; k < 9; k++) { const tread = box(0.07, 0.035, 0.23, MAT.metal); const a = k * TAU / 9; tread.position.set(Math.cos(a) * 0.3, Math.sin(a) * 0.3, 0); tread.rotation.z = a + Math.PI / 2; wheel.add(tread); }
+      wheel.position.set(x, y, side * 0.62);
       body.add(wheel); wheels.push(wheel);
     }
   }
@@ -487,7 +499,7 @@ class MarsScene {
     // rover
     const p = this.P(pose.x, pose.y, 0);
     this.rover.position.copy(p); this.rover.rotation.y = THREE.MathUtils.degToRad(pose.heading);
-    for (const wheel of this.rover.userData.wheels) wheel.rotation.z = -pose.wheel / 0.25;
+    for (const wheel of this.rover.userData.wheels) wheel.rotation.z = -pose.wheel / 0.39;
     this.rover.userData.body.position.y = pose.moving ? Math.sin(wall * 19) * 0.012 : 0;
     this.rover.userData.head.rotation.y = Math.sin(wall * 0.7) * 0.5;
     this.rover.scale.setScalar(map ? 2.1 : 1.3);
@@ -644,7 +656,7 @@ for (const run of RUNS) { const option = document.createElement('option'); optio
 
 const TOOLS = [
   ['rules', 'free', 'delay, costs, slip ranges', '§'], ['map', 'free', 'base, targets, hazards, sand', '⌖'], ['telemetry_log', 'free', 'every packet received so far', '≋'],
-  ['uplink', 'send', 'queue 1–5 commands', '⇡'], ['advance', 'time', 'let 1–5 ticks pass', '»'], ['shell', 'shell', 'its own code, not an MCP tool', '>_'],
+  ['uplink', 'send', 'queue 1–5 commands', '⇡'], ['advance', 'time', 'let 1–5 ticks pass', '»'], ['shell', 'shell', 'its own code, not MCP', '>_'],
 ];
 function describeCall(call) {
   if (call.kind === 'shell') { const text = (call.arguments.command || JSON.stringify(call.arguments)).replace(/\s+/g, ' '); return [`shell`, text.length > 80 ? text.slice(0, 78) + '…' : text]; }
@@ -736,7 +748,10 @@ function updateScreen(screen, info, t) {
   updatePills(screen, info);
   const tag = screen.kind === 'feed' ? `showing tick <b>${String(Math.floor(tv)).padStart(2, '0')}</b><br>it is now tick ${Math.floor(t)}`
     : screen.kind === 'wide' ? `reward <b>${run.reward.toFixed(2)}</b>` : `tick <b>${String(Math.floor(t)).padStart(2, '0')}</b>`;
-  if (screen.shown.tag !== tag) { screen.shown.tag = tag; $('.tag', el).innerHTML = tag; }
+  if (screen.shown.tag !== tag) {
+    screen.shown.tag = tag; $('.tag', el).innerHTML = tag;
+    if (screen.kind === 'feed' && t > 0.05) { el.classList.remove('ping'); void el.offsetWidth; el.classList.add('ping'); }
+  }
   const extra = screen.kind === 'feed' ? `unconfirmed commands<b>${info.pending}</b>` : `view is behind by<b>${info.apart.toFixed(1)} m</b> · in transit<b>${info.pending}</b>`;
   if (screen.shown.extra !== extra) { screen.shown.extra = extra; $('.extra', el).innerHTML = extra; }
   let toast = null;
