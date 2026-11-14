@@ -99,7 +99,7 @@ def farm() -> Dict[str, Any]:
     rows = [json.loads(line) for line in read(FARM_ROWS).splitlines() if line.strip()]
     pilot = {row["seed"]: row for row in rows if row["candidate"] == "pilot"}
     seeds = sorted(pilot)
-    programs = []
+    programs, margin = [], 0.0
     for candidate, label in FARM_NAMES.items():
         mine = {row["seed"]: row for row in rows if row["candidate"] == candidate}
         cells, higher, lost, away = [], 0, 0, 0
@@ -110,6 +110,7 @@ def farm() -> Dict[str, Any]:
                 lost += 1
             elif row["reward"] > pilot[seed]["reward"] + 1e-12:
                 cells.append("c")           # the program scored higher than the reference here
+                margin = max(margin, row["reward"] - pilot[seed]["reward"])
             elif row["reward"] < pilot[seed]["reward"] - 1e-12:
                 cells.append("r")           # the reference scored higher
             else:
@@ -118,9 +119,15 @@ def farm() -> Dict[str, Any]:
                 away += 1
             if pilot[seed]["reward"] > row["reward"] + 1e-12:
                 higher += 1
-        programs.append({"label": label, "cells": "".join(cells), "reference_higher": higher, "lost": lost,
-                         "away": away, "mean": round(sum(mine[s]["reward"] for s in seeds) / len(seeds), 3)})
+        programs.append({"label": label, "cells": "".join(cells), "reference_higher": higher, "lost": lost, "wins": cells.count("c"),
+                         "ties": cells.count("="), "away": away, "mean": round(sum(mine[s]["reward"] for s in seeds) / len(seeds), 3)})
+    # the worlds a program won, and who won them: the two programs with the most wins, and how often those ran flat
+    boldest = sorted(programs, key=lambda program: -program["wins"])[:2]
     return {"source": FARM_ROWS + " (Modal; docs/traverse-farm.md)", "worlds": len(seeds),
+            "pairs": len(seeds) * len(programs), "reference_higher_total": sum(program["reference_higher"] for program in programs),
+            "claude_wins": sum(program["wins"] for program in programs), "ties": sum(program["ties"] for program in programs),
+            "widest_win": round(margin, 3), "wins_of_two": sum(program["wins"] for program in boldest),
+            "lost_of_two": sorted(program["lost"] for program in boldest),
             "reference_mean": round(sum(row["reward"] for row in pilot.values()) / len(seeds), 3),
             "reference_lost": sum(1 for row in pilot.values() if not row["alive"]),
             "reference_away": sum(1 for row in pilot.values() if row["alive"] and not row["at_base"]),

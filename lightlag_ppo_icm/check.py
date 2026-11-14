@@ -9,7 +9,9 @@
         --also-home max_guarded=lightlag_ppo_icm/policies/max.npz              # an older policy with the home guard on
 
 The environment and the delay are the ones the policy was trained on unless --env says
-otherwise. Players: ppo_icm (greedy), ppo_icm_sampled (actions drawn as in training), plain
+otherwise. A policy of the traverse's target mode (targets.py) plays that mode; beside it
+random_targets and nearest_targets (the same adapter without a network) and the traverse's
+scripted players, the reference `pilot` when named. Players: ppo_icm (greedy), ppo_icm_sampled (actions drawn as in training), plain
 (a hand-written rule on the same observation), random (the same adapter with random actions),
 nothing, plain_home, random_home and ppo_icm_home (plain, random and the policy with the home guard
 of task.py on; plain_home plays by default when the policy was trained with the guard), and the
@@ -30,7 +32,8 @@ from multiprocessing import Pool
 from lightlag_dynamic.biomes.max_check import seed_range, table
 
 from .envs import FiveTools, finish, make_env, share
-from .player import load_player, plain_player, random_player
+from .player import load_player, nearest_target_player, plain_player, random_player, random_target_player
+from .targets import is_target_config
 from .task import TaskConfig
 
 
@@ -65,18 +68,27 @@ def player(name, policy, spec):
         return plain_player()
     if name == "plain_home":
         return plain_player(TaskConfig(home_guard=True))
+    if name == "random_targets":
+        return random_target_player()
+    if name == "nearest_targets":
+        return nearest_target_player()
     if name == "nothing":
         return lambda tools, env=None: None
     players = scripted(spec)
     if name not in players:
         raise ValueError(f"no player {name!r} for {spec}; there are ppo_icm, ppo_icm_sampled, ppo_icm_home, plain, "
-                         "plain_home, random, random_home, nothing, " + ", ".join(players))
+                         "plain_home, random, random_home, random_targets, nearest_targets, nothing, "
+                         + ", ".join(players))
     return players[name]
 
 
 def default_players(extra, spec):
     """ppo_icm, plain (and plain_home when the policy plays with the home guard), random, nothing,
-    then the scripted players of the environment but the slow ones."""
+    then the scripted players of the environment but the slow ones. In the target mode: ppo_icm,
+    nearest_targets, random_targets, nothing and the traverse's scripted players but the pilot."""
+    if is_target_config(extra["task"]):
+        builtin = ["ppo_icm", "nearest_targets", "random_targets", "nothing"]
+        return builtin + [n for n in scripted(spec) if n not in builtin + ["pilot"]]
     builtin = ["ppo_icm", "plain"] + (["plain_home"] if extra["task"].get("home_guard") else []) + ["random", "nothing"]
     return builtin + [n for n in scripted(spec) if n not in builtin + ["pilot", "manh_max"]]
 

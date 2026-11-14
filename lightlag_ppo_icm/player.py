@@ -12,6 +12,12 @@ the same adapter, so that what the learning adds can be told apart from what the
     random_player   a uniform random action at every slot: where an untrained agent starts
     plain_player    a rule of a few lines on the observation: sample when the nearest open target
                     is in range, else drive at it, and turn for home when time or energy runs low
+
+A policy trained in the target mode of the traverse (targets.py) plays that mode, mask included.
+Its two players without a network:
+
+    random_target_player    a random target among those the mask allows, never home by choice
+    nearest_target_player   always the nearest target the mask allows (the first slot)
 """
 
 import dataclasses
@@ -20,11 +26,21 @@ import math
 import numpy as np
 
 from .agent import load_policy
+from .targets import TargetConfig, TargetTask, is_target_config
 from .task import BASE, FIRST_DRIVE, GLOBAL, SAMPLE, WAIT, RoverTask, TaskConfig
 
 
 def load_player(path, sample_seed=None, home_guard=None):
     policy, extra = load_policy(path)
+    if is_target_config(extra["task"]):
+        targets = TargetConfig.from_dict(extra["task"])
+
+        def play_targets(tools, env=None):
+            rng = None if sample_seed is None else np.random.default_rng(sample_seed)
+            TargetTask(tools, targets).play(lambda observation, mask: policy.act(observation, rng, mask)[0])
+
+        play_targets.extra = extra
+        return play_targets
     config = TaskConfig.from_dict(extra["task"])
     if home_guard is not None:
         config = dataclasses.replace(config, home_guard=bool(home_guard))
@@ -43,6 +59,30 @@ def random_player(seed=0, config=None):
     def play(tools, env=None):
         rng = np.random.default_rng(seed)
         RoverTask(tools, config).play(lambda observation: int(rng.integers(config.n_actions)))
+
+    return play
+
+
+def random_target_player(seed=0, config=None):
+    config = config or TargetConfig()
+
+    def play(tools, env=None):
+        rng = np.random.default_rng(seed)
+
+        def choose(observation, mask):
+            allowed = np.flatnonzero(mask[:config.home_action])
+            return int(rng.choice(allowed)) if len(allowed) else config.home_action
+
+        TargetTask(tools, config).play(choose)
+
+    return play
+
+
+def nearest_target_player(config=None):
+    config = config or TargetConfig()
+
+    def play(tools, env=None):
+        TargetTask(tools, config).play(lambda observation, mask: 0 if mask[0] else config.home_action)
 
     return play
 
