@@ -121,8 +121,8 @@ def _client_shim(tools: Any) -> types.ModuleType:
 
 def program_id(job: Dict[str, Any]) -> Optional[str]:
     """A short hash of a program job's code, so rows and caches tell programs apart without holding them."""
-    if job.get("policy") != "program":
-        return job.get("program_id")
+    if job.get("policy") != "program" or not ("program" in job or "files" in job):
+        return job.get("program_id")   # a scripted job, or a result row, which carries the id and not the code
     payload = json.dumps({"program": job.get("program"), "files": job.get("files"), "entry": job.get("entry")}, sort_keys=True)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:12]
 

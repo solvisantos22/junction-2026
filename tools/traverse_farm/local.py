@@ -26,7 +26,7 @@ for path in (str(HERE.parent.parent), str(HERE.parent), str(SOURCE)):
     sys.path.insert(0, path)
 
 from traverse_farm import jobs, search  # noqa: E402
-from traverse_farm.common import format_table, parse_policies, parse_seeds  # noqa: E402
+from traverse_farm.common import format_table, format_versus, parse_policies, parse_seeds  # noqa: E402
 
 
 def main(argv=None) -> int:
@@ -37,6 +37,7 @@ def main(argv=None) -> int:
     ev.add_argument("--seeds", default="600-603")
     ev.add_argument("--workers", type=int, default=4)
     ev.add_argument("--out", type=Path)
+    ev.add_argument("--baseline", default="pilot", help="compare every other policy with this one, world by world")
     se = commands.add_parser("search", help="search the pilot's options, then confirm on unseen worlds")
     se.add_argument("--generations", type=int, default=2)
     se.add_argument("--population", type=int, default=4)
@@ -54,8 +55,10 @@ def main(argv=None) -> int:
         policies = parse_policies(args.policies)
         if any(spec["policy"] == "program" for spec in policies.values()):
             parser.error("program policies run only on Modal (tools/traverse_farm/modal_app.py)")
-        result = search.evaluate(run_many, policies, parse_seeds(args.seeds), out=args.out)
+        result = search.evaluate(run_many, policies, parse_seeds(args.seeds), out=args.out, baseline=args.baseline)
         print(format_table(result["table"]))
+        if result["versus"]:
+            print(format_versus(args.baseline, result["versus"]))
     else:
         search.search(run_many, jobs.pilot_defaults(), search_seeds=parse_seeds(args.search_seeds),
                       select_seeds=parse_seeds(args.select), confirm_seeds=parse_seeds(args.confirm),

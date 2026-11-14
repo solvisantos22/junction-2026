@@ -189,6 +189,40 @@ class Search(unittest.TestCase):
         self.assertEqual(sorted(calls[0]), ["greedy", "straight"])
         self.assertEqual((result["table"]["greedy"]["mean"], result["table"]["straight"]["mean"]), (0.1, 0.2))
 
+    def test_saved_program_rows_find_their_programs_again(self):
+        """A row holds a program's id, not its code; two programs on one world must stay apart on disk."""
+        calls = []
+
+        def run_many(batch):
+            calls.append(len(batch))
+            return [dict({k: job[k] for k in jobs.PASSTHROUGH if k in job}, seed=job["seed"], policy="program",
+                         options={}, program_id=jobs.program_id(job), reward=0.1 if "files" in job else 0.3,
+                         alive=True, at_base=True, seconds=1.0, error=None) for job in batch]
+
+        policies = {"script": {"policy": "program", "files": {"auto.py": "print(1)\n"}, "entry": "auto.py"},
+                    "play": {"policy": "program", "program": "def play(t):\n    pass\n"}}
+        with tempfile.TemporaryDirectory() as folder:
+            first = search.evaluate(run_many, policies, [5, 6], out=Path(folder))
+            again = search.evaluate(run_many, policies, [5, 6], out=Path(folder))
+        for result in (first, again):
+            self.assertEqual((result["table"]["script"]["worlds"], result["table"]["script"]["mean"]), (2, 0.1))
+            self.assertEqual((result["table"]["play"]["worlds"], result["table"]["play"]["mean"]), (2, 0.3))
+        self.assertEqual(calls, [4])
+
+    def test_each_policy_is_compared_with_the_baseline_world_by_world(self):
+        rewards = {"pilot": [0.5, 0.5, 0.5, 0.5], "claude": [0.6, 0.5, 0.2, 0.1]}
+
+        def run_many(batch):
+            return [dict(candidate=job["candidate"], seed=job["seed"], policy=job["policy"], options={},
+                         reward=rewards[job["candidate"]][job["seed"]], alive=True, at_base=True, seconds=1.0)
+                    for job in batch]
+
+        result = search.evaluate(run_many, {"pilot": {"policy": "pilot"}, "claude": {"policy": "greedy"}}, [0, 1, 2, 3])
+        row = result["versus"]["claude"]
+        self.assertEqual((row["worlds"], row["higher"], row["equal"], row["lower"]), (4, 1, 1, 2))
+        self.assertAlmostEqual(row["difference"], -0.15)
+        self.assertNotIn("pilot", result["versus"])
+
     def test_programs_are_told_apart_by_their_code(self):
         a = {"policy": "program", "program": "def play(t):\n    pass\n", "seed": 1}
         b = {"policy": "program", "program": "def play(t):\n    t.rules()\n", "seed": 1}

@@ -62,7 +62,8 @@ def _run_many(batch):
         return []
     started = time.time()
     rows = []
-    for job, result in zip(batch, mission.map(batch, order_outputs=True, return_exceptions=True)):
+    results = list(mission.map(batch, order_outputs=True, return_exceptions=True))   # read it all, then pair
+    for job, result in zip(batch, results):
         if isinstance(result, BaseException):
             row = {k: job[k] for k in ("candidate", "label", "generation", "block") if k in job}
             row.update(seed=job.get("seed"), policy=job.get("policy"), options=job.get("options") or {},
@@ -82,10 +83,11 @@ def smoke(seeds: str = "600-607", policies: str = "pilot,greedy"):
 
     chosen, worlds = parse_policies(policies), parse_seeds(seeds)
     batch = [dict(spec, candidate=name, seed=seed) for name, spec in chosen.items() for seed in worlds]
-    print("{} missions locally ...".format(len(batch)))
-    here = jobs.local_map(batch, workers=4)
+    # Modal first: a first attempt that ran the busy local pool first timed out reconnecting to Modal.
     print("{} missions on Modal ...".format(len(batch)))
     there = _run_many(batch)
+    print("{} missions locally ...".format(len(batch)))
+    here = jobs.local_map(batch, workers=4)
     mismatches = [(a.get("candidate"), a.get("seed"), a.get("reward"), b.get("reward"))
                   for a, b in zip(here, there) if a.get("reward") is None or abs(a.get("reward", 0) - b.get("reward", -9)) > 1e-9]
     print("local:\n" + format_table({n: search.summarise(here, n) for n in chosen}))
@@ -95,13 +97,17 @@ def smoke(seeds: str = "600-607", policies: str = "pilot,greedy"):
 
 
 @app.local_entrypoint()
-def evaluate(policies: str = "pilot,greedy,straight", seeds: str = "600-799", out: str = ""):
-    """Several policies on the same worlds. `program:<path>` plays a model-written file defining play(tools)."""
+def evaluate(policies: str = "pilot,greedy,straight", seeds: str = "600-799", out: str = "", baseline: str = "pilot"):
+    """Several policies on the same worlds, each also compared world by world with `baseline`.
+    `program:<path>` plays a model-written file defining play(tools); `agent:<folder>/<entry.py>` an agent's script."""
     from traverse_farm import search
-    from traverse_farm.common import format_table, parse_policies, parse_seeds
+    from traverse_farm.common import format_table, format_versus, parse_policies, parse_seeds
 
-    result = search.evaluate(_run_many, parse_policies(policies), parse_seeds(seeds), out=Path(out) if out else None)
+    result = search.evaluate(_run_many, parse_policies(policies), parse_seeds(seeds), out=Path(out) if out else None,
+                             baseline=baseline)
     print(format_table(result["table"]))
+    if result["versus"]:
+        print(format_versus(baseline, result["versus"]))
 
 
 @app.local_entrypoint()

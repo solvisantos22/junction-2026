@@ -64,9 +64,25 @@ def _split_top_level(text: str) -> List[str]:
 
 
 def format_table(table: Dict[str, Dict[str, Any]]) -> str:
-    lines = ["{:<40} {:>7} {:>7} {:>5} {:>5} {:>8} {:>8}".format("policy", "worlds", "mean", "lost", "away", "crashed", "sec")]
+    lines = ["{:<40} {:>7} {:>7} {:>5} {:>5} {:>7} {:>8} {:>8}".format(
+        "policy", "worlds", "mean", "lost", "away", "errors", "crashed", "sec")]
     for name, row in table.items():
-        lines.append("{:<40} {:>7} {:>7} {:>5} {:>5} {:>8} {:>8}".format(
+        lines.append("{:<40} {:>7} {:>7} {:>5} {:>5} {:>7} {:>8} {:>8}".format(
             name[:40], row["worlds"], "-" if row["mean"] is None else "{:.3f}".format(row["mean"]),
-            row["lost"], row["away"], row["crashed"], "-" if row["seconds"] is None else "{:.1f}".format(row["seconds"])))
+            row["lost"], row["away"], row.get("errors", 0), row["crashed"],
+            "-" if row["seconds"] is None else "{:.1f}".format(row["seconds"])))
+    return "\n".join(lines)
+
+
+def format_versus(baseline: str, table: Dict[str, Dict[str, Any]]) -> str:
+    """Each policy minus the baseline, world by world: mean, 95% paired bootstrap interval, and counts."""
+    lines = ["{:<40} {:>7} {:>8} {:>18} {:>7} {:>6} {:>6}".format(
+        "policy minus " + baseline, "worlds", "mean", "95% interval", "higher", "same", "lower")]
+    for name, row in table.items():
+        if not row.get("worlds"):
+            lines.append("{:<40} {:>7}".format(name[:40], 0))
+            continue
+        lines.append("{:<40} {:>7} {:>+8.3f} {:>18} {:>7} {:>6} {:>6}".format(
+            name[:40], row["worlds"], row["difference"], "[{:+.3f}, {:+.3f}]".format(row["low"], row["high"]),
+            row["higher"], row["equal"], row["lower"]))
     return "\n".join(lines)

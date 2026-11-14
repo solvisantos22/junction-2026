@@ -114,8 +114,29 @@ def summarise(rows: List[Dict[str, Any]], candidate: str) -> Dict[str, Any]:
         "worlds": len(played), "crashed": len(mine) - len(played),
         "mean": statistics.mean(r["reward"] for r in played) if played else None,
         "lost": sum(not r["alive"] for r in played), "away": sum(r["alive"] and not r["at_base"] for r in played),
+        "errors": sum(bool(r.get("error")) for r in played),   # a program that raised; its mission was still graded
         "seconds": statistics.mean(r["seconds"] for r in played) if played else None,
     }
+
+
+def versus(rows: List[Dict[str, Any]], baseline: str, candidates: Iterable[str]) -> Dict[str, Dict[str, Any]]:
+    """Each candidate against `baseline` on the worlds both played: the mean difference, its 95% paired
+    bootstrap interval, and on how many worlds the candidate scored higher, the same, or lower."""
+    table = {}
+    for name in candidates:
+        if name == baseline:
+            continue
+        differences = paired(rows, name, baseline)
+        if not differences:
+            table[name] = {"worlds": 0}
+            continue
+        low, high = bootstrap(differences)
+        table[name] = {
+            "worlds": len(differences), "difference": statistics.mean(differences), "low": low, "high": high,
+            "higher": sum(d > 1e-9 for d in differences), "equal": sum(abs(d) <= 1e-9 for d in differences),
+            "lower": sum(d < -1e-9 for d in differences),
+        }
+    return table
 
 
 # ---- bookkeeping --------------------------------------------------------------------------
@@ -262,11 +283,15 @@ def search(run_many: RunMany, defaults: Dict[str, Any], *, search_seeds: Sequenc
 
 
 def evaluate(run_many: RunMany, policies: Dict[str, Dict[str, Any]], seeds: Sequence[int],
-             out: Optional[Path] = None) -> Dict[str, Any]:
-    """Several policies on the same worlds. `policies`: name -> job fields (policy, options, program...)."""
+             out: Optional[Path] = None, baseline: Optional[str] = "pilot") -> Dict[str, Any]:
+    """Several policies on the same worlds. `policies`: name -> job fields (policy, options, program...).
+    If `baseline` is one of them, every other policy is also compared with it world by world."""
     ledger = Ledger(out)
     jobs = [dict(spec, candidate=name, seed=seed) for name, spec in policies.items() for seed in seeds]
     rows = run_many(jobs) if out is None else ledger.play(run_many, jobs)
     table = {name: summarise(rows, name) for name in policies}
-    ledger.write("evaluation.json", {"seeds": [seeds[0], seeds[-1]], "worlds": len(seeds), "table": table})
-    return {"rows": rows, "table": table}
+    against = versus(rows, baseline, policies) if baseline in policies else {}
+    labels = {name: spec.get("label") for name, spec in policies.items() if spec.get("label")}
+    ledger.write("evaluation.json", {"seeds": [seeds[0], seeds[-1]], "worlds": len(seeds), "table": table,
+                                     "baseline": baseline if against else None, "versus": against, "labels": labels})
+    return {"rows": rows, "table": table, "versus": against}
