@@ -1,0 +1,251 @@
+{
+  "campaign": {
+    "campaign_id": "contextual-20261114",
+    "deadline_unix": 1794713400,
+    "stages": [
+      {
+        "jobs": [
+          {
+            "algorithm": "ppo",
+            "episodes": 2048,
+            "run_id": "ppo-17",
+            "seed": 17
+          },
+          {
+            "algorithm": "ppo",
+            "episodes": 2048,
+            "run_id": "ppo-29",
+            "seed": 29
+          },
+          {
+            "algorithm": "ppo",
+            "episodes": 2048,
+            "run_id": "ppo-43",
+            "seed": 43
+          },
+          {
+            "algorithm": "replay",
+            "episodes": 2048,
+            "run_id": "replay-17",
+            "seed": 17
+          },
+          {
+            "algorithm": "replay",
+            "episodes": 2048,
+            "run_id": "replay-29",
+            "seed": 29
+          },
+          {
+            "algorithm": "replay",
+            "episodes": 2048,
+            "run_id": "replay-43",
+            "seed": 43
+          }
+        ],
+        "max_seconds": 5400,
+        "name": "pilot"
+      },
+      {
+        "jobs": [
+          {
+            "algorithm": "ppo",
+            "episodes": 8192,
+            "run_id": "ppo-17",
+            "seed": 17
+          },
+          {
+            "algorithm": "ppo",
+            "episodes": 8192,
+            "run_id": "ppo-29",
+            "seed": 29
+          },
+          {
+            "algorithm": "ppo",
+            "episodes": 8192,
+            "run_id": "ppo-43",
+            "seed": 43
+          },
+          {
+            "algorithm": "replay",
+            "episodes": 8192,
+            "run_id": "replay-17",
+            "seed": 17
+          },
+          {
+            "algorithm": "replay",
+            "episodes": 8192,
+            "run_id": "replay-29",
+            "seed": 29
+          },
+          {
+            "algorithm": "replay",
+            "episodes": 8192,
+            "run_id": "replay-43",
+            "seed": 43
+          }
+        ],
+        "max_seconds": 10800,
+        "name": "expanded"
+      },
+      {
+        "jobs": [
+          {
+            "algorithm": "ppo",
+            "episodes": 32768,
+            "run_id": "ppo-17",
+            "seed": 17
+          },
+          {
+            "algorithm": "ppo",
+            "episodes": 32768,
+            "run_id": "ppo-29",
+            "seed": 29
+          },
+          {
+            "algorithm": "ppo",
+            "episodes": 32768,
+            "run_id": "ppo-43",
+            "seed": 43
+          },
+          {
+            "algorithm": "replay",
+            "episodes": 32768,
+            "run_id": "replay-17",
+            "seed": 17
+          },
+          {
+            "algorithm": "replay",
+            "episodes": 32768,
+            "run_id": "replay-29",
+            "seed": 29
+          },
+          {
+            "algorithm": "replay",
+            "episodes": 32768,
+            "run_id": "replay-43",
+            "seed": 43
+          }
+        ],
+        "max_seconds": 10800,
+        "name": "extended"
+      }
+    ]
+  },
+  "cost_note": "CPU/memory estimate only; build, startup, storage and egress additional. Not an invoice cap.",
+  "created_unix": 1794679299.123382,
+  "gpu_jobs": 0,
+  "model_api_calls": 0,
+  "required_profile": "solvi-junction",
+  "resources": {
+    "buffer_containers": 0,
+    "cpu_limit": 16,
+    "cpu_request": 16,
+    "function_timeout_seconds": 10920,
+    "gpu": null,
+    "max_containers": 3,
+    "memory_limit_mib": 32768,
+    "memory_mib": 32768,
+    "min_containers": 0,
+    "retries": 0,
+    "startup_timeout_seconds": 120,
+    "workers": 14
+  },
+  "running_compute_envelope_usd": 22.73184,
+  "runtime": {
+    "modal_client": "1.6.4",
+    "numpy": "2.3.4",
+    "python": "3.12",
+    "torch": "2.9.1",
+    "torch_index": "https://download.pytorch.org/whl/cpu"
+  },
+  "schema": "learning-campaign-freeze-v1",
+  "source_commit": "d13bcd7124394e006fd35f0e91d0386b24ca9208",
+  "source_sha256": {
+    "docs/learning-campaign.md": "bee3f5663290ef79f8c48dc63a264e3a7a8aa2e1218a7831e12eb2770ac87527",
+    "lightlag/__init__.py": "c8ec30fc8723d8f6d7ffa8fbd9d4ef7cf0ef480a777829722ce82f98f9201d06",
+    "lightlag/__main__.py": "3969a425d2ea0ba912c5cb825e81ad596ed6b081a229ffbc7ea216feca72ce36",
+    "lightlag/controllers/__init__.py": "b9c20ca7d13f1e6357d2304094061040135b416d2370758edf5697135f5f22c0",
+    "lightlag/controllers/api.py": "f8737cf928f965ef24f786b2ce0e660207ca239745c06497cc5d12b19fb13aec",
+    "lightlag/controllers/baselines.py": "25b588b76ee050c780e544b723ed64e78652729884753be9d52e039ded875f0b",
+    "lightlag/controllers/geometry.py": "e83b7bcda9b5b7285e991b570738396f22dc1bea6cff73647e868c55beea593e",
+    "lightlag/controllers/predictor.py": "1c46181899ca320f9d326247c0045c97acfd87f80ab8bb719604c01430f52643",
+    "lightlag/controllers/reference.py": "0c34d751759440b46a72e81b0e6200a241ead27c82f86dda572ecd60c8a13d62",
+    "lightlag/environment.py": "a6f4d56ea7d218276bdcc700fe94e061c929fb9267f8b735bbfb0cec36689a01",
+    "lightlag/evaluation.py": "7b543ce8d1e92bb7ab8d14dbf091b3e946426f138da0ba518b287ec7921fb9f4",
+    "lightlag/model.py": "d7800c912a48a056a224baaee58f263831128d0916527938e4e0463a9c976c1a",
+    "lightlag_learning/__init__.py": "77f483e957fb0ad8bd3a32eb9383a05d58dfb128519cada3d25a066ecb3620af",
+    "lightlag_learning/environment.py": "9e8bc1fd7cc5606964ef5f313b7809ae78425e00960be9e120c2cde2498bbe95",
+    "lightlag_learning/learners.py": "bcf07d7676280dc98c04ee2cf72a32872e33aaaed62bc093115c4e157d44a429",
+    "lightlag_learning/models.py": "d4b03e694cf0441dd0793d919eb5474685e81868e6b8171fb695bd88d70ad781",
+    "lightlag_learning/train.py": "a2ac312422f7dc7ad63381594c8fe5dc50bb4b3c94e5cd1457185f3f6ce4cf1d",
+    "lightlag_mcp/__init__.py": "ae202374e48ff6d3d9b490d0b636d57cfe4d3e7da45f16cc5bf74af65cbe8158",
+    "lightlag_mcp/__main__.py": "d362cd394c3a3e9752115d859b5cd8526fdbec939a556dd6fa28f7d32bf78db8",
+    "lightlag_mcp/client.py": "66bdeb5c9a0337138beb2e6a6e397e4aef5f0cffbe069ee95624d75fdd8e4278",
+    "lightlag_mcp/finish.py": "97e3e75fa4a8cb3475d66ae175380c1d06a6b7313eccf08086af046292b7ed87",
+    "lightlag_mcp/server.py": "a15c05da870cca1ae8a9f8f3bae718a076b8c301757d249bf48abe22cf5e7e59",
+    "lightlag_mcp/service.py": "46d00c28cab43dc0267c600a957c555d6977e6a451ee0290c504d3760c4d2b98",
+    "lightlag_rl/__init__.py": "74e93161cf9db3c59f4edee185f103536acee10a9f39ee2bcb6ab1e4907b8501",
+    "lightlag_rl/adapter.py": "4113253c465f8bc8ca0d9745e563c37198cc7f7e0937e024e664240df4475279",
+    "lightlag_rl/model.py": "d263c69be352ea8d536c65871ed47e9df24f0b3c6e4c18d12f1b3470b3706b93",
+    "lightlag_rl/train.py": "0034df7df59ba6971d3f6f5a2cd2aa4eff2dfb3b71a42f116efcd0aad88c80b9",
+    "lightlag_rl_feasible/__init__.py": "65f239288dc32162ce63f2365c722021a3ea8a21d77da5cf81a34bd0e8b079a1",
+    "lightlag_rl_feasible/adapter.py": "6335ef34c97fb31bccb6145581c092d51ff4c12b2038fa388160c95b55f88b28",
+    "lightlag_traverse/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lightlag_traverse/environment.py": "ece97a96967f78b7f845c51eb36de90ca4aadb948c18dc8f573d3b63dc4031e9",
+    "lightlag_traverse/make_task.py": "65af653618b337c1700d26995458df45c78be1b24c7a5a2d585fbfaa2c5d8eae",
+    "lightlag_traverse/oneshot.py": "56280efc6480367607f9e05aa6888252195fd0fa745ecc82fda7f364690e610e",
+    "lightlag_traverse/pilot.py": "1bb90ba1e78ba1d2ff0f54bc5bf906b919070865bc08a9d1ce60f281d9a8d198",
+    "lightlag_traverse/planning.py": "629c06325e891b5d49d49b294297f282b332fc1a4dfb13281e0efd2cc49248c5",
+    "lightlag_traverse/play.py": "7d4e766e1757ff133a0cd9424ccb5d1e4a3160b6d4df39723e55a646f6d93fa7",
+    "lightlag_traverse/sandbox.py": "861ab363cb61907a30cd02d5bd4d73a428011bb91acfd93576bcd1a239cec1a6",
+    "lightlag_traverse/sandbox_worker.py": "d72fc9cbbff9c312006d742d49a01d5c09cd9a09b994b7cc08a5f85c94d977cb",
+    "lightlag_traverse/server.py": "c7ff218831aee9151b06290cb52d3b5818466131e7763c75c4b8912cdfec799e",
+    "lightlag_traverse/surface.py": "ad58635a093fcde8a971812b54d456d6ab7026bbc5ac2d7001a4a53490087233",
+    "lightlag_traverse/terrain.py": "8bbc6d73ee3fc95c745fc156c05f895acce368c252dd33292e8469a75793db19",
+    "tools/learning_campaign/__init__.py": "1b2887d2a5b3fab50f3aab92d915cb9530dd5ca20dba842219c127897fc8f48b",
+    "tools/learning_campaign/modal_job.py": "b2782e96a01c0f4f9bdfb6966e0e13341c8dd44d9f66c02227204ef6e652b351"
+  },
+  "uploaded_sha256": {
+    "docs/learning-campaign.md": "bee3f5663290ef79f8c48dc63a264e3a7a8aa2e1218a7831e12eb2770ac87527",
+    "lightlag/__init__.py": "c8ec30fc8723d8f6d7ffa8fbd9d4ef7cf0ef480a777829722ce82f98f9201d06",
+    "lightlag/__main__.py": "3969a425d2ea0ba912c5cb825e81ad596ed6b081a229ffbc7ea216feca72ce36",
+    "lightlag/controllers/__init__.py": "b9c20ca7d13f1e6357d2304094061040135b416d2370758edf5697135f5f22c0",
+    "lightlag/controllers/api.py": "f8737cf928f965ef24f786b2ce0e660207ca239745c06497cc5d12b19fb13aec",
+    "lightlag/controllers/baselines.py": "25b588b76ee050c780e544b723ed64e78652729884753be9d52e039ded875f0b",
+    "lightlag/controllers/geometry.py": "e83b7bcda9b5b7285e991b570738396f22dc1bea6cff73647e868c55beea593e",
+    "lightlag/controllers/predictor.py": "1c46181899ca320f9d326247c0045c97acfd87f80ab8bb719604c01430f52643",
+    "lightlag/controllers/reference.py": "0c34d751759440b46a72e81b0e6200a241ead27c82f86dda572ecd60c8a13d62",
+    "lightlag/environment.py": "a6f4d56ea7d218276bdcc700fe94e061c929fb9267f8b735bbfb0cec36689a01",
+    "lightlag/evaluation.py": "7b543ce8d1e92bb7ab8d14dbf091b3e946426f138da0ba518b287ec7921fb9f4",
+    "lightlag/model.py": "d7800c912a48a056a224baaee58f263831128d0916527938e4e0463a9c976c1a",
+    "lightlag_learning/__init__.py": "77f483e957fb0ad8bd3a32eb9383a05d58dfb128519cada3d25a066ecb3620af",
+    "lightlag_learning/environment.py": "9e8bc1fd7cc5606964ef5f313b7809ae78425e00960be9e120c2cde2498bbe95",
+    "lightlag_learning/learners.py": "bcf07d7676280dc98c04ee2cf72a32872e33aaaed62bc093115c4e157d44a429",
+    "lightlag_learning/models.py": "d4b03e694cf0441dd0793d919eb5474685e81868e6b8171fb695bd88d70ad781",
+    "lightlag_learning/train.py": "a2ac312422f7dc7ad63381594c8fe5dc50bb4b3c94e5cd1457185f3f6ce4cf1d",
+    "lightlag_mcp/__init__.py": "ae202374e48ff6d3d9b490d0b636d57cfe4d3e7da45f16cc5bf74af65cbe8158",
+    "lightlag_mcp/__main__.py": "d362cd394c3a3e9752115d859b5cd8526fdbec939a556dd6fa28f7d32bf78db8",
+    "lightlag_mcp/client.py": "66bdeb5c9a0337138beb2e6a6e397e4aef5f0cffbe069ee95624d75fdd8e4278",
+    "lightlag_mcp/finish.py": "97e3e75fa4a8cb3475d66ae175380c1d06a6b7313eccf08086af046292b7ed87",
+    "lightlag_mcp/server.py": "a15c05da870cca1ae8a9f8f3bae718a076b8c301757d249bf48abe22cf5e7e59",
+    "lightlag_mcp/service.py": "46d00c28cab43dc0267c600a957c555d6977e6a451ee0290c504d3760c4d2b98",
+    "lightlag_rl/__init__.py": "74e93161cf9db3c59f4edee185f103536acee10a9f39ee2bcb6ab1e4907b8501",
+    "lightlag_rl/adapter.py": "4113253c465f8bc8ca0d9745e563c37198cc7f7e0937e024e664240df4475279",
+    "lightlag_rl/model.py": "d263c69be352ea8d536c65871ed47e9df24f0b3c6e4c18d12f1b3470b3706b93",
+    "lightlag_rl/train.py": "0034df7df59ba6971d3f6f5a2cd2aa4eff2dfb3b71a42f116efcd0aad88c80b9",
+    "lightlag_rl_feasible/__init__.py": "65f239288dc32162ce63f2365c722021a3ea8a21d77da5cf81a34bd0e8b079a1",
+    "lightlag_rl_feasible/adapter.py": "6335ef34c97fb31bccb6145581c092d51ff4c12b2038fa388160c95b55f88b28",
+    "lightlag_traverse/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lightlag_traverse/environment.py": "ece97a96967f78b7f845c51eb36de90ca4aadb948c18dc8f573d3b63dc4031e9",
+    "lightlag_traverse/make_task.py": "65af653618b337c1700d26995458df45c78be1b24c7a5a2d585fbfaa2c5d8eae",
+    "lightlag_traverse/oneshot.py": "56280efc6480367607f9e05aa6888252195fd0fa745ecc82fda7f364690e610e",
+    "lightlag_traverse/pilot.py": "1bb90ba1e78ba1d2ff0f54bc5bf906b919070865bc08a9d1ce60f281d9a8d198",
+    "lightlag_traverse/planning.py": "629c06325e891b5d49d49b294297f282b332fc1a4dfb13281e0efd2cc49248c5",
+    "lightlag_traverse/play.py": "7d4e766e1757ff133a0cd9424ccb5d1e4a3160b6d4df39723e55a646f6d93fa7",
+    "lightlag_traverse/sandbox.py": "861ab363cb61907a30cd02d5bd4d73a428011bb91acfd93576bcd1a239cec1a6",
+    "lightlag_traverse/sandbox_worker.py": "d72fc9cbbff9c312006d742d49a01d5c09cd9a09b994b7cc08a5f85c94d977cb",
+    "lightlag_traverse/server.py": "c7ff218831aee9151b06290cb52d3b5818466131e7763c75c4b8912cdfec799e",
+    "lightlag_traverse/surface.py": "ad58635a093fcde8a971812b54d456d6ab7026bbc5ac2d7001a4a53490087233",
+    "lightlag_traverse/terrain.py": "8bbc6d73ee3fc95c745fc156c05f895acce368c252dd33292e8469a75793db19"
+  }
+}
