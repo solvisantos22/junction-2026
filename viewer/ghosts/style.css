@@ -52,30 +52,31 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #board { display: flex; flex-direction: column; min-height: 0; background: var(--panel); border-left: 3px solid #000; padding: calc(12px * var(--s)) calc(14px * var(--s)); letter-spacing: .06em; }
 #board h2 { margin: 0; display: flex; align-items: baseline; justify-content: space-between; font-size: calc(26px * var(--s)); font-weight: 700; letter-spacing: .16em; line-height: 1; }
 #board h2 span { font-size: calc(14px * var(--s)); letter-spacing: .08em; color: var(--faint); }
-#rows { position: relative; flex: 1; min-height: 0; margin-top: calc(12px * var(--s)); }
-.row { position: absolute; left: 0; right: 0; height: calc(58px * var(--s)); padding: calc(6px * var(--s)) calc(8px * var(--s)) 0 calc(14px * var(--s)); background: var(--key); cursor: pointer; pointer-events: auto; transition: top .45s cubic-bezier(.2, .8, .2, 1), opacity .3s; }
+/* --rh is one row's pitch in pixels, set by the page so that every run fits whatever the window's height */
+#rows { position: relative; flex: 1; min-height: 0; margin-top: calc(12px * var(--s)); overflow: hidden; --rh: 62px; }
+.row { position: absolute; left: 0; right: 0; height: calc(var(--rh) - 4px); padding: calc(var(--rh) * .1) calc(8px * var(--s)) 0 calc(14px * var(--s)); background: var(--key); cursor: pointer; pointer-events: auto; transition: top .45s cubic-bezier(.2, .8, .2, 1), opacity .3s; }
 .row::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--shade); }
 .row.ref::before { background: var(--gold); }
 .row.on::before { background: var(--ice); }
 .row.ref { cursor: default; }
 .row.shade { opacity: .66; }
 .row .who { display: flex; align-items: baseline; justify-content: space-between; line-height: 1; }
-.row .who b { font-size: calc(21px * var(--s)); letter-spacing: .08em; }
-.row .who em { font-style: normal; font-size: calc(26px * var(--s)); font-variant-numeric: tabular-nums; }
+.row .who b { font-size: calc(var(--rh) * .34); letter-spacing: .08em; }
+.row .who em { font-style: normal; font-size: calc(var(--rh) * .42); font-variant-numeric: tabular-nums; }
 .row.ref .who { color: var(--gold); }
 .row.on .who { color: var(--ice); }
-.row .how { display: none; position: absolute; right: calc(8px * var(--s)); bottom: calc(5px * var(--s)); font-size: calc(12px * var(--s)); color: var(--faint); }
+.row .how { display: none; position: absolute; right: calc(8px * var(--s)); bottom: calc(var(--rh) * .08); font-size: calc(var(--rh) * .19); color: var(--faint); }
 .row.ref .how { display: block; }
-.cells { display: flex; gap: 3px; margin-top: calc(5px * var(--s)); width: 100%; }
+.cells { display: flex; gap: 3px; margin-top: calc(var(--rh) * .08); width: 100%; }
 .row.ref .cells { width: 60%; }
-.cell { position: relative; flex: 1; height: calc(13px * var(--s)); background: rgba(0, 0, 0, .55); overflow: hidden; }
+.cell { position: relative; flex: 1; height: calc(var(--rh) * .21); background: rgba(0, 0, 0, .55); overflow: hidden; }
 .cell u { position: absolute; left: 0; bottom: 0; top: 0; width: 0; background: var(--shade); }
 .row.ref .cell u { background: var(--gold); }
 .row.on .cell u { background: var(--ice); }
 .cell.lost { background: var(--red); }
 .cell.lost u { display: none; }
-.cell.lost::after { content: "LOST"; position: absolute; inset: 0; font-size: calc(11px * var(--s)); line-height: calc(15px * var(--s)); text-align: center; color: #000; letter-spacing: .04em; }
-.cell.away::after { content: "½"; position: absolute; right: 2px; top: -1px; font-size: calc(12px * var(--s)); color: var(--ink); }
+.cell.lost::after { content: "LOST"; position: absolute; inset: 0; font-size: calc(var(--rh) * .18); line-height: calc(var(--rh) * .24); text-align: center; color: #000; letter-spacing: .04em; }
+.cell.away::after { content: "½"; position: absolute; right: 2px; top: -1px; font-size: calc(var(--rh) * .2); line-height: 1; color: var(--ink); }
 .cell.now { outline: 2px solid var(--ink); outline-offset: -2px; }
 #foot { margin-top: calc(10px * var(--s)); font-size: calc(13px * var(--s)); line-height: 1.25; color: var(--faint); letter-spacing: .05em; text-transform: none; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
 

@@ -432,7 +432,7 @@ class MissionScene {
         for (const e of track.raw.events) { const age = t - e.t; if (age >= 0 && age < 1.5 && e.k !== 'dead') note = { age, text: e.k === 'miss' ? 'MISS' : 'STOPPED', color: RED }; }
       }
       actor.toast.sprite.visible = !!note;
-      if (note) { actor.toast.set(note.text, css(note.color)); actor.toast.sprite.position.set(p.x, 4.7 + note.age * 1.1, p.z); actor.toast.sprite.material.opacity = clamp(1.6 - note.age, 0, 1); }
+      if (note) { actor.toast.set(note.text, css(note.color)); actor.toast.sprite.position.set(p.x, 4.3 + note.age * 0.7, p.z); actor.toast.sprite.material.opacity = clamp(1.6 - note.age, 0, 1); }
       // what this rover's program was last told: a position fix that is `delay` ticks old and noisy
       const seenTick = whole - this.mission.delay, showFix = role === 'on' && pose.alive && seenTick >= 1;
       actor.fix.visible = actor.tether.visible = showFix;
@@ -522,7 +522,10 @@ function updateBoard() {
   const g = state.g, mission = Math.min(K - 1, Math.floor(g / T)), local = g - mission * T, over = g >= TOTAL;
   const rows = RUNS.map(run => ({ run, s: standing(run, g) }));
   const order = rows.slice().sort((a, b) => b.s.live - a.s.live || a.run.index - b.run.index);
-  const height = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--s')) * 62;
+  // every run fits: rows shrink when there are many or the window is short
+  const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--s')) || 1, list = $('#rows');
+  const height = Math.max(30, Math.min(62 * scale, list.clientHeight / RUNS.length));
+  if (list.dataset.rh !== height.toFixed(1)) { list.dataset.rh = height.toFixed(1); list.style.setProperty('--rh', height.toFixed(1) + 'px'); }
   order.forEach(({ run, s }, place) => {
     run.row.style.top = place * height + 'px';
     run.row.classList.toggle('on', run === state.follow);
@@ -553,12 +556,19 @@ function updateBoard() {
     const best = CLAUDE.slice().sort((a, b) => b.reward - a.reward)[0], lost = CLAUDE.reduce((n, r) => n + r.lost, 0);
     text = `<b><em style="color:${css(GOLD)}">${two(REF.reward)}</em> · <em style="color:${css(ICE)}">${best ? two(best.reward) : '–'}</em></b><span>Reference against the best of ${CLAUDE.length} Claude runs${best ? ` (${esc(best.label)})` : ''} · ${lost} rover${lost === 1 ? '' : 's'} lost by Claude, ${REF.lost} by the reference</span>`;
     alpha = 1;
+  } else if (local >= T - 0.02) {
+    // the mission just ended: who took it
+    const top = CLAUDE.slice().sort((a, b) => b.missions[mission].reward - a.missions[mission].reward)[0];
+    const ref = REF.missions[mission].reward, best = top ? top.missions[mission].reward : 0;
+    const lost = CLAUDE.filter(r => !r.missions[mission].alive).length;
+    text = `<b><em style="color:${css(GOLD)}">${two(ref)}</em> · <em style="color:${css(ICE)}">${two(best)}</em></b><span>Mission ${mission + 1}: reference against the best Claude run here${top ? ` (${esc(top.label)})` : ''}${lost ? ` · ${lost} rover${lost === 1 ? '' : 's'} lost` : ''}</span>`;
+    alpha = 1;
   } else if (local < 2.2 && g > 1e-6 || (g <= 1e-6 && !state.playing)) {
     text = `<b>MISSION ${mission + 1}</b><span>${MISSIONS[mission].targets.filter(t => !t.appear).length} targets on the map · more will appear</span>`;
     alpha = g <= 1e-6 ? 0 : clamp(Math.min(local / 0.25, (2.2 - local) / 0.6), 0, 1);
   }
   if (banner.dataset.text !== text) { banner.dataset.text = text; banner.innerHTML = text; }
-  banner.classList.toggle('final', over);
+  banner.classList.toggle('final', over || local >= T - 0.02);
   banner.style.opacity = alpha;
 }
 

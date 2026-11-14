@@ -76,16 +76,101 @@ def run_reference(out: Path, missions: str, noise_level: float) -> Dict[str, Any
             "result": campaign.finish()}
 
 
-def run_policy(policy: Path, out: Path, missions: str, noise_level: float) -> Dict[str, Any]:
+PROGRAM_SHIM = '''\
+"""Stands in for the task's lightlag_client inside the sandbox: the same five calls, over the broker."""
+import contextlib
+import json
+import sys
+
+_out = sys.__stdout__
+
+
+class _Tools:
+    def _call(self, method, **params):
+        _out.write(json.dumps({"method": method, "params": params}) + "\\n")
+        _out.flush()
+        line = sys.stdin.readline()
+        if not line:
+            raise SystemExit(0)
+        reply = json.loads(line)
+        if not reply["ok"]:
+            raise ValueError(reply["error"])
+        return reply["result"]
+
+    def rules(self):
+        return self._call("rules")
+
+    def map(self):
+        return self._call("map")
+
+    def telemetry_log(self):
+        return self._call("telemetry_log")
+
+    def uplink(self, commands):
+        return self._call("uplink", commands=commands)
+
+    def advance(self, ticks=1):
+        return self._call("advance", ticks=ticks)
+
+    def tool_names(self):
+        return ["rules", "map", "telemetry_log", "uplink", "advance"]
+
+
+class RemoteToolError(ValueError):
+    pass
+
+
+@contextlib.contextmanager
+def connect(target=None):
+    yield _Tools()
+'''
+
+PROGRAM_MAIN = '''\
+"""Runs an agent's own program as it ran in the task: as a script, in /app, with the client helper beside it."""
+import json
+import runpy
+import sys
+import traceback
+
+real = sys.stdout
+sys.stdout = sys.stderr
+errors = []
+try:
+    runpy.run_path("/app/{entry}", run_name="__main__")
+except SystemExit:
+    pass
+except BaseException as failure:
+    errors.append({{"mission": None, "error": "{{}}: {{}}".format(type(failure).__name__, failure)[:400]}})
+    traceback.print_exc(file=sys.stderr)
+real.write(json.dumps({{"method": "done", "errors": errors}}) + "\\n")
+real.flush()
+'''
+
+
+def run_policy(policy: Path, out: Path, missions: str, noise_level: float, program: bool = False,
+               image: str = IMAGE) -> Dict[str, Any]:
+    """Play a campaign with model-written code. `policy` is a module defining play(tools), or, with
+    `program`, a folder holding an agent's own autopilot.py exactly as it ran in the task."""
     campaign = new_campaign(out, missions, noise_level)
     name = "lightlag-sandbox-" + uuid.uuid4().hex[:12]
     with tempfile.TemporaryDirectory() as folder:
-        shutil.copyfile(policy, Path(folder) / "policy.py")
-        shutil.copyfile(Path(__file__).with_name("sandbox_worker.py"), Path(folder) / "worker.py")
+        if program:
+            for path in Path(policy).glob("*.py"):
+                if path.name != "lightlag_client.py":
+                    shutil.copyfile(path, Path(folder) / path.name)
+            (Path(folder) / "lightlag_client.py").write_text(PROGRAM_SHIM, encoding="utf-8")
+            (Path(folder) / "sandbox_main.py").write_text(PROGRAM_MAIN.format(entry="autopilot.py"), encoding="utf-8")
+            run = ["sh", "-c", "cp /w/*.py /app/ && cd /app && exec python sandbox_main.py"]
+            extra = ["--tmpfs", "/app:rw,size=64m,mode=1777", "-e", "HOME=/app"]
+        else:
+            shutil.copyfile(policy, Path(folder) / "policy.py")
+            shutil.copyfile(Path(__file__).with_name("sandbox_worker.py"), Path(folder) / "worker.py")
+            run = ["python", "-I", "/w/worker.py"]
+            extra = []
         command = ["docker", "run", "--rm", "-i", "--name", name, "--network", "none", "--cap-drop", "ALL",
                    "--security-opt", "no-new-privileges", "--user", "65534:65534", "--memory", "512m",
                    "--cpus", "1", "--pids-limit", "64", "--read-only", "--tmpfs", "/tmp:rw,size=16m",
-                   "-v", "{}:/w:ro".format(folder), IMAGE, "python", "-I", "/w/worker.py"]
+                   *extra, "-v", "{}:/w:ro".format(folder), image, *run]
         process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, text=True, bufsize=1)
         lines: "queue.Queue[Optional[str]]" = queue.Queue()
@@ -155,6 +240,10 @@ def main(argv=None) -> int:
     parser.add_argument("policy", nargs="?", type=Path)
     parser.add_argument("out", type=Path)
     parser.add_argument("--reference", action="store_true", help="play the frozen KF + MPC instead of a policy file")
+    parser.add_argument("--program", action="store_true",
+                        help="`policy` is a folder holding an agent's own autopilot.py, run as it ran in the task")
+    parser.add_argument("--image", default=IMAGE,
+                        help="container image; an agent that installed a package needs an image that has it")
     parser.add_argument("--missions", default=MISSIONS)
     parser.add_argument("--noise-level", type=float, default=SETTINGS["noise_level"])
     args = parser.parse_args(argv)
@@ -166,7 +255,8 @@ def main(argv=None) -> int:
     if args.reference:
         summary = run_reference(args.out, args.missions, args.noise_level)
     else:
-        summary = run_policy(args.policy, args.out, args.missions, args.noise_level)
+        summary = run_policy(args.policy, args.out, args.missions, args.noise_level, program=args.program,
+                             image=args.image)
     result = summary.pop("result")
     summary.update(reward=result["reward"], missions=[round(m["reward"], 6) for m in result["missions"]],
                    rovers_lost=sum(not m["alive"] for m in result["missions"]),
