@@ -1,0 +1,77 @@
+{
+  "schema": "junction-contextual-publication-verification-v1",
+  "verified_by": "Kristján / Codex main-push watcher",
+  "source_result_commit": "55579352b027fc5e0c1ad1bf4f132dcc4fa5375b",
+  "publication_base": "d45d3f97f420f59a464d0f3a764c7ebbc77d78f6",
+  "contextual_evidence_checks": {
+    "source_commit": "55579352b027fc5e0c1ad1bf4f132dcc4fa5375b",
+    "publication_base": "d45d3f97f420f59a464d0f3a764c7ebbc77d78f6",
+    "frozen_training_source": "55654bb87bcc4c72a0587c0b9ae595220da57dce",
+    "verified_original_source_pins": 56,
+    "known_baseline_pin_differences": [
+      "lightlag_traverse/make_task.py",
+      "lightlag_traverse/pilot.py",
+      "lightlag_traverse/server.py"
+    ],
+    "additional_baseline_sources": [
+      "lightlag_traverse/campaign.py"
+    ],
+    "new_source_differences": [],
+    "byte_identical_source_files": 405,
+    "strict_json_files": 39,
+    "policy_hashes_verified": 9,
+    "checkpoint_hashes_verified": 24,
+    "summary_and_bootstrap_recomputed": true,
+    "report_matches_saved_audit": true,
+    "artifact_bundle_count": 364,
+    "physics_cases_verified": 724,
+    "training_draws": 18380,
+    "scope": "Independent artifact/hash/matrix/statistics and physical replay verification. No training, optimizer reconstruction, teacher/controller re-execution, model API or cloud calls.",
+    "elapsed_seconds": 67.56426906585693,
+    "status": "passed"
+  },
+  "feasibility_impact_checks": {
+    "status": "passed",
+    "original_case_hashes_verified": 240,
+    "paired_arithmetic_verified": 120,
+    "summaries": {
+      "final": {
+        "home_gained": 20,
+        "home_lost": 0,
+        "n_pairs": 48,
+        "penalty_reduction": 0.02153611310824298,
+        "science_change": -0.00018067621398985215,
+        "score_change": 0.02135543689425313,
+        "score_lower_pairs": 6
+      },
+      "greedy": {
+        "home_gained": 11,
+        "home_lost": 0,
+        "n_pairs": 24,
+        "penalty_reduction": 0.06535938536788945,
+        "science_change": -0.0093570052648788,
+        "score_change": 0.056002380103010646,
+        "score_lower_pairs": 3
+      },
+      "initial": {
+        "home_gained": 19,
+        "home_lost": 0,
+        "n_pairs": 48,
+        "penalty_reduction": 0.018949750386777358,
+        "science_change": 0.0021477396545908412,
+        "score_change": 0.021097490041368197,
+        "score_lower_pairs": 4
+      }
+    }
+  },
+  "existing_contextual_tests": {
+    "passed": 6,
+    "command": "python3 -B -m unittest discover -s tests/rl_contextual -v"
+  },
+  "relative_links_checked": 17,
+  "whitespace": "Unrestricted source-candidate and combined staged diff --check passed.",
+  "reproduction_note": "The completed study used frozen source commit 55654bb87bcc4c72a0587c0b9ae595220da57dce. All 56 original source hashes match that commit. Current main already contains the explicitly approved Traverse merge: pilot.py, make_task.py and server.py differ, and campaign.py is additional. This documentation/results merge changes no runtime source and preserves every original freeze, checkpoint, report and audit. Full historical training/controller audit reproduction requires the frozen source version; this publication check independently replays saved physics and verifies hashes/statistics without reconstructing optimizers or rerunning teacher/controllers.",
+  "new_model_calls": 0,
+  "new_cloud_jobs": 0,
+  "new_training_runs": 0
+}

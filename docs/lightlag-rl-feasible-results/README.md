@@ -48,6 +48,12 @@ passes. All 120 treatment cases return alive and home, compared with 70/120
 controls. Sample counts barely change (final weights 7.208 → 7.167); the official
 score gain largely reflects preserved return credit, not more collected samples.
 All policies are unchanged: this is an interface intervention, not new learning.
+The [paired score accounting](development/impact.json) gives final-weight science
+change −.000181 and reduced terminal penalties +.021536, summing to +.021355.
+There are 20 gained home outcomes and none lost, although six individual paired
+scores are lower. Greedy gives up .009357 in normalized science value and recovers
+.065359 in terminal penalties. These are arithmetic components of the measured
+intervention; they are not a hypothetical rescue of unchanged trajectories.
 
 [Complete report](development/report.json), [source/input freeze](development/freeze.json),
 and all 240 compressed cases are retained. The [full audit](development/audit.json)
@@ -56,6 +62,10 @@ rejected candidate occurrences; every feature/decision/command is re-extracted. 
 training maps; this supports the charging-time diagnosis there, not a fresh
 generalization or frontier-agent claim. The route model remains approximate.
 
-Next: the separately published [planner-initialized contextual pilot](../lightlag-rl-contextual.md),
-complementing Sölvi's scratch-learning campaign. The existing full-route planner
+The subsequent [planner-initialized contextual pilot](contextual.md) is complete:
+imitation improves fresh score .0926 → .2822; the short RL phase adds no clear
+gain (.2792), below greedy .3263 and the reference .5091. All 320 fresh missions
+return alive/home. Its full audit reproduces 600 imitation epochs, 24 RL updates, all 724 physical
+trajectories and all 340 teacher/evaluation controllers. This
+complements Sölvi's larger scratch-learning campaign. The existing full-route planner
 remains the project reference.

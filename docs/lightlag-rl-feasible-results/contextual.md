@@ -37,6 +37,87 @@ before opening any fresh evaluation map. Directories are immutable. A failure
 is retained and does not silently trigger a retry. Audit from the source version
 in the freeze; later unrelated experiments must preserve these source files.
 
-No production teacher collection, RL run or new check result is claimed at this
-implementation checkpoint. There has been no cloud job or model API spend in
-this branch.
+## Completed production result
+
+Protocol published at `bddfd56`; implementation and audited smoke published at
+`55654bb` before production. The fixed local run completed in 748.3 seconds:
+20 teacher missions, 200 imitation epochs for each of three initializations,
+384 RL missions / 24 updates, and all 320 final-check missions. Check worlds
+**74000–74015 are now consumed**. No cloud job or model API call was used.
+
+| Policy on the same 16 fresh worlds | Mean official score | Alive/home |
+|---|---:|---:|
+| Untrained contextual scorer | .092619 | 96/96 |
+| Planner imitation | .282207 | 96/96 |
+| Imitation + 128 RL missions per seed | .279219 | 96/96 |
+| Charging-aware persistent greedy | .326323 | 16/16 |
+| Unchanged full-route reference | .509094 | 16/16 |
+
+Neural rows average all three initialization seeds and two action draws per map;
+controls are deterministic, one mission per map. There are no evaluation deaths
+or invalid calls. The primary RL-minus-imitation gain is **−.002988**, with the
+predeclared paired-map 95% interval **[−.014367, .006583]**. The RL screen fails its
+gain and interval criteria; return/death/validity criteria pass. Imitation is a
+large improvement over random initialization, while this short RL phase gives
+no clear extra benefit. Neither learned stage reaches greedy or the reference.
+**Keep the existing full-route planner as the project reference.**
+
+| Initialization | Imitation score | After RL | Paired mean change |
+|---|---:|---:|---:|
+| 17 | .286778 | .283004 | −.003774 |
+| 29 | .279091 | .278337 | −.000754 |
+| 43 | .280752 | .276316 | −.004436 |
+
+The 16 training teacher missions supplied 354 new-goal labels; four separate
+teacher-label validation missions supplied 98. Exact-label agreement after
+imitation is 85.6%/88.1%/88.7% on training and 64.3%/67.3%/68.4% on validation
+(for seeds 17/29/43). Validation here is a diagnostic before RL; those worlds
+belong to the training pool, and are separate from the fresh check above.
+The adapted one-goal teacher's scores were .3534 on training and .3818 on
+validation; these are different maps, not paired against the table's reference.
+
+[Full run](contextual/report.json), [source/data freeze](contextual/freeze.json),
+[nine-checkpoint freeze before evaluation](contextual/evaluation-freeze.json),
+all teacher/training/evaluation trajectories and all checkpoints are retained.
+The [completed audit](contextual/audit.json) reconstructs all 600 imitation epochs,
+24 RL optimizer updates and 18,380 training draws. All **724 physical trajectories**
+replay. All **340 teacher/evaluation controllers** re-execute, including their
+candidate features, held goals, choices and commands. Training choices replay
+from recorded features; training feature extraction remains source-pinned.
+
+This is one fixed, small pilot: a 1,984-parameter selector, sixteen demonstration
+worlds, and eight RL updates per initialization. Neural policies sample from
+softmax; deterministic argmax deployment was not tested. The bootstrap reflects
+map variation for these three fixed initializations. The negative RL result
+rejects promotion of this run, not the possibility that larger training or a
+different learner could work. No task rule, reward, training budget or checkpoint
+selection was changed after seeing the check results.
+
+Sölvi's independent [larger scratch-learning campaign](../learning-campaign-results/README.md)
+is the next source of learning evidence. His published early 512-mission PPO
+validation mean rose .0874→.3440, with 96/96 home, while greedy and beam reached
+.3806/.5143 on those validation maps (snapshot `a637cf6`). Those are different
+maps and budgets; they are not a head-to-head comparison with this pilot. His
+final check remains separate from this completed study.
+
+## Next model confirmation
+
+Charging time and return budgeting are now a supported intervention lead on the
+reused development maps. The 300-world farm also finds failures in saved Claude
+programs, but a supervising coding agent could repair or interrupt those programs.
+A fresh full-agent comparison is still needed before calling this a robust
+frontier-agent failure. The Traverse/Harbor owner retains that scope.
+
+Freeze the chosen mission version and reference first, then run ordinary and
+strategy-hinted full-agent attempts on the same newly allocated worlds. Give
+both arms the same public rules, physics/code access, coding tools and resource
+budget. The hint should explicitly ask for charging waits in the return budget
+and for comparing target sequences; it should supply no hidden state, seed,
+reference route or reference implementation. Retain all attempts and distinguish
+finished missions, process failures and token/time exhaustion. Report matched
+score gaps, collected science and terminal penalties, including every successful
+Claude attempt. Do not treat the best single failure as the project result.
+
+This branch does not modify the task's rules or launch that overlapping agent
+experiment. Its frozen training uses the original mission; it makes no transfer
+claim for the proposed harsher day or teammates' MAX-map variant.
