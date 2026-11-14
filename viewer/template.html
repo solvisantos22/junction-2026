@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lightlag replay</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --line: #30363d; --text: #e6edf3; --muted: #8b949e;
+    --bedrock: #1c2430; --sand: #a8834a; --hazard: #f85149; --base: #58d5f7; --target: #f2cc60;
+    --rover: #7ee787; --ghost: #d2a8ff; --queue: #f2cc60; --dead: #f85149;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 14px 20px 10px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; }
+  h1 { font-size: 20px; margin: 0; font-weight: 650; letter-spacing: .01em; }
+  h1 small { color: var(--muted); font-weight: 400; font-size: 14px; margin-left: 8px; }
+  .controls { display: flex; align-items: center; gap: 10px; flex: 1 1 420px; }
+  button, select { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; font: inherit; cursor: pointer; }
+  button:hover, select:hover { border-color: var(--muted); }
+  #play { min-width: 76px; font-weight: 600; }
+  input[type=range] { flex: 1; accent-color: var(--base); }
+  #tick { font-variant-numeric: tabular-nums; min-width: 96px; color: var(--muted); }
+  main { padding: 16px 20px 28px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .card h2 { font-size: 16px; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .reward { font-variant-numeric: tabular-nums; font-size: 14px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .reward b { color: var(--text); font-size: 17px; }
+  svg.map { width: 100%; height: auto; display: block; border-radius: 6px; background: var(--bedrock); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin-top: 10px; font-size: 13.5px; }
+  .stats div span { color: var(--muted); }
+  .stats b { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .bar { height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; margin-top: 4px; }
+  .bar i { display: block; height: 100%; background: var(--rover); }
+  .event { margin-top: 8px; min-height: 21px; font-size: 13.5px; color: var(--muted); }
+  .event.bad { color: var(--hazard); } .event.good { color: var(--rover); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 14px 0 6px; color: var(--muted); font-size: 13.5px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+  .chart { margin-top: 14px; }
+  .chart h3 { font-size: 14px; margin: 0 0 6px; font-weight: 600; }
+  .chart h3 span { color: var(--muted); font-weight: 400; }
+  svg.plot { width: 100%; height: 150px; display: block; }
+  #drop { border: 2px dashed var(--line); border-radius: 12px; padding: 48px 20px; text-align: center; color: var(--muted); }
+  #drop.over { border-color: var(--base); color: var(--text); }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Lightlag <small>true rover vs. what the operator can see</small></h1>
+  <div class="controls">
+    <button id="play">Play</button>
+    <input id="scrub" type="range" min="0" max="80" value="0" step="1" aria-label="Tick">
+    <span id="tick">tick 0</span>
+    <select id="speed" aria-label="Speed">
+      <option value="2">slow</option><option value="5" selected>normal</option><option value="12">fast</option>
+    </select>
+  </div>
+</header>
+<main>
+  <div id="drop">
+    <p><b>Drop one or more <code>replay.json</code> files here</b>, or choose them:</p>
+    <input id="files" type="file" accept=".json,application/json" multiple>
+    <p>Replays come from a Harbor run's <code>artifacts/evaluator/replay.json</code> or from <code>viewer/record.py</code>.</p>
+  </div>
+  <div id="stage" class="hidden">
+    <div class="legend">
+      <span><i style="background:var(--rover)"></i>where the rover really is</span>
+      <span><i style="border:2px solid var(--ghost)"></i>where the operator last saw it</span>
+      <span><b style="color:var(--text);margin-right:6px">✕</b>where the controller believes it is</span>
+      <span><i style="background:var(--queue);border-radius:2px;height:3px;vertical-align:4px"></i>commands sent but not yet executed</span>
+      <span><i style="background:var(--sand);border-radius:2px"></i>sand</span>
+      <span><i style="background:var(--hazard);border-radius:2px"></i>hazard</span>
+      <span><i style="background:var(--target)"></i>science target</span>
+      <span><i style="border:2px solid var(--base)"></i>base</span>
+    </div>
+    <div id="grid" class="grid"></div>
+    <div class="card chart">
+      <h3>How wrong each operator is about where the rover is <span>(metres; dashed = the raw delayed view, solid = the controller's own estimate)</span></h3>
+      <svg id="plot" class="plot" preserveAspectRatio="none"></svg>
+    </div>
+  </div>
+</main>
+<script id="embedded-replays" type="application/json">[]</script>
+<script>
+"use strict";
+const SVG = "http://www.w3.org/2000/svg";
+const COLORS = ["#7ee787", "#ff9b72", "#79c0ff", "#d2a8ff"];
+const el = (name, attrs = {}, parent = null) => {
+  const node = document.createElementNS(SVG, name);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+  if (parent) parent.appendChild(node);
+  return node;
+};
+const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+
+function prepare(label, replay, beliefNotes) {
+  const states = replay.states;
+  // Optional: where a scripted controller believed the rover was, keyed by tick.
+  const belief = new Map((beliefNotes || []).filter(b => b.tick < states.length).map(b => [b.tick, b.position]));
+  const beliefError = [...belief.entries()].sort((a, b) => a[0] - b[0]).map(([t, p]) => [t, dist(p, states[t].position)]);
+  const last = states.length - 1;
+  const received = [...replay.received_telemetry].sort((a, b) => a.received_tick - b.received_tick);
+  const seen = [];
+  let index = 0, current = received[0] || states[0];
+  for (let t = 0; t <= last; t++) {
+    while (index < received.length && received[index].received_tick <= t) current = received[index++];
+    seen.push(current);
+  }
+  const executed = new Set();
+  const stops = [];
+  for (const s of states) for (const e of s.events) {
+    if (e.type === "command_executed") executed.add(e.command_id);
+    if (e.type === "safety_stop" || e.type === "battery_depleted") stops.push(s.tick);
+  }
+  const commands = replay.commands.map(c => {
+    let until = c.execute_tick;
+    if (!executed.has(c.command_id)) {
+      const stop = stops.find(s => s > c.sent_tick && s <= c.execute_tick);
+      if (stop !== undefined) until = stop;
+    }
+    return { ...c.command, sent: c.sent_tick, until };
+  });
+  const gap = states.map((s, t) => dist(s.position, seen[t].position));
+  const result = replay.result;
+  return {
+    label, replay, states, last, seen, commands, gap, belief, beliefError,
+    reward: result.max_available_value > 0 ? result.raw_score / result.max_available_value : 0,
+    delay: replay.config.delay_ticks, battery: replay.config.initial_battery,
+  };
+}
+
+function buildCard(run, color) {
+  const world = run.replay.world, W = world.width, H = world.height;
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `<h2><span>${run.label}</span><span class="reward">reward <b>${run.reward.toFixed(2)}</b> · delay ${run.delay}</span></h2>`;
+  const svg = el("svg", { class: "map", viewBox: `0 0 ${W} ${H}` });
+  card.appendChild(svg);
+  const flip = y => H - y;
+  for (const r of world.sand) el("rect", { x: r.x1, y: flip(r.y2), width: r.x2 - r.x1, height: r.y2 - r.y1, fill: "var(--sand)", opacity: .55 }, svg);
+  for (const r of world.hazards) el("rect", { x: r.x1, y: flip(r.y2), width: r.x2 - r.x1, height: r.y2 - r.y1, fill: "var(--hazard)", opacity: .85 }, svg);
+  el("circle", { cx: world.base[0], cy: flip(world.base[1]), r: run.replay.config.base_radius, fill: "none", stroke: "var(--base)", "stroke-width": .22 }, svg);
+  const targets = world.targets.map(t => {
+    const dot = el("circle", { cx: t.x, cy: flip(t.y), r: .55, fill: "none", stroke: "var(--target)", "stroke-width": .22 }, svg);
+    const text = el("text", { x: t.x + .9, y: flip(t.y) + .45, fill: "var(--target)", "font-size": 1.25 }, svg);
+    text.textContent = `${t.id} · ${t.value}`;
+    return { id: t.id, dot };
+  });
+  const trail = el("polyline", { fill: "none", stroke: color, "stroke-width": .16, opacity: .75, "stroke-linejoin": "round" }, svg);
+  const queue = el("polyline", { fill: "none", stroke: "var(--queue)", "stroke-width": .18, "stroke-dasharray": ".5 .35" }, svg);
+  const tether = el("line", { stroke: "var(--ghost)", "stroke-width": .1, "stroke-dasharray": ".25 .25" }, svg);
+  const ghost = el("circle", { r: .62, fill: "none", stroke: "var(--ghost)", "stroke-width": .22 }, svg);
+  const rover = el("circle", { r: .5, fill: color }, svg);
+  const believed = el("path", { stroke: "var(--text)", "stroke-width": .2, fill: "none", "stroke-linecap": "round" }, svg);
+  const stats = document.createElement("div");
+  stats.className = "stats";
+  stats.innerHTML = `<div><span>battery</span> <b class="b"></b><div class="bar"><i></i></div></div>
+    <div><span>sampled</span> <b class="s"></b></div>
+    <div><span>view is behind by</span> <b class="g"></b></div>
+    <div><span>commands in transit</span> <b class="q"></b></div>
+    ${run.belief.size ? '<div><span>its own estimate is off by</span> <b class="e"></b></div>' : ""}`;
+  card.appendChild(stats);
+  const event = document.createElement("div");
+  event.className = "event";
+  card.appendChild(event);
+  const DESCRIBE = {
+    safety_stop: ["bad", "Safety stop: the rover hit a hazard or the map edge, queue cleared"],
+    battery_depleted: ["bad", "Battery empty: the rover is dead"],
+    sample_taken: ["good", "Sample taken"],
+    sample_failed: ["bad", "Sample failed: no target in range, energy still spent"],
+  };
+  return {
+    node: card,
+    draw(t) {
+      t = Math.min(t, run.last);
+      const s = run.states[t], seen = run.seen[t];
+      trail.setAttribute("points", run.states.slice(0, t + 1).map(x => `${x.position[0]},${flip(x.position[1])}`).join(" "));
+      rover.setAttribute("cx", s.position[0]); rover.setAttribute("cy", flip(s.position[1]));
+      rover.setAttribute("fill", s.alive ? color : "var(--dead)");
+      ghost.setAttribute("cx", seen.position[0]); ghost.setAttribute("cy", flip(seen.position[1]));
+      tether.setAttribute("x1", s.position[0]); tether.setAttribute("y1", flip(s.position[1]));
+      tether.setAttribute("x2", seen.position[0]); tether.setAttribute("y2", flip(seen.position[1]));
+      const pending = run.commands.filter(c => c.sent <= t && t < c.until);
+      let p = s.position.slice();
+      const points = [`${p[0]},${flip(p[1])}`];
+      for (const c of pending) if (c.action === "drive") {
+        const a = c.heading_deg * Math.PI / 180;
+        p = [p[0] + c.metres * Math.cos(a), p[1] + c.metres * Math.sin(a)];
+        points.push(`${p[0]},${flip(p[1])}`);
+      }
+      queue.setAttribute("points", points.length > 1 ? points.join(" ") : "");
+      for (const target of targets) target.dot.setAttribute("fill", s.sampled_targets.includes(target.id) ? "var(--target)" : "none");
+      stats.querySelector(".b").textContent = s.battery.toFixed(0);
+      stats.querySelector(".bar i").style.width = `${100 * s.battery / run.battery}%`;
+      stats.querySelector(".bar i").style.background = s.battery < 15 ? "var(--dead)" : "var(--rover)";
+      stats.querySelector(".s").textContent = s.sampled_targets.length ? s.sampled_targets.join(", ") : (t === run.last ? "nothing" : "nothing yet");
+      stats.querySelector(".g").textContent = `${run.gap[t].toFixed(1)} m`;
+      stats.querySelector(".q").textContent = pending.length;
+      const b = run.belief.get(t);
+      if (b) {
+        const k = .55, bx = b[0], by = flip(b[1]);
+        believed.setAttribute("d", `M${bx - k},${by - k}L${bx + k},${by + k}M${bx - k},${by + k}L${bx + k},${by - k}`);
+        stats.querySelector(".e").textContent = `${dist(b, s.position).toFixed(1)} m`;
+      } else {
+        believed.setAttribute("d", "");
+        if (run.belief.size) stats.querySelector(".e").textContent = "–";
+      }
+      let shown = null;
+      for (let k = t; k >= Math.max(0, t - 4) && !shown; k--)
+        for (const e of run.states[k].events) if (DESCRIBE[e.type]) shown = [DESCRIBE[e.type], k];
+      if (t === run.last) {
+        const r = run.replay.result;
+        event.className = "event " + (run.reward > 0 ? "good" : "bad");
+        event.textContent = `Finished: ${r.alive ? (r.at_base ? "alive at base" : "alive, away from base") : "battery dead"}, reward ${run.reward.toFixed(2)}`;
+      } else if (shown) {
+        event.className = "event " + shown[0][0];
+        event.textContent = `tick ${shown[1]}: ${shown[0][1]}`;
+      } else { event.className = "event"; event.textContent = ""; }
+    },
+  };
+}
+
+function buildPlot(runs) {
+  const svg = document.getElementById("plot");
+  svg.innerHTML = "";
+  const last = Math.max(...runs.map(r => r.last));
+  const top = Math.max(1, ...runs.flatMap(r => r.gap), ...runs.flatMap(r => r.beliefError.map(e => e[1])));
+  const X = 1000, Y = 150, pad = 6, head = 20;
+  svg.setAttribute("viewBox", `0 0 ${X} ${Y}`);
+  const x = t => pad + (X - 2 * pad) * t / last, y = v => Y - pad - (Y - pad - head) * v / top;
+  for (const frac of [0, .5, 1]) {
+    el("line", { x1: pad, x2: X - pad, y1: y(top * frac), y2: y(top * frac), stroke: "var(--line)", "stroke-width": 1 }, svg);
+    const text = el("text", { x: pad + 4, y: y(top * frac) - 4, fill: "var(--muted)", "font-size": 12 }, svg);
+    text.textContent = `${(top * frac).toFixed(1)} m`;
+  }
+  runs.forEach((run, i) => {
+    const color = COLORS[i % COLORS.length];
+    // Dashed: the raw delayed view. Solid: the controller's own estimate, when recorded.
+    el("polyline", {
+      fill: "none", stroke: color, "stroke-width": run.beliefError.length ? 1.2 : 2.5, opacity: run.beliefError.length ? .55 : 1,
+      "stroke-dasharray": run.beliefError.length ? "5 4" : "", "vector-effect": "non-scaling-stroke",
+      points: run.gap.map((v, t) => `${x(t)},${y(v)}`).join(" "),
+    }, svg);
+    if (run.beliefError.length) el("polyline", {
+      fill: "none", stroke: color, "stroke-width": 2.8, "vector-effect": "non-scaling-stroke",
+      points: run.beliefError.map(([t, v]) => `${x(t)},${y(Math.min(v, top))}`).join(" "),
+    }, svg);
+  });
+  const cursor = el("line", { y1: 0, y2: Y, stroke: "var(--text)", "stroke-width": 1, opacity: .6 }, svg);
+  return t => { cursor.setAttribute("x1", x(t)); cursor.setAttribute("x2", x(t)); };
+}
+
+function start(entries) {
+  const runs = entries.map(e => prepare(e.label, e.replay, e.belief));
+  document.getElementById("drop").classList.add("hidden");
+  document.getElementById("stage").classList.remove("hidden");
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  const cards = runs.map((run, i) => buildCard(run, COLORS[i % COLORS.length]));
+  cards.forEach(c => grid.appendChild(c.node));
+  const moveCursor = buildPlot(runs);
+  const last = Math.max(...runs.map(r => r.last));
+  const scrub = document.getElementById("scrub"), play = document.getElementById("play"), tickLabel = document.getElementById("tick");
+  scrub.max = last;
+  let timer = null;
+  const draw = t => { cards.forEach(c => c.draw(t)); moveCursor(t); tickLabel.textContent = `tick ${t} / ${last}`; scrub.value = t; };
+  const stop = () => { clearInterval(timer); timer = null; play.textContent = "Play"; };
+  const go = () => {
+    if (+scrub.value >= last) draw(0);
+    play.textContent = "Pause";
+    timer = setInterval(() => {
+      const t = +scrub.value + 1;
+      draw(Math.min(t, last));
+      if (t >= last) stop();
+    }, 1000 / +document.getElementById("speed").value);
+  };
+  play.onclick = () => (timer ? stop() : go());
+  scrub.oninput = () => { stop(); draw(+scrub.value); };
+  document.getElementById("speed").onchange = () => { if (timer) { stop(); go(); } };
+  document.onkeydown = e => {
+    if (e.key === " ") { e.preventDefault(); play.click(); }
+    if (e.key === "ArrowRight") { stop(); draw(Math.min(last, +scrub.value + 1)); }
+    if (e.key === "ArrowLeft") { stop(); draw(Math.max(0, +scrub.value - 1)); }
+  };
+  draw(0);
+}
+
+const embedded = JSON.parse(document.getElementById("embedded-replays").textContent);
+if (embedded.length) start(embedded);
+
+async function loadFiles(files) {
+  const entries = [];
+  for (const file of files) {
+    const replay = JSON.parse(await file.text());
+    if (!replay.states || !replay.world) { alert(`${file.name} is not a Lightlag replay`); return; }
+    entries.push({ label: file.name.replace(/\.json$/i, ""), replay });
+  }
+  if (entries.length) start(entries);
+}
+document.getElementById("files").onchange = e => loadFiles(e.target.files);
+const drop = document.getElementById("drop");
+drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); loadFiles(e.dataTransfer.files); };
+</script>
+</body>
+</html>

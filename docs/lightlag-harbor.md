@@ -2,7 +2,15 @@
 
 14 November 2026, 02:00 Helsinki. Owner: Kristján / Claude Code. Task: [`harbor/lightlag/`](../harbor/lightlag/), tests: `tests/harbor/`. This is the submission format AfterQuery requires ([their update](afterquery-update-2026-11-14.md)).
 
-**Status:** the task passes Harbor's linter (0.25.0, default rules), and its four runtime steps pass end to end when run as plain processes. **It has not been built or run in containers**, because Docker was not running on this machine, and **no model has played it**. Treat every claim about a real `harbor run` as unverified until one is done.
+**Status:** the task runs in real containers through Harbor 0.25.0. Three runs are saved with their logs in [`docs/lightlag-runs/`](lightlag-runs/):
+
+| Run | Reward | Detail |
+|---|---|---|
+| Reference (`-a oracle`) | 1.000 | All three targets, back at base, 47 s |
+| Do nothing (`-a nop`) | 0.000 | Nothing sampled, 16 s |
+| **OpenCode 1.19.5 with Claude Opus 5.5** | **1.000** | All three targets, back at base, 4 min 17 s, 27 tool calls, $0.31 |
+
+**The model matched the reference, so under the current rules there is no gap.** One run on one seed, but the way it won is the point: it sent one leg at a time (two or three commands), advanced nine or ten ticks until telemetry caught up, measured the slip, and sent the next leg. That is "send a leg and wait". It works because waiting is free here: the mission needs about 14 commands and the episode lasts 80 ticks. It never needed to act on a stale view. The [pilot](lightlag-pilot.md) predicted this from scripted policies; this is the first confirmation with a real agent. The rules need time pressure before this environment can show a gap; see "What has to change" below.
 
 ## Run it
 
@@ -11,10 +19,17 @@ Needs Docker running and Harbor installed (`uv tool install harbor`, Python 3.12
 ```sh
 harbor run -p harbor/lightlag -a oracle                      # our reference run
 harbor run -p harbor/lightlag -a nop                         # do nothing
-harbor run -p harbor/lightlag -a opencode -m <provider/model> # a model; needs that provider's API key in the environment
+harbor run -p harbor/lightlag -a opencode -m anthropic/claude-opus-5-5 --env-file .env   # a model
 ```
 
-Each run ends with one number between 0 and 1 in `/logs/verifier/reward.txt`.
+The model run reads `ANTHROPIC_API_KEY` from `.env`, which git ignores. Each run ends with one number between 0 and 1 in `/logs/verifier/reward.txt`. To keep a run as evidence, `python3 harbor/save_run.py <trial-dir> <name>` copies its logs into `docs/lightlag-runs/` with local paths removed, and refuses anything that looks like a credential.
+
+## What has to change
+
+- **Waiting has to cost something.** With 80 ticks for a 14-command mission, a careful agent can wait for telemetry after every leg and lose nothing. A shorter episode, deadlines on samples, or targets that appear mid-mission would make that slow.
+- **Blind planning has to fail.** The pilot's rule changes (tighter sampling radius, more slip noise, wider sand range) do that for scripted policies.
+- **Manh's dynamic rules already go this way** ([dynamic pilot](lightlag-dynamic-pilot.md)): deadlines, discoveries and a time-pressured "rush" profile. The next real test is this same Harbor task with those rules, the reference adapted to them, and the same model.
+- **The reference has no headroom here.** It scores 1.000 on this seed, so no agent can fall short of it by being merely competent. Harder rules have to leave the reference clearly above a careful agent.
 
 ## What scripted policies score
 
@@ -50,7 +65,7 @@ is stopped by Harbor
 4. **Harbor copies `/evaluator` from the simulator's container into a fresh verifier container.** The verifier is a separate image the agent never touched. It reads the simulator's result and writes `raw_score / max_available_value`.
 5. **A missing or malformed result fails the verifier** instead of scoring zero, so a broken pipeline cannot pass for a weak agent.
 
-This uses three documented Harbor features: sidecar services in `environment/docker-compose.yaml`, `[[verifier.collect]]` hooks, and artifacts collected from a named service. I read them in Harbor's source as installed; I have not seen them run.
+This uses three documented Harbor features: sidecar services in `environment/docker-compose.yaml`, `[[verifier.collect]]` hooks, and artifacts collected from a named service. All three worked as described in the runs above.
 
 ## Layout
 
@@ -76,12 +91,13 @@ harbor/
 - **One episode per task:** seed 7, delay 3, default map and rules, set in `docker-compose.yaml`. Several maps per run would need several tasks or a multi-episode server.
 - **Rules:** unchanged from the simulator's defaults. The pilot's finding that a blind plan does well under these rules still stands (0.750 here).
 
-## Known risks before the first real run
+## Known limits
 
-- **OpenCode may not see the tools.** Harbor writes OpenCode's MCP settings directly under `mcp`, while OpenCode's current docs put them under `mcp.servers`. If the tools do not appear, pass a corrected block through Harbor's `--ak opencode_config=...` option or pin an OpenCode version.
-- **Nothing has been built.** Image builds, the health check, service-name networking and the collect hook's timing are all untested.
-- **Lint findings under all rules:** base images are not pinned to digests, and the agent runs as root. Neither affects the grading path above; both are worth fixing once a run works.
-- **Model access:** AfterQuery provides no credits. A run needs a provider key in the environment of whoever runs it.
+- **OpenCode sees the tools.** This was a worry beforehand, because Harbor writes OpenCode's MCP settings in an older layout than OpenCode's docs describe. With OpenCode 1.19.5 the agent called `lightlag_rules`, `lightlag_map`, `lightlag_uplink` and `lightlag_advance` directly. It called them one at a time and did not script them, and used the shell only to compute a heading.
+- **The first run can fail on the image download.** Our first attempt timed out pulling `python:3.12-slim` just after Docker started. Harbor reported it as an exception, not a score. Pulling the image once fixed it.
+- **Lint findings under all rules:** base images are not pinned to digests, and the agent runs as root. Neither affects the grading path above.
+- **One run per configuration.** The rubric asks for three agent runs; only one has been done.
+- **Model access:** AfterQuery provides no credits. The Opus run cost $0.31.
 
 ## Tests
 
