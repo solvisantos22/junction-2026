@@ -252,7 +252,76 @@ class StandalonePage(unittest.TestCase):
 
 
 @unittest.skipUnless(REFERENCED, "no traverse reference run under docs/lightlag-runs/traverse-* yet")
+class CampaignPages(unittest.TestCase):
+    """One page per world of a campaign, all in one file, from runs saved the way the campaign task saves them."""
+
+    @classmethod
+    def setUpClass(cls):
+        from lightlag_traverse.campaign import TraverseCampaignService
+        from lightlag_traverse.pilot import fly_campaign
+        cls.root = ROOT / "campaign"
+        short = {"max_ticks": SHORT}
+
+        def save(name, kind, play):
+            folder = cls.root / name
+            service = TraverseCampaignService((SEED, SEED + 1), artifact_dir=str(folder / "artifacts" / "evaluator"),
+                                              mission=short)
+            play(service)
+            service.finish()
+            (folder / "run.json").write_text(json.dumps({"kind": kind, "label": name, "how": "played by the tests"}),
+                                             encoding="utf-8")
+
+        quick = {"plan_steps": 2000, "replan_steps": 400, "beam": 10, "rebeam": 5}
+        save("campaign-pilot", "reference", lambda service: fly_campaign(service, quick))
+        save("campaign-idle", "claude", lambda service: None)
+        save("campaign-nothing", "baseline", lambda service: None)       # a kind the page does not show
+        cls.pages = build_traverse.campaign(cls.root)
+
+    def test_there_is_one_page_per_world_and_each_says_which_it_is(self):
+        self.assertEqual([page["site"] for page in self.pages], [1, 2])
+        self.assertEqual([page["seed"] for page in self.pages], [SEED, SEED + 1])
+        for page in self.pages:
+            self.assertEqual(page["brand"], "SITE {} / 2".format(page["site"]))
+            self.assertEqual([site["n"] for site in page["sites"]], [1, 2])
+            self.assertEqual([run["id"] for run in page["runs"]], ["campaign-pilot", "campaign-idle"])
+
+    def test_each_run_carries_its_score_over_the_whole_campaign(self):
+        folder = self.root / "campaign-pilot" / "artifacts" / "evaluator"
+        overall = json.loads((folder / "result.json").read_text(encoding="utf-8"))
+        for page in self.pages:
+            pilot = next(run for run in page["runs"] if run["id"] == "campaign-pilot")
+            self.assertAlmostEqual(pilot["campaign"], overall["raw_score"] / overall["max_available_value"], places=6)
+            idle = next(run for run in page["runs"] if run["id"] == "campaign-idle")
+            self.assertEqual(idle["campaign"], 0.0)
+        self.assertEqual([page["runs"][0]["reward"] for page in self.pages], overall["mission_rewards"])
+
+    def test_the_page_holds_every_world_and_opens_the_one_asked_for(self):
+        html = build_traverse.standalone(self.pages)
+        for number, page in enumerate(self.pages, 1):
+            element = re.search(r'<script id="src-data-{}" type="application/octet-stream">([^<]*)</script>'.format(number), html)
+            self.assertEqual(json.loads(base64.b64decode(element.group(1))), json.loads(json.dumps(page)))
+        self.assertIn("text('src-data-' + site)", html)
+        self.assertIn("Math.min(2,", html)
+
+    def test_a_world_where_one_run_played_other_ground_is_refused(self):
+        bad = self.root.parent / "campaign-bad"
+        shutil.copytree(self.root, bad)
+        replay = bad / "campaign-idle" / "artifacts" / "evaluator" / "missions" / "02" / "replay.json"
+        data = json.loads(replay.read_text(encoding="utf-8"))
+        data["seed"] += 100
+        replay.write_text(json.dumps(data), encoding="utf-8")
+        with self.assertRaises(SystemExit):
+            build_traverse.campaign(bad)
+
+
 class CommittedPage(unittest.TestCase):
+    def test_the_committed_campaign_page_is_up_to_date(self):
+        if not build_traverse.run_folders(build_traverse.RUNS, "campaign-"):
+            self.skipTest("no campaign runs saved yet")
+        self.assertEqual((REPO / "viewer" / "traverse-campaign.html").read_text(encoding="utf-8"),
+                         build_traverse.standalone(build_traverse.campaign(build_traverse.RUNS)),
+                         "run: python3 viewer/build_traverse.py --campaign")
+
     def test_the_committed_page_and_data_are_up_to_date(self):
         data, hint = build_traverse.gather(COMMITTED), "run: python3 viewer/build_traverse.py"
         self.assertEqual((REPO / "viewer" / "traverse-demo.html").read_text(encoding="utf-8"), build_traverse.standalone(data), hint)
