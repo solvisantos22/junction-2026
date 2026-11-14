@@ -104,3 +104,18 @@ retained. The [archive manifest](lightlag-runs/information-allocation-v1/replay-
 records compressed and uncompressed hashes. `python3 -m
 lightlag_information_allocation.study --output /tmp/new-allocation-study`
 reproduces the study into a new directory (with uncompressed JSON-lines replays).
+
+## Model pilot in progress
+
+The first two of twelve planned sessions are complete and independently audited.
+Claude inspected a in case_1 and b in its mirrored case_2, received a soft signal
+in each, and committed to the detour at the optimal tick. Both rewards are 0.325,
+matching their protected references; both acquisitions and posterior route
+choices maximize expected reward. Reported cost so far is $0.1818758. The harder
+value-versus-uncertainty cases and the second repetitions are still pending.
+Only soft-signal branches are covered by these first two actual model trials.
+
+The [exact reference outcome distribution](lightlag-runs/information-allocation-pilot-v1/reference-distribution.json)
+predicts 1.224 failed trips across twelve independent sessions even under the
+optimal policy. Therefore realized failure counts alone do not establish bad
+reasoning; acquisition, conditional route and timing are audited separately.

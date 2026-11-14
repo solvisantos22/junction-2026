@@ -1,0 +1,151 @@
+{
+    "id": "97925645-0bbd-4101-b2a6-08d48a4208a3",
+    "task_name": "neural-network-november/information-allocation-pilot",
+    "trial_name": "case_1-r1__qrfzuVt",
+    "trial_uri": "file:///private<pilot-runtime>/jobs/model-case_1-r1/case_1-r1__qrfzuVt",
+    "task_id": {
+        "path": "<pilot-runtime>/tasks/case_1-r1"
+    },
+    "source": null,
+    "task_checksum": "08df8796440bf3ed3d34a6a503030b6ebfbde0629f9a7952ad546714a888fbf7",
+    "config": {
+        "task": {
+            "path": "<pilot-runtime>/tasks/case_1-r1",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": null
+        },
+        "trial_name": "case_1-r1__qrfzuVt",
+        "trials_dir": "<pilot-runtime>/jobs/model-case_1-r1",
+        "install_only": false,
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "opencode",
+            "import_path": null,
+            "model_name": "anthropic/claude-opus-5-5",
+            "base_url": null,
+            "model_api_key_name": null,
+            "model_api_format": null,
+            "skip_model_parsing": false,
+            "n_concurrent": null,
+            "concurrency_group": null,
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "resume_trajectory": false,
+            "load_trajectory": null,
+            "extra_allowed_hosts": [],
+            "kwargs": {
+                "version": "1.19.5",
+                "opencode_config": {
+                    "agent": {
+                        "build": {
+                            "steps": 12
+                        }
+                    },
+                    "provider": {
+                        "anthropic": {
+                            "models": {
+                                "claude-opus-5-5": {
+                                    "limit": {
+                                        "context": 200000,
+                                        "output": 8192
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "mcp_servers": []
+        },
+        "user_agent": null,
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "stream": false,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "override_tpu": null,
+            "mounts": null,
+            "extra_docker_compose": [],
+            "kwargs": {},
+            "extra_allowed_hosts": []
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "disable": false
+        },
+        "artifacts": [],
+        "extra_instruction_paths": [],
+        "extra_instructions": [],
+        "job_id": "44035b3a-5419-4f52-b4f1-e4df9c14cda2",
+        "source_trial": null
+    },
+    "agent_info": {
+        "name": "opencode",
+        "version": "1.19.5",
+        "model_info": {
+            "name": "claude-opus-5-5",
+            "provider": "anthropic"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 70649,
+        "n_cache_tokens": 70635,
+        "n_output_tokens": 769,
+        "cost_usd": 0.11841800000000001,
+        "model_usage": {
+            "anthropic/claude-opus-5-5": {
+                "n_input_tokens": 70649,
+                "n_cache_tokens": 70635,
+                "n_output_tokens": 769,
+                "cost_usd": 0.11841800000000001
+            }
+        },
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": {
+        "rewards": {
+            "reward": 0.325
+        }
+    },
+    "verifier_environment_mode": "separate",
+    "exception_info": null,
+    "started_at": "2026-11-14T11:58:06.180881Z",
+    "finished_at": "2026-11-14T11:59:52.408114Z",
+    "environment_setup": {
+        "started_at": "2026-11-14T11:58:06.203366Z",
+        "finished_at": "2026-11-14T11:58:13.216560Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-11-14T11:58:13.216646Z",
+        "finished_at": "2026-11-14T11:59:20.714690Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-11-14T11:59:20.715070Z",
+        "finished_at": "2026-11-14T11:59:41.734202Z"
+    },
+    "verifier": {
+        "started_at": "2026-11-14T11:59:46.530133Z",
+        "finished_at": "2026-11-14T11:59:52.408093Z"
+    },
+    "step_results": null
+}
