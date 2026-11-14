@@ -1,6 +1,6 @@
 # Sponsor tools and extra prizes — Junction 2026
 
-Checked Friday 13 November, approximately 22:10 Helsinki, against all 20 Developer Tools and Assets entries and all 19 Tech Challenges on the logged-in Junction platform. Offers can change. This is research: no credits redeemed, accounts created or prize entries submitted.
+Initial research checked Friday 13 November, approximately 22:10 Helsinki, against all 20 Developer Tools and Assets entries and all 19 Tech Challenges on the logged-in Junction platform. Offers can change. Subsequent credit claims are recorded below; no prize entries were submitted in this research task.
 
 **Update, Saturday 14 November at 01:35 Helsinki:** Ved announced that **AfterQuery will not supply inference credits**. Harbor packaging, a 0–1 text reward and at least one scored Harbor model run are now explicit. See the [announcement and Lightlag implications](docs/afterquery-update-2026-11-14.md). Other sponsor rows below retain their Friday verification date; they are not confirmation of a redeemed balance.
 
@@ -36,7 +36,7 @@ These are fit judgments, not confirmed eligibility decisions or estimates of win
 |---|---|---|
 | [AfterQuery](https://hackjunction.app/participate/45/challenges/328) | Harbor required; OpenCode encouraged; mentors. **No inference credits**, per Ved's Saturday 01:35 update. Upstream Harbor link supplied; no separate event starter kit in those posts. | Package the environment and obtain a scored model run. Confirm judging model/budget and source API access elsewhere. [Update](docs/afterquery-update-2026-11-14.md) |
 | [OpenAI](https://hackjunction.app/participate/45/hackerpacks/70) | **$100 / 2,500 Codex usage credits per participant**, 30 days after redemption, one-use personal link; works on Free accounts | Development tooling. **This offer excludes API credits and a paid subscription.** Separate from the prize above. |
-| [Google DeepMind](https://hackjunction.app/participate/45/hackerpacks/68) | Gemini API credits; amount not specified. [Apply once per team](https://forms.gle/bByXvjGkW9WZuYwW9). Challenge page says up to **400 teams**, participants 18+ | Apply early if Gemini is a serious option. Access instructions are supplied to eligible teams. |
+| [Google DeepMind](https://hackjunction.app/participate/45/hackerpacks/68) | Gemini API credits; amount not specified. [Apply once per team](https://forms.gle/bByXvjGkW9WZuYwW9). Challenge page says up to **400 teams**, participants 18+ | **Application submitted by a teammate, per Sölvi on Saturday 14 November.** Approval, amount and API access remain unverified; do not duplicate the team application. |
 | [Anthropic](https://hackjunction.app/participate/45/hackerpacks/67) | **$20 Claude API credits per participant**; redemption link in the resource entry | Development evaluations or additional model comparisons, subject to AfterQuery harness rules. |
 | [Modal](https://hackjunction.app/participate/45/hackerpacks/62) | **$100 CPU/GPU credits per participant**, valid one year after redemption. **Sölvi's $100 grant confirmed by Modal's Saturday 02:04 email.** | Run isolated episodes, evaluations and hosted models. Current Harbor docs list Modal support for Docker Compose tasks; Lightlag compatibility still needs a real test. See the compute/API distinction below. |
 | [Verda](https://hackjunction.app/participate/45/hackerpacks/71) | **€200 credits**, signup + claim form; inference API, CPU/GPU instances, clusters, containers and batch jobs | Alternative compute platform. Verda's tech brief also advertises a hosted NVIDIA Nemotron endpoint. |
@@ -81,7 +81,7 @@ Dedicated Modal endpoints are billed for compute; Shared Endpoints are billed pe
 ## Tonight's actions
 
 1. Follow [Ved's updated Harbor contract](docs/afterquery-update-2026-11-14.md), confirm the required evaluation settings with mentors, and secure API access from another provider; AfterQuery has withdrawn its inference-credit offer.
-2. If interested, have one teammate request Gemini credits promptly; places are limited to 400 teams. Each teammate can inspect their personal Codex offer.
+2. Follow up on the teammate's submitted Gemini application; approval and usable API access remain unverified. Sölvi is claiming the individual Anthropic offer. Each teammate can inspect their personal Codex offer.
 3. Pick one environment first, then choose Modal or Verda based on the compute we actually need. Keep a second model prize conditional.
 4. For NVIDIA, ask which hosted endpoint serves the **required Super VL model**; the example model mismatch needs clarification.
 5. Keep evidence of meaningful sponsor use and note any separate submission requirement. Do not assume checking a box guarantees eligibility.
