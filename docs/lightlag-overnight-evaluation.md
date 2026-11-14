@@ -379,6 +379,15 @@ attempts replay exactly with no infrastructure findings. B usage is now
 **$2.8120282**, A+B **$6.7830098**. Three pairs remain; retain this recovery and
 failure together without treating the halfway result as the final effect.
 
+### Fourth pair: rush 501, repetition 2
+
+B07 treatment scores **10.5/12 = 0.875**, alive at base. B08 control collects
+the same 10.5 science points but finishes alive away from base, so its reward
+is **5.25/12 = 0.4375**. The paired difference is **+0.4375**. Do not describe
+the control as a battery death or infer causality from its `LATE_SAMPLE` tag.
+All eight B attempts have exact replays and no infrastructure findings.
+Reported B cost is **$3.722155**, A+B **$7.6931366**; four assignments remain.
+
 ## Status
 
 Block A protocol was published at `253b263` before new attempts; all nine are

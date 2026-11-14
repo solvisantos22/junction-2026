@@ -245,7 +245,9 @@ These are recommended evidence choices, not newly asserted official entry requir
   Third pair adds **0 control / 0.916667 treatment** on rush 501; the control
   dies and treatment survives at base. All six B audits are exact, B usage
   **$2.8120282**, six assignments pending. The sample is still incomplete.
-  Reported usage is not a verified balance. No Modal/Gemini use or prize entry.
+  Fourth pair adds **0.875 treatment / 0.4375 control**, both alive but control
+  away from base. All eight B audits are exact, B usage **$3.722155**, four
+  assignments pending. Reported usage is not a verified balance; no prize entry.
 
 ### E08 — 14 November — Reproducible recorded evidence clip
 
