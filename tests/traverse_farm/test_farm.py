@@ -149,6 +149,36 @@ class Programs(unittest.TestCase):
         self.assertEqual(tail.tail(), "\nline 999\n")
         self.assertLess(len(tail.getvalue()), 200)
 
+    def test_replays_are_saved_as_the_demo_builder_reads_them(self):
+        import importlib.util
+        from traverse_farm import replays
+        row = jobs.run_job({"policy": "nothing", "seed": 100, "candidate": "nothing", "keep_replay": True})
+        reference = dict(row, candidate="pilot")   # the writer only needs a reference-kind run; nothing drives here
+        policies = {"pilot": {"policy": "pilot"}, "nothing": {"policy": "nothing"}}
+        spec = importlib.util.spec_from_file_location("build_traverse", REPO / "viewer" / "build_traverse.py")
+        builder = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(builder)
+        with tempfile.TemporaryDirectory() as folder:
+            written = replays.write([reference, row], policies, Path(folder))
+            world = Path(folder) / "world-100"
+            meta = json.loads((world / "traverse-pilot" / "run.json").read_text())
+            data = builder.gather(builder.run_folders(world))   # the demo's own checks: kinds, one world, every tick
+        self.assertEqual(sorted(path.name for path in written), ["traverse-nothing", "traverse-pilot"])
+        self.assertEqual((meta["kind"], meta["seed"]), ("reference", 100))
+        self.assertEqual(len(data["runs"]), 2)
+
+    def test_a_replayed_program_keeps_the_label_of_the_run_it_came_from(self):
+        from traverse_farm import replays
+        with tempfile.TemporaryDirectory() as folder:
+            run = Path(folder) / "traverse-agent-opus-9"
+            (run / "program").mkdir(parents=True)
+            (run / "run.json").write_text(json.dumps({"label": "Opus 5.5 · agent 9", "model": "Claude Opus 5.5"}))
+            spec = {"policy": "program", "label": str(run / "program" / "auto.py")}
+            meta = replays.run_meta("agent:traverse-agent-opus-9", spec, {"seed": 7, "died_tick": 120})
+        self.assertEqual((meta["kind"], meta["label"], meta["died_tick"]), ("claude", "Opus 5.5 · agent 9", 120))
+        self.assertIn("without the agent", meta["how"])
+        self.assertEqual(replays.folder_name("agent:traverse-agent-opus-9"), "traverse-agent-opus-9")
+
     def test_nothing_a_program_imports_leaks_into_the_next_job(self):
         self.run_program("import lightlag_surface\ndef play(tools):\n    pass\n")
         for name in ("policy", "lightlag_surface", "lightlag_client"):
@@ -348,7 +378,7 @@ class ModalApp(unittest.TestCase):
         sys.path.insert(0, str(REPO / "tools" / "traverse_farm"))
         import modal_app
         self.assertEqual(modal_app.app.name, "lightlag-traverse-farm")
-        for name in ("mission", "smoke", "evaluate", "search"):
+        for name in ("mission", "smoke", "evaluate", "search", "replays"):
             self.assertTrue(hasattr(modal_app, name), name)
 
 

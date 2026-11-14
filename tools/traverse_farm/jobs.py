@@ -8,6 +8,7 @@ A job is a small dict that survives JSON:
     {"policy": "program", "program": "<source defining play(tools)>", "seed": 123, "time_limit": 1500}
     {"policy": "program", "files": {"auto.py": "<source>", ...}, "entry": "auto.py", "seed": 123}
     {"policy": "pilot", "seed": 123, "mission": {"sun_margin_ticks": 0}}   # any of these, on changed rules
+    {"policy": "pilot", "seed": 123, "keep_replay": True}   # the row also holds the evaluator's replay
 
 The second form is an agent's own script as it ran in the task: it is started as `__main__` with a
 stand-in `lightlag_client` beside it, as `lightlag_traverse.sandbox --program` does. Both forms get
@@ -15,7 +16,7 @@ the published ground model as `lightlag_surface.py`, and every reply is a JSON c
 
 Extra keys (for example "candidate" or "label") are copied into the row unchanged. `run_job`
 returns one row per job: who played, which world, the reward and how the mission ended. Rows
-never hold a replay, so thousands of them stay small.
+hold a replay only when the job asks for one (`keep_replay`, for the demo), so thousands stay small.
 
 A "program" job runs model-written code in this process. That is only acceptable inside an
 isolated container, so it is refused unless TRAVERSE_FARM_ALLOW_PROGRAMS=1, which the Modal
@@ -285,10 +286,14 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
             row["died_tick"] = next(s["tick"] for s in env.replay()["states"] if not s["alive"])
         if ran["error"] or not result["alive"]:
             row["printed"] = ran["printed"]
+        if job.get("keep_replay"):
+            row["replay"] = env.replay()
     elif not mission:
-        run = play.run_episode(play.policy(policy_name(job)), seed)
+        run = play.run_episode(play.policy(policy_name(job)), seed, keep_replay=bool(job.get("keep_replay")))
         result, seconds, calls = run["result"], run["seconds"], run["public_calls"]
         row["error"] = None
+        if job.get("keep_replay"):
+            row["replay"] = run["replay"]
     else:   # play.run_episode, on the changed rules
         controller = play.policy(policy_name(job))
         env = play.TraverseEnvironment(seed, mission=mission)
@@ -300,6 +305,8 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
             pass
         result = env.evaluate()
         row["error"] = None
+        if job.get("keep_replay"):
+            row["replay"] = env.replay()
     row.update(
         reward=result["raw_score"] / result["max_available_value"],
         raw_score=result["raw_score"], max_value=result["max_available_value"],

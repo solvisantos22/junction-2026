@@ -136,3 +136,20 @@ def search(out: str = "docs/traverse-farm/search-1", generations: int = 6, popul
                        select_seeds=parse_seeds(select), confirm_seeds=parse_seeds(confirm),
                        generations=generations, population=population, block=block,
                        max_slowdown=max_slowdown, out=Path(out), mission=json.loads(mission) if mission else None)
+
+
+@app.local_entrypoint()
+def replays(policies: str = "pilot", seeds: str = "600", out: str = "docs/traverse-farm/replays", mission: str = ""):
+    """Whole missions for the demo: each world's runs saved as the folders viewer/build_traverse.py reads,
+    one `<out>/world-<seed>/` per world (include `pilot`: the demo needs one reference per world)."""
+    import json
+
+    from traverse_farm import replays as farm_replays
+    from traverse_farm.common import parse_policies, parse_seeds
+
+    specs = parse_policies(policies)
+    rules = {"mission": json.loads(mission)} if mission else {}
+    batch = [dict(spec, candidate=name, seed=seed, keep_replay=True, **rules)
+             for seed in parse_seeds(seeds) for name, spec in specs.items()]
+    for folder in farm_replays.write(_run_many(batch), specs, Path(out)):
+        print("  saved", folder)
