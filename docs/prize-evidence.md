@@ -10,7 +10,7 @@ The detailed sponsor briefs were last read directly on the logged-in platform on
 
 | Prize / opportunity | Current decision and actual evidence | What to retain if pursuing it | Entry status |
 |---|---|---|---|
-| **AfterQuery — Break the Agent** | Primary provisional challenge. Kristján delivered original-task model evidence (Opus 1.0); Codex integrated the dynamic task and ran a fresh Opus trial, also 1.0. Both match their reference: no model gap demonstrated. [Requirements and gaps](afterquery-readiness.md). | Harbor task/version, real model logs/configuration, 0–1 verifier score plus raw diagnostics, fair reference/baseline comparisons, exploit probes and demo. | Lightlag draft recorded; final submission not verified. |
+| **AfterQuery — Break the Agent** | Primary provisional challenge. Kristján delivered original-task model evidence (Opus 1.0); Codex integrated the dynamic task and ran fresh Opus trials on `rush` and `rush_noisy`, both 1.0. All match their reference: no model gap demonstrated on these examples. [Requirements and gaps](afterquery-readiness.md). | Harbor task/version, real model logs/configuration, 0–1 verifier score plus raw diagnostics, fair reference/baseline comparisons, exploit probes and demo. | Lightlag draft recorded; final submission not verified. |
 | **[Best Use of Codex](https://hackjunction.app/participate/45/tech-challenges/49)** | Recommended additional entry; substantial development/review work is evidenced below. Last-read brief asks for meaningful use to build, iterate and ship. | Concrete task/prompt summary → Codex change → review/test → commit/result. Keep a few safe genuine session captures and one concise development story. | Selection/submission and any evidence/form specifics still need a live check. No mandatory screenshot format is established by this log. |
 | **[Modal](https://hackjunction.app/participate/45/tech-challenges/40) OR [Verda](https://hackjunction.app/participate/45/tech-challenges/56)** | Conditional infrastructure candidate. Sölvi's Modal grant is confirmed in the [credit notes](../SPONSOR_OPTIONS.md), but no Modal deployment/job evidence is recorded. The new experiment ran in local Docker. | Actual deployment/job ID and configuration, what ran, logs/metrics, live demo or results, and why the service mattered. Verda's last-read brief also asks for a process summary link in its Discord channel; capture that requirement, but do not post automatically. | Not verified entered; choose based on real infrastructure needs. |
 | **[Gemini](https://hackjunction.app/participate/45/tech-challenges/48)** | Conditional if it meaningfully operates/evaluates the environment and fits AfterQuery's permitted-model requirements. User confirms the team credit application is submitted; no Gemini run or approved balance is verified. | Exact model/API configuration, role in the system, actual usage/run artifacts, outcome and a visible explanation of its value. Verify that benchmark use satisfies the current prize brief. | Not verified entered; usable API funding remains unknown. |
@@ -69,6 +69,26 @@ These are recommended evidence choices, not newly asserted official entry requir
   [machine-readable summary](lightlag-runs/rush-seed500-summary.json).
 - Relevant to AfterQuery's real model evidence and an accurate Codex development
   story. This is not Gemini/Modal use or a claim of extra-prize eligibility.
+
+### R02 — 14 November — Claude solves the matched noisy pilot
+
+- Sölvi / Codex continued the authorized evaluation using **OpenCode 1.19.5 /
+  Anthropic Claude Opus 5.5**. Claim `7c2c98d` fixed seed 500, delay 3, horizon
+  50, `rush_noisy`, noise level 1 and bumpiness 0 before results were inspected.
+- Codex verified identical map/source bytes to R01 and only the declared task
+  name/profile configuration changes. Four scripted Harbor controls matched
+  direct runs, including the unchanged KF + MPC at 1.0.
+- One fresh model attempt, no retries: **1.0**, all six targets on time, alive at
+  base, 29 public rover tool calls, trial **246.31 s**, reported cost
+  **$0.4642194**, no execution exception. R01 + R02 report **$0.946363** total.
+- Evidence: [model run](lightlag-runs/rush-noisy-seed500-delay3-opus-5-5/),
+  [matched controls and interpretation](lightlag-noisy-experiment.md),
+  [summary](lightlag-runs/rush-noisy-seed500-summary.json). Export checks cover
+  credentials, manifest identity and score/cost consistency. An independent
+  Codex evidence review found no blocking issues.
+- The team has successful model examples, not a demonstrated deficit. The
+  handoff recommends additional predeclared seeds and decision auditing before
+  choosing final rules. No Modal/Gemini use or additional-prize entry is implied.
 
 ## Keep recording with minimal overhead
 

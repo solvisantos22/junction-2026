@@ -8,10 +8,10 @@ This update does not claim a fresh read of logged-in Discord or prize pages.
 
 **The basic submission path is demonstrated: Harbor, a real model run and a
 valid reward are recorded. The research gap is still unproven.** Claude matched
-the reference at 1.0 on both the original task and the time-pressured `rush`
-pilot. The next experiment tests noisy observations and heading drift rather
-than treating a weak baseline as proof of difficulty. Lightlag and final rules
-remain provisional.
+the reference at 1.0 on the original task and on both seed-500 profiles, `rush`
+and `rush_noisy`. The next milestone is a fixed additional seed comparison and
+decision audit, rather than treating weak scripted baselines as proof of model
+difficulty. Lightlag and final rules remain provisional.
 
 ## What is now demonstrated
 
@@ -32,6 +32,11 @@ remain provisional.
   controller scored 1.0 in a direct delay-0 control. The fresh OpenCode 1.19.5 /
   Claude Opus 5.5 run also scored **1.0**, with 30 rover tool calls and reported
   cost **$0.4821436**. All six samples were on time; no execution error occurred.
+- The [matched noisy pilot](lightlag-noisy-experiment.md) also produced Claude
+  **1.0** / reference **1.0**, with all six samples on time, 29 rover tool calls,
+  no execution exception and reported cost **$0.4642194**. The two new model
+  attempts together report **$0.946363**. The noisy waiting baseline scored
+  0.267857 and the blind plan 0.571429; neither predicts this model's result.
 - A [replay viewer](../viewer/README.md) for the original runs is delivered;
   adapting its presentation to a future dynamic model result remains separate.
 
@@ -39,7 +44,7 @@ remain provisional.
 
 | Priority | Gap | Concrete completion evidence |
 |---|---|---|
-| 1 | **Meaningful model difficulty.** Claude solved the original task and the seed-500 `rush` pilot at 1.0; it predicted queued commands and adapted from telemetry. | Test the already delivered `rush_noisy` profile in a separate, predeclared matched experiment with reference/baselines and a fresh model session. Preserve both successful model runs. Do not choose final rules solely to make one saved trace fail. |
+| 1 | **Meaningful model difficulty.** Claude solved the original task and both seed-500 profiles at 1.0. Default sensing noise did not separate it from the reference on this seed. | Evaluate a fixed, predeclared set of additional seeds under unchanged rules and matched references. Preserve successes as well as failures; use the decision auditor to explain any actual gap. Do not tune difficulty solely to defeat one saved trace. |
 | 1 | **API budget tracking.** The user-supplied Claude key worked for the real run. User reports individual credits obtained and team Gemini application submitted; grant source and remaining balances are not independently verified. | Record reported cost per run and keep credentials local. Gemini application is not confirmation of an available balance. Modal's confirmed compute grant is separate. AfterQuery supplies no inference credits. |
 | 2 | **Evidence for a general reasoning/control gap.** Seed 500 separates scripted strategies but the real model matches the reference. | Use matched rules and capable baselines, additional predeclared seeds and delay-0 controls where useful. Keep infrastructure errors separate from poor decisions and retain negative findings. The new one-log minimum does not cancel earlier judging-rerun requirements. |
 | 2 | **Final mission and demo.** The canonical task still uses the original profile; the generated experiment intentionally does not replace it. | Choose/version a profile after model evidence. Coordinate any canonical-task update with its owner, sync generated copies, and show the objective, decisive actions and reward in a playthrough. Exact judging model/budget remain unresolved. |
@@ -63,8 +68,9 @@ accompanying any main track. [Junction schedule and FAQ](https://2026.hackjuncti
 
 ## Coordination and next steps
 
-1. Use the [experiment handoff](lightlag-experiments.md) and its successful model
-   trace to design the next matched test. The original `harbor/lightlag/`, simulator and teammate controllers
+1. Use the [rush](lightlag-experiments.md) and [noisy](lightlag-noisy-experiment.md)
+   handoffs and their successful model traces to design the next matched seed
+   comparison. The original `harbor/lightlag/`, simulator and teammate controllers
    were preserved; experiment tasks are generated outside the checkout.
 2. Keep the task's source commit/file hashes fixed during comparisons. Manh's
    newly delivered controller collection must not silently replace this reference.

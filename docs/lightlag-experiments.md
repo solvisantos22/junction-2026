@@ -124,10 +124,11 @@ required shared artifacts; the generator and manifests reproduce the tasks.
   The agent image gets no simulator or reference code; only the oracle solution
   gets the controller modules, without their simulator-importing initializer.
 
-**Next:** a separate matched `rush_noisy` experiment at seed 500, delay 3,
-noise level 1, bumpiness 0 and horizon 50 can test noisy observations and heading
-drift. Recheck its reference and baselines before a fresh model run. Seed 500 is
-now a development/pilot seed; reserve additional predeclared seeds for later
-confirmation and avoid a general gap claim from one example. Manh's [additional controllers](../lightlag_dynamic/manh_controllers/README.md)
+**Follow-up delivered:** the [matched `rush_noisy` experiment](lightlag-noisy-experiment.md)
+at seed 500, delay 3, noise level 1, bumpiness 0 and horizon 50 also produced a
+1.0 Claude score and a 1.0 reference score. Both successful traces are preserved.
+Seed 500 is now a development/pilot seed; use a predeclared additional seed set
+and decision auditing before drawing a general gap conclusion or adding more
+difficulty. Manh's [additional controllers](../lightlag_dynamic/manh_controllers/README.md)
 landed in `b867839` during publication. They are outside this frozen comparison;
 do not silently substitute them for the recorded reference.

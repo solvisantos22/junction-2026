@@ -1,0 +1,319 @@
+{
+  "bumpiness": 0.0,
+  "container_runs": [
+    {
+      "alive": true,
+      "at_base": true,
+      "evidence": "rush-noisy-seed500-delay3-kf-mpc",
+      "maximum": 7,
+      "policy": "kf-mpc",
+      "raw_score": 7.0,
+      "reward": 1.0,
+      "tick": 50,
+      "tool_calls": 63,
+      "trial_name": "lightlag-6974-noisy500-reference__smU6uDz"
+    },
+    {
+      "alive": true,
+      "at_base": true,
+      "evidence": "rush-noisy-seed500-delay3-open-loop",
+      "maximum": 7,
+      "policy": "open-loop",
+      "raw_score": 4.0,
+      "reward": 0.571429,
+      "tick": 50,
+      "tool_calls": 16,
+      "trial_name": "lightlag-6974-noisy500-blind-v1__E3vJGGK"
+    },
+    {
+      "alive": true,
+      "at_base": false,
+      "evidence": "rush-noisy-seed500-delay3-leg-and-wait",
+      "maximum": 7,
+      "policy": "leg-and-wait",
+      "raw_score": 1.875,
+      "reward": 0.267857,
+      "tick": 50,
+      "tool_calls": 60,
+      "trial_name": "lightlag-6974-noisy500-waiting-v__m29qRAU"
+    },
+    {
+      "alive": true,
+      "at_base": true,
+      "evidence": "rush-noisy-seed500-delay3-nop",
+      "maximum": 7,
+      "policy": "nop",
+      "raw_score": 0.0,
+      "reward": 0.0,
+      "tick": 50,
+      "tool_calls": 0,
+      "trial_name": "lightlag-6974-noisy500-reference__hq7CiNz"
+    }
+  ],
+  "delay": 3,
+  "direct_runs": [
+    {
+      "delay": 3,
+      "policy": "kf_mpc",
+      "profile": "rush_noisy",
+      "public_calls": 63,
+      "result": {
+        "alive": true,
+        "at_base": true,
+        "max_available_value": 7,
+        "mission_profile": "rush_noisy",
+        "raw_score": 7.0,
+        "sampled_targets": [
+          "d1",
+          "t1",
+          "t2",
+          "t3",
+          "t4",
+          "t5"
+        ],
+        "sampled_value": 7.0,
+        "samples": [
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 6
+          },
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t2",
+            "tick": 14
+          },
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t3",
+            "tick": 9
+          },
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t4",
+            "tick": 17
+          },
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 11
+          },
+          {
+            "credited_value": 2,
+            "on_time": true,
+            "target_id": "d1",
+            "tick": 20
+          }
+        ],
+        "survival_factor": 1.0,
+        "tick": 50
+      },
+      "reward": 1.0,
+      "seed": 500
+    },
+    {
+      "delay": 3,
+      "policy": "open_loop",
+      "profile": "rush_noisy",
+      "public_calls": 16,
+      "result": {
+        "alive": true,
+        "at_base": true,
+        "max_available_value": 7,
+        "mission_profile": "rush_noisy",
+        "raw_score": 4.0,
+        "sampled_targets": [
+          "t1",
+          "t2",
+          "t3",
+          "t5"
+        ],
+        "sampled_value": 4.0,
+        "samples": [
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 6
+          },
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t2",
+            "tick": 14
+          },
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t3",
+            "tick": 9
+          },
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 11
+          }
+        ],
+        "survival_factor": 1.0,
+        "tick": 50
+      },
+      "reward": 0.5714285714285714,
+      "seed": 500
+    },
+    {
+      "delay": 3,
+      "policy": "leg_and_wait",
+      "profile": "rush_noisy",
+      "public_calls": 60,
+      "result": {
+        "alive": true,
+        "at_base": false,
+        "max_available_value": 7,
+        "mission_profile": "rush_noisy",
+        "raw_score": 1.875,
+        "sampled_targets": [
+          "d1",
+          "t1",
+          "t2",
+          "t3",
+          "t5"
+        ],
+        "sampled_value": 3.75,
+        "samples": [
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t1",
+            "tick": 6
+          },
+          {
+            "credited_value": 0.25,
+            "on_time": false,
+            "target_id": "t2",
+            "tick": 41
+          },
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t3",
+            "tick": 24
+          },
+          {
+            "credited_value": 1,
+            "on_time": true,
+            "target_id": "t5",
+            "tick": 16
+          },
+          {
+            "credited_value": 0.5,
+            "on_time": false,
+            "target_id": "d1",
+            "tick": 32
+          }
+        ],
+        "survival_factor": 0.5,
+        "tick": 50
+      },
+      "reward": 0.26785714285714285,
+      "seed": 500
+    },
+    {
+      "delay": 3,
+      "policy": "do_nothing",
+      "profile": "rush_noisy",
+      "public_calls": 0,
+      "result": {
+        "alive": true,
+        "at_base": true,
+        "max_available_value": 7,
+        "mission_profile": "rush_noisy",
+        "raw_score": 0.0,
+        "sampled_targets": [],
+        "sampled_value": 0.0,
+        "samples": [],
+        "survival_factor": 1.0,
+        "tick": 50
+      },
+      "reward": 0.0,
+      "seed": 500
+    }
+  ],
+  "docker_server_version": "29.7.2",
+  "harbor_version": "0.25.0",
+  "horizon": 50,
+  "mcp_version": "2.3.0",
+  "model_run": {
+    "agent": {
+      "model_name": "anthropic/claude-opus-5-5",
+      "name": "opencode",
+      "version": "1.19.5"
+    },
+    "agent_metrics": {
+      "total_cached_tokens": 473217,
+      "total_completion_tokens": 2353,
+      "total_cost_usd": 0.46421939999999995,
+      "total_prompt_tokens": 473261,
+      "total_steps": 22
+    },
+    "alive": true,
+    "at_base": true,
+    "evidence": "rush-noisy-seed500-delay3-opus-5-5",
+    "maximum": 7,
+    "raw_score": 7.0,
+    "reported_cost_usd": 0.46421939999999995,
+    "reward": 1.0,
+    "samples": [
+      {
+        "credited_value": 1,
+        "on_time": true,
+        "target_id": "t1",
+        "tick": 5
+      },
+      {
+        "credited_value": 1,
+        "on_time": true,
+        "target_id": "t2",
+        "tick": 8
+      },
+      {
+        "credited_value": 1,
+        "on_time": true,
+        "target_id": "t3",
+        "tick": 24
+      },
+      {
+        "credited_value": 1,
+        "on_time": true,
+        "target_id": "t4",
+        "tick": 16
+      },
+      {
+        "credited_value": 1,
+        "on_time": true,
+        "target_id": "t5",
+        "tick": 22
+      },
+      {
+        "credited_value": 2,
+        "on_time": true,
+        "target_id": "d1",
+        "tick": 20
+      }
+    ],
+    "tick": 50,
+    "tool_calls": 29,
+    "trial_duration_seconds": 246.305025,
+    "trial_name": "lightlag-6974-noisy500-reference__kshX3vc"
+  },
+  "noise_level": 1.0,
+  "profile": "rush_noisy",
+  "python_version": "3.12.16",
+  "seed": 500,
+  "source_commit": "7c2c98d11618d1d990b83534d99a131d0fff7f6c"
+}
