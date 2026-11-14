@@ -114,7 +114,12 @@ These are recommended evidence choices, not newly asserted official entry requir
   identifies a queue-running-dry wait (2.25 raw points lost, 0.5 recovered by the
   next action). Both replay exactly with no infrastructure findings. Cumulative
   reported API cost **$1.7880344**; remaining four attempts pending. Two model
-  wins and two deficits so far; no general gap claim.
+  wins and two deficits across the first four attempts; no general gap claim.
+- Third batch, **6/8 attempts cumulative**: seed 503 Claude **0.75** in both
+  profiles, tying rush KF + MPC and beating noisy KF + MPC's **0.625**. Both
+  audits replay exactly with no infrastructure findings. Cumulative reported
+  API cost **$2.6180796**; final seed 504 pair running. Three model wins, one
+  tie, two deficits across the six completed attempts.
 - [Predeclared protocol, results and limitations](lightlag-fixed-seed-comparison.md),
   [machine-readable evidence](lightlag-runs/fixed-seeds501-504-summary.json).
 - Team components retain their original authorship; Codex's contribution is

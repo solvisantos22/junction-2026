@@ -121,10 +121,10 @@ its own directory and retains the team's existing audit index.
 
 ## Model results (in progress)
 
-**4 of 8** predeclared attempts complete; seed 503 is running and seed 504
-remains scheduled. Reported API cost so far: **$1.7880344**. Each completed run
-used the pinned agent/model, one attempt, no retries, and the same task digest
-and manifest as its matched reference.
+**6 of 8** predeclared attempts complete; the final pair, seed 504, is running.
+Reported API cost so far: **$2.6180796**. Each completed run used the pinned
+agent/model, one attempt, no retries, and the same task digest and manifest as
+its matched reference.
 
 | Seed | Profile | Claude reward | Reference reward | Reference − Claude | Rover calls | Reported USD | Audit |
 |---|---|---:|---:|---:|---:|---:|---|
@@ -132,6 +132,8 @@ and manifest as its matched reference.
 | 501 | `rush_noisy` | [0.791667](lightlag-runs/rush-noisy-seed501-delay3-opus-5-5/) | 0.666667 | -0.125000 | 32 | 0.7105792 | [Report](lightlag-audits/fixed-seeds501-504/rush-noisy-seed501-delay3-opus-5-5/audit.md) |
 | 502 | `rush` | [0.769231](lightlag-runs/rush-seed502-delay3-opus-5-5/) | 0.615385 | -0.153846 | 22 | 0.2967346 | [Report](lightlag-audits/fixed-seeds501-504/rush-seed502-delay3-opus-5-5/audit.md) |
 | 502 | `rush_noisy` | [0.634615](lightlag-runs/rush-noisy-seed502-delay3-opus-5-5/) | 0.769231 | +0.134615 | 23 | 0.3621726 | [Report](lightlag-audits/fixed-seeds501-504/rush-noisy-seed502-delay3-opus-5-5/audit.md) |
+| 503 | `rush` | [0.750000](lightlag-runs/rush-seed503-delay3-opus-5-5/) | 0.750000 | +0.000000 | 28 | 0.3497882 | [Report](lightlag-audits/fixed-seeds501-504/rush-seed503-delay3-opus-5-5/audit.md) |
+| 503 | `rush_noisy` | [0.750000](lightlag-runs/rush-noisy-seed503-delay3-opus-5-5/) | 0.625000 | -0.125000 | 31 | 0.4802570 | [Report](lightlag-audits/fixed-seeds501-504/rush-noisy-seed503-delay3-opus-5-5/audit.md) |
 
 Positive gaps favor the reference; negative gaps favor Claude. Costs are the
 agent's reported usage, not independently checked invoices or credit balances.
@@ -175,14 +177,18 @@ wait loses 2.25 raw points; call 11 recovers 0.5, for a net **1.75/13** deficit.
 Discovery d2 is sampled at tick 25 after deadline 22. This is a specific delayed
 command/queue-management failure, with the needed timing rules available.
 
-All four audits reconstruct the saved runs exactly, have zero infrastructure
+On **seed 503**, Claude scores **6/8** in both profiles, alive at home. This
+matches the rush reference and exceeds the noisy reference's **5/8**. Neither
+audit assigns main mistakes relative to its reference.
+
+All six audits reconstruct the saved runs exactly, have zero infrastructure
 findings, and their per-decision losses sum to the reference/model gap. Optional
 `superlog` labels are unavailable because numpy is absent in this local audit
 interpreter; the core replay checks and decision audit completed normally.
 
 ## Current interpretation and handoff
 
-The first two pairs include two model wins, an energy-budget failure and a
-queue-management deficit. Preserve all four. Finish the predeclared set before
-a cross-seed conclusion; keep the original reference and rules fixed. Final
+The first three pairs include three model wins, one tie, an energy-budget
+failure and a queue-management deficit. Preserve all six. Finish the final
+predeclared pair before a cross-seed conclusion; keep the original reference and rules fixed. Final
 mission/profile selection remains a team decision.

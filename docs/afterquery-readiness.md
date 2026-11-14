@@ -10,10 +10,10 @@ This update does not claim a fresh read of logged-in Discord or prize pages.
 valid reward are recorded. The fixed seed comparison now has specific model
 failures and model wins; a broad gap is not established.** Claude matched the
 reference at 1.0 on the original task and both seed-500 profiles. In the first
-four [predeclared additional attempts](lightlag-fixed-seed-comparison.md), it
-beats the reference twice and trails twice. The deficits involve full-horizon
-energy budgeting and delayed command queues; all four replay audits are exact
-with no infrastructure findings. Finish seeds 503–504 before interpreting the
+six [predeclared additional attempts](lightlag-fixed-seed-comparison.md), it
+beats the reference three times, ties once and trails twice. The deficits involve full-horizon
+energy budgeting and delayed command queues; all six replay audits are exact
+with no infrastructure findings. Finish seed 504 before interpreting the
 whole set. Lightlag and final rules remain provisional.
 
 ## What is now demonstrated
@@ -41,11 +41,12 @@ whole set. Lightlag and final rules remain provisional.
   attempts together report **$0.946363**. The noisy waiting baseline scored
   0.267857 and the blind plan 0.571429; neither predicts this model's result.
 - [Fixed seeds 501–504](lightlag-fixed-seed-comparison.md): eight matched Harbor
-  references verified, 32 direct controls retained; **4/8 model runs complete**.
+  references verified, 32 direct controls retained; **6/8 model runs complete**.
   Seed 501 rush/noisy: Claude **0.0 / 0.791667**, reference **0.833333 / 0.666667**.
   Seed 502: Claude **0.769231 / 0.634615**, reference **0.615385 / 0.769231**.
-  Four exact decision audits, no infrastructure findings; reported API usage
-  **$1.7880344** for this set so far, in addition to **$0.946363** for seed 500.
+  Seed 503: Claude **0.75 / 0.75**, reference **0.75 / 0.625**.
+  Six exact decision audits, no infrastructure findings; reported API usage
+  **$2.6180796** for this set so far, in addition to **$0.946363** for seed 500.
 - A [replay viewer](../viewer/README.md) for the original runs is delivered;
   adapting its presentation to a future dynamic model result remains separate.
 
@@ -53,7 +54,7 @@ whole set. Lightlag and final rules remain provisional.
 
 | Priority | Gap | Concrete completion evidence |
 |---|---|---|
-| 1 | **Meaningful model difficulty.** Four additional attempts show two model deficits versus the reference and two model wins; the remaining four attempts are pending. | Complete the predeclared set under unchanged rules and matched references. Preserve successes as well as failures; use the decision auditor to explain any actual gap. Do not tune difficulty solely to defeat one saved trace. |
+| 1 | **Meaningful model difficulty.** Six additional attempts show two model deficits versus the reference, three model wins and one tie; the final two attempts are running. | Complete the predeclared set under unchanged rules and matched references. Preserve successes as well as failures; use the decision auditor to explain any actual gap. Do not tune difficulty solely to defeat one saved trace. |
 | 1 | **API budget tracking.** The user-supplied Claude key worked for the real run. User reports individual credits obtained and team Gemini application submitted; grant source and remaining balances are not independently verified. | Record reported cost per run and keep credentials local. Gemini application is not confirmation of an available balance. Modal's confirmed compute grant is separate. AfterQuery supplies no inference credits. |
 | 2 | **Evidence for a general reasoning/control gap.** Specific energy/queue failures are now audited, but the model also beats the frozen reference and the fixed set is incomplete. | Use matched rules and capable baselines, additional predeclared seeds and delay-0 controls where useful. Keep infrastructure errors separate from poor decisions and retain negative findings. The new one-log minimum does not cancel earlier judging-rerun requirements. |
 | 2 | **Final mission and demo.** The canonical task still uses the original profile; the generated experiment intentionally does not replace it. | Choose/version a profile after model evidence. Coordinate any canonical-task update with its owner, sync generated copies, and show the objective, decisive actions and reward in a playthrough. Exact judging model/budget remain unresolved. |
