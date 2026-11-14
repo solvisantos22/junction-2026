@@ -65,10 +65,37 @@ class FrozenTest(unittest.TestCase):
         self.assertEqual((oneshot.BASELINE / "request.md").read_text(encoding="utf-8"), oneshot.build_request())
         self.assertEqual(frozen["mission_files_sha256"], oneshot.mission_hashes(),
                          "the mission changed after the freeze: results would not be comparable")
-        self.assertEqual((frozen["hard_worlds"], frozen["task_world"], frozen["models"], frozen["effort"],
-                          frozen["max_tokens"], frozen["samples_per_model"]),
-                         (list(oneshot.HARD_WORLDS), oneshot.TASK_WORLD, dict(oneshot.MODELS), oneshot.EFFORT,
-                          oneshot.MAX_TOKENS, oneshot.SAMPLES))
+        self.assertEqual((frozen["hard_worlds"], frozen["fair_worlds"], frozen["task_world"], frozen["models"],
+                          frozen["effort"], frozen["max_tokens"], frozen["samples_per_model"]),
+                         (list(oneshot.HARD_WORLDS), list(oneshot.FAIR_WORLDS), oneshot.TASK_WORLD,
+                          dict(oneshot.MODELS), oneshot.EFFORT, oneshot.MAX_TOKENS, oneshot.SAMPLES))
+
+
+class RefreezeTest(unittest.TestCase):
+    """A frozen protocol can change only before any request is sent, and the change is kept."""
+
+    def setUp(self):
+        self.out = Path(tempfile.mkdtemp(prefix="max-refreeze-tests-"))
+        self.addCleanup(shutil.rmtree, self.out, ignore_errors=True)
+        self.scripted = self.out / "scripted-in.json"
+        self.scripted.write_text(json.dumps([
+            {"policy": p, "seed": s, "map": m, "reward": 0.1, "trips": 0,
+             "result": {"sampled_targets": ["t1"], "alive": True, "at_base": True}}
+            for p in oneshot.PLAYERS for s in oneshot.WORLDS for m in ("normal", "max")]), encoding="utf-8")
+        self.base = self.out / "baseline"
+        oneshot.freeze([self.scripted], self.base)
+
+    def test_a_second_freeze_needs_a_reason_and_keeps_the_first(self):
+        with self.assertRaises(SystemExit):
+            oneshot.freeze([self.scripted], self.base)
+        frozen = oneshot.freeze([self.scripted], self.base, refreeze="other worlds")
+        self.assertEqual(len(frozen["history"]), 1)
+        self.assertEqual(frozen["history"][0]["replaced_because"], "other worlds")
+
+    def test_no_refreeze_once_a_request_has_gone_out(self):
+        (self.base / "replies" / "haiku-1").mkdir(parents=True)
+        with self.assertRaises(SystemExit):
+            oneshot.freeze([self.scripted], self.base, refreeze="too late")
 
 
 class AskTest(unittest.TestCase):

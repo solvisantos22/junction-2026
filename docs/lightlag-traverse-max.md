@@ -175,29 +175,31 @@ Each MAX mechanic switched on alone, and each switched off with all the others o
 
 ## A frozen model baseline
 
-Manh asked for the MAX map's hardest worlds as a fixed point to measure Claude Opus 5.5, Sonnet 5.5 and Haiku 5.5 against. Everything below was frozen in [`docs/lightlag-runs/max-baseline/`](lightlag-runs/max-baseline/README.md) before any paid call. Code: [`lightlag_traverse_max/oneshot.py`](../lightlag_traverse_max/oneshot.py) and [`sandbox.py`](../lightlag_traverse_max/sandbox.py); tests: [`test_oneshot.py`](../tests/lightlag_traverse_max/test_oneshot.py).
+Manh asked for superhard and fair MAX worlds as a fixed point to measure Claude Opus 5.5, Sonnet 5.5 and Haiku 5.5 against. Everything below was frozen in [`docs/lightlag-runs/max-baseline/`](lightlag-runs/max-baseline/README.md) before any paid call. Code: [`lightlag_traverse_max/oneshot.py`](../lightlag_traverse_max/oneshot.py) and [`sandbox.py`](../lightlag_traverse_max/sandbox.py); tests: [`test_oneshot.py`](../tests/lightlag_traverse_max/test_oneshot.py).
 
-- **The worlds.** Of the 24 fresh worlds 500–523, the 8 where `manh_max` scored lowest on the MAX map: 503, 504, 505, 509, 515, 516, 517 and 518. Ranking by the share of its normal-map score that it keeps picks the same 8, and there is a clear gap after them (0.199, then 0.291). On the normal map these worlds are ordinary (`manh_max` 0.478); the MAX map is what makes them hard. World 2026, the task's world, is added beside them, so the MAX results can sit next to Kristján's normal-map baseline. **Caveat:** the worlds were picked because `manh_max` did badly there, so its score on them is biased low. A model's score is not biased that way.
+- **The worlds, picked by Manh from the 24 fresh worlds 500–523 by `manh_max`'s MAX-map score.** *Superhard:* 505, 509 and 515, where it scores 0.199, 0.180 and 0.094 (515 is the hardest of the 24; 509 is the only very hard one where it still gets home). *Fair:* 500, 510 and 520, where it scores 0.455, 0.481 and 0.529 and gets home, keeping 82–99% of its normal-map score. On the normal map all six are ordinary (0.44–0.55), so the MAX map is what makes the superhard ones hard. World 2026, the task's world, sits beside them as an anchor next to Kristján's normal-map baseline. First frozen at 21:07 with the 8 worlds under 0.2 (503, 504, 505, 509, 515, 516, 517, 518); re-frozen at 21:34 with Manh's six, before any request was sent (`freeze.json` keeps the first). **Caveat:** the worlds were picked by how `manh_max` did there, so its own scores on them are biased (low on superhard, high on fair). A model's are not.
 - **The request.** Kristján's one-request text (`lightlag_traverse/oneshot.py`, unchanged), filled from the MAX map's example world 99991, plus one section on what the MAX map changes. The rules shown are the MAX map's public rules. No hidden value appears in the request (tested).
 - **The models.** Each model writes 3 programs, from 3 separate requests: effort `medium`, adaptive thinking, up to 128,000 output tokens, no retries and no fallback model. Kristján's Opus reply used 50,450 of his 64,000, so the limit is higher here. A reply counts as it came.
 - **Playing.** Docker is not installed on this machine, so [`sandbox.py`](../lightlag_traverse_max/sandbox.py) runs Kristján's worker, unchanged, under bubblewrap: no network, read-only files, user nobody, Python 3.12, his timeouts and call cap. It replays his Docker run of his normal-map Opus program byte for byte (tested).
 
-Free results so far, mean over the 8 hard worlds on the MAX map (per-world tables in the [baseline's README](lightlag-runs/max-baseline/README.md)):
+Free results so far on the MAX map, mean over each group (per-world tables in the [baseline's README](lightlag-runs/max-baseline/README.md)):
 
-| Player | Score | Ended away | Lost |
+| Player | Superhard (505, 509, 515) | Fair (500, 510, 520) | World 2026 |
 |---|---|---|---|
-| `manh_max` | 0.171 | 7 of 8 | 0 |
-| Reference pilot | 0.017 | 5 | 2 |
-| Greedy | 0.028 | 7 | 1 |
-| Straight line | 0.030 | 7 | 0 |
-| Kristján's Opus 5.5 program, written for the normal map | 0.037 | 7 | 0 |
-| Kristján's Sonnet 5.5 program, written for the normal map | 0.018 | 7 | 0 |
-| Kristján's Haiku 5.5 program, written for the normal map | 0.005 | 8 | 0 |
+| `manh_max` | 0.157 | 0.488 | 0.431 |
+| Reference pilot | 0.036 | 0.102 | 0.000, lost |
+| Greedy | 0.013 | 0.058 | 0.000, lost |
+| Straight line | 0.036 | 0.031 | 0.030 |
+| Kristján's Opus 5.5 program, written for the normal map | 0.038 | 0.049 | 0.078 |
+| Kristján's Sonnet 5.5 program, written for the normal map | 0.029 | 0.020 | 0.039 |
+| Kristján's Haiku 5.5 program, written for the normal map | 0.014 | 0.003 | 0.013 |
+
+Even on the fair worlds, players that ignore the MAX rules score 0.003–0.10; only a MAX-aware player reaches about 0.5 there.
 
 The paid step sends 9 requests. At Kristján's measured usage that is about $1 per Opus reply, $0.25 per Sonnet reply and $0.02 per Haiku reply: about $5 in all. If every reply used all 128,000 tokens it would be $12. `ask` refuses any call whose worst case would take the total past the budget given. The key goes in the gitignored `.env`; it is never printed or stored.
 
 ```sh
-python3 -m lightlag_traverse_max.oneshot ask --budget-usd 15 --env-file .env   # paid: 9 requests
+python3 -m lightlag_traverse_max.oneshot ask --budget-usd 10 --env-file .env   # paid: 9 requests
 python3 -m lightlag_traverse_max.oneshot play                                  # free: every program on every world
 python3 -m lightlag_traverse_max.oneshot report                                # rewrites the baseline's README
 ```
@@ -215,7 +217,7 @@ python3 -m lightlag_traverse_max.oneshot report                                #
 - **Development: 1–24**, part of Kristján's development range 1–99, used read-only as he does.
 - **101–124:** a first full run, before rebasing onto Kristján's beam search. They lie inside the farm's search range 100–399, so they are reported above but not used for the claim.
 - **Final: 500–523.** Unclaimed in `TEAM_STATUS.md` before this run; now used.
-- **Model baseline: 503, 504, 505, 509, 515, 516, 517 and 518** (chosen from 500–523 as above), **and 2026**, the task's world. Example world in the request: 99991, Kristján's, never evaluated.
+- **Model baseline: superhard 505, 509, 515; fair 500, 510, 520** (chosen from 500–523 as above), **and 2026**, the task's world. Example world in the request: 99991, Kristján's, never evaluated.
 
 ## Suggested next steps (not done)
 

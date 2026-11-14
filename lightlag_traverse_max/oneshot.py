@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One request per program on the MAX map: a frozen baseline of Claude models on the map's hardest worlds.
+"""One request per program on the MAX map: a frozen baseline of Claude models on superhard and fair MAX worlds.
 
     python3 -m lightlag_traverse_max.oneshot request <out.md>              # the exact text a model is sent
     python3 -m lightlag_traverse_max.oneshot freeze --scripted <play.json> # write the frozen protocol
@@ -50,15 +50,22 @@ REPO = Path(__file__).resolve().parent.parent
 BASELINE = REPO / "docs" / "lightlag-runs" / "max-baseline"
 NAME = "MAX-map model baseline"
 
-# The protocol. Changing any of it after `freeze` means a new baseline under a new name.
-HARD_WORLDS = (503, 504, 505, 509, 515, 516, 517, 518)
+# The protocol. Once a request has been sent, changing any of it means a new baseline under a new name.
+HARD_WORLDS = (505, 509, 515)
+FAIR_WORLDS = (500, 510, 520)
 TASK_WORLD = 2026
-WORLDS = HARD_WORLDS + (TASK_WORLD,)
-RULE = ("Of the 24 worlds 500-523 (Manh's claimed range; played once on both maps by all four scripted "
-        "players at full budgets, never used for tuning), the 8 where manh_max, the best scripted player "
-        "on the MAX map, scored lowest there. Ranking by the share of its normal-map score it keeps on the "
-        "MAX map picks the same 8. The 8th scored 0.199, the 9th 0.291. World 2026, the task's world, is "
-        "added as an anchor next to Kristján's normal-map baseline; it is not one of the hard worlds.")
+WORLDS = HARD_WORLDS + FAIR_WORLDS + (TASK_WORLD,)
+RULES = {
+    "pool": ("The 24 worlds 500-523 (Manh's claimed range), each played once on both maps by all four scripted "
+             "players at full budgets and never used for tuning. Manh picked both groups from them by manh_max's "
+             "score on the MAX map, after the first freeze and before any request was sent."),
+    "superhard": ("manh_max scores 0.199, 0.180 and 0.094 on the MAX map (the hardest of the 24 "
+                  "is 515; 509 is the only one of the 8 hardest where it still gets home). All 8 worlds under 0.2 "
+                  "were 503 504 505 509 515 516 517 518; the 9th hardest scored 0.291."),
+    "fair": ("manh_max scores 0.455, 0.481 and 0.529 on the MAX map and gets home, keeping 82%, "
+             "99% and 99% of its normal-map score; the three highest MAX scores of the 24."),
+    "task_world": "the task's world, as an anchor next to Kristján's normal-map baseline; in neither group.",
+}
 MODELS = (("haiku", "claude-haiku-5-5"), ("sonnet", "claude-sonnet-5-5"), ("opus", "claude-opus-5-5"))
 EFFORT = "medium"
 MAX_TOKENS = 128000
@@ -155,13 +162,34 @@ def helsinki_now() -> str:
     return datetime.now(ZoneInfo("Europe/Helsinki")).strftime("%Y-%m-%d %H:%M Helsinki")
 
 
-def freeze(scripted: Path, out: Path = BASELINE) -> Dict[str, Any]:
-    """Write the frozen protocol: request.md, scripted.json and freeze.json. Never overwrites."""
+def requests_sent(out: Path = BASELINE) -> bool:
+    replies = out / "replies"
+    return (out / "asks.jsonl").exists() or (replies.exists() and any(replies.iterdir()))
+
+
+def freeze(scripted: Sequence[Path], out: Path = BASELINE, refreeze: Optional[str] = None) -> Dict[str, Any]:
+    """Write the frozen protocol: request.md, scripted.json and freeze.json. A frozen protocol can be
+    changed only before any request is sent, by giving `refreeze` (why); the earlier freeze is kept in
+    the history."""
+    history: List[Dict[str, Any]] = []
     if (out / "freeze.json").exists():
-        raise SystemExit("{} is already frozen; a changed protocol is a new baseline".format(out))
-    rows = [row for row in json.loads(Path(scripted).read_text(encoding="utf-8")) if row["seed"] in WORLDS]
-    missing = [(p, s, m) for p in PLAYERS for s in WORLDS for m in ("normal", "max")
-               if not any(r["policy"] == p and r["seed"] == s and r["map"] == m for r in rows)]
+        if not refreeze:
+            raise SystemExit("{} is already frozen; to change it before any request is sent, say why with "
+                             "--refreeze".format(out))
+        if requests_sent(out):
+            raise SystemExit("requests have been sent: a changed protocol is a new baseline under a new name")
+        previous = json.loads((out / "freeze.json").read_text(encoding="utf-8"))
+        history = previous.get("history", []) + [{
+            "frozen": previous["frozen"], "on_commit": previous["on_commit"],
+            "worlds": {key: previous[key] for key in ("hard_worlds", "fair_worlds", "task_world") if key in previous},
+            "request_sha256": previous["request"]["sha256"], "replaced_because": refreeze}]
+    found: Dict[Tuple[str, int, str], Dict[str, Any]] = {}
+    for path in scripted:
+        for row in json.loads(Path(path).read_text(encoding="utf-8")):
+            if row["seed"] in WORLDS and row["policy"] in PLAYERS:
+                found[(row["policy"], row["seed"], row["map"])] = row
+    rows = list(found.values())
+    missing = [(p, s, m) for p in PLAYERS for s in WORLDS for m in ("normal", "max") if (p, s, m) not in found]
     if missing:
         raise SystemExit("the scripted results lack {} runs, e.g. {}".format(len(missing), missing[0]))
     text = build_request()
@@ -170,13 +198,13 @@ def freeze(scripted: Path, out: Path = BASELINE) -> Dict[str, Any]:
     kept = [{"player": r["policy"], "seed": r["seed"], "map": r["map"], "reward": r["reward"],
              "samples": len(r["result"]["sampled_targets"]), "alive": r["result"]["alive"],
              "at_base": r["result"]["at_base"], "slip_trips": r.get("trips", 0)}
-            for r in sorted(rows, key=lambda r: (r["map"], r["policy"], r["seed"]))
-            if r["policy"] in PLAYERS]
+            for r in sorted(rows, key=lambda r: (r["map"], r["policy"], r["seed"]))]
     (out / "scripted.json").write_text(json.dumps(kept, indent=1) + "\n", encoding="utf-8")
     commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
     frozen = {
         "name": NAME, "frozen": helsinki_now(), "on_commit": commit, "map": "max",
-        "hard_worlds": list(HARD_WORLDS), "task_world": TASK_WORLD, "rule": RULE,
+        "hard_worlds": list(HARD_WORLDS), "fair_worlds": list(FAIR_WORLDS), "task_world": TASK_WORLD,
+        "rules": RULES,
         "models": dict(MODELS), "samples_per_model": SAMPLES, "effort": EFFORT, "thinking": "adaptive",
         "max_tokens": MAX_TOKENS, "fallback_model": None,
         "replies": "a reply counts as it came, one without a program scoring 0 on every world; a call that "
@@ -191,7 +219,9 @@ def freeze(scripted: Path, out: Path = BASELINE) -> Dict[str, Any]:
         "sandbox": "lightlag_traverse_max.sandbox: Kristján's worker under bubblewrap (no network, read-only "
                    "files, user nobody, 2 GB address space, Python 3.12), his timeouts and call cap",
         "score": "the mission's reward: credited value x (1 at the lander, 0.5 alive elsewhere, 0 lost) / all "
-                 "the value there was; a program is summed up by its mean over the 8 hard worlds",
+                 "the value there was; a program is summed up by its mean over the superhard worlds and over "
+                 "the fair worlds",
+        "history": history,
     }
     (out / "freeze.json").write_text(json.dumps(frozen, indent=1) + "\n", encoding="utf-8")
     return frozen
@@ -366,14 +396,16 @@ def _fate(alive: Any, at_base: Any) -> str:
     return "home" if at_base else ("away" if alive else "lost")
 
 
+def _mean(runs: Dict[int, Dict[str, Any]], worlds: Sequence[int]) -> Optional[float]:
+    return statistics.mean(runs[s]["reward"] for s in worlds) if all(s in runs for s in worlds) else None
+
+
 def _line(label: str, runs: Dict[int, Dict[str, Any]], extra: str = "") -> str:
-    hard = [runs[s] for s in HARD_WORLDS if s in runs]
     cells = ["{:.3f}{}".format(runs[s]["reward"], {"home": "", "away": "*", "lost": "†"}[
         _fate(runs[s]["alive"], runs[s]["at_base"])]) if s in runs else "–" for s in WORLDS]
-    mean = "{:.3f}".format(statistics.mean(r["reward"] for r in hard)) if len(hard) == len(HARD_WORLDS) else "–"
-    lost = sum(1 for r in hard if not r["alive"])
-    away = sum(1 for r in hard if r["alive"] and not r["at_base"])
-    return "| {} | **{}** | {} | {} | {} |{}".format(label, mean, lost, away, " | ".join(cells), extra)
+    means = ["**{:.3f}**".format(m) if m is not None else "–"
+             for m in (_mean(runs, HARD_WORLDS), _mean(runs, FAIR_WORLDS))]
+    return "| {} | {} | {} |{}".format(label, " | ".join(means), " | ".join(cells), extra)
 
 
 def report(out: Path = BASELINE) -> str:
@@ -381,8 +413,9 @@ def report(out: Path = BASELINE) -> str:
     frozen = load_frozen(out)
     scripted = json.loads((out / "scripted.json").read_text(encoding="utf-8"))
     plays = json.loads((out / "plays.json").read_text(encoding="utf-8")) if (out / "plays.json").exists() else []
-    head = "| Player | Mean, 8 hard worlds | Lost | Away | {} |\n|---|---|---|---|{}\n".format(
-        " | ".join(str(s) for s in WORLDS), "---|" * len(WORLDS))
+    head = "| Player | Superhard mean | Fair mean | {} |\n|---|---|---|{}\n".format(
+        " | ".join("{} ({})".format(s, "hard" if s in HARD_WORLDS else "fair" if s in FAIR_WORLDS else "task")
+                   for s in WORLDS), "---|" * len(WORLDS))
     lines = []
     for option in ("max", "normal"):
         lines.append("\n**Scripted players, {} map** (`scripted.json`):\n\n{}".format(
@@ -392,42 +425,42 @@ def report(out: Path = BASELINE) -> str:
     by_program: Dict[str, Dict[int, Dict[str, Any]]] = {}
     for row in plays:
         by_program.setdefault(row["program"], {})[row["seed"]] = row
-    replies = [(name, runs) for name, runs in sorted(by_program.items()) if not name.startswith("normal-")]
+    replies = [name for name in by_program if not name.startswith("normal-")]
     transfer = [(name, by_program[name]) for name, _ in TRANSFER if name in by_program]
     if replies:
-        rows = []
+        rows, means = [], []
         for short, model in MODELS:
-            for k in range(1, SAMPLES + 1):
-                name = "{}-{}".format(short, k)
-                if name in by_program:
-                    meta = _meta(out / "replies" / name) or {}
-                    rows.append(_line("{} ({})".format(name, model), by_program[name],
-                                      " ${:.2f}, {} output tokens".format(meta.get("cost_usd", 0.0),
-                                                                          meta.get("output_tokens", "?"))))
+            names = [n for n in ("{}-{}".format(short, k) for k in range(1, SAMPLES + 1)) if n in by_program]
+            for name in names:
+                meta = _meta(out / "replies" / name) or {}
+                rows.append(_line("{} ({})".format(name, model), by_program[name],
+                                  " ${:.2f}, {} output tokens".format(meta.get("cost_usd") or 0.0,
+                                                                      meta.get("output_tokens", "?"))))
+            hard = [m for m in (_mean(by_program[n], HARD_WORLDS) for n in names) if m is not None]
+            fair = [m for m in (_mean(by_program[n], FAIR_WORLDS) for n in names) if m is not None]
+            if hard and fair:
+                means.append("| {} | **{:.3f}** | **{:.3f}** | {} |".format(
+                    model, statistics.mean(hard), statistics.mean(fair),
+                    ", ".join("{:.3f} / {:.3f}".format(h, f) for h, f in zip(hard, fair))))
         lines.append("\n**Programs written for the MAX map** (one reply each, `replies/`; cost after the row):\n\n"
                      + head + "\n".join(rows))
-        means = []
-        for short, model in MODELS:
-            per = [statistics.mean(by_program[n][s]["reward"] for s in HARD_WORLDS)
-                   for n in ("{}-{}".format(short, k) for k in range(1, SAMPLES + 1))
-                   if n in by_program and all(s in by_program[n] for s in HARD_WORLDS)]
-            if per:
-                means.append("| {} | **{:.3f}** | {} |".format(model, statistics.mean(per),
-                                                              ", ".join("{:.3f}".format(p) for p in per)))
-        lines.append("\n**By model**, mean over the 8 hard worlds:\n\n| Model | Mean of its programs | "
-                     "Each program |\n|---|---|---|\n" + "\n".join(means))
+        lines.append("\n**By model**, mean of its programs:\n\n| Model | Superhard | Fair | Each program "
+                     "(superhard / fair) |\n|---|---|---|---|\n" + "\n".join(means))
     if transfer:
         lines.append("\n**Kristján's one-request programs, written for the normal map**, played unchanged on the "
                      "MAX map:\n\n" + head + "\n".join(_line(name, runs) for name, runs in transfer))
     text = """# {name}
 
 A freeze point for the MAX map: Claude models write one program each, from one request, and it plays
-the MAX map's hardest worlds. Frozen {frozen}. Generated by `python3 -m lightlag_traverse_max.oneshot
+superhard and fair MAX worlds. Frozen {frozen}. Generated by `python3 -m lightlag_traverse_max.oneshot
 report`; the method and every command are in [`lightlag_traverse_max/oneshot.py`](../../../lightlag_traverse_max/oneshot.py).
 
 ## What is frozen
 
-- **Worlds:** {hard}, and the task's world {task}. {rule}
+- **Superhard worlds:** {hard}. {rule_hard}
+- **Fair worlds:** {fair}. {rule_fair}
+- **Anchor:** {task}, {rule_task}
+- **Where they come from:** {rule_pool}
 - **Request:** [`request.md`](request.md), sha256 `{sha}`: Kristján's one-request text with the MAX map's rules, map
   and example world ({example}), plus a section on what the MAX map changes.
 - **Models:** {models}; {samples} replies each, effort `{effort}`, adaptive thinking, at most {tokens} output tokens,
@@ -438,10 +471,12 @@ report`; the method and every command are in [`lightlag_traverse_max/oneshot.py`
 
 ## Results
 
-Score per world; `*` ended away from the lander (half score), `†` lost (battery empty). The mean is over the 8 hard
-worlds; world {task} stands apart.
+Score per world; `*` ended away from the lander (half score), `†` lost (battery empty). Means are over the 3 superhard
+and the 3 fair worlds; world {task} stands apart.
 {tables}
-""".format(name=NAME, frozen=frozen["frozen"], hard=", ".join(map(str, HARD_WORLDS)), task=TASK_WORLD, rule=RULE,
+""".format(name=NAME, frozen=frozen["frozen"], hard=", ".join(map(str, HARD_WORLDS)), fair=", ".join(map(str, FAIR_WORLDS)), task=TASK_WORLD,
+           rule_hard=RULES["superhard"], rule_fair=RULES["fair"], rule_task=RULES["task_world"],
+           rule_pool=RULES["pool"],
            sha=frozen["request"]["sha256"], example=frozen["request"]["example_world"],
            models=", ".join("`{}`".format(m) for _, m in MODELS), samples=frozen["samples_per_model"],
            effort=frozen["effort"], tokens=frozen["max_tokens"], tables="\n".join(lines))
@@ -455,7 +490,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     requesting = commands.add_parser("request", help="write the request text")
     requesting.add_argument("out", type=Path)
     freezing = commands.add_parser("freeze", help="write the frozen protocol")
-    freezing.add_argument("--scripted", type=Path, required=True, help="lightlag_traverse_max.play --json output")
+    freezing.add_argument("--scripted", type=Path, nargs="+", required=True,
+                          help="lightlag_traverse_max.play --json output, one or more files")
+    freezing.add_argument("--refreeze", help="change a frozen protocol before any request is sent: why")
     asking = commands.add_parser("ask", help="PAID: send the frozen request for every reply not yet received")
     asking.add_argument("--budget-usd", type=float, required=True)
     asking.add_argument("--env-file", type=Path, default=REPO / ".env")
@@ -469,7 +506,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print("wrote {} ({} characters)".format(args.out, len(text)))
         return 0
     if args.command == "freeze":
-        frozen = freeze(args.scripted)
+        frozen = freeze(args.scripted, refreeze=args.refreeze)
         print("froze {}: request sha256 {}".format(BASELINE, frozen["request"]["sha256"]))
         return 0
     if args.command == "ask":

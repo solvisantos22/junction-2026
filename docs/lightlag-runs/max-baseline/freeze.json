@@ -1,20 +1,25 @@
 {
  "name": "MAX-map model baseline",
- "frozen": "2026-11-14 21:07 Helsinki",
- "on_commit": "d45d3f97f420f59a464d0f3a764c7ebbc77d78f6",
+ "frozen": "2026-11-14 21:34 Helsinki",
+ "on_commit": "9ba659133fa262b0a4c98dcaaec96a384b58f7a7",
  "map": "max",
  "hard_worlds": [
-  503,
-  504,
   505,
   509,
-  515,
-  516,
-  517,
-  518
+  515
+ ],
+ "fair_worlds": [
+  500,
+  510,
+  520
  ],
  "task_world": 2026,
- "rule": "Of the 24 worlds 500-523 (Manh's claimed range; played once on both maps by all four scripted players at full budgets, never used for tuning), the 8 where manh_max, the best scripted player on the MAX map, scored lowest there. Ranking by the share of its normal-map score it keeps on the MAX map picks the same 8. The 8th scored 0.199, the 9th 0.291. World 2026, the task's world, is added as an anchor next to Kristj\u00e1n's normal-map baseline; it is not one of the hard worlds.",
+ "rules": {
+  "pool": "The 24 worlds 500-523 (Manh's claimed range), each played once on both maps by all four scripted players at full budgets and never used for tuning. Manh picked both groups from them by manh_max's score on the MAX map, after the first freeze and before any request was sent.",
+  "superhard": "manh_max scores 0.199, 0.180 and 0.094 on the MAX map (the hardest of the 24 is 515; 509 is the only one of the 8 hardest where it still gets home). All 8 worlds under 0.2 were 503 504 505 509 515 516 517 518; the 9th hardest scored 0.291.",
+  "fair": "manh_max scores 0.455, 0.481 and 0.529 on the MAX map and gets home, keeping 82%, 99% and 99% of its normal-map score; the three highest MAX scores of the 24.",
+  "task_world": "the task's world, as an anchor next to Kristj\u00e1n's normal-map baseline; in neither group."
+ },
  "models": {
   "haiku": "claude-haiku-5-5",
   "sonnet": "claude-sonnet-5-5",
@@ -49,7 +54,7 @@
    "greedy",
    "straight"
   ],
-  "command": "python3 -m lightlag_traverse_max.play --seeds 503,504,505,509,515,516,517,518,2026 --maps normal,max --policies manh_max,pilot,greedy,straight --json <file>"
+  "command": "python3 -m lightlag_traverse_max.play --seeds 505,509,515,500,510,520,2026 --maps normal,max --policies manh_max,pilot,greedy,straight --json <file>"
  },
  "transfer": {
   "normal-opus-1": "docs/lightlag-runs/traverse-oneshot-opus-1/policy.py",
@@ -57,5 +62,26 @@
   "normal-haiku-1": "docs/lightlag-runs/traverse-oneshot-haiku-1/policy.py"
  },
  "sandbox": "lightlag_traverse_max.sandbox: Kristj\u00e1n's worker under bubblewrap (no network, read-only files, user nobody, 2 GB address space, Python 3.12), his timeouts and call cap",
- "score": "the mission's reward: credited value x (1 at the lander, 0.5 alive elsewhere, 0 lost) / all the value there was; a program is summed up by its mean over the 8 hard worlds"
+ "score": "the mission's reward: credited value x (1 at the lander, 0.5 alive elsewhere, 0 lost) / all the value there was; a program is summed up by its mean over the superhard worlds and over the fair worlds",
+ "history": [
+  {
+   "frozen": "2026-11-14 21:07 Helsinki",
+   "on_commit": "d45d3f97f420f59a464d0f3a764c7ebbc77d78f6",
+   "worlds": {
+    "hard_worlds": [
+     503,
+     504,
+     505,
+     509,
+     515,
+     516,
+     517,
+     518
+    ],
+    "task_world": 2026
+   },
+   "request_sha256": "8b0c412f40f21cc0c5bc468372d98baac8d85af324fc2a84461182fd61ab8699",
+   "replaced_because": "Manh chose 3 superhard worlds (505, 509, 515) and 3 fair ones (500, 510, 520) instead of the 8 hardest; no request had been sent"
+  }
+ ]
 }
