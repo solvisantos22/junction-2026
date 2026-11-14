@@ -555,6 +555,8 @@ These are recommended evidence choices, not newly asserted official entry requir
 
 - **Actual Modal launch:** one CPU training job, [ap-e9VDJ99Y3AAjaY30NcNemX](https://modal.com/apps/solvisantos22/main/ap-e9VDJ99Y3AAjaY30NcNemX), using Sölvi’s configured profile and the published source/resource freeze. No GPU or external model API. 28 tests pass; the evaluator independently reconstructs 12 used-map smoke episodes and 428 choices. Training results and any improvement remain pending; no cost is represented as a verified invoice.
 
+- **Completed Modal training:** the single job completed 512 missions and 16 updates in 466.74 trainer seconds (468.24 seconds including wrapper). [Retained metadata](lightlag-rl-results/modal/pilot-01/modal-job.json), all weights/batches and [training audit](lightlag-rl-results/modal/pilot-01/training/audit.json): 21,078 choices and every optimizer update reconstruct against 34 source pins. All 30 focused tests pass. Running CPU/memory estimate $0.03285, excluding build/startup/storage/egress; not a verified invoice. Codex authored the experiment; the trained model is a 256-parameter NumPy policy, not a language model. Fresh comparison follows separately.
+
 ## Keep recording with minimal overhead
 
 At each meaningful delivered increment, its owner adds one entry or extends the matching entry. Bookkeeping-only edits need no new entry. Other tools/providers use the same structure; only describe use that actually happened.
