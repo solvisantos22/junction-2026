@@ -1,116 +1,69 @@
-# Final Traverse learning campaign
+# Final Traverse learning results and handoff
 
-**Training has settled; final evaluation is running.** Five runs completed 8,192 missions; replay seed 43 stopped at its deadline after 6,880. Neither method qualified for continuation. The [all-seed policy freeze](policy-freeze.json) reached main in `d81fa88` before any final world was opened. [Terminal evidence](fit/README.md) · [evaluation and exact-campaign plan](evaluation-plan.md). The operational notes below retain the earlier monitoring history and will be closed in the final handoff.
+**Every latest trained controller beats all recorded Opus/Sonnet attempts on the exact submission campaign. Learning also transfers to 40 fresh worlds. Neither method demonstrates an advantage over greedy, and the existing reference remains stronger. Keep the reference.**
 
-- [Protocol](../learning-final.md), [campaign manifest](campaign.json), [source/runtime freeze](freeze.json), [fit receipt](fit-receipt.json), [launch status](launch-status.json).
-- Training source and supervisor commit **`becbf3e`**; freeze published in **`2257871`** before launch. Fixed local checkout: `/tmp/junction-learning-final-frozen`; runtime: `/tmp/junction-learning-venv`.
-- New app, volume and control dictionary: **`junction-learning-final`**; profile `solvi-junction`. The old `junction-learning-campaign` supervisor remains stopped and its [completed pilot](../learning-campaign-results/pilot/README.md) retains its original hashes.
-- First stage: PPO and Rainbow-inspired replay × initialization seeds 17, 29, 43, each targeting **8192 missions**. All six began together; stage cutoff **22:42 UTC**. Only entire methods passing the declared gain/reliability gate can extend toward **32768 missions per seed**, with a separate three-hour limit. Absolute stop **15 November 03:30 UTC / 05:30 Helsinki**.
-- Maximum six 8-CPU/16-GiB containers and six rollout workers each. Running CPU/memory envelope **$18.185472**, below the $19 guard; image/startup/storage/egress are additional. No GPU or model API. This is not an invoice cap or verified credit balance.
+All six runs are accounted for. Five completed 8192 training missions; replay seed 43 stopped at the deadline after 6880 and retains its last declared checkpoint at 2048. Neither method qualified for continuation. Training, the supervisor, progress publisher and one-time completion wake-up have finished. No training was repeated or old campaign resumed.
 
-Sölvi also authorized more containers when useful, within the user-reported $300 shared team budget. The current six-run source/resource freeze stays unchanged. Additional capacity can support a separately bounded parallel evaluation after training; no additional jobs or budget were allocated by that permission alone.
+## Exact campaign: the comparison with Opus
 
-## Team checkpoints
+The same frozen policies played worlds **2027, 2028, 2029**, with the same weighted score as the recorded LLM attempts.
 
-Use the [shared progress page](progress.md) for checkpoint scores, home/survival counts, six-run progress and estimates. Every page has an explicit observation time. The publisher refreshes it every 15 minutes and, within its five-minute polling interval, when all three seeds of either method reach another declared checkpoint. It does not wake a model for routine updates or change training decisions.
+| System | Campaign reward | Range across seeds / attempts |
+|---|---:|---:|
+| Initial controller, each method | 8.01% | 0.00–24.02% |
+| Latest PPO, mean of 3 seeds | **36.64%** | 34.01–39.53% |
+| Latest replay, mean of 3 seeds | **33.36%** | 32.61–34.36% |
+| Greedy, same navigator | 36.73% | — |
+| Frozen reference | 47.63% | — |
+| Recorded Opus, 4 attempts | 21.98% | 12.01–26.75% |
+| Recorded Sonnet, 2 attempts | 25.28% | 21.30–29.26% |
 
-| Missions per run | What the checkpoint is for |
-|---:|---|
-| 512 | Early learning and reliability check |
-| 2048 | Same-budget checkpoint beside the earlier pilot |
-| 8192 | Formal decision on whether the whole method may continue |
-| 16384 and 24576 | Progress during the optional extension |
-| 32768 | Extended target, if reached before the time limit |
-| Final 40 worlds | Separate evaluation after all selected policy artifacts are frozen |
+The weakest latest trained seed scores 32.61%, above the best recorded Opus and Sonnet attempts. All 19 evaluated policies/controls finish all three missions alive at home: **57/57 audited missions**, zero invalid calls. The reference reproduces its recorded score exactly, mission by mission. [Full campaign evidence, every seed and matched-2048 results](campaign/README.md).
 
-The page averages methods only at a checkpoint completed by all three seeds. Batch-file counts are progress indicators and may lag volume commits; they are not substitutes for validated milestone artifacts. Interim scores are from reused validation worlds, not the final test or submission campaign. Teammates should keep the frozen reference in the demo and submission until a separate, supported decision changes it. Complete checkpoint files remain available on Modal; reporting does not wait for the entire stage to finish.
+This compares hybrid trained controllers with historical LLM agents, with different training/compute budgets. Navigation and feasibility logic are hand-written. All six recorded Opus/Sonnet attempts completed the campaign but retained EPIPE/nonzero-exit errors; Haiku's length-censored zero is excluded from the table. It is a fixed showcase, not proof of general LLM superiority or LLM post-training. No new model API or Harbor run was made here.
 
-### Progress publisher operation
+## Fresh worlds: does learning transfer?
 
-The publisher is active, PID **92298**, with idle-sleep guard **92299**. Its fixed runtime and private configuration/state/logs live in `/Users/solvisantos/.codex/junction-learning-final-progress-20261114/`. Integration happens only in `/tmp/junction-learning-progress-publish`, branch `codex/learning-progress-20261114`. Implementation `73b84fc`; the first actual automatic update reached main as **`637764d`**, with both methods at their common 2048 checkpoint. All **24 collector/publisher tests pass**, including real temporary-Git push races and interruption recovery.
+| System | Mean reward on 82000–82039 | Alive at home / missions |
+|---|---:|---:|
+| Initial controller, each method | 8.27% | 120/120 |
+| Latest PPO | 35.92% | **117/120** |
+| Latest replay | 36.29% | 120/120 |
+| Greedy | 37.99% | 40/40 |
+| Frozen reference | 50.82% | 40/40 |
 
-The publisher writes only `progress.md`, `progress.json` and timestamped `progress-snapshots/*.json` in this results directory. Each update is fetched/reconciled, checked and normally pushed; it never force-pushes or edits the training code. New same-budget method checkpoints and status changes trigger earlier updates; otherwise publication is every 15 minutes, with a five-minute polling cadence. Network downloads and Git operations can add delay. Full immutable policy/validation files are cached privately and remain on Modal; JSON snapshots retain their hashes and checked summaries.
+Latest PPO improves by 27.66 percentage points over initialization (paired 95% interval +25.14 to +29.83); replay improves by 28.03 points (+26.66 to +29.46). Neither demonstrates an advantage over greedy; both remain below beam. PPO at 2048 scores 36.78% with one death, versus 35.92% with three deaths at 8192. Replay at 2048 scores 35.02%; its latest row uses budgets **8192, 8192, 2048**. These intervals resample maps, conditional on the three training initializations. No seed or checkpoint was selected by score.
 
-To stop only progress publication, create `/tmp/junction-learning-final-monitor/progress-stop`. A training pause/stop also disables it. It publishes a last snapshot when training settles and independently stops at **15 November 03:40 UTC / 05:40 Helsinki**, even if the supervisor stalls. A dirty integration tree, workflow change, conflict or ambiguous commit halts publication for review; it preserves the pending work and logs an error rather than guessing. Check the page's observation timestamp and private `state.json`; publication is separate from the training supervisor and completion wake-up. Do not run a second publisher or edit its three output paths concurrently.
+All **760 unique cases** pass the retained physics/score/choice audit. [Full tables, intervals and limitations](evaluation/README.md). All three latest PPO deaths occur on 82001; a fourth death affects PPO29 at 2048 on 82024. [Saved-trace diagnosis](evaluation/failure-notes.json) places the losses on the home leg after battery depletion despite feasible saved home forecasts. That motivates later investigation on development maps; no cause is proven and no policy was changed after evaluation.
 
-## Verification and interpretation
+## Figure and copy for the submission
 
-**51 focused tests pass**, with an independent code review finding no blocking issue. Both algorithms complete 32-mission local smoke runs on worlds 1/2. Complete reports, policies, batches, optimizer checkpoints and validation replays are retained under [preflight](preflight/). These are engineering checks.
+![Development learning curve, with every seed and means only at shared checkpoints](figures/learning-curve.png)
 
-The [matched compatibility check](compatibility/README.md) passes both method gates across 112 missions on reused worlds 80000–80007. All 56 paired grades and goal choices match. Home-return commands and trajectories differ in 28 pairs, so the controllers are not treated as identical and the six learners start afresh. Physics and controller replay audits are retained.
+[1920×1080 PNG](figures/learning-curve.png) · [Vector SVG](figures/learning-curve.svg) · [Data/provenance](figures/learning-curve-data.json) · [README/video paragraph and caption](submission-copy.md).
 
-The historical `lightlag_rl` retained-smoke fixture remains pinned to its old source: its current-main source assertion fails after the controller/task change. Its original-source audit still passes. We did not rewrite historical hashes to conceal that mismatch; this experiment supplies a separately pinned final-version preflight. The 51-test result above is for the new suite, not a claim that every historical repository test passes against current source.
+The curve is **development validation on reused worlds 81000–81031**, not the fresh comparison or campaign. Replay has no all-seed 8192 point because its third run missed that checkpoint. Do not overlay fresh-world reference scores as if matched to this curve.
 
-Training worlds **80000–80511** and validation **81000–81031** are reused development data. Final worlds **82000–82039 remain unopened**. Submission worlds **2026–2029 are excluded from training and selection**. No model, seed or checkpoint is selected by final results. Keep the frozen beam reference for submission unless the team separately approves a supported replacement.
+## Compute, source and verification
 
-## Monitor and stop
+- **Training:** 47,840 missions / 1495 batches in six original Modal calls. [Terminal evidence, 52 downloaded artifacts and reconciliation](fit/README.md). All 736 retained development validation missions were reported home/alive with no invalid calls; that did not guarantee fresh-map safety.
+- **Cost:** **$7.262395867** estimated running CPU/memory for this final fit, excluding startup/build/storage/egress and other experiments; not an invoice or balance. [Modal app `ap-GGkMI4eQi8N9MVVuTef5Au`](https://modal.com/apps/solvisantos22/main/ap-GGkMI4eQi8N9MVVuTef5Au). The old pilot's separately reported estimate was $1.592405 on its original navigator. Final evaluation used local CPU, with no new cloud jobs, GPUs or model API calls.
+- **Freeze:** training/evaluator source `becbf3e`, Python 3.12.16 / NumPy 2.3.4 / Torch 2.9.1. [Source/resource freeze](freeze.json) published in `2257871`; [all-seed policies](policy-freeze.json) published in **`d81fa88` before final worlds**; [campaign source/weight freeze](campaign/freeze.json) published in **`48a63ee` before campaign worlds**. No frozen source was edited.
+- **Checks:** 760 fresh cases and 57 campaign missions audited; independent artifact/statistics review; six campaign tests, three aggregation tests and two plotting tests. Final campaign parent-hash hardening passed both metadata tests. The figure was visually checked and regenerated deterministically. Earlier new-run preflight had 51 focused tests. Historical `lightlag_rl` fixtures retain their original pins; this is not a claim that every historical test passes against changed main.
+- **Audit scope:** physics, scores, recorded policy choices and summaries are reconstructed. Observation generation, controller linkage and beam planning remain source-pinned. Production optimizer learning is not reconstructed; batch/replay/optimizer archives remain on Modal volume `junction-learning-final`.
+- **Attribution:** Sölvi chose the experiment, budget and matched-campaign comparison. Codex implemented and audited learners, orchestration and reports. Simulator/navigation and feasibility helpers retain the team's original authorship. [Prize evidence](../prize-evidence.md) records contributions and compute.
 
-The continuation supervisor is running from the fixed checkout at `becbf3e`, PID **92082**; idle-sleep guard PID **92083** exits with it. Its state, heartbeat, events, terminal downloads and decisions live in `/tmp/junction-learning-final-monitor`. Cloud jobs continue independently of this local process. Automatic continuation requires the local supervisor to remain available.
+## Decisions and handoff
 
-Read `/tmp/junction-learning-final-monitor/state.json` and the stage's `status.json` for current progress. The supervisor polls every 30 seconds and downloads artifacts only after all stage functions have returned and committed their volume. A failed function, corrupt evidence or ambiguous launch stops progress; no automatic retry or extra budget allocation follows.
+1. **Keep the frozen reference and task.** The trained controllers meet the requested recorded-LLM comparison bar but do not improve on the reference; greedy must remain visible alongside learning.
+2. **Use the learning result as supporting submission evidence.** The task/demo owner can reuse the paragraph and figure. Retain the hand-written-navigation, agent-exit, incomplete-budget and fresh-PPO-death limitations.
+3. **Do not extend this run or retune on final worlds.** **82000–82039 are now consumed.** Future work needs a separate bounded protocol and fresh evaluation range; preserve every artifact here.
+4. **Teammates' work continues independently.** Manh's target learner/Gemini attempts and Kristján's learned-planner experiment have separate scopes and seeds. This result neither changes their jobs nor promotes a reference replacement.
 
-To pause **future stage launches** while letting current jobs finish, create `/tmp/junction-learning-final-monitor/pause.json`. The saved `user_paused` state remains durable; deleting the file alone does not resume it. To request a stop of **current jobs and all future stages**, run from the fixed checkout:
+## Follow-up question: combining RL and greedy
 
-```sh
-cd /tmp/junction-learning-final-frozen
-MODAL_PROFILE=solvi-junction /tmp/junction-learning-venv/bin/python -m tools.learning_final.modal_job --stop --receipt /Users/solvisantos/.codex/worktrees/6974/Junction/docs/learning-final-results/fit-receipt.json
-```
+Greedy ranks feasible targets by expected credited science divided by estimated visit time (including the charging forecast), and goes home if none qualifies. It uses the same navigator and feasibility interface as the learned policies. A possible new experiment is to let greedy supply a shortlist of similarly efficient targets and let RL select within it; its shortlist rule must be fixed using development data before another fresh check.
 
-Do not relaunch `fit`, clear cloud reservations or resume the old supervisor. If this new local monitor stops unexpectedly, inspect `state.json` and any launch intent before restarting the same command recorded in `/tmp/junction-learning-final-monitor/process.json`. Use the existing output directory and unchanged fixed checkout; a saved error/pause requires deliberate reconciliation.
+A [saved-development-trace diagnostic](fit/development-overlap.json) covers 192 episodes and 3736 recorded decisions. Excluding forced home-only decisions, PPO agrees with greedy on 68.1% and replay on 70.7%. Their choices therefore differ often enough to investigate, but disagreement does not show complementary strengths or an ensemble improvement. These are states visited by the learned policies, not counterfactual outcomes. No hybrid was built, no new map was opened, and the completed experiment was not changed. Coordinate any follow-up with the separately claimed learned-planner work rather than duplicate it.
 
-## Monitoring interruption and recovery, 21:00 UTC
-
-Training continued through two local reporting interruptions. At 20:42 UTC the progress publisher stopped because `AGENTS.md` gained the approved MAX Harbor-task instructions; that change was reviewed before updating its workflow pin. At 21:00 UTC the supervisor stopped on a DNS `ConnectionError` during a read-only Modal poll. A direct 21:03 UTC check confirmed all six original cloud calls still running, no job errors and no stop marker. [Retained status and recovery record](monitoring-recovery-20261114/record.json).
-
-The same supervisor and publisher were rearmed after preserving their error states and logs. Their frozen code, receipts, source pins, continuation gates, deadlines and cloud reservations are unchanged. No training was relaunched and no extra cloud job was created. Publication resumed in `a0e6f42`; the page now reflects current saved batches again. Read-only network failures remain fail-closed, so another connection failure can stop local monitoring while cloud jobs continue.
-
-The first completion watcher had already queued its one error alert, so it was retained unchanged and a **second generation** was activated for completion. Its current runtime path and PID are listed below. The original runtime remains under `/Users/solvisantos/.codex/junction-learning-final-wake-20261114/`; do not restart or clear its queued reservation. The new generation's live local check reports waiting. Queue acceptance is not a guarantee that resumed work finishes if connectivity or Codex availability fails.
-
-## Continue this chat when training settles
-
-Sölvi asked for continued work after training. A separate one-time watcher is now active, PID **92085**, with idle-sleep guard **92086**. It polls the local monitor every 30 seconds and uses the installed `codex queue --thread … --message … --resume` command to resume this same chat when the monitor reaches final evaluation, reports an error/deadline, or has a heartbeat stale for 15 minutes. A final fallback fires at **03:40 UTC**, ten minutes after the training cutoff.
-
-The queued instruction directs Codex to reconcile all runs, publish the all-seed policy freeze before opening final maps, evaluate and audit the learned policies beside greedy/beam, then publish findings and the handoff. It preserves the reference and original training freeze. An error wake-up requires diagnosis before new spend; it does not authorize repeating training. No cloud job is launched by this watcher.
-
-Runtime code, configuration, state and logs are under `/Users/solvisantos/.codex/junction-learning-final-wake-20261114-generation-2/`. The private code copy is hash-bound and unaffected by later main commits. `state.json` reports `waiting`, `queued`, `uncertain` or `disabled`. Dispatch is reserved durably before the CLI call; an interrupted or ambiguous attempt is never automatically repeated. A `queued` state means the CLI reported acceptance, not that the follow-up work finished.
-
-A training pause/stop suppresses the wake-up. To disable only this watcher, create `/tmp/junction-learning-final-monitor/wake-stop`; current training continues. A disabled watcher requires deliberate rearming. The Mac and Codex must remain available, and Codex usage limits can interrupt the resumed work. Thirteen synthetic tests cover dispatch, pauses, interruption, identity changes and duplicate prevention; a real local poll verified `waiting`. No test follow-up message was sent to the chat.
-
-## Team delivery requested for 07:30 Helsinki
-
-Sölvi relayed Kristján's requested morning handoff: by **15 November 07:30 Helsinki / 05:30 UTC**, provide one clean before/after on the final frozen source, averaged over all three initialization seeds, with greedy and the frozen reference on the same final worlds; one README/video paragraph; one learning-curve figure; and Modal app IDs with estimated cost in `docs/prize-evidence.md`. The active completion wake-up reads this handoff. Training's absolute 05:30 Helsinki cutoff leaves two hours for that work.
-
-**Seed correction for the team:** worlds **72000–72039 were already consumed by the first small-policy RL experiment** ([retained result](../lightlag-rl-results/README.md)). They must not be reopened and described as fresh. This experiment's predeclared untouched final worlds are **82000–82039**, opened once only after policy freezing. Worlds 81000–81031 are held apart from training but repeatedly used for validation and continuation decisions; call them development validation, not an untouched test. Our 80000–80511 training range also avoids the newly reserved MAX pool 500–523, the team's farm/probe ranges, submission 2026–2029 and example 99991. The broad suggestion that any seed above 5000 is unused does not override prior experiment reservations.
-
-If training hits its deadline, use each run's last completed declared milestone and state the attempted target separately. Retain the same-source matched 2048 comparison. The old pilot fallback remains initial .087395 → PPO .376800 at 2048, greedy .380555 and beam .514345, but it used the original navigator and must be labelled accordingly; it is not a completed result from this final-version training run. Current validation improvement alone does not establish a learned-policy win or a Claude gap.
-
-The figure should clearly label the training checkpoints as development validation, retain all seeds, and pair any final before/after headline with the separately audited final-world comparison. Keep the current reference until the team separately decides otherwise. Current cloud allocation remains within its published running-compute envelope; no additional allocation should exceed the remaining authorized credit.
-
-## Next handoff
-
-1. Collect and publish the completed fit decision and, if launched, extend receipt. Keep every seed and failure. Full training batches, replay buffers and optimizer checkpoints stay on the unique Modal volume; download them for a separate optimizer/physics audit before making stronger reproducibility claims.
-2. Once the supervisor reaches `ready_for_final_evaluation`, choose each run's **latest completed declared milestone by episode count**, retaining its initial and matched-2048 policies. For a method that did not extend, use its fit directory; for an extended method, use its extend directory. Supply exactly one terminal directory per identity. Report attempted targets separately from completed milestones.
-3. From the frozen checkout, `tools.learning_final.evaluate --freeze <new-manifest> --runs <six-run-directories>` creates the self-contained final manifest without opening maps. Publish it before `--run`, then run and `--audit` all 40 final worlds. Include the same greedy and beam controls, every training seed, and paired-map intervals. The supervisor deliberately stops before this evaluation.
-4. A campaign showcase comes only after policies are frozen: fresh pilot for each mission, stop at `campaign_complete`, and score `sum(raw)/sum(max)`. A single-mission learning improvement does not establish a campaign win or Claude failure. The task owner's real-agent evidence retains its EPIPE exits and length-censored attempt.
-
-The canonical Traverse rules, reference, Harbor task and teammates' training packages are unchanged by this experiment.
-
-### Completion-pass readiness check
-
-The delayed error wake-up was reconciled again at **21:17 UTC on 14 November**: all six original call IDs still matched the fit receipt and were running, with no new job error, stop marker, pause or launch intent. All **46 frozen source hashes** matched and the fixed checkout was clean. This was the already-repaired 21:00 monitoring interruption; no recovery was repeated or new job launched. The second completion watcher remains responsible for the terminal-state wake-up.
-
-The frozen evaluator covers every initialization's initial, matched-2048 and latest completed declared policy, plus greedy and beam on the same 40 worlds. Normally this is **20 arms / 800 missions**; a policy serving both matched-2048 and latest roles is evaluated once, so the total can be smaller. Do not freeze from a live `report.json`: wait for returned calls and terminal downloads, then supply exactly one directory per identity as described above. If a wrapper deadline leaves a report marked `running`, the freeze will reject it. Reconcile it with the terminal receipt and preserve the original evidence; do not relaunch training or silently rewrite its status.
-
-Run from `/tmp/junction-learning-final-frozen` with `/tmp/junction-learning-venv/bin/python`, preserving Python 3.12.16, NumPy 2.3.4 and Torch 2.9.1. Evaluation accepts `--workers 6`; **the audit is serial and does not use that worker setting**. Limit numerical-library threads for the audit. After the policy freeze has reached `main` and the final evaluation has completed, the audit invocation is:
-
-```sh
-cd /tmp/junction-learning-final-frozen
-OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
-  /tmp/junction-learning-venv/bin/python -m tools.learning_final.evaluate \
-  --audit /Users/solvisantos/.codex/worktrees/6974/Junction/docs/learning-final-results/evaluation/report.json \
-  --output /Users/solvisantos/.codex/worktrees/6974/Junction/docs/learning-final-results/evaluation/audit.json
-```
-
-The audit reconstructs physics, grades and learned/greedy choices on saved observations, and recomputes the summaries. Observation reconstruction, choice-to-command linkage and beam decision logic remain source-pinned; optimizer learning is outside this audit. Retain those limits in the final write-up. **No final manifest or final-world evaluation has been created during this readiness check.**
-
-Allow roughly **20–40 minutes for the final run and serial audit**, plus download, publication and figure time. This is a planning estimate based on the earlier 112-case compatibility workload, not a measurement on final worlds. All evaluation output paths must be new; the frozen runner has no resume option.
+[Evaluation plan](evaluation-plan.md) · [Historical monitoring/recovery notes](monitoring-history.md) · [Original training protocol](../learning-final.md). No supervisor or completion watcher needs rearming for this completed experiment.
