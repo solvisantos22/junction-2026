@@ -1,0 +1,338 @@
+#!/usr/bin/env python3
+"""Build manh_demo_1: a more cinematic cut of Kristján's Lightlag Traverse demo video.
+
+    python -m tools.manh_demo.make all          # voice, picture, sound, video (about ten minutes)
+    ... make voice       # speak the narration (Kristján's script and voice container, no network)
+    ... make capture     # record every shot frame by frame   [--only cold,energy]
+    ... make fit         # stretch the last card so the film is exactly as long as it should be
+    ... make assemble    # synthesise the sound track, join the shots, write the video and subtitles
+    ... make check       # a speech recogniser writes down the finished sound track; compare with the script
+    ... make frames --shot energy --at 2.5,9   # look at single frames of one shot without recording it
+
+Run it with the Python of `tools/manh_demo/build/venv` (playwright, numpy, scipy, soundfile). Needs
+Docker with Kristján's narrator image (`docker build -t lightlag-narrator tools/demo_video/voice`),
+Playwright's Chromium (`python -m playwright install chromium`) and ffmpeg. On a machine where the
+shell is not in the docker group yet: `sg docker -c "<the command>"`.
+
+Kristján's video (`docs/demo-video/`) is the team's main one and is not touched: this cut reads his
+storyboard, his scenes and his numbers and writes to `docs/manh-demo/`. Intermediate files go to
+`tools/manh_demo/build/` (not committed).
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from tools.demo_video import data as film_data
+from tools.demo_video import make as kmake
+
+from . import cut, makers, pages
+
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[1]
+BUILD = HERE / "build"
+OUT = REPO / "docs" / "manh-demo"
+VIDEO = OUT / (cut.NAME + ".mp4")
+FPS, SIZE = kmake.FPS, kmake.SIZE
+FADE_IN, FADE_OUT = kmake.FADE_IN, kmake.FADE_OUT
+CHROME_ARGS = ["--enable-gpu", "--ignore-gpu-blocklist", "--hide-scrollbars", "--force-color-profile=srgb",
+               "--autoplay-policy=no-user-gesture-required"]
+
+# Kristján's helpers (the voice, the subtitles, the listening check) read these when they are called.
+kmake.BUILD, kmake.OUT, kmake.VIDEO = BUILD, OUT, VIDEO
+
+run = kmake.run
+
+
+def plan(stretch: Optional[float] = None) -> List[Dict[str, Any]]:
+    if stretch is None:
+        saved = BUILD / "fit.json"
+        stretch = json.loads(saved.read_text(encoding="utf-8"))["stretch"] if saved.exists() else 0.0
+    return cut.shots(kmake.durations(), kmake.spoken_words(), stretch)
+
+
+# ---------------------------------------------------------------- picture
+def open_page(context: Any, shot: Dict[str, Any], sources: Dict[str, Any], problems: List[str]) -> Any:
+    """The page of a shot, loaded, dressed and ready for its first frame. Its errors are collected in `problems`."""
+    page = context.new_page()
+    page.on("pageerror", lambda error: problems.append(str(error)[:300]))
+    tiles = makers.for_page()
+    if shot["page"] == "film":
+        page.add_init_script("window.FILM_DATA = {}; window.__MANH = {};".format(sources["facts"], json.dumps({"tiles": tiles})))
+        page.goto(sources["film"].as_uri() + "?scene=" + shot["scene"])
+        page.wait_for_function("window.__scene !== undefined && document.fonts.status === 'loaded'", polling=50)
+        page.evaluate(sources["scenes.js"])
+    else:
+        page.goto(sources["campaign"].as_uri() + "?site={}".format(shot["site"]))
+        page.wait_for_function("window.LIGHTLAG_TRAVERSE_APP !== undefined", polling=50, timeout=60000)
+        page.evaluate(sources["overlay.js"])
+        page.evaluate("window.__overlay.chapter({})".format(json.dumps(shot.get("chapter"))))
+        runs = page.evaluate("() => window.LIGHTLAG_TRAVERSE_APP.RUNS.map(run => [run.id, run.kind, run.label, run.model || ''])")
+        whose = {run: makers.maker_of(label + " " + model) for run, kind, label, model in runs if kind != "reference"}
+        page.evaluate("m => { window.__MANH = m; }", {"tiles": tiles, "makers": {run: key for run, key in whose.items() if key}})
+        page.evaluate(sources["tracker.js"])
+    page.evaluate("() => window.__manh.ready")
+    return page
+
+
+def record(context: Any, shot: Dict[str, Any], lengths: Dict[str, float], sources: Dict[str, Any],
+           stills: Optional[List[float]] = None) -> Dict[str, Any]:
+    """Record one shot, beat by beat as Kristján's recorder does. Returns its length, when each line and
+    sound starts inside it, and (for the ground shots) what the followed rover did in every frame.
+    With `stills`, nothing is encoded: those moments of the shot are saved as pictures instead."""
+    problems: List[str] = []
+    page = open_page(context, shot, sources, problems)
+    film = shot["page"] == "film"
+
+    def act(code: str) -> Any:               # run a storyboard snippet in the page, with A as the demo's controls
+        return page.evaluate("() => { const A = window.LIGHTLAG_TRAVERSE_APP; " + code + " }")
+
+    encoder = None if stills is not None else kmake.Encoder(BUILD / "shots" / "{}.mp4".format(shot["name"]))
+    wanted = sorted(stills or [])
+    fade_in, fade_out = shot.get("fade_in", FADE_IN), shot.get("fade_out", FADE_OUT)
+    frame, events, thumps, sounds, talking = 0, [], [], [], 0.0
+    telemetry: List[Dict[str, Any]] = []
+    last_thump: Optional[float] = None
+    beats = shot["beats"]
+    for number, beat in enumerate(beats):
+        last, start = number == len(beats) - 1, frame
+        spoken = lengths[beat["vo"]] if beat.get("vo") else 0.0
+        if beat.get("vo"):
+            talking = max(talking, start / FPS + beat.get("vo_at", 0.0) + spoken)
+        held = (beat.get("vo_at", 0.0) + spoken + beat.get("pad", 0.0)) if beat.get("vo") and not beat.get("over") else 0.0
+        if last:
+            held = max(held, talking - start / FPS + beat.get("pad", 0.0))
+        need = math.ceil(max(beat.get("min", 0.0), held) * FPS)
+        if last and beat.get("until"):
+            raise SystemExit("{}: the last beat of a shot needs a fixed length".format(shot["name"]))
+        if film:
+            page.evaluate("([d, cues]) => { window.__scene.duration = d; window.__scene.cues = cues; }", [need / FPS, beat.get("cues", [])])
+            for cue in page.evaluate("([name, d, cues]) => window.__manh.sfx(name, d, cues)", [shot["scene"], need / FPS, beat.get("cues", [])]):
+                if cue["at"] < need / FPS - 0.05:
+                    sounds.append({**cue, "at": round(start / FPS + cue["at"], 3), "scene_at": cue["at"]})
+        else:
+            page.evaluate("cues => { window.__overlay.cues = cues; }", beat.get("overlay", []))
+            if beat.get("js"):
+                act(beat["js"])
+        if beat.get("vo"):
+            events.append({"line": beat["vo"], "at": round(frame / FPS + beat.get("vo_at", 0.0), 3)})
+        if "thump" in beat:
+            thumps.append(round(frame / FPS + beat["thump"], 3))
+            last_thump = frame / FPS + beat["thump"]
+        for cue in beat.get("sfx", []):
+            sounds.append({**{key: value for key, value in cue.items() if key != "t"}, "at": round(frame / FPS + cue["t"], 3)})
+        pending = sorted(beat.get("at", []), key=lambda item: item["t"])
+        while True:
+            local = (frame - start) / FPS
+            while pending and pending[0]["t"] <= local:
+                act(pending.pop(0)["js"])
+            black = max(0.0, 1.0 - frame / (fade_in * FPS)) if fade_in else 0.0
+            if last:
+                black = max(black, 1.0 - (start + need - 1 - frame) / (fade_out * FPS))
+            if film:
+                page.evaluate("black => { window.__scene.fade = black; window.__film.step(1000 / %d); }" % FPS, black)
+            else:
+                since = None if last_thump is None or frame / FPS < last_thump else frame / FPS - last_thump
+                seen = page.evaluate(
+                    "([ts, black, shot, fx]) => { window.__film.step(1000 / %d); window.__overlay.draw(ts, black, shot); return window.__manh.draw(fx); }" % FPS,
+                    [local, black, frame / FPS, {"dt": 1.0 / FPS, "since": since, "shot": frame / FPS, "trackers": beat.get("trackers")}])
+                telemetry.append(seen)
+            if encoder:
+                encoder.add(page.screenshot(type="jpeg", quality=95))
+            while wanted and frame / FPS >= wanted[0] - 1e-9:
+                target = BUILD / "frames" / "{}_{:06.2f}.jpg".format(shot["name"], wanted.pop(0))
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(page.screenshot(type="jpeg", quality=90))
+                print("  " + str(target.relative_to(REPO)), flush=True)
+            frame += 1
+            if stills is not None and not wanted:
+                page.close()
+                return {"name": shot["name"], "frames": frame}
+            if frame - start >= need and (not beat.get("until") or act("return " + beat["until"] + ";")):
+                break
+            if frame - start > need + 40 * FPS:
+                raise SystemExit("{}: beat {} never ended".format(shot["name"], number + 1))
+        if beat.get("then"):
+            act(beat["then"])
+    if film:                                 # every sound under a chart must sit on a moment the chart really used
+        used = page.evaluate("() => window.__manh.onsets()")
+        for cue in sounds:
+            if cue.get("check") and not any(abs(cue["scene_at"] * 1000 - onset) <= 2 for onset in used):
+                raise SystemExit("{}: the sound {!r} at {:.3f}s is not a moment of the scene any more: look at tools/manh_demo/scenes.js".format(
+                    shot["name"], cue["kind"], cue["scene_at"]))
+    if encoder:
+        encoder.close()
+    page.close()
+    if problems:
+        raise SystemExit("{}: the page reported errors: {}".format(shot["name"], problems[:3]))
+    if telemetry:
+        (BUILD / "tele").mkdir(parents=True, exist_ok=True)
+        (BUILD / "tele" / "{}.json".format(shot["name"])).write_text(json.dumps(telemetry, separators=(",", ":")), encoding="utf-8")
+    return {"name": shot["name"], "page": shot["page"], "frames": frame, "seconds": round(frame / FPS, 3), "lines": events, "thumps": thumps, "sfx": sounds}
+
+
+def browser_sources() -> Dict[str, Any]:
+    return {
+        "campaign": pages.campaign_page(BUILD), "film": pages.film_page(BUILD), "overlay.js": pages.overlay_script(),
+        "tracker.js": (HERE / "tracker.js").read_text(encoding="utf-8"), "scenes.js": (HERE / "scenes.js").read_text(encoding="utf-8"),
+        "facts": json.dumps({**film_data.build(), "live_url": cut.LIVE_URL}, separators=(",", ":")),
+    }
+
+
+def with_browser(work: Any) -> Any:
+    from playwright.sync_api import sync_playwright
+
+    sources = browser_sources()
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True, args=CHROME_ARGS, env=pages.font_environment(BUILD))
+        context = browser.new_context(viewport={"width": SIZE[0], "height": SIZE[1]}, device_scale_factor=1)
+        context.add_init_script((REPO / "tools" / "demo_video" / "clock.js").read_text(encoding="utf-8"))
+        try:
+            return work(context, sources)
+        finally:
+            browser.close()
+
+
+def capture(only: Optional[List[str]] = None, stretch: Optional[float] = None) -> List[Dict[str, Any]]:
+    lengths, shots = kmake.durations(), plan(stretch)
+    (BUILD / "shots").mkdir(parents=True, exist_ok=True)
+    timeline_path = BUILD / "timeline.json"
+    known = {item["name"]: item for item in json.loads(timeline_path.read_text())} if timeline_path.exists() else {}
+
+    def work(context: Any, sources: Dict[str, Any]) -> None:
+        for shot in shots:
+            if only and shot["name"] not in only:
+                continue
+            known[shot["name"]] = record(context, shot, lengths, sources)
+            print("  {:10s} {:6.2f}s  lines at {}  {} sounds".format(
+                shot["name"], known[shot["name"]]["seconds"], [(e["line"], e["at"]) for e in known[shot["name"]]["lines"]],
+                len(known[shot["name"]]["sfx"])), flush=True)
+
+    with_browser(work)
+    timeline = [known[shot["name"]] for shot in shots if shot["name"] in known]
+    timeline_path.write_text(json.dumps(timeline, indent=1), encoding="utf-8")
+    print("  {:.2f}s in {} shots".format(sum(item["seconds"] for item in timeline), len(timeline)))
+    return timeline
+
+
+def frames(shot_name: str, moments: List[float]) -> None:
+    """Save single frames of one shot (seconds into the shot) to build/frames/, without recording it."""
+    lengths = kmake.durations()
+    shot = next((item for item in plan() if item["name"] == shot_name), None)
+    if shot is None:
+        raise SystemExit("no shot called {}".format(shot_name))
+    with_browser(lambda context, sources: record(context, shot, lengths, sources, stills=moments))
+
+
+def fit() -> float:
+    """Stretch the last card so the whole film lasts `cut.TARGET_SECONDS`, and record that card again."""
+    timeline = json.loads((BUILD / "timeline.json").read_text(encoding="utf-8"))
+    saved = BUILD / "fit.json"
+    before = json.loads(saved.read_text(encoding="utf-8"))["stretch"] if saved.exists() else 0.0
+    total = sum(item["seconds"] for item in timeline)
+    stretch = round(max(0.0, before + cut.TARGET_SECONDS - total), 3)
+    saved.write_text(json.dumps({"stretch": stretch}), encoding="utf-8")
+    print("  the film is {:.2f}s; the last card is held {:.2f}s longer to make it {:.1f}s".format(total, stretch, cut.TARGET_SECONDS))
+    if abs(stretch - before) > 1e-6:
+        capture(only=[timeline[-1]["name"]], stretch=stretch)
+    return stretch
+
+
+# ---------------------------------------------------------------- putting it together
+def assemble(mute: Optional[List[str]] = None) -> Path:
+    from . import sound
+
+    lengths, words = kmake.durations(), kmake.spoken_words()
+    timeline = json.loads((BUILD / "timeline.json").read_text(encoding="utf-8"))
+    names = [shot["name"] for shot in plan()]
+    if [item["name"] for item in timeline] != names:
+        raise SystemExit("not every shot is recorded yet: run `make capture`")
+    total = sum(item["seconds"] for item in timeline)
+    if total > cut.LIMIT_SECONDS:
+        raise SystemExit("the video would be {:.1f}s, over the {:.1f}s this cut allows: shorten the script".format(total, cut.LIMIT_SECONDS))
+    OUT.mkdir(parents=True, exist_ok=True)
+    listing = BUILD / "shots.txt"
+    listing.write_text("".join("file '{}'\n".format(BUILD / "shots" / "{}.mp4".format(name)) for name in names), encoding="utf-8")
+    joined, silent = BUILD / "picture.mp4", BUILD / "picture-lean.mp4"
+    run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(listing), "-c", "copy", str(joined)])
+    # The shots are recorded at a generous quality. The film is encoded once more, a little leaner: about a
+    # quarter smaller in the repository, and not to be told apart (SSIM 0.995 against the joined shots).
+    newest = max((BUILD / "shots" / "{}.mp4".format(name)).stat().st_mtime for name in names)
+    if not silent.exists() or silent.stat().st_mtime < newest:
+        run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(joined), "-an", "-c:v", "libx264", "-preset", "slow", "-crf", "21.5", "-pix_fmt", "yuv420p",
+             "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv", str(silent)])
+
+    spoken, offset = [], 0.0
+    for item in timeline:
+        spoken += [{"line": event["line"], "at": round(offset + event["at"], 3)} for event in item["lines"]]
+        offset += item["seconds"]
+    report = sound.build(timeline, spoken, lengths, words, BUILD, cut.THROWS, mute=mute or [])
+    # the limiter's ceiling leaves room for what AAC adds between samples, as in Kristján's cut
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(silent), "-i", str(report["mix"]), "-map", "0:v", "-map", "1:a",
+         "-af", "alimiter=limit=0.8:level=disabled,apad,atrim=0:{:.3f}".format(total),
+         "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(VIDEO)])
+    VIDEO.with_suffix(".srt").write_text(kmake.subtitles(spoken, lengths, words), encoding="utf-8")
+    shot, into = cut.POSTER
+    title_at = sum(item["seconds"] for item in timeline[:names.index(shot)]) + into + cut.TITLE_LEAD
+    run(["ffmpeg", "-y", "-loglevel", "error", "-ss", "{:.2f}".format(title_at), "-i", str(VIDEO), "-frames:v", "1", "-q:v", "2", str(OUT / "poster.jpg")])
+    (BUILD / "spoken.json").write_text(json.dumps({"total": round(total, 2), "lines": spoken, "thumps": report["thumps"]}, indent=1), encoding="utf-8")
+    probe = run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", str(VIDEO)]).stdout.strip()
+    print("  {} {:.2f}s (the file says {}s), {:.1f} MB".format(VIDEO.relative_to(REPO), total, probe, VIDEO.stat().st_size / 1e6))
+    for line in report["notes"]:
+        print("    " + line)
+    for item in spoken:
+        print("    {:>6.1f}s  {}  {}".format(item["at"], item["line"], cut.SUBTITLES[item["line"]][:80]))
+    return VIDEO
+
+
+def levels() -> None:
+    """The finished sound track's loudness, as ffmpeg's EBU R128 meter reads it."""
+    done = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", str(VIDEO), "-vn", "-af", "ebur128=peak=true", "-f", "null", "-"],
+                          capture_output=True, text=True)
+    tail = done.stderr[done.stderr.rfind("Summary:"):]
+    print("  " + " · ".join(line.strip() for line in tail.splitlines() if any(key in line for key in ("I:", "LRA:", "Peak:"))))
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("step", choices=["voice", "capture", "fit", "assemble", "all", "check", "frames", "levels"])
+    parser.add_argument("--only", default=None, help="capture: comma-separated shot names")
+    parser.add_argument("--shot", default=None, help="frames: the shot to look at")
+    parser.add_argument("--at", default="1", help="frames: comma-separated seconds into the shot")
+    parser.add_argument("--mute", default="", help="assemble: comma-separated layers to leave out: rover, charts, music, wind, echo, treat")
+    args = parser.parse_args(argv)
+    if not shutil.which("ffmpeg"):
+        raise SystemExit("ffmpeg is needed and was not found")
+    if args.step in ("voice", "all"):
+        print("narration:")
+        lengths = kmake.voice()
+        print("  {:.1f}s of speech in {} lines".format(sum(lengths[key] for key in cut.LINES), len(cut.LINES)))
+    if args.step == "frames":
+        frames(args.shot, [float(value) for value in args.at.split(",")])
+    if args.step in ("capture", "all"):
+        print("picture:")
+        capture(args.only.split(",") if args.only else None)
+    if args.step in ("fit", "all"):
+        print("length:")
+        fit()
+    if args.step in ("assemble", "all"):
+        print("video:")
+        assemble([name for name in args.mute.split(",") if name])
+        levels()
+    if args.step == "levels":
+        levels()
+    if args.step == "check":
+        print("by ear:")
+        kmake.check()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

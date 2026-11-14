@@ -830,6 +830,15 @@ call. The study does not make a new Claude-performance claim.
 [protocol](reference-ablation.md), [results and raw data](reference-ablation-results/README.md),
 [verification](reference-ablation-results/verification.json).
 
+### 15 November — Manh / Claude Code: `manh_demo_1`, a more cinematic cut of the demo video
+
+- **Human direction:** Manh asked for an upgraded cut of Kristján's demo video: gravel and a small, subliminal engine under the rover, barely noticeable flowing sounds under the charts, a logo tracker over each AI rover in the top-down shots and the logo on the failure explanations (to be reused when the demos show Anthropic, Google DeepMind and OpenAI models together), a cinematic effect on the narrator, at most 2:00 and ideally 1:59, and any other cinematic ideas; Kristján's video stays the main one until the team approves this. The sound design, the tracker design and the extra ideas (the power-cut dip, the held note, the longer top-down moment) are Claude Code's choices and a first proposal.
+- **Tool:** Claude Code; the session reported its model as Claude Fable 5.2. The voice is Kristján's (Kokoro-82M, run locally with no network), the check is his (Whisper `base.en`, offline). Every sound is synthesised with numpy and scipy from scratch; no sample library, no model API call, nothing paid for.
+- **Claude Code contribution:** `tools/manh_demo/`: add-ons that draw on top of Kristján's unchanged demo page and chart scenes (logo trackers, card and chart logos, the power cut), a recorder that also notes what the followed rover does in every frame, a sound synthesiser driven by those notes and by the charts' own timing, and a registry of makers and marks; `tests/manh_demo/` (14 tests); `docs/manh-demo/` with the video, subtitles, a poster and a README.
+- **Verification:** 119.1 s by ffprobe. The offline recogniser heard 304 of the script's 316 words with every layer in (305 for Kristján's cut). −16.0 LUFS, true peak −3.4 dBFS; everything but the voice sits about 20 LU under it, except the two batteries running flat. Each chart sound is checked against the moment the chart really used, or the build stops. Frames from every shot were looked at. Kristján's files are unchanged, by test. **Not verified:** how any of it sounds to a person; nobody has watched or heard this cut yet.
+- **Evidence:** [video](manh-demo/manh_demo_1.mp4), [README](manh-demo/README.md), [tool](../tools/manh_demo/).
+- **Scope:** new files only, plus my own `TEAM_STATUS.md` row. Nothing uploaded or submitted.
+
 ### Kristján / Codex — Modal classical planner learning (15 November)
 
 Kristján explicitly requested parallel Modal training, prioritizing speed using
