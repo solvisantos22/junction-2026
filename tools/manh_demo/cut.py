@@ -24,10 +24,11 @@ LIMIT_SECONDS = 119.4           # never over this; the Junction's limit is 120
 
 LINES, SUBTITLES, VOICE, POSTER, LIVE_URL = base.LINES, base.SUBTITLES, base.VOICE, base.POSTER, base.LIVE_URL
 
-# Words that are sent into a long echo as they are said: the end of the opening, of the verdict and of the film.
+# Words that are sent into a long echo as they are said: the end of the verdict and the end of the film.
+# The first build also echoed "zero." (line a1, about 0:10) and "saved it." (line b4, about 0:49). No interface
+# sound plays there, so the echo's tail was the loudest thing once the voice stopped and came across as a whoosh:
+# Manh asked for both to go after listening (15 November).
 THROWS: Dict[str, List[str]] = {
-    "a1": ["zero."],
-    "b4": ["saved it."],
     "q1": ["planning the day."],
     "e1": ["make it home?"],
 }

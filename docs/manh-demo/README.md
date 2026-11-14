@@ -1,12 +1,19 @@
 # manh_demo_1: a more cinematic cut of the demo video
 
-Sunday 15 November 2026, about 01:00 Helsinki. Owner: Manh / Claude Code (demo cut chat).
+Sunday 15 November 2026, about 01:13 Helsinki (second build). Owner: Manh / Claude Code (demo cut chat).
 
 **[`manh_demo_1.mp4`](manh_demo_1.mp4)**: 1 minute 59 seconds (119.1 s; the Junction guide allows two minutes), 1920×1080, 30 frames a second, narrated, 32 MB. Subtitles: [`manh_demo_1.srt`](manh_demo_1.srt). A still: [`poster.jpg`](poster.jpg).
 
 **Kristján's video stays the main one.** [`docs/demo-video/lightlag-traverse-demo.mp4`](../demo-video/lightlag-traverse-demo.mp4) is the team's demo until the team approves this cut. This is iteration 1 of Manh's version, made to be changed. Nothing is uploaded.
 
-**Nobody has listened to it yet.** Claude Code cannot hear. Every level below was set by measurement, and they are the first thing to change by ear. See [what was not checked](#what-was-checked-and-what-was-not).
+**Manh has listened to the first build** and asked for one change, made in the second build below; he called every other sound perfect. Claude Code cannot hear: the levels were set by measurement. See [what was not checked](#what-was-checked-and-what-was-not).
+
+## Builds
+
+| Build | Change |
+|---|---|
+| 1 · Sunday about 01:00 | The first cut |
+| 2 · Sunday about 01:13 | **Two echoes removed, at Manh's word after listening.** The first build also sent "zero." (0:10) and "saved it." (0:49) into the long echo. No chart or interface sound plays at those two moments, so the echo's tail was the loudest thing once the voice stopped and came across as a whoosh. Measured after each word, the second that follows is now 5 and 6.5 LU quieter (−32.7 and −33.7 LUFS). The picture is byte for byte the same, the two echoes that remain are unchanged, and everything else is within 0.05 dB of the first build |
 
 ## What is the same
 
@@ -22,7 +29,7 @@ The story, the script, the narrator's voice, every number and every replay are K
 | Gravel under the rover | In the chase-camera shots: short grains of noise, more of them the faster the rover really drives. The grain changes with the ground it is really on: regolith, sand (a finer hiss), a rock field (lower, with clacks), bedrock |
 | A small rumbling engine, subliminal | A low electric motor whose pitch follows the rover's real speed. Most of it is below 150 Hz: felt on headphones, nearly absent on a laptop. It idles when the rover stops and winds down when the battery dies |
 | Quiet, clean, flowing sounds under the charts | One sound for each thing that moves on a chart, at the moment the chart moves it: air sliding up as a bar grows (further for a higher score), long moving air while a line draws itself, a soft note when a link lights or a number lands, a low note under a verdict |
-| A cinematic voice effect on the narrator | The same voice, produced like a trailer voice: rumble out, more chest, a compressor that holds every syllable near one level, the hissing consonants held back, a short room around it, and **a long echo on the last word** of four lines ("zero.", "saved it.", "planning the day.", "make it home?") |
+| A cinematic voice effect on the narrator | The same voice, produced like a trailer voice: rumble out, more chest, a compressor that holds every syllable near one level, the hissing consonants held back, a short room around it, and **a long echo on the last word** of two lines: the verdict ("planning the day.") and the last question ("make it home?") |
 | At most 2:00, ideally 1:59 | 119.1 s. The last card is held until the film is exactly that long, so a player shows 1:59 whether it rounds down or to the nearest second |
 
 Other ideas put in, each easy to take out again:
@@ -53,11 +60,11 @@ Everything but the voice also steps back while the narrator speaks (the rover by
 
 - **Length:** 119.10 s by ffprobe, picture and sound. The build refuses anything over 119.4 s.
 - **Words:** the same offline speech recogniser Kristján used (Whisper `base.en`, which has not seen the script) wrote down the finished sound track with every layer in: 304 of the script's 316 words came back as written, against 305 for his cut. The differences are the same spellings and near-homophones ("meters", "centimeters", "root", "two", "Clod").
-- **Levels:** −16.0 LUFS integrated, loudness range 4.2 LU, true peak −3.4 dBFS (ffmpeg `ebur128`); Kristján's cut reads −16.2 LUFS.
+- **Levels:** −16.0 LUFS integrated, loudness range 4.3 LU, true peak −3.6 dBFS (ffmpeg `ebur128`); Kristján's cut reads −16.2 LUFS.
 - **Sounds sit on the picture:** every chart sound is checked against the moments the chart really used while it was recorded; the build stops if one has drifted. The rover's sound is made from what the recorder saw in each frame.
 - **Picture:** frames from every shot were looked at for overlaps and cut-off text, at the tracker moments in particular.
 - **Kristján's files:** unchanged; a test compares them before and after the build's copies are made. 14 tests (`python3 -m unittest discover -s tests/manh_demo -v`; the 4 sound tests need numpy, scipy and soundfile).
-- **Not checked by ear.** Whether the gravel reads as gravel, whether the motor is subliminal or simply inaudible on your speakers, whether the echo is too much: only a person can say. Each layer is a file of its own in `tools/manh_demo/build/audio/` (`voice.wav`, `rover.wav`, `charts.wav`, `wind.wav`, `music.wav`), so one can be listened to alone.
+- **Checked by one pair of ears.** Manh listened to the first build and asked for the two echoes above to go; nobody else has heard it, and nobody has yet heard the second build. Whether the motor is subliminal or simply inaudible on a given pair of speakers, only a person there can say. Each layer is a file of its own in `tools/manh_demo/build/audio/` (`voice.wav`, `rover.wav`, `charts.wav`, `wind.wav`, `music.wav`), so one can be listened to alone.
 - **A different typeface.** Kristján's pages ask for DIN Condensed, which only macOS has. This cut was built on Linux with Barlow Condensed (and Inter, JetBrains Mono) in its place, so letters are a little rounder than in his video. The layouts were checked to hold.
 - **The marks** are the Simple Icons paths for Claude, OpenAI and DeepMind (CC0). The logos are trademarks of their owners and are used only to name the maker of a model on screen. Only Claude appears in this cut; OpenAI and Google DeepMind are registered for the demos to come ([`makers.py`](../../tools/manh_demo/makers.py)).
 
