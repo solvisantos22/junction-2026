@@ -175,3 +175,29 @@ determine whether a paid pilot is justified. A retained development-only timing
 check ([artifact](lightlag-runs/survey-timing-v1/timing.json), map0/seed100) took
 .517 seconds including transcript/replay reconstruction, within the declared
 one-second target. No cases or settings were selected from that score.
+
+## Six-region development and check freeze
+
+The [576-episode development matrix](lightlag-runs/survey-development-v1/summary.json)
+completes without errors; all replays reconstruct and source hashes are unchanged.
+All six regions satisfy the competitive two-target/home criterion on maps0,1,3;
+the adaptive reference physically samples every region across cases and uses
+two different nonempty inspection sets (r2+r6, r4+r6). The structural gate passes.
+
+| Development policy | Mean raw score | Alive and home |
+|---|---:|---:|
+| Adaptive | 8.88125 | 32/32 |
+| No inspection | 8.18906 | 32/32 |
+| Entropy | 8.26250 | 32/32 |
+| Best fixed pair, r5+r6 | 9.15938 | 32/32 |
+
+Adaptive gains .69219 over no inspection and .61875 over entropy, but loses
+.278125 to the development-selected fixed pair. These are development outcomes,
+not a passed check. The unchanged predeclared protocol permits the separate
+check after structural passage; it will test all four policies on the full
+128-case disjoint grid without tuning or choosing favorable cases.
+
+[Check protocol](lightlag-runs/survey-check-v1/protocol.json) and its checksum
+freeze the selected r5+r6 pair, source hashes and settings before any check
+rollout. Preparation executes zero check policies. This freeze is pushed before
+running the check. No model API calls have been made.

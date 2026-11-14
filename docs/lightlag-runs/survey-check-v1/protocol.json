@@ -1,0 +1,603 @@
+{
+  "config": {
+    "delay": 3,
+    "episode_seeds": [
+      200,
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207
+    ],
+    "episodes": 128,
+    "horizon": 60,
+    "mission_seeds": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "normalization": 36,
+    "policies": [
+      "adaptive",
+      "no_probe",
+      "entropy",
+      "fixed:r5+r6"
+    ],
+    "selected_pair": [
+      "r5",
+      "r6"
+    ],
+    "stage": "check",
+    "visibility": "hidden"
+  },
+  "development_evidence": {
+    "artifacts": {
+      "episodes.jsonl.gz": "8a3ae3761305741a191b7758edcef204a14fe6bfcb3fee4d5e6964f5f92e9451",
+      "protocol.json": "df734911a4b211997a8d132c5c8e7ae04c7e35bf1518e5c2dd5e324eeb85b677",
+      "rows.jsonl": "19da46ab80c4a79c29a0025303cec6ad65ac40448824d9dd99eecd8c010fce4e",
+      "started.json": "d49e4de66c0bc8c0982c7e22cabfea2543fb63e993dad43c8411ba05abf7c700",
+      "summary.json": "8b779171d5a3e16ef080394f362576144eb24ce709c52fa7ea45318fe8f88490"
+    },
+    "selected_pair": [
+      "r5",
+      "r6"
+    ],
+    "selection_cases": 576,
+    "selection_means": {
+      "fixed:r1+r2": 7.9468749999999995,
+      "fixed:r1+r3": 8.5875,
+      "fixed:r1+r4": 8.1671875,
+      "fixed:r1+r5": 8.271875,
+      "fixed:r1+r6": 8.40625,
+      "fixed:r2+r3": 8.2796875,
+      "fixed:r2+r4": 7.8625,
+      "fixed:r2+r5": 8.1578125,
+      "fixed:r2+r6": 8.9375,
+      "fixed:r3+r4": 8.1953125,
+      "fixed:r3+r5": 8.415625,
+      "fixed:r3+r6": 8.2625,
+      "fixed:r4+r5": 8.0234375,
+      "fixed:r4+r6": 8.581249999999999,
+      "fixed:r5+r6": 9.159375
+    },
+    "sha256_manifest": "db211efdd122374ca43987cc939b7769a10b3c0dba57389977f7600ca3de70df",
+    "structural_gate": {
+      "distinct_nonempty_probe_sets": [
+        [
+          "r2",
+          "r6"
+        ],
+        [
+          "r4",
+          "r6"
+        ]
+      ],
+      "passed": true,
+      "per_map": {
+        "0": {
+          "all_six_competitive": true,
+          "diagnostics_consistent_across_seeds": true,
+          "single_region_plans": {
+            "r1": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.6800000000000006,
+              "feasible": true,
+              "home_energy_safe": 4.234973617675343,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 17.573886557420906,
+              "return_tick": 9,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t1",
+                "t2"
+              ]
+            },
+            "r2": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 2.88,
+              "feasible": true,
+              "home_energy_safe": 20.73376082260394,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 30.414089763957985,
+              "return_tick": 12,
+              "sample_ticks": [
+                7,
+                9
+              ],
+              "targets": [
+                "t3",
+                "t4"
+              ]
+            },
+            "r3": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 2.4000000000000004,
+              "feasible": true,
+              "home_energy_safe": 14.590271,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 29.235268363123375,
+              "return_tick": 11,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t5",
+                "t6"
+              ]
+            },
+            "r4": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 2.4000000000000004,
+              "feasible": true,
+              "home_energy_safe": 7.834245753890017,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 23.263163000000002,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t7",
+                "t8"
+              ]
+            },
+            "r5": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.04,
+              "feasible": true,
+              "home_energy_safe": 8.296072,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 30.20605,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                9
+              ],
+              "targets": [
+                "t10",
+                "t9"
+              ]
+            },
+            "r6": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.3600000000000003,
+              "feasible": true,
+              "home_energy_safe": 9.19093378883981,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 15.465051337936833,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t11",
+                "t12"
+              ]
+            }
+          },
+          "single_region_values": {
+            "r1": 3.6800000000000006,
+            "r2": 2.88,
+            "r3": 2.4000000000000004,
+            "r4": 2.4000000000000004,
+            "r5": 3.04,
+            "r6": 3.3600000000000003
+          }
+        },
+        "1": {
+          "all_six_competitive": true,
+          "diagnostics_consistent_across_seeds": true,
+          "single_region_plans": {
+            "r1": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.6800000000000006,
+              "feasible": true,
+              "home_energy_safe": 4.95962893297086,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 15.630235176918168,
+              "return_tick": 9,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t1",
+                "t2"
+              ]
+            },
+            "r2": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 2.88,
+              "feasible": true,
+              "home_energy_safe": 9.827361707795122,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 17.677008565755393,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t3",
+                "t4"
+              ]
+            },
+            "r3": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 2.4000000000000004,
+              "feasible": true,
+              "home_energy_safe": 7.5960241877783625,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 16.51179993237548,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t5",
+                "t6"
+              ]
+            },
+            "r4": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 2.4000000000000004,
+              "feasible": true,
+              "home_energy_safe": 9.960274042795414,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 16.996643785626848,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t7",
+                "t8"
+              ]
+            },
+            "r5": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.04,
+              "feasible": true,
+              "home_energy_safe": 10.788078,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 17.747617360940648,
+              "return_tick": 9,
+              "sample_ticks": [
+                5,
+                7
+              ],
+              "targets": [
+                "t10",
+                "t9"
+              ]
+            },
+            "r6": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.3600000000000003,
+              "feasible": true,
+              "home_energy_safe": 7.8243161159707535,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 16.149863688583146,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t11",
+                "t12"
+              ]
+            }
+          },
+          "single_region_values": {
+            "r1": 3.6800000000000006,
+            "r2": 2.88,
+            "r3": 2.4000000000000004,
+            "r4": 2.4000000000000004,
+            "r5": 3.04,
+            "r6": 3.3600000000000003
+          }
+        },
+        "2": {
+          "all_six_competitive": false,
+          "diagnostics_consistent_across_seeds": true,
+          "single_region_plans": {
+            "r1": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.6800000000000006,
+              "feasible": true,
+              "home_energy_safe": 12.591284,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 24.174060349748924,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t1",
+                "t2"
+              ]
+            },
+            "r2": {
+              "expected_value": 0.0,
+              "feasible": false
+            },
+            "r3": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 2.4000000000000004,
+              "feasible": true,
+              "home_energy_safe": 9.571119,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 19.345960858265705,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t5",
+                "t6"
+              ]
+            },
+            "r4": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 2.4000000000000004,
+              "feasible": true,
+              "home_energy_safe": 9.663076071691833,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 15.738370503296661,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t7",
+                "t8"
+              ]
+            },
+            "r5": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.04,
+              "feasible": true,
+              "home_energy_safe": 5.3814133612491215,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 15.008348001169939,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t10",
+                "t9"
+              ]
+            },
+            "r6": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.3600000000000003,
+              "feasible": true,
+              "home_energy_safe": 7.711243368711883,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 18.13752941837813,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t11",
+                "t12"
+              ]
+            }
+          },
+          "single_region_values": {
+            "r1": 3.6800000000000006,
+            "r2": 0.0,
+            "r3": 2.4000000000000004,
+            "r4": 2.4000000000000004,
+            "r5": 3.04,
+            "r6": 3.3600000000000003
+          }
+        },
+        "3": {
+          "all_six_competitive": true,
+          "diagnostics_consistent_across_seeds": true,
+          "single_region_plans": {
+            "r1": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.6800000000000006,
+              "feasible": true,
+              "home_energy_safe": 5.766443126309929,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 14.462893097414447,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t1",
+                "t2"
+              ]
+            },
+            "r2": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 2.88,
+              "feasible": true,
+              "home_energy_safe": 10.320976024157552,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 17.220644020451132,
+              "return_tick": 11,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t3",
+                "t4"
+              ]
+            },
+            "r3": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 2.4000000000000004,
+              "feasible": true,
+              "home_energy_safe": 11.91825,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 23.407128999999998,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t5",
+                "t6"
+              ]
+            },
+            "r4": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 2.4000000000000004,
+              "feasible": true,
+              "home_energy_safe": 6.56751842642215,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 15.375872955284283,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t7",
+                "t8"
+              ]
+            },
+            "r5": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.04,
+              "feasible": true,
+              "home_energy_safe": 7.304891580648311,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 16.942568746464346,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t10",
+                "t9"
+              ]
+            },
+            "r6": {
+              "battery": 98.5,
+              "energy_reserve": 2.0,
+              "expected_value": 3.3600000000000003,
+              "feasible": true,
+              "home_energy_safe": 7.990471372458062,
+              "idle_energy_to_horizon": 28.5,
+              "movement_and_sample_energy": 14.013653800245038,
+              "return_tick": 10,
+              "sample_ticks": [
+                6,
+                8
+              ],
+              "targets": [
+                "t11",
+                "t12"
+              ]
+            }
+          },
+          "single_region_values": {
+            "r1": 3.6800000000000006,
+            "r2": 2.88,
+            "r3": 2.4000000000000004,
+            "r4": 2.4000000000000004,
+            "r5": 3.04,
+            "r6": 3.3600000000000003
+          }
+        }
+      },
+      "sampled_regions": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6"
+      ]
+    }
+  },
+  "evidence": "full public transcript, independent replay reconstruction, deterministic gzip",
+  "gate": {
+    "cases_per_policy": 32,
+    "minimum_home": 31,
+    "minimum_nonnegative_maps_per_control": 3,
+    "minimum_raw_gain": {
+      "entropy": 0.5,
+      "fixed_pair": 0.5,
+      "no_probe": 1.0
+    },
+    "zero_deaths": true
+  },
+  "python_version": "3.9.6",
+  "schema_version": 1,
+  "selection": "greatest complete development mean raw score; exact ties lexicographic",
+  "source_sha256": {
+    "docs/lightlag-survey-gate.md": "233f212d39d40c4112742f94334f57fbb682d36a3efff2a6c2eb7fd6ce1d5698",
+    "lightlag/__init__.py": "c8ec30fc8723d8f6d7ffa8fbd9d4ef7cf0ef480a777829722ce82f98f9201d06",
+    "lightlag/environment.py": "a6f4d56ea7d218276bdcc700fe94e061c929fb9267f8b735bbfb0cec36689a01",
+    "lightlag/model.py": "d7800c912a48a056a224baaee58f263831128d0916527938e4e0463a9c976c1a",
+    "lightlag_dynamic/__init__.py": "fc159c8af26f6b4e6198365cf0ce2914b870328a3f453679db86946240cb6f14",
+    "lightlag_dynamic/controllers.py": "00ececad4b3e55a3917ef83a7a3b15054dc072734dfb6e807d338fad0cdaf567",
+    "lightlag_dynamic/environment.py": "91623eb0e6a78f52bd5ab58a793104da97e04fc5ff50b6df62b9587f59432ffb",
+    "lightlag_dynamic/kf_mpc.py": "f970f847f88c86e1b5ffb1ba6e45cab9582200336d6118ec09883900d581e1d8",
+    "lightlag_dynamic/missions.py": "ea12fbeff21d66b8db1444f8ad31f5405a333a1ec7fb6dd4b9d735d916ee35e8",
+    "lightlag_dynamic/tools.py": "c97161583e6f4fb0a0e536a829969fcd2814a11603bd25adc12d241ed19651eb",
+    "lightlag_expedition/__init__.py": "aec2bd2b3f342fcc6069c1c6f0991f7113212ca4566adaee30257cd426095bc7",
+    "lightlag_expedition/environment.py": "aa3d34b9bde55812a12e66e9573a7484e31255577afa7b2e2ce2422964a7271c",
+    "lightlag_expedition/missions.py": "d9dc2dd303e9c47f1c5c7b76f18a56c6f742ae5796898c166e7e458c3c6737ab",
+    "lightlag_expedition/model.py": "590a0745b9e42927933dfb6c969a8e79c5ce1f3ebbb3c10e2e11fa342c9422b5",
+    "lightlag_expedition/reference.py": "fa3a964b0b77dc23b8d457740e53c189523353ce99be6173d9bf364afc817d5e",
+    "lightlag_expedition/reference_v2.py": "17a48388c7c6c73242fb175a16f2f5496ea5e3114d88018d4ea9c15d98b16009",
+    "lightlag_survey/__init__.py": "478483866e556900934d3fcb1383fd4c058e62c7d6b7966108561f7e290cac77",
+    "lightlag_survey/environment.py": "dee50e55354b213d0652f40b18c574eaf98dd16e255326ee80d93cfa8daa72e1",
+    "lightlag_survey/missions.py": "8a4e8d62f40b7545d6cfe44571d54df22140f9b69bde2f4e8fe4254196fce548",
+    "lightlag_survey/model.py": "031fddec5acbfc4de28d9aef1e7c683d2aa8b6c62ad8f6debffd50e29ca74a62",
+    "lightlag_survey/study.py": "62de2c21e4204b7aa8b4bd04ac459b96196ba5acb453fb236517a5de3770db68"
+  }
+}
