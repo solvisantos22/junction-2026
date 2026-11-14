@@ -674,3 +674,25 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
 - **Artifacts:** [review and handoff](research/2026-11-14-rl-reference-and-failures.md), [reproducible auditor](../tools/reference_gap_review/audit.py), [retained review data](reference-gap-review/review.json), [rerun training audit](reference-gap-review/rl-training-audit.json), [rerun check audit](reference-gap-review/rl-check-audit.json).
 
 - **Persistence follow-up in the same review:** as Sölvi’s result landed, Codex independently recomputed all arm means, paired home outcomes, the 24-map primary gain/bootstrap and failed return gate; reran all 240 physics/grade and 10,479-choice checks and all 21 published tests. The score gains are from unchanged weights under a commitment rule, not new RL learning. Initial-policy home transitions include 12 home-to-away and eight away-to-home cases. Sölvi retains the missed-return diagnosis and training scope. [Independent statistics](reference-gap-review/persistence-summary.json), [replay audit](reference-gap-review/persistence-audit.json).
+
+### 14 November — Kristján / Claude Code: Traverse rollout farm on Modal
+
+- **Human direction:** Kristján asked Claude Code to use his Modal credit to create an RL model that would do very well at Lightlag Traverse. Claude Code proposed starting with a rollout farm that plays many missions in parallel, to measure the reference pilot against Claude's saved programs on fresh worlds and to search the pilot's options. Kristján said to build it, asked for frequent commits, and logged in to Modal himself. The Traverse owner's session asked for the paired comparison first, then for Opus agent 3 and Sonnet agent 1 to be rebuilt from their trajectories and added, then for a pilot-only run under its proposed harsher day.
+- **Tool:** Claude Code (the session reports its model as Claude Opus 5.5), with the Modal 1.6.4 client. No model API calls: the Claude programs replayed were written in earlier, already recorded runs.
+- **Claude Code contribution:** [`tools/traverse_farm/`](../tools/traverse_farm/): one mission per job, a Modal app and a local process pool, paired comparison with bootstrap intervals, a ledger that saves part by part and resumes, missions on changed rules, and per-program diagnostics (where it stopped, when the battery ran out, the end of its output). It also has an option search with selection and confirmation on unseen worlds, not yet run. 31 tests. The two agent programs were rebuilt from their trajectories, with a labelled wrapper repeating Opus agent 3's by-hand setup. Before any result was used, Claude Code found and fixed its own bug: saved program rows shared one key, so programs dropped out of tables and would have been mixed up on a rerun.
+- **What it found:** on 300 fresh worlds (600–899), paired, the reference pilot (0.502) beats all seven saved Claude programs on 288–300 of the 300 worlds and never loses a rover. The programs score 0.321 (one-request Opus), 0.309 (Opus agent 1), 0.265 (Sonnet agent 1, 91 rovers lost), 0.221 (Opus agent 3, 157 lost), 0.094 (one-request Sonnet) and 0.039 (one-request Haiku). Under the owner's proposed harsher day the pilot scores 0.435, never lost, and is stranded on 2 worlds. These replay programs without their agents, so they measure the programs, not the agents. [Results and limits](traverse-farm.md).
+- **Modal jobs:**
+  - smoke against the laptop `ap-kew5v67eaVvOdeMDDAbtzZ`
+  - task-world replays `ap-GnrGDGApXmzHdabvZmKkJ7` and `ap-xv5BaJGa8rfv96Cl9sx7ZQ`
+  - comparison `ap-gBRd5446NAlbSopK5sdrI4` (1500 missions in 7 minutes) and `ap-758nYv4YvdQRCYPMuSAv1V` (600 in 23 minutes)
+  - harsher day `ap-T2EvbsPSpwUE9Jy1mFCOiH`
+  - farm check on the owner's worlds 1–8 `ap-aXFI1zwa4J4dBGGioCveZx`
+- **Modal configuration:** CPU functions with 1 core and 1 GiB each, up to 100 containers (the workspace limit, reached; further missions queued), a 30-minute timeout, and a Debian-slim Python 3.12 image holding the repository's `lightlag`, `lightlag_traverse` and the farm. Model-written programs run only inside these containers; the local command refuses them.
+- **Usage, not checked against a bill:** about 39 core-hours of mission time (the sum of per-mission times; container start-up not included).
+- **Why Modal mattered:** the 2100-mission comparison took about 30 minutes of wall time instead of hours on a laptop, and it kept model-written code off the laptop.
+- **Verification:**
+  - 16 missions scored identically on Modal and on the laptop.
+  - Opus agent 3's rebuilt program reproduces its Harbor score on the task's world (0.515), and the owner's eight scores on worlds 1–8.
+  - Missions in containers that Modal preempted were replayed from the start; a mission is deterministic per world, so this changes no result.
+- **Evidence:** [write-up](traverse-farm.md), [comparison rows](traverse-farm/programs-1/), [harsher-day rows](traverse-farm/sun-margin-0/), [code](../tools/traverse_farm/), [tests](../tests/traverse_farm/).
+- **Scope:** no change to `lightlag_traverse/`, the Harbor task or any teammate's file; no Harbor run, model API spend or prize submission.
