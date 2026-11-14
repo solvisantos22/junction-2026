@@ -5,6 +5,7 @@
     python3 -m lightlag_dynamic.biomes.nogps_players --players fused blind --delays 0 3 5
     python3 -m lightlag_dynamic.biomes.nogps_players --seeds 0-19 --many-sensors   # many weak sensors
     python3 -m lightlag_dynamic.biomes.nogps_players --weak-gps --set beacons=3 --set gyro_noise_deg=2
+    python3 -m lightlag_dynamic.biomes.nogps_players --wheel-error 0.2   # today's telemetry, wheels of a hidden size
 
 The fusing reference (`fused`) is the Manh controllers' particle-filter controller with three
 more likelihoods, one per sensor that stands in for a trustworthy position fix:
@@ -243,7 +244,8 @@ class _Navigator:
                                         n=self.N, seed=7, slip_walk=self.SLIP_WALK, map_size=self.size)
             self.beacons = [(b["x"], b["y"]) for b in self.tools.map().get("beacons", [])]
             self.pf.gyro = "gyro" in self.USE and self.nav.get("gyro_noise_deg") is not None
-            error = self.nav.get("wheel_scale_error", 0.0) if "scale" in self.USE else 0.0
+            published = self.nav.get("wheel_scale_error") or (rules.get("wheels") or {}).get("wheel_scale_error") or 0.0
+            error = published if "scale" in self.USE else 0.0
             self.slip_floor = 0.0
             if error > 0:
                 self.pf.learn_scale(error)
@@ -468,8 +470,14 @@ def play(job):
     from lightlag_dynamic.tools import PublicTools
 
     from .nogps import make_nogps_env
-    name, profile, delay, seed, biome, navigation = job
-    env = make_nogps_env(seed, delay, profile, biome=biome, navigation=navigation or None)
+    name, profile, delay, seed, biome, navigation, *wheels = job
+    if wheels and wheels[0] and not navigation:   # today's telemetry, with wheels of a hidden size
+        from .wheels import make_overshoot_env
+        env = make_overshoot_env(seed, delay, profile, biome=biome, error=wheels[0])
+    else:
+        if wheels and wheels[0]:
+            navigation = dict(navigation, wheel_scale_error=wheels[0])
+        env = make_nogps_env(seed, delay, profile, biome=biome, navigation=navigation or None)
     crash = None
     try:
         players()[name](PublicTools(env))
@@ -483,8 +491,10 @@ def play(job):
             "home": bool(result["alive"] and result["at_base"]), "dead": not result["alive"], "crash": crash}
 
 
-def probe(names, profiles, delays, seeds, workers, biome="main_mars", navigation=None):
-    jobs = [(n, p, d, s, biome, navigation) for n in names for p in profiles for d in delays for s in seeds]
+def probe(names, profiles, delays, seeds, workers, biome="main_mars", navigation=None, wheel_error=None):
+    """`wheel_error` alone plays today's telemetry with wheels of a hidden size (wheels.py); with
+    `navigation` it is that setting's wheel_scale_error."""
+    jobs = [(n, p, d, s, biome, navigation, wheel_error) for n in names for p in profiles for d in delays for s in seeds]
     if workers > 1:
         with Pool(workers) as pool:
             return pool.map(play, jobs, chunksize=2)
@@ -524,6 +534,9 @@ def main(argv=None):
                          "and wheels of a hidden size (nogps.MANY_SENSORS)")
     ap.add_argument("--set", action="append", default=[], metavar="NAME=VALUE",
                     help="any single navigation setting of nogps.py, e.g. beacons=6 or gyro_noise_deg=none")
+    ap.add_argument("--wheel-error", type=float, default=None,
+                    help="wheels of a hidden size, 1 +- this. Alone: today's telemetry and nothing else new "
+                         "(wheels.py); with a navigation option: that setting's wheel_scale_error")
     ap.add_argument("--profiles", nargs="*", default=["rush_noisy"])
     ap.add_argument("--delays", nargs="*", type=int, default=[3])
     ap.add_argument("--seeds", default="0-19")
@@ -539,11 +552,13 @@ def main(argv=None):
     for item in a.set:
         name, _, value = item.partition("=")
         navigation[name] = None if value.lower() == "none" else int(value) if name == "beacons" else float(value)
-    names = a.players or default_players(navigation.get("position_noise_m") is not None, navigation)
+    today = a.wheel_error is not None and not navigation
+    names = a.players or (["fused", "fused_no_scale", "kf_mpc_on_fix", "blind"] if today else
+                          default_players(navigation.get("position_noise_m") is not None, navigation))
     unknown = set(names) - set(players())
     if unknown:
         ap.error(f"unknown players: {sorted(unknown)}; choose from {', '.join(players())}")
-    rows = probe(names, a.profiles, a.delays, parse_seeds(a.seeds), a.workers, a.biome, navigation)
+    rows = probe(names, a.profiles, a.delays, parse_seeds(a.seeds), a.workers, a.biome, navigation, a.wheel_error)
     print(table(rows))
     for row in rows:
         if row["crash"]:

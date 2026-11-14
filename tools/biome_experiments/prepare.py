@@ -14,6 +14,8 @@ five tools and what the agent is told about it:
                    range), no_gps (no fix; the compass and the beacon only) or many_sensors (the
                    weak fix, four vague beacons, a gyroscope, coarse visual odometry and wheels
                    of a hidden size)
+    --wheel-error  wheels of a hidden size, 1 +- this, so that a drive can overshoot. With
+                   --navigation gps it is the only change to today's episode
 
 The simulator container runs `python -m lightlag_dynamic.biomes.serve`, whose tool
 descriptions are made true for the episode, and instruction.md gets the same facts. The
@@ -44,7 +46,8 @@ SIMULATOR = {
     "lightlag_mcp": ("__init__.py", "__main__.py", "finish.py", "server.py", "service.py", "requirements.txt"),
     "lightlag_dynamic": ("__init__.py", "environment.py", "missions.py", "tools.py", "controllers.py", "kf_mpc.py"),
     "lightlag_dynamic/manh_controllers": ("__init__.py", "scenarios.py", "mars.py"),
-    "lightlag_dynamic/biomes": ("__init__.py", "catalog.py", "environment.py", "nogps.py", "serve.py", "wording.py"),
+    "lightlag_dynamic/biomes": ("__init__.py", "catalog.py", "environment.py", "nogps.py", "serve.py", "wheels.py",
+                                "wording.py"),
 }
 
 
@@ -54,7 +57,7 @@ def replace_once(text, old, new):
     return text.replace(old, new, 1)
 
 
-def episode_rules(biome, profile, seed, delay, navigation):
+def episode_rules(biome, profile, seed, delay, navigation, wheel_error=0.0):
     """The rules() of the episode the generated task will serve, read from this checkout."""
     sys.path.insert(0, str(REPO))
     try:
@@ -64,7 +67,7 @@ def episode_rules(biome, profile, seed, delay, navigation):
         service = BiomeEpisodeService(seed=seed, biome=biome, profile=profile,
                                       config=Config(delay_ticks=delay, max_ticks=HORIZONS[profile][4]),
                                       no_gps=navigation == "no_gps", weak_gps=navigation == "weak_gps",
-                                      many_sensors=navigation == "many_sensors")
+                                      many_sensors=navigation == "many_sensors", wheel_error=wheel_error or None)
         return service._env.rules()
     finally:
         sys.path.remove(str(REPO))
@@ -115,7 +118,7 @@ def mission_text(rules):
 
 
 def prepare(destination, biome="main_mars", profile="rush_noisy", seed=2400, delay=3, navigation="weak_gps",
-            policy="kf_mpc"):
+            policy="kf_mpc", wheel_error=0.0):
     destination = Path(destination).resolve()
     if destination == REPO or REPO in destination.parents:
         raise ValueError("generate experimental tasks outside the checkout")
@@ -127,7 +130,9 @@ def prepare(destination, biome="main_mars", profile="rush_noisy", seed=2400, del
         raise ValueError("without a position fix only the open_loop solution can play; the others read the position")
     if type(seed) is not int or seed < 0 or type(delay) is not int or delay < 0:
         raise ValueError("seed and delay must be nonnegative integers")
-    rules = episode_rules(biome, profile, seed, delay, navigation)  # raises ValueError on an unknown biome
+    if type(wheel_error) not in (int, float) or not 0 <= wheel_error < 0.5:
+        raise ValueError("the wheel error must be a number from 0 to below 0.5")
+    rules = episode_rules(biome, profile, seed, delay, navigation, wheel_error)  # ValueError on an unknown biome
     horizon = rules["max_ticks"]
 
     tracked = subprocess.check_output(["git", "ls-files", "-z", "--", str(BASE)], cwd=REPO).decode()
@@ -161,10 +166,13 @@ def prepare(destination, biome="main_mars", profile="rush_noisy", seed=2400, del
                 raise ValueError("missing or repeated simulator setting: " + key)
         settings = {"LIGHTLAG_PROFILE": profile, "LIGHTLAG_TICKS": horizon, "LIGHTLAG_BIOME": biome,
                     "LIGHTLAG_NOISE_LEVEL": "1.0", **NAVIGATION[navigation]}
+        if wheel_error:
+            settings["LIGHTLAG_WHEEL_ERROR"] = wheel_error
         block = "".join('      {}: "{}"\n'.format(key, value) for key, value in settings.items())
         return replace_once(text, "      LIGHTLAG_ARTIFACT_DIR: /evaluator", block + "      LIGHTLAG_ARTIFACT_DIR: /evaluator")
 
-    slug = re.sub(r"[^a-z0-9]+", "-", "{}-{}-{}".format(biome, navigation, profile).lower()).strip("-")
+    slug = re.sub(r"[^a-z0-9]+", "-", "{}-{}-{}{}".format(biome, navigation, profile,
+                                                         "-wheels" if wheel_error else "").lower()).strip("-")
     edit("environment/docker-compose.yaml", compose)
     edit("environment/simulator/Dockerfile", lambda text:
          replace_once(replace_once(text, "COPY lightlag_mcp/ lightlag_mcp/",
@@ -185,7 +193,7 @@ def prepare(destination, biome="main_mars", profile="rush_noisy", seed=2400, del
         "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip(),
         "source_dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=REPO)),
         "settings": {"biome": biome, "profile": profile, "seed": seed, "delay": delay, "horizon": horizon,
-                     "navigation": navigation, "noise_level": 1.0, "policy": policy},
+                     "navigation": navigation, "noise_level": 1.0, "policy": policy, "wheel_error": float(wheel_error)},
         "navigation_rules": rules.get("navigation") and {k: v for k, v in rules["navigation"].items()
                                                         if isinstance(v, (int, float)) or v is None},
         "source_sha256": {name: hashlib.sha256(data).hexdigest() for name, data in source_bytes.items()},
@@ -212,6 +220,7 @@ def main():
     parser.add_argument("--delay", type=int, default=3)
     parser.add_argument("--navigation", choices=tuple(NAVIGATION), default="weak_gps")
     parser.add_argument("--policy", choices=POLICIES, default="kf_mpc")
+    parser.add_argument("--wheel-error", type=float, default=0.0, dest="wheel_error")
     args = parser.parse_args()
     try:
         manifest = prepare(**vars(args))

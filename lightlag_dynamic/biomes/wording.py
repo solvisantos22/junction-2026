@@ -2,8 +2,10 @@
 
 lightlag_mcp's tool descriptions are everything an agent is told about how to act, and they
 describe today's telemetry: a position in every packet. That is untrue without a fix and
-misleading with a very noisy one, and they say nothing of a biome's extra map layers. This
-module holds the sentences that make them true again, built from the episode's own rules():
+misleading with a very noisy one, they say nothing of a biome's extra map layers, and they
+call wheel_odometry the wheel distance, which it is not once the wheels may be off their
+nominal size. This module holds the sentences that make them true again, built from the
+episode's own rules():
 
     tool_wording(rules)     {constant of lightlag_mcp.server: (text to find, text to put)}
     patched(server, rules)  context manager: the constants patched while a server is built
@@ -25,9 +27,13 @@ BEACONS = ("the distance to each radio beacon listed in `map` (beacon_ranges_m, 
 UNHEARD = "an entry is null when that beacon was not heard"
 COMPASS = "the heading actually driven, measured by a sun compass (sun_heading_deg)"
 GYRO = ("how far that heading turned since the previous executed drive, measured by a gyroscope (gyro_turn_deg)")
-WHEELS = ("The wheels are a hidden few percent bigger or smaller than nominal (`rules`, navigation.wheel_scale): a "
+WHEELS = ("The wheels are a hidden few percent bigger or smaller than nominal (`rules`, {}.wheel_scale): a "
           "drive of M commanded metres covers M x wheel_scale x (1 - slip) of ground, so a drive can also overshoot. "
           "wheel_odometry reports the commanded wheel metres, visual_odometry the ground covered.")
+ODOMETER = ("wheel_odometry (wheel distance in metres during that tick)",
+            "wheel_odometry (commanded wheel metres turned during that tick; `rules` describes the hidden wheel scale)")
+SLIP_HINT = ("Compare wheel_odometry with visual_odometry in telemetry to estimate slip.",
+             "Compare wheel_odometry with visual_odometry in telemetry to estimate slip and the wheel scale together.")
 
 
 def _navigation(rules):
@@ -53,15 +59,31 @@ def _navigation(rules):
     fields += ", sun_heading_deg (measured heading of the drive executed in that tick, or null)"
     if gyro:
         fields += ", gyro_turn_deg (measured turn of that heading since the previous executed drive, or null)"
+    wheel_text = WHEELS.format("navigation")
     return {
         "paragraph": "Position: {} Every packet reports {}; the packet of an executed drive also reports {}. {}{}"
-                     .format(position, beacon, driven, HEADING_ERROR, " " + WHEELS if wheels else ""),
+                     .format(position, beacon, driven, HEADING_ERROR, " " + wheel_text if wheels else ""),
         "fields": fields + ", heading_deg (commanded heading)",
         "map": " `beacons` lists the radio beacons whose ranges telemetry reports." if several else "",
         "bullets": [position,
                     "Every packet reports {}.".format(beacon),
                     "The packet of an executed drive also reports {}.".format(driven),
-                    HEADING_ERROR] + ([WHEELS] if wheels else []),
+                    HEADING_ERROR] + ([wheel_text] if wheels else []),
+    }
+
+
+def _wheels(rules):
+    """Wheels of a hidden size on today's telemetry (wheels.py); the navigation prototype words its own."""
+    if not rules.get("wheels"):
+        return None
+    return {
+        "paragraph": "Wheels: " + WHEELS.format("wheels"),
+        "bullets": ["The wheels are a hidden few percent bigger or smaller than nominal (`rules`, wheels.wheel_scale). "
+                    "A drive of M commanded metres covers M x wheel_scale x (1 - slip) of ground, not M x (1 - slip), "
+                    "so a drive can fall short or overshoot.",
+                    "wheel_odometry reports the commanded wheel metres; visual_odometry reports the ground covered. "
+                    "Their ratio is wheel_scale x (1 - slip).",
+                    "The wheel scale stays the same for the whole mission; `rules` gives its range."],
     }
 
 
@@ -83,29 +105,37 @@ def _biome(rules):
 
 def tool_wording(rules):
     """{constant name in lightlag_mcp.server: [(old, new), ...]} for this episode; {} when nothing differs."""
-    navigation, biome = _navigation(rules), _biome(rules)
+    navigation, biome, wheels = _navigation(rules), _biome(rules), _wheels(rules)
     changes = {}
-    paragraphs = [part["paragraph"] for part in (biome, navigation) if part]
+    scaled = bool(wheels) or "wheel_scale" in (rules.get("navigation") or {})
+    paragraphs = [part["paragraph"] for part in (biome, navigation, wheels) if part]
     if paragraphs:
         start = "Start with `rules` and `map`."
         changes["INSTRUCTIONS"] = [(start, "\n\n".join(paragraphs) + "\n\n" + start)]
+        if scaled:   # the two odometers no longer measure slip alone
+            changes["INSTRUCTIONS"].append(SLIP_HINT)
+    fields = []
     if navigation:
-        changes["TELEMETRY_DESCRIPTION"] = [("position [x, y], heading_deg (commanded heading)", navigation["fields"])]
-        changes["RULES_DESCRIPTION"] = [("and command limits.",
-                                         "command limits, and under `navigation` what telemetry reports about the "
-                                         "rover's position and how noisy each reading is.")]
+        fields.append(("position [x, y], heading_deg (commanded heading)", navigation["fields"]))
+    if scaled:
+        fields.append(ODOMETER)   # the stock text calls it the wheel distance, which it no longer is
+    if fields:
+        changes["TELEMETRY_DESCRIPTION"] = fields
     layers = (biome["map"] if biome else "") + (navigation["map"] if navigation else "")
     if layers:
         old = "Everything not sand is bedrock."
         changes["MAP_DESCRIPTION"] = [(old, old + layers)]
+    sections = []
+    if navigation:
+        sections.append("under `navigation` what telemetry reports about the rover's position and how noisy each "
+                        "reading is")
     if biome:
-        rule = ("and command limits.", "command limits, and under `biome` the rules of the biome this episode is set in.")
-        if navigation:
-            old, new = changes["RULES_DESCRIPTION"][0]
-            changes["RULES_DESCRIPTION"] = [(old, new[:-1] + ", and under `biome` the rules of the biome this "
-                                                             "episode is set in.")]
-        else:
-            changes["RULES_DESCRIPTION"] = [rule]
+        sections.append("under `biome` the rules of the biome this episode is set in")
+    if wheels:
+        sections.append("under `wheels` the rule and the range of the hidden wheel scale")
+    if sections:
+        changes["RULES_DESCRIPTION"] = [("and command limits.",
+                                         "command limits, " + ", ".join("and " + section for section in sections) + ".")]
     return changes
 
 
@@ -140,9 +170,11 @@ def patched(server_module, rules):
 def brief(rules):
     """Markdown for a task's instruction.md: the same facts the tool texts state, as bullets. '' if none."""
     sections = []
-    biome, navigation = _biome(rules), _navigation(rules)
+    biome, navigation, wheels = _biome(rules), _navigation(rules), _wheels(rules)
     if biome:
         sections.append("## Where this mission is set\n\n" + "\n".join("- " + line for line in biome["bullets"]))
     if navigation:
         sections.append("## Where the rover is\n\n" + "\n".join("- " + line for line in navigation["bullets"]))
+    if wheels:
+        sections.append("## How far a drive goes\n\n" + "\n".join("- " + line for line in wheels["bullets"]))
     return "\n\n".join(sections)

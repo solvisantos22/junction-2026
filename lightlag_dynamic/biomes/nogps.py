@@ -49,7 +49,8 @@ More to fuse, each off unless its setting is given (an episode without them is u
                             the wheel odometer does not notice. The rover can now overshoot a
                             commanded drive; without this it can only fall short
 
-Everything is published in rules()["navigation"]; the seed fixes the noise. The evaluator's
+The wheel scale alone, on today's telemetry, is wheels.py. Everything here is published in
+rules()["navigation"]; the seed fixes the noise. The evaluator's
 truth, scoring and the replay's states use the true position, as always.
 
 A sandbox prototype, not a rules decision. Standard library only. Players that fuse the
@@ -64,6 +65,7 @@ from lightlag_dynamic.missions import PROFILES, SENSING
 
 from .catalog import MAIN
 from .environment import BiomeEnvironment
+from .wheels import WHEEL_SCALE_RULE, drive_with_scale, hidden_wheel_scale
 
 # Published defaults. heading_bias_deg replaces the +-5 degrees of the noisy profiles.
 NAVIGATION = {
@@ -150,8 +152,7 @@ class NoGpsEnvironment(BiomeEnvironment):
         self._drive_heading = None   # (tick, heading really driven) of the latest executed drive
         self._driven_before = None   # the heading really driven by the executed drive before it
         self._turn = None            # (tick, turn since the drive before), what the gyroscope senses
-        error = nav["wheel_scale_error"]
-        self._wheel_scale = 1.0 + random.Random(f"{seed}:wheel").uniform(-error, error) if error > 0 else 1.0
+        self._wheel_scale = hidden_wheel_scale(seed, nav["wheel_scale_error"])
         super().__init__(seed=seed, config=config, profile=profile, biome=biome, sensing=sensing,
                          noise_level=noise_level, **kw)
         self._beacons = self._place_beacons(nav["beacons"])
@@ -230,11 +231,7 @@ class NoGpsEnvironment(BiomeEnvironment):
                 "executed drive, in degrees in (-180, 180], counter-clockwise positive, + Gaussian noise with "
                 "std dev gyro_noise_deg; null on a tick without a drive and for the first executed drive")
         if nav["wheel_scale_error"] > 0:
-            rules["navigation"]["wheel_scale"] = (
-                "hidden for the whole mission, uniform in 1 - wheel_scale_error .. 1 + wheel_scale_error: a "
-                "drive of M commanded metres turns the wheels for M x wheel_scale metres, so it covers "
-                "M x wheel_scale x (1 - slip) of ground and spends the energy of M x wheel_scale wheel metres; "
-                "wheel_odometry still reports the commanded wheel metres, visual_odometry the ground covered")
+            rules["navigation"]["wheel_scale"] = WHEEL_SCALE_RULE
         if not has_fix:
             rules["position_fix"] = "none: see navigation; the tick-0 briefing position is exact"
             rules["sensing"] = {name: value for name, value in rules["sensing"].items() if name != "position_noise_m"}
@@ -249,12 +246,7 @@ class NoGpsEnvironment(BiomeEnvironment):
 
     # ---- hooks ------------------------------------------------------------------------------
     def _drive(self, command, events):
-        scale = self._wheel_scale
-        if scale != 1.0:  # the wheels really turn for scale x the commanded metres
-            command = dict(command, metres=command["metres"] * scale)
-        wheel, visual = super()._drive(command, events)
-        if scale != 1.0:  # the odometer counts wheel turns, so it reports the commanded metres
-            wheel = wheel / scale
+        wheel, visual = drive_with_scale(self._wheel_scale, command, events, super()._drive)
         error = self._heading_errors[-1] if self._heading_errors else None
         if error is not None and error["tick"] == self._tick:
             heading = (command["heading_deg"] + error["error_deg"]) % 360.0

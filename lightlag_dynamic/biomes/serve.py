@@ -8,13 +8,15 @@ The same five tools, evaluator-only finish, artifacts and settings as
 `python3 -m lightlag_dynamic.serve` (LIGHTLAG_SEED, LIGHTLAG_DELAY, LIGHTLAG_TICKS,
 LIGHTLAG_PROFILE, LIGHTLAG_NOISE_LEVEL, LIGHTLAG_ARTIFACT_DIR, LIGHTLAG_EVALUATOR_TOKEN,
 LIGHTLAG_TOKEN_FILE), plus --biome / LIGHTLAG_BIOME and, for the no-GPS prototype, --no-gps /
-LIGHTLAG_NO_GPS=1, --weak-gps / LIGHTLAG_WEAK_GPS=1 or --many-sensors / LIGHTLAG_MANY_SENSORS=1.
-With the default biome, main_mars, and today's position fix, the episode is the one
+LIGHTLAG_NO_GPS=1, --weak-gps / LIGHTLAG_WEAK_GPS=1 or --many-sensors / LIGHTLAG_MANY_SENSORS=1,
+and --wheel-error / LIGHTLAG_WHEEL_ERROR for wheels of a hidden size (wheels.py). With the default
+biome, main_mars, today's position fix and no wheel error, the episode is the one
 `lightlag_dynamic.serve` plays.
 
 The tool descriptions are made true for the episode (wording.py): with --no-gps or --weak-gps
-they say what telemetry reports instead of a trustworthy position, and in a biome they point
-at rules()["biome"] and the map's extra layers. With main_mars and today's fix they are
+they say what telemetry reports instead of a trustworthy position, in a biome they point at
+rules()["biome"] and the map's extra layers, and with a wheel error they say what a drive covers
+and what the wheel odometer reports. With main_mars, today's fix and no wheel error they are
 lightlag_mcp's own, unchanged.
 
 A separate module, so `lightlag_dynamic/serve.py`, which the Harbor experiments copy and hash,
@@ -42,7 +44,7 @@ class BiomeEpisodeService(EpisodeService):
     """lightlag_mcp's EpisodeService, playing a dynamic profile in a chosen biome."""
 
     def __init__(self, seed, biome=MAIN, profile="rush", config=None, artifact_dir=None, noise_level=1.0,
-                 no_gps=False, gps_noise=None, weak_gps=False, many_sensors=False):
+                 no_gps=False, gps_noise=None, weak_gps=False, many_sensors=False, wheel_error=None):
         parse_biome(biome)
         if profile not in PROFILES:
             raise ValueError(f"unknown profile {profile!r}; use one of {', '.join(PROFILES)}")
@@ -55,8 +57,14 @@ class BiomeEpisodeService(EpisodeService):
             navigation = dict(MANY_SENSORS) if many_sensors else dict(WEAK_GPS) if weak_gps else {}
             if gps_noise is not None:
                 navigation["position_noise_m"] = gps_noise
+            if wheel_error:
+                navigation["wheel_scale_error"] = wheel_error
             self._env = NoGpsEnvironment(seed=seed, config=config, profile=profile, biome=biome,
                                          noise_level=noise_level, navigation=navigation)
+        elif wheel_error:  # today's telemetry, with wheels of a hidden size
+            from .wheels import OvershootEnvironment
+            self._env = OvershootEnvironment(seed=seed, config=config, profile=profile, biome=biome,
+                                             noise_level=noise_level, wheel_scale_error=wheel_error)
         else:
             self._env = BiomeEnvironment(seed=seed, config=config, profile=profile, biome=biome,
                                          noise_level=noise_level)
@@ -114,6 +122,9 @@ def main(argv=None):
     parser.add_argument("--many-sensors", action="store_true",
                         default=os.environ.get("LIGHTLAG_MANY_SENSORS") in ("1", "true", "yes"),
                         help="prototype: many weak sensors to fuse (nogps.MANY_SENSORS)")
+    parser.add_argument("--wheel-error", type=float,
+                        default=float(os.environ["LIGHTLAG_WHEEL_ERROR"]) if os.environ.get("LIGHTLAG_WHEEL_ERROR") else None,
+                        help="wheels of a hidden size, 1 +- this, so that a drive can overshoot (wheels.py)")
     parser.add_argument("--gps-noise", type=float,
                         default=float(os.environ["LIGHTLAG_GPS_NOISE"]) if os.environ.get("LIGHTLAG_GPS_NOISE") else None,
                         help="prototype: as --no-gps, but keep a position fix with this much noise per axis (metres)")
@@ -130,7 +141,7 @@ def main(argv=None):
                                   config=Config(delay_ticks=args.delay, max_ticks=ticks),
                                   artifact_dir=args.artifact_dir, noise_level=args.noise_level,
                                   no_gps=args.no_gps, gps_noise=args.gps_noise, weak_gps=args.weak_gps,
-                                  many_sensors=args.many_sensors)
+                                  many_sensors=args.many_sensors, wheel_error=args.wheel_error)
     token = os.environ.get("LIGHTLAG_EVALUATOR_TOKEN") or None
     if token is None and args.token_file and args.transport == "http":
         token = secrets.token_urlsafe(32)  # exists only inside this process's container

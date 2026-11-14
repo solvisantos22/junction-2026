@@ -397,7 +397,7 @@ What each piece is worth to the reference, paired over delays 0, 3 and 5, in poi
 - **Jumping to the rings' crossing kills the rover.** Rings this vague cross in the wrong place, and a player that believes the crossing chases it.
 - **For the reference itself this is no harder than weak GPS alone:** 51% against 51% at delay 3 on `rush_noisy` (+1.6 points over the delays, −1.2 to +4.0), and 77% against 81% on the 80-tick map (−1.9, −6.2 to +2.1). The extra sensors make up for the coarser odometry and the wheel scale. What changes is how far a player that does not fuse falls behind.
 
-**The wheel scale on its own, with today's sensing** (fix 0.3 m, heading bias ±5°), same seeds:
+**The wheel scale on its own, on today's telemetry** (`wheels.py`: today's fix and sensing, nothing else new), same seeds:
 
 | Player | `rush_noisy`, delay 0 | delay 3 | delay 5 | `noisy`, delay 3 |
 |---|---|---|---|---|
@@ -405,14 +405,17 @@ What each piece is worth to the reference, paired over delays 0, 3 and 5, in poi
 | Controller 36, wheel scale ±20% | 71%, 95% | 48%, 92% | 37%, 90% | 74%, 100% |
 | `kf_mpc`, no wheel scale | 85%, 100% | 71%, 100% | 57%, 98% | 90%, 100% |
 | `kf_mpc`, wheel scale ±20% | 73%, 98% | 46%, 92% | 35%, 88% | 75%, 100% |
-| `fused`, which estimates the scale, wheel scale ±20% | 85%, 100% | 61%, 100% | 45%, 100% | 88%, 100% |
+| A particle filter that estimates the scale, wheel scale ±20% | 84%, 100% | 61%, 100% | 45%, 100% | 86%, 100% |
+| The same filter, wheels taken at nominal size | 59%, 88% | 46%, 95% | 35%, 88% | 64%, 85% |
 | `blind`, no wheel scale | 56%, 95% | 54%, 95% | 56%, 95% | 66%, 72% |
 | `blind`, wheel scale ±20% | 34%, 88% | 35%, 90% | 34%, 92% | 36%, 52% |
 
-To play it again, without controller 36, which is not one of the probe's players: `python3 -m lightlag_dynamic.biomes.nogps_players --gps-noise 0.3 --set heading_bias_deg=5 --set wheel_scale_error=0.2 --seeds 2500-2539 --delays 0 3 5 --players kf_mpc_on_fix fused blind`.
+To play it again, without controller 36, which is not one of the probe's players: `python3 -m lightlag_dynamic.biomes.nogps_players --wheel-error 0.2 --seeds 2500-2539 --delays 0 3 5 --profiles rush_noisy noisy`.
+
+*Corrected Saturday about 16:45 Helsinki.* The filter row first showed 85%, 61%, 45% and 88%: that run could also read a beacon and a compass, which today's telemetry does not have. Played on today's telemetry alone it scores the same within a point (−0.3 points on `rush_noisy`, −1.4 to +0.8). The rows and the figures below are now the ones without those readings.
 
 - **This is the largest single effect measured in this package on today's environment.** A hidden ±20% takes controller 36 down by 20.3 points on `rush_noisy` (13.9 to 26.8) and 17.3 on `noisy`; `kf_mpc` by 19.6 and 11.0. Neither estimates a wheel scale, and both clip slip at zero.
-- **A filter that estimates the scale gets part of it back**: 12.3 points above `kf_mpc` on `rush_noisy` (7.2 to 17.5), 8.5 on `noisy`. At delay 3 it scores 61%, where `kf_mpc` scored 71% without the wheel scale and 46% with it. A likely reason for the rest, not checked: the first drives are sent before any packet has shown how big the wheels are.
+- **A filter that estimates the scale gets part of it back**: 12.0 points above `kf_mpc` on `rush_noisy` (7.2 to 17.0), 7.5 on `noisy` (4.2 to 11.0). To the same filter, knowing the scale is worth 16.7 points on `rush_noisy` (10.8 to 23.0) and 20.3 on `noisy`. At delay 3 it scores 61%, where `kf_mpc` scored 71% without the wheel scale and 46% with it; over the delays it stays 7.5 points below `kf_mpc` without the wheel scale on `rush_noisy` (4.7 to 10.5). A likely reason for the rest, not checked: the first drives are sent before any packet has shown how big the wheels are.
 
 **How the setting was chosen** (development seeds 0–19, `rush_noisy`, delay 3):
 
@@ -445,11 +448,11 @@ To play it again, without controller 36, which is not one of the probe's players
    - In a biome, the texts point at `rules()["biome"]` and at the map's extra layers.
    - With Main Mars and today's fix nothing changes.
    - No file of `lightlag_mcp` is edited, and the swap fails loudly if that wording ever changes. Every sentence says what telemetry reports, never what to do with it. The sentences are in `lightlag_dynamic/biomes/wording.py`.
-2. **A task generator,** `tools/biome_experiments/prepare.py`. It follows Sölvi's `tools/lightlag_experiments/prepare.py`: the task is written outside the checkout, an existing directory is never overwritten, and `experiment.json` records the hash of every source and generated file. It takes `--biome`, `--profile`, `--seed`, `--delay`, `--policy` and `--navigation gps | weak_gps | no_gps | many_sensors`.
+2. **A task generator,** `tools/biome_experiments/prepare.py`. It follows Sölvi's `tools/lightlag_experiments/prepare.py`: the task is written outside the checkout, an existing directory is never overwritten, and `experiment.json` records the hash of every source and generated file. It takes `--biome`, `--profile`, `--seed`, `--delay`, `--policy`, `--navigation gps | weak_gps | no_gps | many_sensors` and `--wheel-error`.
    - **With today's fix in Main Mars the agent gets the dynamic experiment's task.** `instruction.md` is byte for byte the one Sölvi's generator writes, and so is every other file except the simulator's entry point, its settings and the task name. A test compares the two outputs.
    - **A navigation setting adds one section to the instruction, "Where the rover is", and rewrites nothing.** Without a fix, one clause changes too: "position and visual odometry are noisy" becomes "visual odometry is noisy".
    - **The oracle solution is the frozen reference `kf_mpc`,** played through the five tools. It checks the pipeline; it is not the reference for the setting. The fusing reference needs numpy, which neither image has, so its scores below are direct runs.
-3. **A dry run without Docker,** as tests (`python3 -m unittest discover -s tests/biome_experiments`, 11 tests, about 15 seconds). They start the generated simulator with its Dockerfile's own command and its compose settings, with numpy blocked, on the loopback interface. They read the tool texts through a real MCP client, play `solve.sh`, then run the collect hook and the verifier.
+3. **A dry run without Docker,** as tests (`python3 -m unittest discover -s tests/biome_experiments`, 14 tests, about 20 seconds). They start the generated simulator with its Dockerfile's own command and its compose settings, with numpy blocked, on the loopback interface. They read the tool texts through a real MCP client, play `solve.sh`, then run the collect hook and the verifier.
    - The reward equals a direct run to the verifier's six decimals: for weak GPS (`kf_mpc`), for no GPS (the blind plan) and for doing nothing (0 after the full 50 ticks).
    - The fusing reference, played through that HTTP server, scores exactly what it scores directly. It uses the five tools and nothing else.
    - Replays are identical under Python 3.12, the image's version, and under 3.14, this machine's: eight episodes compared by replay hash.
@@ -496,6 +499,57 @@ harbor run -p /tmp/lightlag-nav-weak_gps-2400 -a opencode \
 - **Cost:** the team's first Opus run reported $0.48 and about four minutes ([same page](lightlag-experiments.md)), and the three expedition sessions reported $1.56 together ([expedition handoff](lightlag-expedition-handoff.md)). At about $0.50 a session, eight runs are about $4 and the weak-GPS arm alone about $2. Both are above the $1.50 launch guard the expedition pilot used. A harder episode may keep the agent busy longer, and no cap is claimed. Nothing is started here.
 - The same generator packs any biome (`--biome troy_crust`), alone or with a navigation setting. No biome pilot is proposed here.
 
+### A second pilot: the wheel scale on today's environment
+
+*Added Saturday about 16:45 Helsinki, after Manh's go-ahead to prepare it.* **Prepared, not run**, like the weak-GPS pilot above.
+
+`python3 tools/biome_experiments/prepare.py DIR --navigation gps --wheel-error 0.2` builds today's task with wheels of a hidden size and nothing else new. The episode is `lightlag_dynamic/biomes/wheels.py`: today's telemetry, today's position fix, and a wheel scale hidden in 0.8 to 1.2.
+
+- **It is the only change to today's task.** Against the task without `--wheel-error`, three files differ besides the manifest: the simulator's settings, the task name, and `instruction.md`, which gains one section, "How far a drive goes", and loses nothing. The packets have today's fields. A test compares the two tasks.
+- **The texts say what a drive covers.** The server instructions and the instruction file state `M × wheel_scale × (1 − slip)`, that `wheel_odometry` reports the commanded wheel metres, and that the two odometers measure slip and the wheel scale together. The range is in `rules()["wheels"]`; the value is in the protected replay only.
+- **Dry run without Docker**: the simulator's own command, `solve.sh`, the collect hook and the verifier give the direct-run reward, and the replay is identical under Python 3.12 and 3.14.
+- **It is the rule already measured.** A test checks that the rover moves tick for tick as in the navigation prototype with today's sensing numbers, so the 40-seed table above applies to this task.
+
+**Proposed seeds, fixed before any model run.** The four seeds of the weak-GPS pilot, 2400 to 2403, whose runs with today's fix are then shared. Their wheel scales came out at 0.84, 1.08, 1.01 and 0.82: two clearly small and none clearly big, so they would hardly test overshoot. Two more are therefore added by a rule set before any score on them was computed: the first two seeds after 2403 whose wheel scale is at least 1.10, which are 2405 and 2408.
+
+Scripted scores, `rush_noisy`, delay 3, as share of the maximum. Direct runs; every rover ends alive, and at base except controller 36 on seed 2403 with the wheel scale:
+
+| Seed | Wheel scale | Today: `kf_mpc` (the oracle) | controller 36 | blind | Wheel scale ±20%: `kf_mpc` (the oracle) | controller 36 | blind | filter that estimates the scale |
+|---|---|---|---|---|---|---|---|---|
+| 2400 | 0.84 | 0.625000 | 0.675 | 0.600 | 0.100000 | 0.100 | 0.100 | 0.525 |
+| 2401 | 1.08 | 0.833333 | 0.833 | 0.667 | 0.777778 | 0.778 | 0.444 | 0.750 |
+| 2402 | 1.01 | 0.833333 | 0.583 | 0.556 | 0.833333 | 0.583 | 0.556 | 0.833 |
+| 2403 | 0.82 | 0.694444 | 0.694 | 0.667 | 0.388889 | 0.139 | 0.333 | 0.528 |
+| 2405 | 1.10 | 0.687500 | 0.750 | 0.667 | 0.500000 | 0.500 | 0.667 | 0.542 |
+| 2408 | 1.20 | 0.850000 | 0.850 | 0.700 | 0.400000 | 0.500 | 0.000 | 0.700 |
+| Mean | | 0.754 | 0.731 | 0.643 | 0.500 | 0.433 | 0.350 | 0.646 |
+
+- **The oracle columns are the check on the containers**, as above: `harbor run -a oracle` must give exactly these rewards.
+- **Six seeds are a pilot, not a ranking.** On seed 2405 the blind plan scores above every other player with the wheel scale. The 40-seed table is the evidence for the size of the effect.
+- **No scripted rover was stopped by a hazard or the map edge on these six seeds.** What the wheel scale costs here is samples taken from the wrong place and time lost, not safety stops.
+- **What the pilot can show:** whether the model keeps its level when the wheels are off size, and where it lands next to a filter that estimates the scale. That filter is the Manh controllers' particle-filter controller with the scale as one more unknown; it is not a bound.
+
+```sh
+for seed in 2400 2401 2402 2403 2405 2408; do
+  python3 tools/biome_experiments/prepare.py /tmp/lightlag-wheels-$seed \
+    --navigation gps --wheel-error 0.2 --profile rush_noisy --seed $seed --delay 3
+done
+for seed in 2405 2408; do   # today's task for the two added seeds; 2400-2403 are prepared above
+  python3 tools/biome_experiments/prepare.py /tmp/lightlag-nav-gps-$seed \
+    --navigation gps --profile rush_noisy --seed $seed --delay 3
+done
+
+harbor lint /tmp/lightlag-wheels-2408
+harbor run -p /tmp/lightlag-wheels-2408 -a oracle \
+  --jobs-dir /tmp/lightlag-nav-jobs --job-name wheels-2408-oracle --n-concurrent 1   # expect 0.400000
+harbor run -p /tmp/lightlag-wheels-2408 -a opencode \
+  -m anthropic/claude-opus-5-5 --ak version=1.19.5 --env-file .env \
+  --jobs-dir /tmp/lightlag-nav-jobs --job-name wheels-2408-opus --n-concurrent 1
+```
+
+- **Cost:** six model runs for the wheel-scale arm, about $3 at the $0.50 a session reported so far, and six more for today's arm unless the weak-GPS pilot has already paid for four of them. Above the $1.50 launch guard of the expedition pilot. Nothing is started here.
+- The Harbor commands were not run here, and what was not checked for the weak-GPS pilot is not checked for this one either.
+
 ### What was not checked
 
 - **No container was built or started**, `harbor lint` was not run, and no model has played.
@@ -510,7 +564,7 @@ harbor run -p /tmp/lightlag-nav-weak_gps-2400 -a opencode \
 - **Bound 16 is not a bound in the biomes.** Its planner ignores their rules. On Relay Pass at delay 0 it scores below controller 36.
 - **40 seeds, one draw each.** Differences under about one point are noise.
 - **Mixed biomes** work and have one test; they were not part of the trial.
-- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting and position probes; 2200–2239, 2300–2339 and 2500–2539 for the no-GPS, weak-GPS and many-sensors results. All now used. 2400–2403 are set aside for the proposed model run; the scripted players have already played them.
+- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting and position probes; 2200–2239, 2300–2339 and 2500–2539 for the no-GPS, weak-GPS and many-sensors results. All now used. 2400–2403, 2405 and 2408 are set aside for the proposed model runs; the scripted players have already played them.
 
 ## Suggested next steps (not done)
 
@@ -518,7 +572,7 @@ harbor run -p /tmp/lightlag-nav-weak_gps-2400 -a opencode \
 2. With those, a second calibration: stronger settings should then pass the keep rule.
 3. The weak-GPS pilot prepared above: eight model runs on four fixed seeds. It costs API credit, and it is a team decision.
 4. One model run in one biome at delay 0 and delay 3. This is the delay-relevance test with a real agent; the same generator packs it, and it is a team decision too.
-5. A team decision on the wheel scale. It is the one change here that costs the best controllers 20 points on today's environment, it is published like every other rule, and it would need a reference that estimates it before it could join a graded profile.
+5. A team decision on the wheel scale. It is the one change here that costs the best controllers 20 points on today's environment, it is published like every other rule, and it would need a reference that estimates it before it could join a graded profile. A pilot of it on today's task is prepared above.
 6. A team decision on whether any biome ever joins a graded profile. The brainstorm's advice stands: at most one or two, Relay Pass first, and only after a model has played it.
 
 ## The biome edition of the 3D demo

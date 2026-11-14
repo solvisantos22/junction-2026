@@ -67,12 +67,12 @@ def files_of(task):
     return {str(path.relative_to(task)): path.read_bytes() for path in task.rglob("*") if path.is_file()}
 
 
-def direct(policy, seed, delay, profile="rush_noisy", biome="main_mars", navigation="weak_gps"):
+def direct(policy, seed, delay, profile="rush_noisy", biome="main_mars", navigation="weak_gps", wheel_error=None):
     """The same episode played in this process, straight on the environment."""
     service = BiomeEpisodeService(seed=seed, biome=biome, profile=profile,
                                   config=Config(delay_ticks=delay, max_ticks=PROFILES[profile][4]),
                                   no_gps=navigation == "no_gps", weak_gps=navigation == "weak_gps",
-                                  many_sensors=navigation == "many_sensors")
+                                  many_sensors=navigation == "many_sensors", wheel_error=wheel_error)
     env = service._env
     policy(PublicTools(env))
     while not env.advance(5)["episode_complete"]:
@@ -146,7 +146,7 @@ class Preparation(unittest.TestCase):
             manifest = json.loads((first / "experiment.json").read_text())
             self.assertEqual(manifest["settings"], {"biome": "main_mars", "profile": "rush_noisy", "seed": 2400,
                                                    "delay": 3, "horizon": 50, "navigation": "weak_gps",
-                                                   "noise_level": 1.0, "policy": "leg_and_wait"})
+                                                   "noise_level": 1.0, "policy": "leg_and_wait", "wheel_error": 0.0})
             self.assertEqual(manifest["navigation_rules"], {"beacon_range_noise_m": 0.25, "heading_bias_deg": 15.0,
                                                            "position_noise_m": 2.0, "sun_compass_noise_deg": 12.0})
             actual = {name: hashlib.sha256(data).hexdigest() for name, data in files_of(first).items()
@@ -207,6 +207,32 @@ class Preparation(unittest.TestCase):
             for fact in ("## Where this mission is set", "Troy Crust", "crust regions", 'rules()["biome"]'):
                 self.assertIn(fact, added)
             self.assertNotIn("Where the rover is", added)
+
+    def test_a_wheel_error_is_the_only_change_to_todays_task(self):
+        with tempfile.TemporaryDirectory() as directory:
+            control, wheels = Path(directory) / "control", Path(directory) / "wheels"
+            self.prepare(control, "--navigation", "gps", "--seed", "11")
+            self.prepare(wheels, "--navigation", "gps", "--seed", "11", "--wheel-error", "0.2")
+            before, after = files_of(control), files_of(wheels)
+            changed = sorted(name for name in before if before[name] != after[name])
+            self.assertEqual(changed, ["environment/docker-compose.yaml", "experiment.json", "instruction.md", "task.toml"])
+            self.assertEqual(set(before), set(after))
+            self.assertEqual(dict(settings_of(control), LIGHTLAG_WHEEL_ERROR="0.2"), settings_of(wheels))
+            self.assertNotIn("LIGHTLAG_WEAK_GPS", settings_of(wheels))
+            lines = list(difflib.unified_diff(before["instruction.md"].decode().splitlines(),
+                                              after["instruction.md"].decode().splitlines(), n=0, lineterm=""))
+            removed = [line for line in lines if line.startswith("-") and not line.startswith("---")]
+            added = "\n".join(line[1:] for line in lines if line.startswith("+") and not line.startswith("+++"))
+            self.assertEqual(removed, [])
+            for fact in ("## How far a drive goes", "wheels.wheel_scale", "fall short or overshoot",
+                         "wheel_odometry reports the commanded wheel metres"):
+                self.assertIn(fact, added)
+            self.assertNotIn("beacon", added)
+            self.assertIn('lightlag-biome-main-mars-gps-rush-noisy-wheels"', after["task.toml"].decode())
+            self.assertEqual(json.loads(after["experiment.json"])["settings"]["wheel_error"], 0.2)
+            for bad in ("0.5", "-0.1"):
+                self.prepare(Path(directory) / "bad", "--wheel-error", bad, success=False)
+                self.assertFalse((Path(directory) / "bad").exists())
 
     def test_the_fixed_map_profile_is_not_described_as_a_rush(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -382,6 +408,25 @@ class DryRunWithoutContainers(unittest.TestCase):
         self.assertNotEqual(replay["navigation"]["wheel_scale"], 1.0)
         expected = direct(POLICIES["kf_mpc"], 7, 3, navigation="many_sensors")
         self.assertEqual(text, "{:.6f}\n".format(expected["raw_score"] / expected["max_available_value"]))
+
+    def test_wheel_error_task_keeps_todays_packets_and_says_what_a_drive_covers(self):
+        with self.served("--navigation", "gps", "--wheel-error", "0.2", "--seed", "7", "--delay", "3") as running:
+            task, url, environment, folder = running
+            instructions, described = self.look(url)
+            self.assertIn("so a drive can also overshoot", instructions)
+            self.assertIn("commanded wheel metres turned during that tick", described["telemetry_log"])
+            self.assertIn("under `wheels`", described["rules"])
+            self.assertIn("position [x, y], heading_deg (commanded heading)", described["telemetry_log"], "today's fix")
+            self.solve(task, url, environment)
+            packets = self.telemetry(url)
+            text, result = self.grade(task, url, environment, folder)
+            replay = json.loads((folder / "evaluator/replay.json").read_text())
+        self.assertFalse({"beacon_range_m", "sun_heading_deg", "gyro_turn_deg"} & set(packets[1]))
+        self.assertNotEqual(replay["wheels"]["wheel_scale"], 1.0)
+        self.assertNotIn("navigation", replay)
+        expected = direct(POLICIES["kf_mpc"], 7, 3, navigation="gps", wheel_error=0.2)
+        self.assertEqual(text, "{:.6f}\n".format(expected["raw_score"] / expected["max_available_value"]))
+        self.assertEqual(result["tick"], 50)
 
     def test_no_gps_task_with_the_blind_plan(self):
         with self.served("--navigation", "no_gps", "--policy", "open_loop", "--seed", "7", "--delay", "3") as running:

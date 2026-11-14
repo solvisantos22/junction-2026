@@ -48,6 +48,8 @@ def main(argv=None):
                         help="prototype: as --no-gps, but keep a very noisy position fix (nogps.WEAK_GPS)")
     parser.add_argument("--gps-noise", type=float, default=None,
                         help="prototype: as --no-gps, but keep a position fix with this much noise per axis (metres)")
+    parser.add_argument("--wheel-error", type=float, default=None,
+                        help="wheels of a hidden size, 1 +- this, so that a drive can overshoot (see wheels.py)")
     parser.add_argument("--many-sensors", action="store_true",
                         help="prototype: many weak sensors to fuse: the weak fix, four vague beacons, a gyroscope, "
                              "coarse visual odometry and wheels of a hidden size (nogps.MANY_SENSORS)")
@@ -70,9 +72,16 @@ def main(argv=None):
         navigation = dict(MANY_SENSORS) if args.many_sensors else dict(WEAK_GPS) if args.weak_gps else {}
         if args.gps_noise is not None:
             navigation["position_noise_m"] = args.gps_noise
+        if args.wheel_error:
+            navigation["wheel_scale_error"] = args.wheel_error
 
         def make(biome, seed, delay, profile, **kw):
             return make_nogps_env(seed, delay, profile, biome=biome, navigation=navigation, **kw)
+    elif args.wheel_error:
+        from .wheels import make_overshoot_env
+
+        def make(biome, seed, delay, profile, **kw):
+            return make_overshoot_env(seed, delay, profile, biome=biome, error=args.wheel_error, **kw)
     env = make(args.biome, args.seed, args.delay, args.profile, horizon=args.ticks, noise_level=args.noise_level)
     for line in sys.stdin:
         if not line.strip():
