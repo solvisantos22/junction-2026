@@ -1,6 +1,6 @@
 # Second-machine check: reproduction, `manh_max` on Kristján's worlds, and can an agent beat our controllers
 
-Saturday 14 November 2026, about 23:20 Helsinki. Owner: Manh / Claude Code (biomes chat). Checked at commit `c406475` of `main`, from a fresh clone; the MAX comparison in section 3 uses the farm's rows as of `cf144ad`. **A check, not a rules or reference decision.** New files only: [`tools/second_machine_check/`](../tools/second_machine_check/), [`tests/second_machine_check/`](../tests/second_machine_check/test_verify_replays.py), [`docs/second-machine-check/`](second-machine-check/) and this page. No task, rule, controller or teammate's file is changed.
+Saturday 14 November 2026, about 23:20 Helsinki; section 4 added at midnight. Owner: Manh / Claude Code (biomes chat). Checked at commit `c406475` of `main`, from a fresh clone; the MAX comparison in section 3 uses the farm's rows as of `cf144ad`. **A check, not a rules or reference decision.** New files only: [`tools/second_machine_check/`](../tools/second_machine_check/), [`tests/second_machine_check/`](../tests/second_machine_check/test_verify_replays.py), [`docs/second-machine-check/`](second-machine-check/) and this page. No task, rule, controller or teammate's file is changed.
 
 Manh asked four things about Kristján's Lightlag Traverse ([write-up](lightlag-traverse-campaign.md)): what his seeded worlds and Harbor testing show, how Manh's best controller does on them, whether judges can reproduce the scores, and whether a Claude agent will ever beat the controllers we designate as references.
 
@@ -9,7 +9,7 @@ Manh asked four things about Kristján's Lightlag Traverse ([write-up](lightlag-
 - **The submission reproduces exactly on a second machine.** From a fresh clone on Manh's Linux laptop, Harbor with local Docker gives the reference **0.476257** on the campaign and **0.564655** on world 2026, and 0 for doing nothing. Every replay file is byte for byte the one Kristján committed from his Mac.
 - **Every reported Claude score can be re-derived without a model.** All 24 saved runs play again from their command logs to their saved scores, on Python 3.12 and 3.14.
 - **On Kristján's normal map, `manh_max` is the reference:** 0.476257 on the campaign, 0.564655 on world 2026. It is one end-of-day rule behind his newest pilot, which changes 53 ticks on world 2027 and no score.
-- **On the normal map, Claude's saved programs almost never beat the reference:** 0 of 7 agent runs on the campaign, and under 0.1% of simulated three-world campaigns. **But the reference is not the ceiling:** with its battery reserves off, the same planner scores 0.487 on the campaign's worlds.
+- **On the normal map the reference still wins nearly every world, but the margin is thinner than our write-ups say.** 0 of 7 agent runs beat it on the campaign, and Claude's programs beat it on at most 0.1% of simulated three-world campaigns. Yet the four newer one-request Opus programs score 0.34 to 0.45 on fresh worlds against its 0.500, where the older program scores 0.326, and one of them scores **0.474 on the campaign's own worlds, against 0.476** ([section 4](#4-why-opus-looks-closer-on-the-max-map)). **The reference is not the ceiling either:** with its battery reserves off, the same planner scores 0.487 there.
 - **On the MAX map, Opus already matches `manh_max`.** Two of Opus's three farm-played programs beat it on 45 and 47 of 100 fresh worlds, and on 36% and 38% of simulated three-world campaigns. The MAX Harbor tasks ship Kristján's normal-map pilot as their reference solution (0.103 and 0.036), which Opus's programs beat several times over.
 
 ## 1. Can a judge reproduce it?
@@ -73,11 +73,13 @@ Rows: [`harbor-runs.json`](second-machine-check/harbor-runs.json), [`replays-pyt
 | Saved Claude programs on 300 fresh worlds, single worlds | Higher than the reference on 0 to 2.7% of worlds |
 | The same, as 200,000 random three-world campaigns | Higher on 0.00 to 0.06% of campaigns |
 | The best Claude score on each world, in hindsight | Higher on 4.3% of worlds and 0.26% of campaigns |
+| The four newer one-request Opus programs (written from the MAX request), 30 fresh worlds | 0.342 to 0.453 against 0.500; higher than the reference on 2 of 120 world-plays and on at most 0.1% of three-world campaigns ([section 4](#4-why-opus-looks-closer-on-the-max-map)) |
+| **The same four on the campaign's own worlds** | **0.267, 0.342, 0.409 and 0.474, against 0.476.** The best is 0.75 points of 358 short over the three sites and beats the reference at site 2029 (0.513 against 0.460) |
 | **The reference with its reserves off** | **0.487 on the campaign's worlds (0.461, 0.514, 0.483): higher at all three sites.** On fresh worlds higher on 49.7% of worlds and 58.5% of campaigns, mean 0.489 against 0.502, 10 rovers lost in 300 |
 
 From [`outperform.py`](../tools/second_machine_check/outperform.py) on the farm's saved rows ([`outperform.json`](second-machine-check/outperform.json)); the reserves-off scores were played again here and agree with the farm's.
 
-- **With what Claude writes today, a win over the reference on the campaign is very unlikely.** The programs are about 0.2 short, the worth of whole-route planning with a battery forecast, and three worlds in a row leave little room for luck.
+- **A win over the reference on the campaign is still unlikely, but it is not far off.** The older saved programs are about 0.2 short, the worth of whole-route planning with a battery forecast. The four newer Opus programs are 0.05 to 0.16 short on fresh worlds and almost never ahead, and three worlds in a row leave little room for luck. On the campaign's own three worlds the best of them is 0.002 short.
 - **It is not impossible.** The reference keeps a battery reserve that costs it about 0.01 on these three worlds. A program that planned as well and gambled the reserve would score 0.487 here. It would also lose a rover on about one world in thirty.
 - **Unknowns.** Seven runs do not give a rate. The judges' model is not disclosed, and nothing stronger than Opus 5.5 has played. No upper bound on the achievable score is known.
 
@@ -114,20 +116,61 @@ Campaign scores (value earned over value available in the three worlds). Manh's 
 
 **Spend on Manh's key:** $2.80 recorded for the six replies. Four further calls (Opus 2 and Haiku 3, twice each) were cut off when the run was stopped and left no reply; their cost is not recorded, at most about $5.35 if billed in full. No more calls are planned on this key: the farm session has completed the baseline's nine replies.
 
+## 4. Why Opus looks closer on the MAX map
+
+Manh's follow-up: the MAX map is the same ground with harder rules, so why is Claude level with `manh_max` there when the reference is far ahead of Claude on the normal map?
+
+**Mostly because the two comparisons used different Claude programs.** The normal-map figure (0.321 against 0.502) is one older one-request program. The MAX figures are the four programs written from the frozen MAX request. Those four were played here on the normal map as well, in the sandbox, on 30 fresh worlds the farm had used on both maps ([`opus_on_both_maps.py`](../tools/second_machine_check/opus_on_both_maps.py); rows in [`opus-both-maps.jsonl`](second-machine-check/opus-both-maps.jsonl), table in [`opus-both-maps-table.json`](second-machine-check/opus-both-maps-table.json)). They are much better programs on either map.
+
+| Player, worlds 600 to 629 | Normal map | MAX map | Kept on the MAX map |
+|---|---:|---:|---:|
+| Reference pilot (normal) / `manh_max` (MAX) | 0.500 | 0.306 | 61% |
+| Opus 1, Manh's key | 0.453, 91% of the reference | 0.251, 82% of `manh_max` | 56% |
+| Opus 1, Kristján's key | 0.439, 88% | 0.308, 101% | 70% |
+| Opus 3, Kristján's key | 0.385, 77% | 0.305, 100% | 79% |
+| Opus 2, Kristján's key | 0.342, 68% | 0.211, 69% | 62% |
+| The four together | 0.405, 81% | 0.269, 88% | 66% |
+| Older Opus one-request program | 0.326, 65% | not played | |
+
+- **The same programs on both maps get 81% of the designated controller on the normal map and 88% on the MAX map.** A small narrowing, and not for every program: two gain, one stays, one loses.
+- **The MAX rules cost every player about a third.** `manh_max` keeps 61% of what the reference scores on the same worlds; the four programs keep 56 to 79%. The ground and the targets are the same, but nine more rules make it another game.
+- **What changes most is the noise.** On the normal map the reference's lead is steady: its own score varies by 0.046 from world to world, and the four programs are higher on 2 of 120 world-plays. On the MAX map the difference between two players swings by about 0.15 a world, so a level average means each wins about half: the programs are higher on 47 of 120.
+- **Each side loses differently on the MAX map.** `manh_max` ends away from the lander on 17 of 100 fresh worlds; the reference never does on the normal map. On world 2028 it stopped 6.8 m from the lander (radius 4 m) with 6.1 battery left, waiting for the sun: the missing `home_floor` rule. Opus 1 (Kristján's key) loops on slip stops instead: 9.1 a mission against 2.0, and on worlds 2028 and 2029 its 24 and 40 stops threw away 137 and 249 queued commands.
+- **Why the reference's edge shrinks is only partly shown.** On the normal map Claude's programs drive as far as the reference and take nearly as many samples (18.6 to 23.6 a mission against 24.4), but of less value: on world 600, 20 to 26 samples for 49.5 to 58.2 points, where the reference takes 25 for 65. On the MAX map `manh_max` takes 16.3 samples a mission and the programs 12.6 to 18.1. Which MAX rule costs Claude's programs most was not measured.
+- **Why the four are better than the older program is not established.** The instruction text is the same. The MAX request adds one section and one example, and the replies are about half as long again (73,000 to 88,000 output tokens against 50,000). It is one older sample against four.
+
+**The same four programs on Kristján's own worlds**, each world as a single mission ([rows](second-machine-check/opus-judged-worlds.json)):
+
+| | World 2026 | Campaign 2027 to 2029 |
+|---|---:|---:|
+| **Normal map:** reference pilot | 0.565 | 0.476 |
+| Opus 1, Manh's key | 0.539 | **0.474** |
+| Opus 1 / 3 / 2, Kristján's key | 0.500 / 0.450 / 0.147 | 0.409 / 0.342 / 0.267 |
+| Best live agent run | 0.528 | 0.293 |
+| **MAX map:** `manh_max` | 0.431 | 0.235 |
+| Opus 3 / 1 / 2, Kristján's key | 0.297 / 0.284 / 0.153 | 0.279 / 0.133 / 0.187 |
+| Opus 1, Manh's key | 0.168 | 0.194 |
+
+- **One one-request program all but ties the reference on the judged worlds.** Manh's-key Opus 1 scores 0.418, 0.490 and 0.513 at the three sites: 169.75 points of 358 against the reference's 170.5. Three runs here gave the same score, and each mission plays again from its command log. On 30 fresh worlds the same program is 0.047 behind and ahead on 2, so these three worlds suit it; but a live agent that wrote such a program would be at the reference's level on the task as judged.
+- **On the MAX map, Opus 3 beats `manh_max` on these worlds too:** 0.279 against 0.235, home at all three sites.
+- **Three of the four programs plan against the wall clock,** so their scores shift with the machine. Opus 1 (Kristján's key) scores 0.284 on world 2026 on the MAX map here and 0.207 on Modal; the other three repeat the farm's or the earlier sandbox scores there. The missions here ran 16 to 20 at a time on 20 cores.
+
 ## Limits
 
 - **One second machine.** Linux x86-64 with Docker 29.1. The judges' machines are not known.
 - **No model run here.** Everything above the reference and do-nothing runs relies on saved runs and saved programs.
 - **The outperformance rates describe saved programs,** replayed without their agents. A live agent can watch and fix its program; on the normal map that did not help (the one-request Opus program, 0.362 on the campaign's worlds, is above every live run).
 - **Random three-world groups are drawn from 300 (or 100) worlds,** so they overlap; the percentages are estimates.
+- **Section 4 rests on 30 worlds** and on programs whose planning depends on the clock; the farm's 100-world rows are the steadier record for the MAX map.
 - **`manh_max` on the MAX map was tuned on development worlds 1 to 24** and picked the baseline worlds by its own score; fresh worlds 600 to 699 are the fair comparison.
 
 ## Rerun
 
 ```sh
-python3 -m unittest discover -s tests/second_machine_check -v           # 4 tests, seconds
+python3 -m unittest discover -s tests/second_machine_check -v           # 7 tests, seconds
 python3 tools/second_machine_check/verify_replays.py                    # every saved run from its commands: 20 s
 python3 tools/second_machine_check/outperform.py                        # the two tables above, from the farm's rows
+python3 tools/second_machine_check/opus_on_both_maps.py table           # section 4's tables, from the saved rows
 python3 tools/second_machine_check/kristjans_worlds.py /tmp/kworlds     # manh_max and the pilot on 2026-2029: 6 minutes
 harbor run -p harbor/lightlag-traverse-campaign -a oracle -y            # 0.476257 (needs Docker)
 ```
