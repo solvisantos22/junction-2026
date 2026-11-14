@@ -2,7 +2,7 @@
 
 14 November 2026. Owner: Kristján / Claude Code. Code: [`lightlag_shift/`](../lightlag_shift/), tests: [`tests/lightlag_shift/`](../tests/lightlag_shift/). **A proposal for the team, not a rules decision.** Nothing here changes `lightlag/`, `lightlag_dynamic/`, `lightlag_mcp/` or the canonical `harbor/lightlag` task.
 
-**Three model runs so far, on the first mission only** (below): Claude copes. The second mission, where one of four rules changes, has scripted results only.
+**Three model runs so far, on the first mission only** (below): Claude copes. The second mission, where one of four rules changes, has four model runs: Claude is behind the reference on average, for mixed reasons.
 
 ## What it is
 
@@ -105,9 +105,27 @@ Forty fresh seeds (3200–3239), `rush_noisy`, delay 3, each kind of change forc
 - **`relay` barely matters** at 4 ticks in 8. It is on the menu as a decoy that still has to be told apart from the others; a tighter pass would make it bite.
 - A reference that works out which change happened and responds only to that one should beat the prepared one. There is none yet.
 
+### First model runs on step two: behind the reference on average, for mixed reasons
+
+Saturday evening, with Kristján's approval for the spend. Claude Opus 5.5 through OpenCode 1.19.5 and Harbor, one attempt per map. The four seeds are the first from 3300 upward to draw each kind of change, fixed before any run. The prepared reference played the same seeds in process (it needs numpy and so plays outside the container). Runs: `docs/lightlag-runs/shift-rule-seed33*`. Reported model cost: $1.77.
+
+| Seed | Hidden change | Claude Opus 5.5 | Prepared reference | Claude's own diagnosis |
+|---|---|---|---|---|
+| 3300 | Lost telemetry from tick 18 | **0.61** | 0.48 | Correct: "almost certainly lost telemetry", with the missing ticks listed |
+| 3301 | Turning cost from tick 20 | **0.78** | 0.78 | Correct, to three decimals: about 0.031 per degree against a hidden 0.0311 |
+| 3302 | Ground from tick 20 | **0.56** | 0.78 | **Wrong:** it concluded relay passes, from one uplink that executed three ticks later than it expected |
+| 3327 | Relay passes from tick 18 | **0.00**, rover lost | 0.65 | Wrong ("may have been the ground"), but see below |
+| Mean | | 0.49 | 0.67 | 2 of 4 right |
+
+- **On average Claude is behind, 0.49 against 0.67, but four single attempts do not make a gap,** and the reasons differ map by map.
+- **The lost rover was not caused by the rule change.** On seed 3327 every uplink Claude sent happened to fall inside an open relay pass, so the change never touched it, and it could not have seen it. It lost the rover the way it did on the Deadlines mission: it queued a detour for a late target worth half a point with 33.2 battery when the plan needed 34.4, and says so in its report.
+- **One real misdiagnosis.** On seed 3302 the ground changed and Claude decided it was relay passes. It missed a sample after the change and came home with 10.8 battery unspent, 0.22 behind the reference.
+- **Two clean diagnoses,** one of them exact, and on the lost-telemetry map Claude beat the prepared reference.
+- **A design flaw this exposed:** the relay change can pass unnoticed and without effect if the agent's uplinks happen to land inside passes. As set (4 ticks in 8) it is a weak entry on the menu.
+
 ### Limits of step two
 
-- **No model run.** The prepared reference winning against scripts says nothing yet about an agent.
+- **Four model runs, one per kind of change.** Suggestive at most.
 - **Forced kinds for the table.** In a real mission the seed picks the kind; over 400 seeds each came up between 83 and 120 times.
 - **Seeds 3200–3239 are used.** The prepared reference's single setting (the top of the published turning range) was chosen before this table was run, from the menu, not tuned on these seeds; I tried no other setting.
 - The reference needs numpy, like all of Manh's controllers, so it plays outside the agent's container.
