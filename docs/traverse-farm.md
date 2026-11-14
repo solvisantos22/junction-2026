@@ -32,7 +32,7 @@ modal run tools/traverse_farm/modal_app.py::evaluate \
 modal run tools/traverse_farm/modal_app.py::search --out docs/traverse-farm/search-1
 ```
 
-**Live on Modal:** `modal deploy tools/traverse_farm/live_app.py` serves https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run: pick any world, and Modal drives the reference, the textbook controller (`greedy`) and two Claude-written autopilots on it in parallel, then serves the Traverse demo page for that world, cached in a Modal Volume. Only fixed code from this repository runs; a visitor supplies only the world number.
+**Live on Modal:** `modal deploy tools/traverse_farm/live_app.py` serves https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run: pick any world, and Modal drives the reference, the textbook controller (`greedy`) and the six Claude-written autopilots that can drive a new world on it in parallel, then serves the Traverse demo page for that world, cached in a Modal Volume. The six are the Opus, Sonnet and Haiku one-request programs and the autopilots of Opus agents 1 and 3 and Sonnet agent 1. The other agent runs drove by hand or left no program, so they can't be replayed on a new world. Only fixed code from this repository runs; a visitor supplies only the world number.
 
 `replays --policies "pilot,agent:..." --seeds 871 --out <folder>` records whole missions for the demo (see Demo worlds below). Stopping the local `modal run` does not always stop its app: `modal app list` shows it, and `modal app stop --yes <app id>` stops it.
 

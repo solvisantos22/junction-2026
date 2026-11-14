@@ -1161,7 +1161,8 @@ stage.addEventListener('wheel', event => {
 }, { passive: false });
 stage.addEventListener('pointerdown', event => {
   touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
-  stage.setPointerCapture(event.pointerId); stage.classList.add('dragging');
+  try { stage.setPointerCapture(event.pointerId); } catch (error) { /* a pointer the browser no longer tracks */ }
+  stage.classList.add('dragging');
   if (touches.size === 2) { const m = middle(); drag = { pinch: m.gap, grab: groundUnder(viewPoint(m.x, m.y)), moved: 99 }; return; }
   const turn = event.button === 2 || event.button === 1 || event.shiftKey;
   drag = { turn, grab: turn ? null : groundUnder(viewPoint(event.clientX, event.clientY)), moved: 0 };

@@ -60,7 +60,7 @@ Doing nothing scores 0; stopping after the first site scores 0.149; grading read
 ## See it
 
 - **Story mode** on the judged runs: `viewer/traverse-campaign.html?site=3#story` (or press S; N skips to the next moment).
-- **Live on Modal:** [https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run](https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run) drives any world you choose, on Modal, with the reference, a textbook A* + Kalman controller and two Claude-written autopilots, and shows the replay (about a minute for a new world, instant once cached).
+- **Live on Modal:** [https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run](https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run) drives any world you choose, on Modal, with the reference, a textbook A* + Kalman controller and six Claude-written autopilots (three one-request programs and three that agents wrote during a mission), and shows the replay. A new world takes about a minute, and a cached one opens at once. You can zoom and move around the ground.
 - **Video:** [link to come].
 
 ## The team and the tools
