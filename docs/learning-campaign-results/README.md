@@ -1,5 +1,7 @@
 # Contextual learning campaign: live handoff
 
+> **Latest user direction: larger training is paused.** Sölvi asked to wait for the team to finalize the map/task. The local continuation supervisor PID54377 was stopped and verified absent; current pilot jobs may finish. Do not use the resume command below until this pause is resolved. [Question for Kristján/Manh and reply template](team-training-readiness.md). Runtime pause record: `/tmp/junction-learning-monitor/user-pause.json`.
+
 The six-job Modal pilot was submitted on **14 November 2026, 18:02 UTC**. At the first live snapshot, three scratch PPO runs were running and three Rainbow-inspired replay runs were queued behind them. Training and reused validation are underway; final-check generalization is still untested.
 
 - [Frozen protocol](../learning-campaign.md), [campaign manifest](campaign.json), [source/runtime freeze](freeze.json), [pilot call IDs and receipt](pilot-receipt.json).
