@@ -264,11 +264,17 @@ def replay_episode(runtime, episode):
             "transcript_sha256": sha256(canonical(episode["transcript"]))}
 
 
-def parse_call(data, next_id):
+def decode_message(data):
     try:
         value = json.loads(data, parse_constant=lambda _: (_ for _ in ()).throw(ValueError("nonfinite JSON")))
-    except (ValueError, UnicodeError) as error:
-        raise ProtocolError("invalid JSON request") from error
+        canonical(value)  # Also rejects exponent overflow such as 1e9999.
+    except (ValueError, UnicodeError, RecursionError, OverflowError) as error:
+        raise ProtocolError("invalid or nonfinite JSON message") from error
+    return value
+
+
+def parse_call(data, next_id):
+    value = decode_message(data)
     if not isinstance(value, dict) or set(value) != {"id", "tool", "arguments"}:
         raise ProtocolError("request must contain exactly id, tool and arguments")
     if type(value["id"]) is not int or value["id"] != next_id:
@@ -454,7 +460,7 @@ def run_container(broker, policy, worker, image, docker, *, seconds=60):
                     line, _, rest = output.partition(b"\n")
                     output = bytearray(rest)
                     if not ready:
-                        hello = json.loads(line)
+                        hello = decode_message(line)
                         if not isinstance(hello, dict) or set(hello) != {"ready", "python"} or hello["ready"] is not True:
                             raise InfrastructureError("worker readiness handshake is invalid")
                         ready, python_version = True, hello["python"]
@@ -462,10 +468,17 @@ def run_container(broker, policy, worker, image, docker, *, seconds=60):
                         pending.extend(canonical({"start": True}))
                         selector.register(process.stdin, selectors.EVENT_WRITE, "in")
                         continue
-                    value = json.loads(line)
+                    value = decode_message(line)
                     if isinstance(value, dict) and value.get("done") is True:
                         if terminal or set(value) != {"done", "status", "error"} or value["status"] not in ("returned", "policy_error"):
                             raise ProtocolError("worker terminal envelope is invalid")
+                        failure_detail = value["error"]
+                        if value["status"] == "returned":
+                            if failure_detail is not None:
+                                raise ProtocolError("successful terminal envelope must have no error")
+                        elif (not isinstance(failure_detail, dict) or set(failure_detail) != {"type", "message"}
+                              or not all(isinstance(item, str) for item in failure_detail.values())):
+                            raise ProtocolError("worker error must contain string type and message")
                         terminal = value
                         continue
                     if terminal:
@@ -787,4 +800,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

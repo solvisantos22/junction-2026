@@ -308,8 +308,10 @@ These are recommended evidence choices, not newly asserted official entry requir
 - Evidence: [protocol](lightlag-synthesis-experiment.md),
   [published request and checkpoint](lightlag-runs/overnight-synthesis/README.md),
   [preparation manifest](lightlag-runs/overnight-synthesis/preparation-v1/preparation.json).
-  Evaluation review and the actual single paid response remain pending at this
-  increment. No policy result, sponsor usage or prize entry is claimed yet.
+  Evaluation review is now complete: all 42 checks pass, including interrupted
+  attempt retention, null-score bounds and non-fabricated reproducibility. The
+  actual single paid response remains pending at this increment. No policy
+  result, sponsor usage or prize entry is claimed yet.
 
 ## Keep recording with minimal overhead
 

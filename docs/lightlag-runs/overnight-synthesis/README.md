@@ -4,7 +4,8 @@
 The single-response [protocol](../../lightlag-synthesis-experiment.md) is
 predeclared. This increment publishes the exact public request, constrained
 worker, historical parity checks and reviewed API runner. The evaluation phase
-is still being implemented/reviewed; do not launch generation until it passes.
+is now independently approved too; all 42 offline/actual-Docker checks pass.
+The request and all fresh cells remain unattempted at this checkpoint.
 
 ## Frozen inputs
 
@@ -62,7 +63,7 @@ paid launch at $12 cumulative usage. The free token counter must pass the
 One model response only, no retries or repairs, with recorded usage and
 calculated cost distinguished from a verified account balance.
 
-After evaluation review and publication, root can invoke the documented
+After this reviewed implementation is published, root can invoke the documented
 `synthesize` phase with the exact approved request hash and explicit operator
 flag. Credentials are supplied only in the child process environment, never
 in request artifacts or containers. Then freeze the unedited response and run
@@ -74,3 +75,26 @@ do not buy another response or repair the program.
 This is one sampled program across many maps, not forty independent model
 attempts, and is separate from the online OpenCode comparisons and required
 Harbor playthrough. A failure here does not establish inability with feedback.
+
+## Final runner review before launch
+
+The evaluator preserves 80 planned primary slots and four fixed generated-policy
+verification attempts. Policy errors receive normal protected grading;
+infrastructure failures retain null primary scores and bounded comparisons.
+Interrupted in-flight attempts remain attempted/unknown, not unrun; interruption
+stops the loop, and matching infrastructure failures cannot establish policy
+reproducibility. Review also fixed CLI exit-code propagation and malformed
+terminal JSON handling. The exact request, worker and twelve simulator source
+files remain unchanged. No real endpoints or fresh maps were used in review.
+
+Review approved broker SHA-256
+`39a25cee7473b4319c9de906788e56b0f9dfce7a68115fdb1a944fed9dade469` and evaluator
+`8ba24f003cd5999293a8d44f2d86b614c146aee776bb267168a343f2bec34e24`.
+Run all 42 checks with the pinned image via the same test command above, using
+pattern `test_overnight_synthesis*.py`.
+
+The provider’s [current model documentation](https://platform.claude.com/docs/en/models/opus-5-5/overview)
+still lists $4/million input and $20/million output. Its
+[versioning documentation](https://platform.claude.com/docs/en/about-claude/models/model-ids-and-versions)
+identifies these dateless IDs as pinned model snapshots; serving infrastructure
+can still change. Both sources were rechecked before launch on 14 November.
