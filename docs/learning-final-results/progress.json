@@ -30,12 +30,12 @@
     }
   },
   "campaign_id": "learning-final-20261114",
-  "created_unix": 1794693339.1790578,
+  "created_unix": 1794694539.17978,
   "errors": [],
   "freeze_sha256": "63ef4720ce395b1a80c78316258fdee8bd9222857ff2d39a5d4ab33afd244473",
   "limit": "Read-only reused-validation progress. Contiguous batch filenames show artifact coverage, not committed checkpoint state; volume visibility may lag. ETA is a rough linear extrapolation, separate from the hard stage cutoff. No production physics or optimizer audit; no final-world or reference-superiority claim.",
   "monitor_status": "monitoring",
-  "monitor_updated_unix": 1794693316.7533,
+  "monitor_updated_unix": 1794694529.142089,
   "receipt_sha256": {
     "fit": "bffdd1fd9a7f9700bfcc4132bb8adfec208a73bc49f6065eb48f24f77d9d76a2"
   },
@@ -128,7 +128,7 @@
       "seed": 17,
       "stage": "fit",
       "stage_cutoff_unix": 1794696126.755458,
-      "stage_seconds_remaining": 2787.576400279999,
+      "stage_seconds_remaining": 1587.5756781101227,
       "started_unix": 1794685342.7434099,
       "status": "completed",
       "target_episodes": 8192
@@ -221,7 +221,7 @@
       "seed": 29,
       "stage": "fit",
       "stage_cutoff_unix": 1794696126.755458,
-      "stage_seconds_remaining": 2787.576400279999,
+      "stage_seconds_remaining": 1587.5756781101227,
       "started_unix": 1794685343.8004158,
       "status": "completed",
       "target_episodes": 8192
@@ -314,17 +314,17 @@
       "seed": 43,
       "stage": "fit",
       "stage_cutoff_unix": 1794696126.755458,
-      "stage_seconds_remaining": 2787.576400279999,
+      "stage_seconds_remaining": 1587.5756781101227,
       "started_unix": 1794685343.7706335,
       "status": "completed",
       "target_episodes": 8192
     },
     "replay-17": {
       "algorithm": "replay",
-      "batch_episodes_at_least": 7136,
-      "batch_files_contiguous": 223,
-      "elapsed_seconds": 7996.005760192871,
-      "episodes_at_least": 7136,
+      "batch_episodes_at_least": 8160,
+      "batch_files_contiguous": 255,
+      "elapsed_seconds": 9196.006482362747,
+      "episodes_at_least": 8160,
       "latest_checkpoint": {
         "alive": 32,
         "count": 32,
@@ -387,36 +387,36 @@
           "sha256": "b5a1802dea092798971cc2e6b6015cf505942b510fb080bf106ff04f121ff2d0"
         }
       },
-      "rough_eta_seconds": 1183.2654263962545,
-      "rough_finish_unix": 1794694522.4444842,
+      "rough_eta_seconds": 36.062770519069595,
+      "rough_finish_unix": 1794694575.2425506,
       "seed": 17,
       "stage": "fit",
       "stage_cutoff_unix": 1794696126.755458,
-      "stage_seconds_remaining": 2787.576400279999,
+      "stage_seconds_remaining": 1587.5756781101227,
       "started_unix": 1794685343.1732976,
       "status": "running",
       "target_episodes": 8192
     },
     "replay-29": {
       "algorithm": "replay",
-      "batch_episodes_at_least": 7232,
-      "batch_files_contiguous": 226,
-      "elapsed_seconds": 7995.433659076691,
-      "episodes_at_least": 7232,
+      "batch_episodes_at_least": 8192,
+      "batch_files_contiguous": 256,
+      "elapsed_seconds": 9195.434381246567,
+      "episodes_at_least": 8192,
       "latest_checkpoint": {
         "alive": 32,
         "count": 32,
         "deaths": 0,
-        "filename": "validation-02048.json.gz",
-        "first_checked_unix": 1794687738.4855611,
+        "filename": "validation-08192.json.gz",
+        "first_checked_unix": 1794694539.17978,
         "home": 32,
         "invalid_calls": 0,
-        "mean_decisions": 19.09375,
-        "mean_reward": 0.3665278856324283,
-        "milestone": 2048,
-        "policy_filename": "policy-02048.json",
-        "policy_sha256": "e46a2fd0e9feaf5b28efc3fdcb98434904b5a3a70ad9b828b3dcd5976cfd828b",
-        "sha256": "130d57999302e8e836d1ab57dc29f4f0eaad4a282f5d1f7a046cf688379b1f41"
+        "mean_decisions": 16.75,
+        "mean_reward": 0.35589222978513324,
+        "milestone": 8192,
+        "policy_filename": "policy-08192.json",
+        "policy_sha256": "85f7622d02d035cd2e37e196c870e01b6c41913b16e0add46d66b18ca2ff4920",
+        "sha256": "b68df970d85542c64c0f46d2b65d76b22c2815dbc83413f2d2abb02a3bc61bed"
       },
       "milestones": {
         "0": {
@@ -463,24 +463,39 @@
           "policy_filename": "policy-00512.json",
           "policy_sha256": "105058221401b187969829c8bc2d22d223e20acf819fbe961adc83821ff42b96",
           "sha256": "b55c75f8f0c54e0ceb72eb14ba2966257d601f3666623daeccffbb7ea4c2b61b"
+        },
+        "8192": {
+          "alive": 32,
+          "count": 32,
+          "deaths": 0,
+          "filename": "validation-08192.json.gz",
+          "first_checked_unix": 1794694539.17978,
+          "home": 32,
+          "invalid_calls": 0,
+          "mean_decisions": 16.75,
+          "mean_reward": 0.35589222978513324,
+          "milestone": 8192,
+          "policy_filename": "policy-08192.json",
+          "policy_sha256": "85f7622d02d035cd2e37e196c870e01b6c41913b16e0add46d66b18ca2ff4920",
+          "sha256": "b68df970d85542c64c0f46d2b65d76b22c2815dbc83413f2d2abb02a3bc61bed"
         }
       },
-      "rough_eta_seconds": 1061.3407512048705,
-      "rough_finish_unix": 1794694400.519809,
+      "rough_eta_seconds": 0.0,
+      "rough_finish_unix": 1794694539.17978,
       "seed": 29,
       "stage": "fit",
       "stage_cutoff_unix": 1794696126.755458,
-      "stage_seconds_remaining": 2787.576400279999,
+      "stage_seconds_remaining": 1587.5756781101227,
       "started_unix": 1794685343.7453988,
       "status": "running",
       "target_episodes": 8192
     },
     "replay-43": {
       "algorithm": "replay",
-      "batch_episodes_at_least": 5280,
-      "batch_files_contiguous": 165,
-      "elapsed_seconds": 7992.539521694183,
-      "episodes_at_least": 5280,
+      "batch_episodes_at_least": 5952,
+      "batch_files_contiguous": 186,
+      "elapsed_seconds": 9192.54024386406,
+      "episodes_at_least": 5952,
       "latest_checkpoint": {
         "alive": 32,
         "count": 32,
@@ -543,12 +558,12 @@
           "sha256": "b60e8a08dbfc8d3fc708c1d92165ae960c4a9ce6408c1483aaa1244f586a670c"
         }
       },
-      "rough_eta_seconds": 4408.0066452980045,
-      "rough_finish_unix": 1794697747.185703,
+      "rough_eta_seconds": 3459.5581562929256,
+      "rough_finish_unix": 1794697998.7379363,
       "seed": 43,
       "stage": "fit",
       "stage_cutoff_unix": 1794696126.755458,
-      "stage_seconds_remaining": 2787.576400279999,
+      "stage_seconds_remaining": 1587.5756781101227,
       "started_unix": 1794685346.6395361,
       "status": "running",
       "target_episodes": 8192
