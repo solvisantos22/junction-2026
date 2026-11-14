@@ -1,5 +1,7 @@
 # Lightlag Traverse: a long mission on Mars-like ground, and what Claude did on it
 
+**Superseded** by [`lightlag-traverse-campaign.md`](lightlag-traverse-campaign.md), which adds the three-site campaign that Kristján froze as the submission candidate and its seven Claude agent runs. This page is the earlier write-up of the one-site task.
+
 14 November 2026. Owner: Kristján / Claude Code (gap research chat). Code: [`lightlag_traverse/`](../lightlag_traverse/README.md), task: [`harbor/lightlag-traverse/`](../harbor/lightlag-traverse/) (version 0.1.1), demo: [`viewer/traverse-demo.html`](../viewer/traverse-demo.html). **A proposal for the team, not a rules decision.** Nothing here changes `lightlag/`, `lightlag_dynamic/`, `lightlag_mcp/` or the canonical `harbor/lightlag`.
 
 **Integration note:** Kristján requested the full Traverse branch merge into
