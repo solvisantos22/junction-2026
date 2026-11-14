@@ -105,8 +105,9 @@ def shots(durations: Dict[str, float], words: Dict[str, List[Dict[str, Any]]]) -
                  {"kind": "caption", "side": "left", "from": 0.7, "to": round(0.5 + say.at("a1", "this rover's") - 0.15, 2), "text": "HEADING HOME WITH 21 SAMPLES"},
                  {"kind": "caption", "side": "left", "from": round(0.5 + say.at("a1", "this rover's"), 2), "to": round(flat - 0.05, 2), "text": "BATTERY NEARLY EMPTY"},
              ]},
-            # it stands there; then the camera rises and story mode shows how close home was
-            {"min": 0.9, "thump": 0.0, "js": "A.setPlaying(false); A.seek(409);"},
+            # it stands there; then the camera rises and story mode shows how close home was. The mini-map goes
+            # now, so that it is not still fading under the card that comes up in its corner.
+            {"min": 0.9, "thump": 0.0, "js": "A.setPlaying(false); A.seek(409); document.getElementById('mini').style.opacity = '0';"},
             {"min": 3.0, "pad": 0.7, "js": "A.startStory();"},
         ]},
         # 2. The task: the first site from its first tick, the title over it, one caption per rule.
