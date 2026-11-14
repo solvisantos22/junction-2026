@@ -35,7 +35,7 @@ class BiomeEpisodeService(EpisodeService):
     """lightlag_mcp's EpisodeService, playing a dynamic profile in a chosen biome."""
 
     def __init__(self, seed, biome=MAIN, profile="rush", config=None, artifact_dir=None, noise_level=1.0,
-                 no_gps=False):
+                 no_gps=False, gps_noise=None, weak_gps=False):
         parse_biome(biome)
         if profile not in PROFILES:
             raise ValueError(f"unknown profile {profile!r}; use one of {', '.join(PROFILES)}")
@@ -43,14 +43,21 @@ class BiomeEpisodeService(EpisodeService):
             config = Config(max_ticks=PROFILES[profile][4])
         super().__init__(seed=seed, config=config, artifact_dir=artifact_dir)
         # Swap the episode before any tool call; the lock, transcript and grading are unchanged.
-        environment = BiomeEnvironment
-        if no_gps:  # prototype: no position fix (nogps.py)
-            from .nogps import NoGpsEnvironment as environment
-        self._env = environment(seed=seed, config=config, profile=profile, biome=biome, noise_level=noise_level)
+        if no_gps or weak_gps or gps_noise is not None:  # prototype: no position fix, or a very noisy one
+            from .nogps import WEAK_GPS, NoGpsEnvironment
+            navigation = dict(WEAK_GPS) if weak_gps else {}
+            if gps_noise is not None:
+                navigation["position_noise_m"] = gps_noise
+            self._env = NoGpsEnvironment(seed=seed, config=config, profile=profile, biome=biome,
+                                         noise_level=noise_level, navigation=navigation)
+        else:
+            self._env = BiomeEnvironment(seed=seed, config=config, profile=profile, biome=biome,
+                                         noise_level=noise_level)
         rules = self._env.rules()
         self._max_ticks = rules["max_ticks"]
         self._max_advance = rules["max_advance_ticks"]
-        self.profile, self.biome, self.no_gps = profile, biome, bool(no_gps)
+        self.profile, self.biome = profile, biome
+        self.no_gps = bool(no_gps or weak_gps or gps_noise is not None)
 
 
 def _env_int(name, default):
@@ -81,6 +88,11 @@ def main(argv=None):
                         help="multiplies the sensing noise and drift of the noisy profiles")
     parser.add_argument("--no-gps", action="store_true", default=os.environ.get("LIGHTLAG_NO_GPS") in ("1", "true", "yes"),
                         help="prototype: no position fix; a beacon range and a sun compass instead")
+    parser.add_argument("--weak-gps", action="store_true", default=os.environ.get("LIGHTLAG_WEAK_GPS") in ("1", "true", "yes"),
+                        help="prototype: as --no-gps, but keep a very noisy position fix (nogps.WEAK_GPS)")
+    parser.add_argument("--gps-noise", type=float,
+                        default=float(os.environ["LIGHTLAG_GPS_NOISE"]) if os.environ.get("LIGHTLAG_GPS_NOISE") else None,
+                        help="prototype: as --no-gps, but keep a position fix with this much noise per axis (metres)")
     args = parser.parse_args(argv)
     if args.seed is None:
         parser.error("a seed is required (--seed or LIGHTLAG_SEED)")
@@ -95,7 +107,7 @@ def main(argv=None):
     service = BiomeEpisodeService(seed=args.seed, biome=args.biome, profile=args.profile,
                                   config=Config(delay_ticks=args.delay, max_ticks=ticks),
                                   artifact_dir=args.artifact_dir, noise_level=args.noise_level,
-                                  no_gps=args.no_gps)
+                                  no_gps=args.no_gps, gps_noise=args.gps_noise, weak_gps=args.weak_gps)
     token = os.environ.get("LIGHTLAG_EVALUATOR_TOKEN") or None
     if token is None and args.token_file and args.transport == "http":
         token = secrets.token_urlsafe(32)  # exists only inside this process's container

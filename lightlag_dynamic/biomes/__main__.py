@@ -44,6 +44,10 @@ def main(argv=None):
                         help="multiplies the sensing noise and drift of the noisy profiles")
     parser.add_argument("--no-gps", action="store_true",
                         help="prototype: no position fix; a beacon range and a sun compass instead (see nogps.py)")
+    parser.add_argument("--weak-gps", action="store_true",
+                        help="prototype: as --no-gps, but keep a very noisy position fix (nogps.WEAK_GPS)")
+    parser.add_argument("--gps-noise", type=float, default=None,
+                        help="prototype: as --no-gps, but keep a position fix with this much noise per axis (metres)")
     parser.add_argument("--result", type=Path, help="write the final score to a new JSON file")
     parser.add_argument("--replay", type=Path, help="write the evaluator replay to a new JSON file")
     args = parser.parse_args(argv)
@@ -58,11 +62,14 @@ def main(argv=None):
         if path is not None and (path.exists() or not path.parent.is_dir()):
             parser.error("output files must be new and their parent directories must exist")
     make = make_biome_env
-    if args.no_gps:
-        from .nogps import make_nogps_env
+    if args.no_gps or args.weak_gps or args.gps_noise is not None:
+        from .nogps import WEAK_GPS, make_nogps_env
+        navigation = dict(WEAK_GPS) if args.weak_gps else {}
+        if args.gps_noise is not None:
+            navigation["position_noise_m"] = args.gps_noise
 
         def make(biome, seed, delay, profile, **kw):
-            return make_nogps_env(seed, delay, profile, biome=biome, **kw)
+            return make_nogps_env(seed, delay, profile, biome=biome, navigation=navigation, **kw)
     env = make(args.biome, args.seed, args.delay, args.profile, horizon=args.ticks, noise_level=args.noise_level)
     for line in sys.stdin:
         if not line.strip():

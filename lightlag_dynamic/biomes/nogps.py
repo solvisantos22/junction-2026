@@ -2,6 +2,7 @@
 
     env = make_nogps_env(seed=7, delay=3, profile="rush_noisy")          # in Main Mars
     env = make_nogps_env(seed=7, delay=3, biome="troy_crust")            # or in any biome
+    env = make_nogps_env(seed=7, delay=3, navigation=WEAK_GPS)           # with a very noisy fix kept
 
 Today every telemetry packet carries an absolute position fix, so a player can read where the
 rover is. Mars has no satellite positioning: a rover dead-reckons from its wheels, its
@@ -20,6 +21,11 @@ wider here than on the noisy profiles, so dead reckoning on commanded headings w
 the map; one compass reading is too noisy to steer by; the range says how far from base, not
 in which direction. Together, over several drives, they pin the rover down. The terrain
 field, the battery and sample results are unchanged and carry information too.
+
+A position fix can be kept as one more sensor: navigation=WEAK_GPS puts the position back in
+every packet with 2 m of noise per axis, about seven times today's, and makes the compass twice
+as coarse. The fix is then far too coarse to drive by, the compass too coarse to steer by, and
+each is worth something only when fused with the rest.
 
 Everything is published in rules()["navigation"]; the seed fixes the noise. The evaluator's
 truth, scoring and the replay's states use the true position, as always.
@@ -42,7 +48,15 @@ NAVIGATION = {
     "beacon_range_noise_m": 0.25,   # std dev of every beacon range
     "sun_compass_noise_deg": 6.0,   # std dev of the heading reported for an executed drive
     "heading_bias_deg": 15.0,       # the hidden bias starts uniform in +-this many degrees
+    "position_noise_m": None,       # None: no position fix. A number: a fix every tick with this
+                                    # std dev per axis (the noisy profiles publish 0.3)
 }
+
+# Weak sensors all round: a position fix that is there but far too coarse to drive by (about
+# seven times today's noise), and a compass twice as coarse as the default. Chosen on development
+# seeds 0-19 as the setting where taking any one sensor away costs the fusing reference
+# something and no player leaning on a single sensor comes within ten points of it.
+WEAK_GPS = {"position_noise_m": 2.0, "sun_compass_noise_deg": 12.0}
 
 
 class NoGpsEnvironment(BiomeEnvironment):
@@ -54,11 +68,15 @@ class NoGpsEnvironment(BiomeEnvironment):
         if unknown:
             raise ValueError(f"unknown navigation settings: {sorted(unknown)}")
         nav.update(extra)
-        if min(nav.values()) < 0:
+        if any(value is not None and value < 0 for value in nav.values()):
             raise ValueError("navigation settings cannot be negative")
+        if any(nav[name] is None for name in nav if name != "position_noise_m"):
+            raise ValueError("only position_noise_m can be None (no position fix)")
         if sensing is None:  # the published sensing model, on every profile, with the wider bias
             sensing = {name: value * noise_level for name, value in SENSING.items()}
             sensing["heading_bias_deg"] = nav["heading_bias_deg"]
+            if nav["position_noise_m"] is not None:
+                sensing["position_noise_m"] = nav["position_noise_m"]
         self.navigation = nav
         self._drive_heading = None
         super().__init__(seed=seed, config=config, profile=profile, biome=biome, sensing=sensing,
@@ -70,17 +88,21 @@ class NoGpsEnvironment(BiomeEnvironment):
     # ---- public tools ---------------------------------------------------------------------
     def rules(self):
         rules = super().rules()
+        has_fix = self.navigation["position_noise_m"] is not None
         rules["navigation"] = {
             **self.navigation,
-            "position": "null in every telemetry packet after the tick-0 briefing, which is exact",
+            "position": ("in every packet after the exact tick-0 briefing: true position + Gaussian noise with "
+                         "std dev position_noise_m per axis, clipped to the map" if has_fix else
+                         "null in every telemetry packet after the tick-0 briefing, which is exact"),
             "beacon_range_m": ("in every packet: true distance to the base + Gaussian noise with std dev "
                                "beacon_range_noise_m, never below 0"),
             "sun_heading_deg": ("in the packet of an executed drive: the heading the rover really drove "
                                 "(commanded heading + heading error, see heading) + Gaussian noise with "
                                 "std dev sun_compass_noise_deg; null on a tick without a drive"),
         }
-        rules["position_fix"] = "none: see navigation; the tick-0 briefing position is exact"
-        rules["sensing"] = {name: value for name, value in rules["sensing"].items() if name != "position_noise_m"}
+        if not has_fix:
+            rules["position_fix"] = "none: see navigation; the tick-0 briefing position is exact"
+            rules["sensing"] = {name: value for name, value in rules["sensing"].items() if name != "position_noise_m"}
         return rules
 
     # ---- hooks ------------------------------------------------------------------------------
@@ -102,7 +124,8 @@ class NoGpsEnvironment(BiomeEnvironment):
         if (self._drive_heading is not None and self._drive_heading[0] == packet["tick"]
                 and packet["wheel_odometry"] > 0):
             heading = round((self._drive_heading[1] + rng.gauss(0.0, self.navigation["sun_compass_noise_deg"])) % 360.0, 6)
-        return {**packet, "position": None, "beacon_range_m": round(max(0.0, reading), 6),
+        position = packet["position"] if self.navigation["position_noise_m"] is not None else None
+        return {**packet, "position": position, "beacon_range_m": round(max(0.0, reading), 6),
                 "sun_heading_deg": heading}
 
     def replay(self):

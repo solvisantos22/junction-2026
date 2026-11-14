@@ -1,10 +1,11 @@
 """Players for the no-GPS option, and a probe that compares them (needs numpy).
 
-    python3 -m lightlag_dynamic.biomes.nogps_players --seeds 0-19            # every player
+    python3 -m lightlag_dynamic.biomes.nogps_players --seeds 0-19            # every player, no fix
+    python3 -m lightlag_dynamic.biomes.nogps_players --seeds 0-19 --weak-gps # a very noisy fix kept
     python3 -m lightlag_dynamic.biomes.nogps_players --players fused blind --delays 0 3 5
 
 The fusing reference (`fused`) is the Manh controllers' particle-filter controller with three
-more likelihoods, one per sensor the position fix was replaced by:
+more likelihoods, one per sensor that stands in for a trustworthy position fix:
 
     beacon range    a ring around the base: weight each particle by how well its distance fits
     sun compass     the heading of the drive just made: weight each particle's own heading
@@ -18,13 +19,21 @@ The planner is unchanged: it plans on the filter's mean and covariance.
 The other players are what a player without that filter might do:
 
     fused_no_<sensor>   the reference with one sensor ignored (what each sensor is worth)
-    odometry_only       the reference with all three ignored: wheels, cameras and sample results
+    odometry_only       the reference with all of them ignored: wheels, cameras and sample results
     dr_commanded        the frozen reference, kf_mpc, fed a position dead-reckoned from the
                         commanded headings and visual odometry
     dr_compass          kf_mpc fed a position dead-reckoned from each raw compass reading
     dr_mean_compass     kf_mpc fed a position dead-reckoned from the commanded heading plus the
                         average compass error so far: the simplest fusion there is
     blind               plans once from the briefing and never reads telemetry
+
+With a very noisy position fix kept in the packets (--weak-gps), the fix is a fourth sensor
+for `fused`, the dead-reckoning players ignore it, and three more players show what it is
+worth on its own:
+
+    fix_only            the particle filter fed the fix and odometry, nothing else
+    kf_mpc_on_fix       the frozen reference as it is: a Kalman filter on the fix and odometry
+    trusts_fix          re-plans from every fix as if it were exact
 
 Scripted players only. A sandbox prototype, not a rules decision.
 """
@@ -41,7 +50,7 @@ from lightlag_dynamic.controllers import POLICIES
 from lightlag_dynamic.manh_controllers import controllers as zoo
 from lightlag_dynamic.manh_controllers.estimators import ParticleFilter
 
-SENSORS = ("range", "compass", "terrain")
+SENSORS = ("fix", "range", "compass", "terrain")   # "fix" only does anything when the packets carry one
 
 
 class NavParticleFilter(ParticleFilter):
@@ -86,22 +95,21 @@ def _executed_drive(controller, packet):
 
 
 class _Navigator:
-    """In front of a particle-filter controller: no position fix, the three sensors instead.
-
-    With a position in the packet (any environment but the no-GPS one) the fix is used as well,
-    so the same player runs everywhere.
+    """In front of a particle-filter controller: the position comes from the filter, which is fed
+    whatever of the sensors in USE the packets carry. A position fix, when there is one, is one
+    more sensor ("fix"), weighed by its published noise; so the same player runs with today's
+    fix, with a very noisy one and with none.
     """
     USE = frozenset(SENSORS)
     N = 1000
     HOLD_FOR_FIXES = False   # without a fix, standing still at a target teaches almost nothing
 
     def absorb(self, packet):
-        self._has_fix = packet.get("position") is not None
-        if not self._has_fix:  # the bookkeeping below reads a position: give it the estimate
-            packet = dict(packet, position=[self.filter.mean[0], self.filter.mean[1]])
+        self._fix = packet["position"] if "fix" in self.USE else None
+        # The bookkeeping below reads a position: give it the estimate, never a raw reading.
+        packet = dict(packet, position=[self.filter.mean[0], self.filter.mean[1]])
         super().absorb(packet)
-        if not self._has_fix:
-            self.packets[-1]["position"] = [self.filter.mean[0], self.filter.mean[1]]
+        self.packets[-1]["position"] = [self.filter.mean[0], self.filter.mean[1]]
 
     def _filter(self, packet):
         f = self.filter
@@ -119,8 +127,8 @@ class _Navigator:
                 pf.update_visual_odometry(packet["visual_odometry"])
             if "compass" in self.USE and packet.get("sun_heading_deg") is not None:
                 pf.update_compass(packet["sun_heading_deg"], nav.get("sun_compass_noise_deg", 6.0))
-        if getattr(self, "_has_fix", packet.get("position") is not None) and packet["tick"] > 0:
-            pf.update_position(packet["position"])
+        if getattr(self, "_fix", None) is not None and packet["tick"] > 0:
+            pf.update_position(self._fix)
         if "range" in self.USE and packet.get("beacon_range_m") is not None and packet["tick"] > 0:
             pf.update_range(packet["beacon_range_m"], self.base, nav.get("beacon_range_noise_m", 0.25))
         if "terrain" in self.USE and packet["tick"] > 0:
@@ -161,7 +169,11 @@ class DeadReckoningTools:
         self._size, self._estimate = (public["width"], public["height"]), list(public["base"])
 
     def rules(self):
-        return self._tools.rules()
+        # The position this player hands on is its own reckoning, not a noisy reading: no fix noise.
+        rules = dict(self._tools.rules())
+        if rules.get("sensing"):
+            rules["sensing"] = {name: value for name, value in rules["sensing"].items() if name != "position_noise_m"}
+        return rules
 
     def map(self):
         return self._tools.map()
@@ -173,10 +185,10 @@ class DeadReckoningTools:
         return acks
 
     def _fill(self, packet):
-        if packet.get("position") is not None:
+        tick = packet["tick"]
+        if tick == 0:  # the briefing is exact; any later fix is ignored: this player reckons
             self._estimate = list(packet["position"])
             return packet
-        tick = packet["tick"]
         if tick not in self._filled:
             executed = [e["command_id"] for e in packet["events"] if e["type"] == "command_executed"]
             command = self._commands.get(executed[0]) if executed else None
@@ -212,11 +224,22 @@ def players():
     for sensor in SENSORS:
         out[f"fused_no_{sensor}"] = _run(navigator([s for s in SENSORS if s != sensor]))
     out["odometry_only"] = _run(navigator(()))
+    out["fix_only"] = _run(navigator(["fix"]))                  # needs a fix in the packets
+    out["kf_mpc_on_fix"] = POLICIES["kf_mpc"]                   # needs a fix
+    out["trusts_fix"] = POLICIES["reference"]                   # needs a fix
     out["dr_commanded"] = lambda tools: POLICIES["kf_mpc"](DeadReckoningTools(tools, "commanded"))
     out["dr_compass"] = lambda tools: POLICIES["kf_mpc"](DeadReckoningTools(tools, "compass"))
     out["dr_mean_compass"] = lambda tools: POLICIES["kf_mpc"](DeadReckoningTools(tools, "mean_compass"))
     out["blind"] = POLICIES["open_loop"]
     return out
+
+
+NEED_A_FIX = ("fused_no_fix", "fix_only", "kf_mpc_on_fix", "trusts_fix")
+
+
+def default_players(has_fix):
+    """Every player that makes sense: the ones that read the fix only when there is one."""
+    return [name for name in players() if has_fix or name not in NEED_A_FIX]
 
 
 def play(job):
@@ -269,17 +292,29 @@ def main(argv=None):
     from lightlag_dynamic.manh_controllers.swarm import parse_seeds
     ap = argparse.ArgumentParser(prog="python3 -m lightlag_dynamic.biomes.nogps_players", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--players", nargs="*", default=list(players()))
+    ap.add_argument("--players", nargs="*")
+    ap.add_argument("--weak-gps", action="store_true",
+                    help="the weak-sensor setting: a 2 m position fix and a 12 degree compass (nogps.WEAK_GPS)")
+    ap.add_argument("--gps-noise", type=float, default=None,
+                    help="keep a position fix with this much noise per axis, in metres (default: no fix)")
+    ap.add_argument("--compass-noise", type=float, default=None, help="the sun compass noise in degrees (default 6)")
     ap.add_argument("--profiles", nargs="*", default=["rush_noisy"])
     ap.add_argument("--delays", nargs="*", type=int, default=[3])
     ap.add_argument("--seeds", default="0-19")
     ap.add_argument("--biome", default="main_mars")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 2))
     a = ap.parse_args(argv)
-    unknown = set(a.players) - set(players())
+    from .nogps import WEAK_GPS
+    navigation = dict(WEAK_GPS) if a.weak_gps else {}
+    if a.gps_noise is not None:
+        navigation["position_noise_m"] = a.gps_noise
+    if a.compass_noise is not None:
+        navigation["sun_compass_noise_deg"] = a.compass_noise
+    names = a.players or default_players(navigation.get("position_noise_m") is not None)
+    unknown = set(names) - set(players())
     if unknown:
         ap.error(f"unknown players: {sorted(unknown)}; choose from {', '.join(players())}")
-    rows = probe(a.players, a.profiles, a.delays, parse_seeds(a.seeds), a.workers, a.biome)
+    rows = probe(names, a.profiles, a.delays, parse_seeds(a.seeds), a.workers, a.biome, navigation)
     print(table(rows))
     for row in rows:
         if row["crash"]:

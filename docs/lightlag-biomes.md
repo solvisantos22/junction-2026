@@ -201,9 +201,10 @@ Controller 36's share by delay, and the difference from Main Mars at the same de
 
 ```sh
 python3 -m lightlag_dynamic.biomes.nogps_players --seeds 0-19                 # every player, about 5 seconds (needs numpy)
+python3 -m lightlag_dynamic.biomes.nogps_players --seeds 0-19 --weak-gps      # the same with a very noisy GPS kept
 python3 -m lightlag_dynamic.biomes --no-gps --profile rush_noisy --seed 7 --delay 3 < script.jsonl
 python3 -m lightlag_dynamic.biomes.serve --no-gps --profile rush_noisy --seed 7 --delay 3    # over MCP
-python3 -m unittest tests.lightlag_dynamic.test_nogps                         # 10 tests, about 3 seconds
+python3 -m unittest tests.lightlag_dynamic.test_nogps                         # 12 tests, about 8 seconds
 ```
 
 ### Why taking the position away is not enough
@@ -288,6 +289,60 @@ Seeds 2200–2239, one run, with the settings above fixed before any episode was
 
 The beacon's noise (0.05 to 1 m) and the number of particles (300 to 3,000) change nothing beyond a point or two.
 
+### With a very noisy GPS kept
+
+*Added Saturday about 16:30 Helsinki, after Manh's point that a GPS may stay as long as it is very noisy next to the rest.*
+
+`navigation=WEAK_GPS`, or `--weak-gps` on the runner, the MCP entry and the probe: the position fix is back in every packet with **2 m of noise per axis**, about seven times today's 0.3 m, and the compass is twice as coarse (**12°**). Both are published like everything else. The fix is then far too coarse to drive by and the compass too coarse to steer by.
+
+**What is being fused, and what each sensor is worth to the reference.** Unused seeds 2300–2339, paired over delays 0, 3 and 5, points of share with a 95% interval; "worth" is what the reference loses when that one sensor is ignored:
+
+| Sensor | What it tells the rover | Worth on `rush_noisy` | Worth on `noisy` |
+|---|---|---|---|
+| Wheel and visual odometry | How far each drive went | The backbone: every player here uses it | |
+| Very noisy position fix, 2 m | Roughly where it is | +4.9 (+2.5 to +7.6) | +6.7 (+3.3 to +10.0) |
+| Sun compass, 12° | Which way each drive really went | +5.9 (+3.6 to +8.3) | +4.8 (+2.1 to +7.5) |
+| Beacon range, 0.25 m | How far the base is | −0.5 (−2.2 to +1.3) | +0.2 (−1.5 to +1.9) |
+| Terrain under the rover | Bedrock or sand, against the map | 0.0 (−0.5 to +0.6) | +0.8 (0.0 to +2.1) |
+| Sample results | A hit: within 0.75 m of that target; a miss: not | Built into every filter here | |
+| Battery | Exact energy left | Not used by this reference | |
+
+Share of the maximum, and rovers home, on the same seeds:
+
+| Player | `rush_noisy`, delay 0 | delay 3 | delay 5 | `noisy` (80 ticks), delay 3 |
+|---|---|---|---|---|
+| **`fused`**: fix, compass, beacon, terrain | **84%**, 100% | **42%**, 98% | **23%**, 100% | **77%**, 100% |
+| `fused_no_fix` | 81%, 100% | 33%, 95% | 20%, 100% | 67%, 100% |
+| `fused_no_compass` | 80%, 100% | 34%, 100% | 18%, 100% | 76%, 100% |
+| `fix_only`: particle filter on the fix and odometry | 76%, 98% | 30%, 95% | 16%, 100% | 76%, 100% |
+| `kf_mpc_on_fix`: the frozen reference as it is | 66%, 95% | 26%, 100% | 12%, 95% | 72%, 100% |
+| `trusts_fix`: takes each fix as exact | 0%, 0% | 1%, 0% | 1%, 0% | 0%, 0% |
+| `dr_mean_compass`: averages the compass error | 28%, 42% | 22%, 42% | 15%, 22% | 26%, 35% |
+| `blind` | 27%, 85% | 25%, 82% | 24%, 80% | 27%, 68% |
+| With today's fix: controller 36 | 88%, 100% | 71%, 100% | 57%, 95% | 96%, 100% |
+
+- **Two weak sensors are now fused with the odometry, and both count.** The fix is worth 5 to 7 points and the compass 5 to 6. Neither is enough alone.
+- **Leaning on the fix alone falls short.** Paired over the delays, `fused` is 8.9 points above a particle filter on the fix alone on `rush_noisy` (6.4 to 11.4) and 5.7 on `noisy` (2.5 to 9.3). It is 15.2 and 11.1 above the frozen reference `kf_mpc`, which fuses the fix with odometry and nothing else.
+- **Leaning on the compass alone falls further:** 28 and 47 points below.
+- **Taking the fix at its word kills the rover** in about nine episodes in ten: it chases the noise until the battery is gone.
+- **The beacon range is redundant here,** and so is the terrain reading. As a third sensor that counts, the beacon would need a partner: a second beacon, or a bearing.
+- **The price is the reference's own score on the short missions.** On `rush_noisy` it falls from 71% with today's fix to 42% at delay 3 and 23% at delay 5. Fifty ticks are few for a filter to pin down a hidden bias from 2 m fixes. On the 80-tick map it keeps 74 to 77% at every delay.
+
+**How the setting was chosen** (development seeds 0–19, `rush_noisy`, delay 3): a grid of compass noise 6°, 12° and 20° against fix noise 0.3, 1, 2, 3 and 5 m, looking for the cell where ignoring any one sensor costs the reference something and no single-sensor player comes within ten points of it.
+
+| Compass 12°, fix noise | `fused` | `fused_no_fix` | `fused_no_compass` | `fix_only` | `kf_mpc_on_fix` |
+|---|---|---|---|---|---|
+| 0.3 m (today's) | 62% | 37% | 63% | 65% | 62% |
+| 1 m | 54% | 37% | 48% | 46% | 46% |
+| **2 m** | **45%** | 37% | 32% | 31% | 25% |
+| 3 m | 40% | 37% | 29% | 26% | 17% |
+| 5 m | 37% | 37% | 24% | 20% | 12% |
+
+- At today's 0.3 m the fix alone is enough and the compass adds nothing.
+- At 5 m the fix adds nothing.
+- With the finer 6° compass the compass carries everything from 2 m up (53% against 51% without the fix).
+- 2 m with a 12° compass is the cell where both matter.
+
 ### What it does not show
 
 - **No model has played it.** Claude writes code, and averaging the compass error is ten lines that already reach 37–47%. A careful agent could write the particle filter too. What the prototype adds for certain is that reading the rover's position off a packet no longer works, and that the last drive home has to be checked against the beacon.
@@ -295,7 +350,7 @@ The beacon's noise (0.05 to 1 m) and the number of particles (300 to 3,000) chan
 - **The demo page cannot show it.** Its Earth view draws the reported position, which is null here.
 - **The reference needs numpy**, like every Manh controller built on the particle filter, so it cannot run inside the Harbor task image as it is.
 - **There is no bound** for this setting, so "56%" is the best known player, not the best possible.
-- **Seeds:** 0–19 for the sensitivity table, 2100–2139 for the probe, 2200–2239 for the result. All now used.
+- **Seeds:** 0–19 for the sensitivity tables and the grid, 2100–2139 for the probe, 2200–2239 for the no-GPS result, 2300–2339 for the weak-GPS result. All now used.
 
 ## Limits
 
@@ -304,7 +359,7 @@ The beacon's noise (0.05 to 1 m) and the number of particles (300 to 3,000) chan
 - **Bound 16 is not a bound in the biomes.** Its planner ignores their rules. On Relay Pass at delay 0 it scores below controller 36.
 - **40 seeds, one draw each.** Differences under about one point are noise.
 - **Mixed biomes** work and have one test; they were not part of the trial.
-- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting and position probes; 2200–2239 for the no-GPS result. All now used.
+- **Seeds:** development 0–19 for the settings; 2000–2039 for the trial; 2100–2139 for the hard-setting and position probes; 2200–2239 and 2300–2339 for the no-GPS and weak-GPS results. All now used.
 
 ## Suggested next steps (not done)
 

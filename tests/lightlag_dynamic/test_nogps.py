@@ -9,7 +9,7 @@ import unittest
 
 from lightlag import Config
 from lightlag_dynamic.biomes import make_biome_env
-from lightlag_dynamic.biomes.nogps import NAVIGATION, NoGpsEnvironment, make_nogps_env
+from lightlag_dynamic.biomes.nogps import NAVIGATION, WEAK_GPS, NoGpsEnvironment, make_nogps_env
 from lightlag_dynamic.biomes.serve import BiomeEpisodeService
 from lightlag_dynamic.controllers import POLICIES
 from lightlag_dynamic.missions import SENSING
@@ -103,6 +103,28 @@ class EnvironmentTest(unittest.TestCase):
             self.assertEqual([s["position"] for s in ours["states"]], [s["position"] for s in stock["states"]])
             self.assertEqual(ours["result"], stock["result"])
 
+    def test_a_weak_gps_puts_a_very_noisy_fix_back(self):
+        self.assertEqual(WEAK_GPS["position_noise_m"], 2.0)
+        self.assertGreater(WEAK_GPS["position_noise_m"], 5 * SENSING["position_noise_m"], "very noisy next to today's fix")
+        errors = []
+        for seed in range(6):
+            env = finish(make_nogps_env(seed=seed, delay=3, profile="rush_noisy", navigation=WEAK_GPS))
+            base = env.map()["base"]
+            for packet in env.telemetry_log()[1:]:   # nothing was sent: the rover stands on the base
+                errors += [packet["position"][0] - base[0], packet["position"][1] - base[1]]
+                self.assertIn("beacon_range_m", packet)
+        self.assertAlmostEqual(statistics.pstdev(errors), 2.0, delta=0.25)
+        self.assertLess(abs(statistics.mean(errors)), 0.3)
+        rules = make_nogps_env(seed=0, navigation=WEAK_GPS).rules()
+        self.assertEqual(rules["navigation"]["position_noise_m"], 2.0)
+        self.assertEqual(rules["sensing"]["position_noise_m"], 2.0)
+        self.assertEqual(rules["navigation"]["sun_compass_noise_deg"], 12.0)
+        self.assertNotIn("null", rules["navigation"]["position"])
+        self.assertFalse(rules["position_fix"].startswith("none"))
+        service = BiomeEpisodeService(seed=3, profile="rush_noisy", config=Config(delay_ticks=0, max_ticks=50), weak_gps=True)
+        self.assertEqual(service.rules()["navigation"]["position_noise_m"], 2.0)
+        self.assertIsNotNone(service.advance(1)["packets"][0]["position"])
+
     def test_it_sits_on_any_biome_and_the_entry_points_take_it(self):
         env = make_nogps_env(seed=2, delay=3, profile="rush_noisy", biome="troy_crust")
         self.assertEqual([b["id"] for b in env.rules()["biome"]], ["troy_crust"])
@@ -164,6 +186,28 @@ class PlayerTest(unittest.TestCase):
         self.assertTrue(all(r["home"] for r in rows if r["player"] == "fused"))
         self.assertGreater(mean["fused"], mean["dr_commanded"] + 0.15)
         self.assertGreater(mean["fused"], mean["blind"] + 0.15)
+
+    def test_with_a_weak_gps_fusing_beats_leaning_on_the_fix(self):
+        from lightlag_dynamic.biomes.nogps_players import DeadReckoningTools, default_players, probe
+        self.assertIn("kf_mpc_on_fix", default_players(True))
+        self.assertNotIn("kf_mpc_on_fix", default_players(False))
+        self.assertIn("fused", default_players(False))
+        rows = probe(["fused", "fused_no_fix", "kf_mpc_on_fix", "trusts_fix"], ["rush_noisy"], [3], list(range(10)), 1,
+                     navigation=dict(WEAK_GPS))
+        self.assertFalse([r["crash"] for r in rows if r["crash"]])
+        mean = {n: statistics.mean(r["share"] for r in rows if r["player"] == n) for n in {r["player"] for r in rows}}
+        self.assertTrue(all(r["home"] for r in rows if r["player"] == "fused"))
+        self.assertGreater(mean["fused"], mean["kf_mpc_on_fix"] + 0.1, "the frozen reference leans on the fix alone")
+        self.assertGreater(mean["fused"], mean["fused_no_fix"], "the noisy fix is worth something once fused")
+        self.assertLess(mean["trusts_fix"], 0.05, "a 2 m fix taken as exact wrecks the mission")
+        # the dead-reckoning players ignore the fix: what they hand on is their own estimate
+        env = make_nogps_env(seed=1, delay=0, profile="rush_noisy", navigation=WEAK_GPS)
+        tools = DeadReckoningTools(PublicTools(env), "commanded")
+        raw = PublicTools(env)
+        self.assertNotIn("position_noise_m", tools.rules()["sensing"])
+        handed = tools.advance(3)["packets"]
+        self.assertEqual([p["position"] for p in handed], [list(env.map()["base"])] * 3)
+        self.assertNotEqual([p["position"] for p in raw.telemetry_log()[1:4]], [p["position"] for p in handed])
 
     def test_the_reference_also_plays_with_a_fix(self):
         from lightlag_dynamic.biomes.nogps_players import navigator
