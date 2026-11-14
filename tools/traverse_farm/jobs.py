@@ -7,6 +7,7 @@ A job is a small dict that survives JSON:
     {"policy": "greedy", "seed": 123}                                  # any scripted policy of lightlag_traverse.play
     {"policy": "program", "program": "<source defining play(tools)>", "seed": 123, "time_limit": 1500}
     {"policy": "program", "files": {"auto.py": "<source>", ...}, "entry": "auto.py", "seed": 123}
+    {"policy": "pilot", "seed": 123, "mission": {"sun_margin_ticks": 0}}   # any of these, on changed rules
 
 The second form is an agent's own script as it ran in the task: it is started as `__main__` with a
 stand-in `lightlag_client` beside it, as `lightlag_traverse.sandbox --program` does. Both forms get
@@ -131,8 +132,11 @@ def program_id(job: Dict[str, Any]) -> Optional[str]:
 
 def job_key(item: Dict[str, Any]) -> str:
     """What makes two jobs (or a job and a row) the same mission: who plays, with what, on which world."""
-    return json.dumps({"policy": item.get("policy"), "options": item.get("options") or {},
-                       "program": program_id(item), "seed": item.get("seed")}, sort_keys=True)
+    key = {"policy": item.get("policy"), "options": item.get("options") or {},
+           "program": program_id(item), "seed": item.get("seed")}
+    if item.get("mission"):   # changed rules make another mission; unchanged keys stay as they were saved
+        key["mission"] = item["mission"]
+    return json.dumps(key, sort_keys=True)
 
 
 def pilot_defaults() -> Dict[str, Any]:
@@ -262,9 +266,12 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
     row.update(seed=seed, policy=job["policy"], options=job.get("options") or {})
     if job["policy"] == "program":
         row["program_id"] = program_id(job)
+    mission = job.get("mission") or None   # rule changes for this mission, e.g. {"sun_margin_ticks": 0}
+    if mission:
+        row["mission"] = mission
     started = time.time()
     if job["policy"] == "program":
-        env = play.TraverseEnvironment(seed)
+        env = play.TraverseEnvironment(seed, mission=mission)
         tools = play.PublicTools(env)
         ran = _run_program(job, tools, job.get("time_limit", 1500))
         seconds, calls = time.time() - started, tools.calls
@@ -278,9 +285,20 @@ def run_job(job: Dict[str, Any]) -> Dict[str, Any]:
             row["died_tick"] = next(s["tick"] for s in env.replay()["states"] if not s["alive"])
         if ran["error"] or not result["alive"]:
             row["printed"] = ran["printed"]
-    else:
+    elif not mission:
         run = play.run_episode(play.policy(policy_name(job)), seed)
         result, seconds, calls = run["result"], run["seconds"], run["public_calls"]
+        row["error"] = None
+    else:   # play.run_episode, on the changed rules
+        controller = play.policy(policy_name(job))
+        env = play.TraverseEnvironment(seed, mission=mission)
+        tools = play.PublicTools(env)
+        started = time.time()
+        controller(tools)          # as there, a policy's error propagates: it must not turn into a low score
+        seconds, calls = time.time() - started, tools.calls
+        while not env.advance(5)["episode_complete"]:
+            pass
+        result = env.evaluate()
         row["error"] = None
     row.update(
         reward=result["raw_score"] / result["max_available_value"],
@@ -303,6 +321,8 @@ def _safe(job: Dict[str, Any]) -> Dict[str, Any]:
                    crash="{}: {}".format(type(failure).__name__, failure)[:400])
         if job.get("policy") == "program":
             row["program_id"] = program_id(job)
+        if job.get("mission"):
+            row["mission"] = job["mission"]
         return row
 
 

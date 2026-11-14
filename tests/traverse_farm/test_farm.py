@@ -63,6 +63,19 @@ class Jobs(unittest.TestCase):
         with self.assertRaises(ValueError):
             jobs.policy_name({"policy": "greedy", "options": {"floor": 3}})
 
+    def test_a_mission_can_be_played_on_changed_rules(self):
+        row = jobs.run_job({"policy": "nothing", "seed": 100, "mission": {"sun_margin_ticks": 0}})
+        self.assertEqual((row["mission"], row["alive"], row["reward"]), ({"sun_margin_ticks": 0}, True, 0.0))
+        with mock.patch.dict(os.environ, ALLOW):
+            seen = jobs.run_job({"policy": "program", "seed": 100, "mission": {"sun_margin_ticks": 0},
+                                 "program": "def play(tools):\n    assert tools.rules()['sun_margin_ticks'] == 0\n"})
+        self.assertIsNone(seen["error"])
+
+    def test_changed_rules_are_another_mission_and_saved_keys_stay_the_same(self):
+        plain = {"policy": "pilot", "seed": 1}
+        self.assertEqual(jobs.job_key(plain), '{"options": {}, "policy": "pilot", "program": null, "seed": 1}')
+        self.assertNotEqual(jobs.job_key(plain), jobs.job_key(dict(plain, mission={"sun_margin_ticks": 0})))
+
     def test_crashes_come_back_as_rows(self):
         rows = jobs.local_map([{"policy": "pilot", "options": {"no_such_option": 1}, "seed": 100}], workers=1)
         self.assertIn("no_such_option", rows[0]["crash"])

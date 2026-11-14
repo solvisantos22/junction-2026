@@ -286,15 +286,19 @@ def search(run_many: RunMany, defaults: Dict[str, Any], *, search_seeds: Sequenc
 
 
 def evaluate(run_many: RunMany, policies: Dict[str, Dict[str, Any]], seeds: Sequence[int],
-             out: Optional[Path] = None, baseline: Optional[str] = "pilot") -> Dict[str, Any]:
+             out: Optional[Path] = None, baseline: Optional[str] = "pilot",
+             mission: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Several policies on the same worlds. `policies`: name -> job fields (policy, options, program...).
-    If `baseline` is one of them, every other policy is also compared with it world by world."""
+    If `baseline` is one of them, every other policy is also compared with it world by world.
+    `mission` changes the rules for every mission (for example {"sun_margin_ticks": 0})."""
     ledger = Ledger(out)
-    jobs = [dict(spec, candidate=name, seed=seed) for name, spec in policies.items() for seed in seeds]
+    extra = {"mission": mission} if mission else {}
+    jobs = [dict(spec, candidate=name, seed=seed, **extra) for name, spec in policies.items() for seed in seeds]
     rows = run_many(jobs) if out is None else ledger.play(run_many, jobs)
     table = {name: summarise(rows, name) for name in policies}
     against = versus(rows, baseline, policies) if baseline in policies else {}
     labels = {name: spec.get("label") for name, spec in policies.items() if spec.get("label")}
     ledger.write("evaluation.json", {"seeds": [seeds[0], seeds[-1]], "worlds": len(seeds), "table": table,
-                                     "baseline": baseline if against else None, "versus": against, "labels": labels})
+                                     "baseline": baseline if against else None, "versus": against, "labels": labels,
+                                     "mission": mission or {}})
     return {"rows": rows, "table": table, "versus": against}

@@ -32,6 +32,8 @@ modal run tools/traverse_farm/modal_app.py::evaluate \
 modal run tools/traverse_farm/modal_app.py::search --out docs/traverse-farm/search-1
 ```
 
+`--mission '{"sun_margin_ticks": 0}'` plays every mission on changed rules (JSON, as `TraverseEnvironment(seed, mission=...)` takes them); each row records them, and missions on other rules stay apart in the same folder.
+
 `evaluate` compares every policy with `--baseline` (default `pilot`) world by world: the mean difference, its 95% paired bootstrap interval, and on how many worlds the policy scored higher, the same, or lower. With `--out`, rows are saved after every 400 missions and a rerun into the same folder plays only missions it has not seen, so policies can be added to a finished comparison.
 
 Agent programs rebuilt from trajectories: Opus agent 3 prepared its autopilot by hand (saved the map to `/tmp/map.json`, built `/tmp/ll/D.pkl` with `route.py`, then started `auto.py` from `/tmp/ll`), so it is replayed through a labelled wrapper, `agent:docs/lightlag-runs/traverse-agent-opus-3/program/farm_prepare.py`. Sonnet agent 1 runs as `agent:docs/lightlag-runs/traverse-agent-sonnet-1/program/auto.py`. Each run's `run.json` says how its program was rebuilt.
@@ -56,9 +58,20 @@ The pilot scores higher than every saved Claude program on 298 to 300 of the 300
 
 Read with care: an agent's program was written during its own mission on world 2026 and is replayed here on worlds it never saw, with no agent watching. This measures the program, not the agent, which in a mission could notice trouble and step in. The one-request programs were written without seeing any world, so for them fresh worlds are a fair test.
 
+## The pilot under a harsher day (a proposal, not the rules)
+
+At the Traverse owner's request, the pilot alone on the same 300 worlds with the sun rising as the mission starts and setting as it ends: `{"sun_margin_ticks": 0}`, where the published 0.1.0 rules use 56. Modal app `ap-T2EvbsPSpwUE9Jy1mFCOiH`; rows in [`traverse-farm/sun-margin-0/`](traverse-farm/sun-margin-0/).
+
+| Pilot, worlds 600–899 | Mean | Lost | Away |
+|---|---:|---:|---:|
+| 0.1.0 day (`sun_margin_ticks` 56) | 0.502 | 0 | 0 |
+| Harsher day (`sun_margin_ticks` 0) | 0.435 | 0 | 2 |
+
+Paired on the same worlds, the harsher day costs the pilot 0.067 [95%: 0.062 to 0.071]; it scores lower on 292 worlds, the same on 1 and higher on 7. Its battery never ran out; it was stranded away from base on worlds 752 (0.214, against 0.475 on the 0.1.0 day) and 861 (0.225, against 0.507). A mission also takes longer to plan: 65 s against 48 s on a Modal core.
+
 ## Checked so far
 
-- 29 tests pass (1 skipped without the `modal` package; it passes with it), on `main` with the beam-search pilot (`f90cb6b`, merged into `main` at 18:30).
+- 31 tests pass (1 skipped without the `modal` package; it passes with it), on `main` with the beam-search pilot (`f90cb6b`, merged into `main` at 18:30).
 - Local run of that pilot on fresh worlds 600–601: pilot 0.523, greedy 0.296, straight 0.213, nothing 0.000; about 35 s per pilot mission with eight in parallel on this laptop.
 - Modal against this laptop (app `ap-kew5v67eaVvOdeMDDAbtzZ`): pilot and greedy on worlds 600–607 scored the same on all 16 missions (pilot 0.496, greedy 0.282). A pilot mission takes about 52 s on one Modal core, against 33.5 s here; the 16 ran in 76 s.
 - The task's world, 2026 (app `ap-GnrGDGApXmzHdabvZmKkJ7`): Opus agent 3's rebuilt program scores 0.515, the same as its Harbor run (0.515). Opus agent 1's program scores 0.203 (its Harbor run: 0.216). Sonnet agent 1's final program, started from tick 0, ran its battery flat and scored 0. In its Harbor run (0.528) an earlier version drove first, and this one's first command ran at tick 30. Being checked.
