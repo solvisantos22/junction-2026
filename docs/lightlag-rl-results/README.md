@@ -35,3 +35,15 @@ python -m lightlag_rl.train --output /tmp/rl-smoke-new --updates 2 --batch-size 
 
 Use the pinned production source revision for the full experiment. The protocol
 stays unchanged; completed results and decisions are appended here.
+
+
+The independent evaluator is now verified on the two used smoke maps: all 12
+policy/control episodes, their complete 420-tick replays and 428 retained goal
+choices reconstruct. Its true do-nothing control sends no commands. This smoke
+comparison does not pass the learning screen and is not used for tuning or model
+selection. Production weights and all 40 fresh worlds remain separate.
+
+The first production job is running on Modal under the published source freeze:
+[run ap-e9VDJ99Y3AAjaY30NcNemX](https://modal.com/apps/solvisantos22/main/ap-e9VDJ99Y3AAjaY30NcNemX).
+The successful job launch is real Modal use; no training improvement is claimed
+before the completed fresh comparison. **28 focused tests pass.**
