@@ -24,13 +24,22 @@ under `~/.codex/junction-main-push-2026/`; they are not committed to this repo.
 The integration worktree is `/private/tmp/junction-main-push-integration`, on
 `codex/main-push-watch`. The agent can recreate that worktree if it disappears.
 
-The timer reuses an unchanged copy of the existing
+The timer reuses a private copy of the existing
 [Junction Watch adapter](../tools/junction_watch/README.md), independently of
 Sölvi's event-news watcher. Its required `ends_at` field uses the year 9999 as a
 practical no-expiry value. Each timer tick can queue only one outstanding check;
 if verification runs longer than five minutes, subsequent ticks wait for the
-agent's completion acknowledgement. A missing acknowledgement produces one
-health alert, rather than piling up overlapping checks.
+agent's completion acknowledgement. The installed private copy accepts
+`health_alert_seconds`, set to `900`: a check without a completion record for
+15 minutes produces one health alert. This threshold is separate from the
+300-second schedule and never permits overlapping checks. It does not claim
+that a long check has failed; inspect the task before taking recovery action.
+
+The independent alert threshold was added after two verified integrations took
+longer than five minutes and triggered early alerts. The shared repository
+adapter and Sölvi's event-news timer remain unchanged. Reinstalling from the
+shared adapter alone would lose this local extension; preserve the private
+adapter and its tests when moving the installation.
 
 Status and controls on Kristján's Mac:
 
@@ -62,3 +71,16 @@ not a hosted service. It does not change the Mac's sleep settings.
   `origin/main` at `269217a`; no integration or push was needed.
 - The agent atomically recorded successful completion and delivered its setup
   acknowledgement to the parent conversation, with no blockers.
+- Alert-threshold correction: 31 tests pass against the private adapter (26
+  existing cases and five added timing/validation cases). They cover no alert
+  or duplicate at five/ten minutes, one alert at 15 minutes, five-minute dispatch
+  after completion, late acknowledgement, invalid delay and status reporting.
+  Runtime status confirms `interval_seconds: 300`, `health_alert_seconds: 900`,
+  `enabled: true`; completion of the second alerted check was acknowledged.
+
+Rerun the installed adapter's focused suite on Kristján's Mac:
+
+```sh
+python3 -B -m unittest discover \
+  -s ~/.codex/junction-main-push-2026 -p test_health_delay.py
+```
