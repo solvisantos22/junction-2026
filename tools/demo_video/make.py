@@ -317,8 +317,9 @@ def assemble(bed: bool = True) -> Path:
     run(["ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex", ";".join(graph), "-map", "0:v", "-map", "[out]",
          "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(VIDEO)])
     VIDEO.with_suffix(".srt").write_text(subtitles(spoken, lengths, words), encoding="utf-8")
-    # a still for the submission page: the title over the map, just after the task shot fades in
-    title_at = sum(item["seconds"] for item in timeline[:names.index("task")]) + 0.85
+    # a still for the submission page: the title over the map, just after that shot fades in
+    shot, into = storyboard.POSTER
+    title_at = sum(item["seconds"] for item in timeline[:names.index(shot)]) + into
     run(["ffmpeg", "-y", "-loglevel", "error", "-ss", "{:.2f}".format(title_at), "-i", str(VIDEO), "-frames:v", "1", "-q:v", "2", str(OUT / "poster.jpg")])
     (BUILD / "spoken.json").write_text(json.dumps({"total": round(total, 2), "lines": spoken, "thumps": thumps}, indent=1), encoding="utf-8")
     print("  {} {:.1f}s, {:.1f} MB".format(VIDEO.relative_to(REPO), total, VIDEO.stat().st_size / 1e6))
