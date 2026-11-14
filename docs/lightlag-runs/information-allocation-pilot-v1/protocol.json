@@ -1,0 +1,113 @@
+{
+  "attempts_per_context": 2,
+  "budget_note": "Soft target, not hard provider cap. steps12 is a prompt guard; output8192 is per response. Prior coordinator usage 10.1660742 plus potentially shared Rocks1.4873214, against historical user-reported15.70; live balance unknown. Stop on runaway/unknown usage and retain incomplete/unrun rows.",
+  "controls": "No inspection, fixeda/fixedb, blind selective matched timing; entropy and least-useful targets reported both forced and matched selective probe/skip gate.",
+  "expansion": "Retain model successes. No mechanics or case tuning after outcomes; next expansion is separate decision.",
+  "harness": "OpenCode 1.19.5 / Harbor 0.25",
+  "judging": "Separate expected-reward-optimal acquisition, posterior route and commitment timing from same-seed realized reward. Report actual signal-branch coverage; diagnostic12sessions not population reliability.",
+  "model": "anthropic/claude-opus-5-5",
+  "opencode_config": {
+    "agent": {
+      "build": {
+        "steps": 12
+      }
+    },
+    "provider": {
+      "anthropic": {
+        "models": {
+          "claude-opus-5-5": {
+            "limit": {
+              "context": 200000,
+              "output": 8192
+            }
+          }
+        }
+      }
+    }
+  },
+  "order": [
+    {
+      "assignment_id": "case_1-r1",
+      "context": "case_1",
+      "repeat": 1,
+      "seed_commitment": "4f86e497defe5e8ae0f6f17dafacc2ad5205cbe0a67c5d0ae422503aebd9288a"
+    },
+    {
+      "assignment_id": "case_2-r1",
+      "context": "case_2",
+      "repeat": 1,
+      "seed_commitment": "fdc49f37a0c0159ad9eb1d945a8c09b30d2f6debf7669ee77375599022a2f807"
+    },
+    {
+      "assignment_id": "case_3-r1",
+      "context": "case_3",
+      "repeat": 1,
+      "seed_commitment": "ea532e486eaddd1ccf112a148c7db3e4a01df4d637f0b20484be285b929a6a47"
+    },
+    {
+      "assignment_id": "case_4-r1",
+      "context": "case_4",
+      "repeat": 1,
+      "seed_commitment": "7bb54e22cc8cef82114249c261556ea8c4cd0f5598d04cfa2d516c3626794268"
+    },
+    {
+      "assignment_id": "case_5-r1",
+      "context": "case_5",
+      "repeat": 1,
+      "seed_commitment": "7611def958b6fed4956e87338818e7d9f84cd41ad31d844101dbba455dedb203"
+    },
+    {
+      "assignment_id": "case_6-r1",
+      "context": "case_6",
+      "repeat": 1,
+      "seed_commitment": "aa2748668ee5d633500c79eda873dd46b0db37d78cf0925d8a75f1f088355ae5"
+    },
+    {
+      "assignment_id": "case_1-r2",
+      "context": "case_1",
+      "repeat": 2,
+      "seed_commitment": "97e22fc3430d0bd96d81cceea166d62c6e2b1f066574d441ca3a520265a2a463"
+    },
+    {
+      "assignment_id": "case_2-r2",
+      "context": "case_2",
+      "repeat": 2,
+      "seed_commitment": "e5647f92096cc3aa629af90be33ce3b540ec92da58197392ed89b8163736676f"
+    },
+    {
+      "assignment_id": "case_3-r2",
+      "context": "case_3",
+      "repeat": 2,
+      "seed_commitment": "9dd0e00f62f4f1bae51f2c59dd0727a6cfd164aea43fbafd28f35e6a105addc1"
+    },
+    {
+      "assignment_id": "case_4-r2",
+      "context": "case_4",
+      "repeat": 2,
+      "seed_commitment": "eb287c0bf87c0a8e0a67a7524da0a70d3e8b7c313082c9a679d7d12611de7cfb"
+    },
+    {
+      "assignment_id": "case_5-r2",
+      "context": "case_5",
+      "repeat": 2,
+      "seed_commitment": "99c2c01e4944945c311e373f904eaa25f42ed189ed326fd57f17f73bf078045e"
+    },
+    {
+      "assignment_id": "case_6-r2",
+      "context": "case_6",
+      "repeat": 2,
+      "seed_commitment": "307eaeff996e60f86f8e967eeca866337f5ab50d48167158f8eb75072e32bb76"
+    }
+  ],
+  "parallelism": 1,
+  "pilot_spend_target_usd": 1.5,
+  "preflight_required": "Exact weighted structural gate; tests; independent review; protected Harbor reference and no-op; no simulator/evaluator source or token in model container.",
+  "retries": 0,
+  "schema_version": 1,
+  "scope": "Frozen two-independent-uncertainty microenvironment with one shared targeted inspection. No continuous-rover or final-task choice.",
+  "seed_commitment_format": "SHA256 compact sorted JSON of assignment_id,context,seed,salt; reveal after outcomes. repeat is metadata excluded from hash.",
+  "selection": "Six hand-designed mirrored development contexts frozen before model outcomes. Independent128-bit seeds, no outcomes inspected before commitment publication. No forced outcome balancing.",
+  "stop_new_launches_at_pilot_reported_usd": 1.0,
+  "stop_on_unknown_usage": true,
+  "timeout_sec": 1800
+}
