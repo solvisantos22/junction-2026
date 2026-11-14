@@ -665,6 +665,8 @@ python3 -m lightlag_dynamic.biomes.max_check --seeds 2600-2639 --workers 20
 - Three missions scored zero.
 - `kf_mpc` crashed once (seed 2624: commands beyond the horizon), as on the development seeds.
 
+**On Kristján's Lightlag Traverse:** the same mechanics are a MAX map option there, and `max_navigator`'s layers ride on his pilot as `manh_max`. See [Lightlag Traverse: normal map and MAX map](lightlag-traverse-max.md).
+
 ## Limits
 
 - **No model has played a biome.** Whether a biome opens a gap between an agent and a reference is unknown.
