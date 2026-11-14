@@ -315,8 +315,11 @@ def web():
             return "driving"
         except Exception:
             return "failed"
-        _reload()                              # built: ready once this container sees the saved page
-        return "ready" if Path("/cache/" + PAGE.format(seed_n)).exists() else "driving"
+        _reload()                              # done: a build saves its page before it returns
+        if Path("/cache/" + PAGE.format(seed_n)).exists():
+            return "ready"
+        _forget(seed_n)                        # a finished build with no page here (one for an older page version): build again
+        return "none"
 
     @api.get("/", response_class=HTMLResponse)
     def landing():
