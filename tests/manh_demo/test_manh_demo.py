@@ -1,4 +1,4 @@
-"""manh_demo_1, the parts that need no browser, no Docker and no sound card.
+"""manh_demo_1 and the second draft, the parts that need no browser, no Docker and no sound card.
 
     python3 -m unittest discover -s tests/manh_demo -v
 
@@ -9,6 +9,8 @@ need numpy, scipy and soundfile and are skipped without them.
 
 import base64
 import hashlib
+import json
+import math
 import re
 import sys
 import tempfile
@@ -36,10 +38,10 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def fake_words():
+def fake_words(lines=None):
     """Word timings as the voice model would report them: every token a third of a second after the last."""
     words, lengths = {}, {}
-    for key, text in base.LINES.items():
+    for key, text in (base.LINES if lines is None else lines).items():
         tokens = []
         for number, found in enumerate(re.finditer(r"[\w'’-]+|[^\w\s]", text)):
             after = text[found.end():found.end() + 1]
@@ -172,6 +174,102 @@ class CutTest(unittest.TestCase):
         self.assertLess(cut.LIMIT_SECONDS, 120.0)
         self.assertGreaterEqual(cut.TARGET_SECONDS, 119.0)
         self.assertLess(cut.TARGET_SECONDS, 119.5)
+
+
+RUNS = REPO / "docs" / "lightlag-runs"
+
+
+def mission(run, site):
+    folder = RUNS / run / "artifacts" / "evaluator" / "missions" / "{:02d}".format(site)
+    return json.loads((folder / "replay.json").read_text(encoding="utf-8"))
+
+
+def ticks_of(replay, kind):
+    return [state["tick"] for state in replay["states"] for event in state["events"] if event["type"] == kind]
+
+
+class SecondDraftTest(unittest.TestCase):
+    """The next draft (manh_demo_2): its script, its cast of nine models and what it says about them."""
+
+    def setUp(self):
+        self.kept = base.LINES
+        base.LINES = cut.LINES2                             # as make.use(2) does: the word timings are looked up in the film's own lines
+        self.lengths, self.words = fake_words(cut.LINES2)
+        self.shots = cut.shots2(self.lengths, self.words)
+
+    def tearDown(self):
+        base.LINES = self.kept
+
+    def test_every_line_is_spoken_once_and_in_order(self):
+        spoken = [beat["vo"] for shot in self.shots for beat in shot["beats"] if beat.get("vo")]
+        self.assertEqual(spoken, list(cut.LINES2))
+        self.assertEqual(set(cut.SUBTITLES2), set(cut.LINES2))
+        names = [shot["name"] for shot in self.shots]
+        self.assertEqual(len(names), len(set(names)))
+        base.LINES = self.kept
+        first = {shot["name"] for shot in cut.shots(*fake_words())}
+        base.LINES = cut.LINES2
+        self.assertFalse(set(names) & first)                 # the first cut's recordings are not overwritten
+        longer = cut.shots2(self.lengths, self.words, stretch=2.0)
+        self.assertAlmostEqual(longer[-1]["beats"][-1]["pad"] - self.shots[-1]["beats"][-1]["pad"], 2.0)
+
+    def test_the_cast_is_one_saved_run_per_model(self):
+        lineup = {name for models in makers.LINEUP.values() for name in models}
+        self.assertEqual(set(makers.CAST), lineup)
+        for model, run in makers.CAST.items():
+            self.assertTrue((RUNS / run / "artifacts" / "evaluator" / "missions" / "03" / "replay.json").exists(), run)
+            self.assertEqual(makers.maker_of(model), next(key for key, models in makers.LINEUP.items() if model in models))
+        self.assertEqual(set(makers.cast_tiers().values()), set(makers.TIERS))
+        for run in (cut.FAST, cut.MID, cut.FLAGSHIP, cut.FLAT):
+            self.assertIn(run, makers.CAST.values())
+
+    def test_the_ladder_shows_what_the_replays_hold(self):
+        fast = mission(cut.FAST, 3)                          # "misses, by three centimetres ... nine tries, one rock"
+        misses, state = ticks_of(fast, "sample_failed"), fast["states"][104]
+        self.assertIn(104, misses)
+        reach = min(math.hypot(t["x"] - state["position"][0], t["y"] - state["position"][1]) for t in fast["world"]["targets"])
+        self.assertEqual(round((reach - fast["config"]["target_radius"]) * 100), 3)
+        self.assertEqual((len(misses), len(fast["result"]["samples"])), (8, 1))
+        stops = ticks_of(mission(cut.MID, 3), "safety_stop")       # "freezes ... thirty times"
+        self.assertEqual((stops[0], len(stops)), (302, 30))
+        flagship = mission(cut.FLAGSHIP, 1)                  # "thirteen metres from home, twenty-one samples on board"
+        died = next(s for s in flagship["states"] if not s["alive"])
+        home = flagship["world"]["base"]
+        self.assertEqual(died["tick"], 409)
+        self.assertEqual(round(math.hypot(died["position"][0] - home[0], died["position"][1] - home[1])), 13)
+        self.assertEqual(len(flagship["result"]["samples"]), 21)
+        flat = mission(cut.FLAT, 3)                          # "drove until its battery was flat"
+        self.assertEqual(next(s["tick"] for s in flat["states"] if not s["alive"]), 62)
+
+    def test_what_the_narration_says_about_the_scores_holds(self):
+        claude, reference = {}, None
+        for path in sorted(RUNS.glob("campaign-*/run.json")):
+            meta = json.loads(path.read_text(encoding="utf-8"))
+            if meta.get("kind") == "claude":
+                claude.setdefault(meta["model"].upper(), []).append(meta["reward"])
+            elif meta.get("kind") == "reference":
+                reference = meta["reward"]
+        table = makers.tier_table(claude, reference, makers.facts()["rl"])
+        self.assertEqual(len(table["rows"]), 9)
+        self.assertLess(table["best_run"]["score"], reference)                              # "none beat our driver"
+        for key, said in cut.SAID2.items():                                                  # 37 percent, 48, eight of the nine
+            self.assertEqual(table[key], said, key)
+        self.assertEqual([row["mean"] for row in table["rows"]], sorted((row["mean"] for row in table["rows"]), reverse=True))
+        with self.assertRaises(SystemExit):
+            makers.tier_table(claude, table["best_run"]["score"], 0.3)                       # a run at the planner's score stops the build
+
+    def test_the_replay_page_carries_nine_models_and_the_trained_agent(self):
+        before = {path: digest(path) for path in KRISTJANS}
+        with tempfile.TemporaryDirectory() as folder:
+            page = pages.cast_page(Path(folder), makers.CAST)
+            html = page.read_text(encoding="utf-8")
+            self.assertIn("'AI run you follow'", base64.b64decode(re.search(r'id="src-app" type="application/octet-stream">([^<]+)<', html).group(1)).decode("utf-8"))
+            for site in (1, 2, 3):
+                data = json.loads(base64.b64decode(re.search(r'id="src-data-%d" type="application/octet-stream">([^<]+)<' % site, html).group(1)))
+                labels = [run["label"] for run in data["runs"]]
+                self.assertEqual(labels[0], "Reference")
+                self.assertEqual(set(labels[1:]), set(makers.CAST) | {"RL agent · PPO"})
+        self.assertEqual(before, {path: digest(path) for path in KRISTJANS})
 
 
 @unittest.skipIf(sound is None, "numpy, scipy and soundfile are needed for the sound tests")

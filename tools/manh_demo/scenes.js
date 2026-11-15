@@ -140,7 +140,7 @@
         score: F.reference, claim: 'NEVER LOST A ROVER, HERE OR ON 300 MORE WORLDS' },
       { key: 'rl', color: C.lime, title: 'OUR RL AGENT', kind: 'TRAINED FROM SCRATCH ON MODAL', sub: `${F.rl_runs} TRAINING RUNS · ${F.rl_missions.toLocaleString('en-US')} PRACTICE MISSIONS EACH`,
         lines: ['Learns by trial and error which rock to go for', 'A hand-written navigator steers underneath it', 'A reference point: what learning reaches today'],
-        score: F.rl, claim: 'ABOVE EVERY CLAUDE RUN · BELOW THE PLANNER' },
+        score: F.rl, claim: F.below_rl === undefined ? 'ABOVE EVERY CLAUDE RUN · BELOW THE PLANNER' : `AHEAD OF ${F.below_rl} OF THE ${F.models} MODELS · BEHIND THE PLANNER` },
     ];
     panels.forEach((panel, i) => {
       const x = 120 + i * 870, y = 262, wide = 810, tall = 616, at = P.panels[i], k = appear(t, at, 0.45);
@@ -163,8 +163,63 @@
       text(panel.claim, x + 60 + number, y + tall - 54, { size: 22, color: C.dim, spacing: 0.11, alpha: shown });
       g.restore();
     });
-    rise(t, P.note, () => text(`FOR SCALE · A SIMPLE "NEAREST ROCK FIRST" DRIVER WITH THE SAME NAVIGATOR: ${three(F.greedy)} · THE BEST CLAUDE RUN: ${three(F.best_claude)}`,
+    rise(t, P.note, () => text(F.best_model
+      ? `ON AVERAGE OVER ITS RUNS · THE BEST MODEL, ${F.best_model.name}: ${three(F.best_model.score)} · A SIMPLE "NEAREST ROCK FIRST" DRIVER: ${three(F.greedy)}`
+      : `FOR SCALE · A SIMPLE "NEAREST ROCK FIRST" DRIVER WITH THE SAME NAVIGATOR: ${three(F.greedy)} · THE BEST CLAUDE RUN: ${three(F.best_claude)}`,
       120, 946, { size: 24, color: C.dim, spacing: 0.13 }));
+  };
+
+  // Every campaign run of all nine models beside the planner (window.__MANH.tiers, from makers.tier_table): a row per
+  // model, best average first; a dot for each run, a bar for the average; the planner's score as a gold line down
+  // through all of them. cues[0] rings the best single run, cues[1] names the planner.
+  const TIERS = { line: 0.6, rows: 0.9, step: 0.13, foot: 3.4, top: 268, row: 68, x0: 740, x1: 1540 };
+  SCENES.tiers = (t, D, data, cues) => {
+    backdrop('THE RESULTS');
+    const T = M.tiers, R = T.rows, L = TIERS, X = v => L.x0 + (L.x1 - L.x0) * v / 0.5, bottom = L.top + R.length * L.row;
+    heading(t, 'NINE MODELS · THREE MAPS IN A ROW', `${T.count} LIVE RUNS · THE SCORE IS THE SHARE OF EVERYTHING ON THE MAPS THAT A ROVER BROUGHT HOME`);
+    rise(t, 0.5, () => {
+      for (const v of [0, 0.1, 0.2, 0.3, 0.4, 0.5]) {
+        rect(X(v), L.top - 4, 1, bottom - L.top + 8, 'rgba(243,234,217,.10)');
+        text(v.toFixed(1), X(v), bottom + 34, { size: 22, color: C.faint, align: 'center', spacing: 0.05 });
+      }
+    });
+    const best = T.best_run, ring = cues[0] !== undefined ? appear(t, cues[0], 0.35) : 0, ours = cues[1] !== undefined ? appear(t, cues[1], 0.35) : 0;
+    R.forEach((r, i) => {
+      const y = L.top + i * L.row, at = L.rows + i * L.step, k = appear(t, at, 0.35);
+      if (k <= 0.003) return;
+      const color = M.tiles[r.maker].text, grow = out((t - at - 0.1) / 0.7);
+      g.save(); g.globalAlpha = k; g.translate((1 - out((t - at) / 0.45)) * -26, 0);
+      tile(r.maker, 120, y + 10, 46);
+      text(r.name, 184, y + 46, { size: 37, color, spacing: 0.08, bare: true });
+      text(r.tier, 500, y + 44, { size: 20, color: C.faint, spacing: 0.16 });
+      text(three(r.mean * grow), 706, y + 47, { size: 38, color: C.ink, spacing: 0.04, align: 'right' });
+      rect(L.x0, y + 33, L.x1 - L.x0, 2, 'rgba(243,234,217,.12)');
+      rect(L.x0, y + 23, Math.max(0, X(r.mean) - L.x0) * grow, 22, color, 0.3);
+      r.runs.forEach((score, n) => {
+        const show = appear(t, at + 0.25 + n * 0.08, 0.25);
+        if (show <= 0.003) return;
+        const same = r.runs.slice(0, n).filter(other => Math.abs(other - score) < 0.006).length, dy = same ? (same % 2 ? -12 : 12) * Math.ceil(same / 2) : 0;
+        g.save(); g.globalAlpha *= show; g.fillStyle = color; g.beginPath(); g.arc(X(score), y + 34 + dy, 9, 0, Math.PI * 2); g.fill();
+        g.strokeStyle = '#140d0b'; g.lineWidth = 2.5; g.stroke(); g.restore();
+      });
+      if (r.name === best.name && ring > 0.003) {            // the best single run of all: a ring, and what it scored
+        const pulse = 1 + 0.5 * (1 - out((t - cues[0]) / 0.6));
+        g.save(); g.globalAlpha *= ring; g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.arc(X(best.score), y + 34, 17 * pulse, 0, Math.PI * 2); g.stroke(); g.restore();
+        text(`${three(best.score)} · BEST SINGLE RUN`, X(T.reference) + 34, y + 44, { size: 25, color: C.ink, spacing: 0.12, alpha: ring });
+      }
+      g.restore();
+    });
+    // the planner: a gold line down through every row
+    const drawn = out((t - L.line) / 0.9), shown = appear(t, L.line, 0.3);
+    rect(X(T.reference) - 2, L.top - 30, 4, (bottom - L.top + 38) * drawn, C.gold, shown);
+    text('OUR PLANNER', X(T.reference) + 34, L.top + 34, { size: 30, color: C.gold, spacing: 0.14, alpha: shown * (0.55 + 0.45 * ours) });
+    text(three(T.reference), X(T.reference) + 34, L.top + 34 + L.row, { size: 58, color: C.gold, spacing: 0.04, alpha: shown * (0.55 + 0.45 * ours) });
+    text('NEVER LOST', X(T.reference) + 34 + 148, L.top + 10 + L.row, { size: 22, color: C.gold, spacing: 0.14, alpha: ours });
+    text('A ROVER', X(T.reference) + 34 + 148, L.top + 38 + L.row, { size: 22, color: C.gold, spacing: 0.14, alpha: ours });
+    rise(t, L.foot, () => {
+      rect(120, 966, 1680, 2, C.line);
+      text('THE SAME TASK, THE SAME FIVE TOOLS AND 45 MINUTES FOR ALL · A DOT IS ONE RUN · THE BAR IS THE AVERAGE', 120, 1012, { size: 26, color: C.dim, spacing: 0.13 });
+    });
   };
 
   // When each thing on a chart starts to move, in seconds from the start of the scene. `check` marks a time
@@ -226,6 +281,14 @@
       for (let i = 0; i < 2; i++) for (let n = 0; n < 3; n++) list.push({ at: P.lines + i * 0.2 + n * 0.32, kind: 'tick', step: n + i, check: true });
       list.push({ at: P.scores, kind: 'bar', score: 0.476, gold: true, check: true }, { at: P.scores + 0.3, kind: 'bar', score: 0.366, check: true });
       list.push({ at: P.note, kind: 'chime_soft', step: 1, check: true });
+      return list;
+    },
+    tiers(D, data, cues) {
+      const L = TIERS, list = [{ at: L.line, kind: 'flow', len: 0.9, rise: -1, check: true }];
+      M.tiers.rows.forEach((row, i) => list.push({ at: L.rows + i * L.step, kind: 'bar', score: row.mean, step: i, check: true }));
+      if (cues[0] !== undefined) list.push({ at: cues[0], kind: 'tick', step: 2, check: true });
+      if (cues[1] !== undefined) list.push({ at: cues[1], kind: 'hit_soft', check: true });
+      list.push({ at: L.foot, kind: 'chime_soft', check: true });
       return list;
     },
     end(D, data, cues) {

@@ -106,3 +106,140 @@ def shots(durations: Dict[str, float], words: Dict[str, List[Dict[str, Any]]], s
     end = by["end"]["beats"][-1]
     end["pad"] = round(end.get("pad", 0.0) + stretch, 3)
     return plan
+
+
+# ---------------------------------------------------------------- the second draft: script v2, compiled from the pieces
+# Manh, 15 November about 05:20: "compile it onto a next draft demo", and a little later: the replay should carry all
+# the different agents, as a story from the light models to the heavy ones. The words follow docs/manh-demo/script-v2.md
+# (plain, a cliffhanger after every beat), spoken by the placeholder voice until the team records its own. The pictures
+# are the pieces he has seen one by one: the opening from orbit, the lineup, the floating marks and the score-cards,
+# the card for the reference and the trained agent, and Kristján's planner, 300-world and end scenes. New here: a
+# replay with one rover per model (`makers.CAST`) and a chart of every run of all nine (`scenes.js`, `tiers`).
+#
+# The ladder, one failure per tier and three labs between them, every one a moment of a saved run:
+#   FAST      GPT-6 Luna, site 3: samples 2.53 m from a rock that needs 2.5 m (tick 104); 8 misses and 1 sample there
+#   BALANCED  Claude Sonnet 5.5, site 3: onto the scarp at tick 302; 30 safety stops there
+#   FLAGSHIP  Claude Opus 5.5, site 1: battery flat at tick 409, 13 m from the lander, 21 samples on board
+# and then the reason, on Gemini 4 Argon at site 3: flat at tick 62, where the reference waits for the sun at tick 93.
+# What line n8 and n11 say about the scores is checked against the runs at every build (`makers.tier_table`).
+NAME2 = "manh_demo_2"
+VOICE2 = {"voice": "af_heart", "speed": 1.12}
+LINES2: Dict[str, str] = {
+    "n1": "Imagine driving a car where everything you see happened three seconds ago, and the car obeys three seconds late. "
+          "That is every day on Mars. So who do you trust to drive?",
+    "n2": "We built that day. One rover, one day of sunlight, rocks to collect, and one rule: be home before the battery dies.",
+    "n3": "Then we handed the keys to nine AI models from three labs, from the fastest to the most powerful. "
+          "Surely one of them makes it home?",
+    "n4": "Mars doesn't play fair. A fast one reaches for a rock and misses, by three centimetres. No points. Nine tries, one rock.",
+    "n5": "A bigger one drives onto a slope too steep. The rover freezes and forgets its orders. Thirty times.",
+    "n6": "And a flagship: thirteen metres from home, twenty-one samples on board. It will not make it.",
+    "n6b": "Nothing broke. So what went wrong?",
+    "n7": "The sun. It's the only fuel. This rover drove until its battery was flat.",
+    "n7b": "Ours saw its battery fall, stopped, and waited for light. So how did all nine do?",
+    "n8": "On three maps in a row, none beat our driver. The best run came within a hair; the best average brought home "
+          "thirty-seven percent. Ours: forty-eight, and it never lost a rover. So what is it?",
+    "n9": "Not an AI. A planner: plain code that works out the whole day before the wheels turn. Lucky maps? We wondered too.",
+    "n10": "So we ran eighteen hundred more match-ups on Modal, on worlds nobody had seen. "
+           "The planner won seventeen hundred and eighty. Can a machine learn it instead?",
+    "n11": "We trained one from scratch. On average it out-scored eight of the nine models, and still lost to the planner.",
+    "n12": "AI can write the code. It can't yet plan the day. Can your agent make it home?",
+}
+SUBTITLES2: Dict[str, str] = {
+    **LINES2,
+    "n4": "Mars doesn't play fair. A fast one reaches for a rock and misses, by 3 centimetres. No points. 9 tries, 1 rock.",
+    "n5": "A bigger one drives onto a slope too steep. The rover freezes and forgets its orders. 30 times.",
+    "n6": "And a flagship: 13 metres from home, 21 samples on board. It will not make it.",
+    "n8": "On three maps in a row, none beat our driver. The best run came within a hair; the best average brought home "
+          "37%. Ours: 48, and it never lost a rover. So what is it?",
+    "n10": "So we ran 1,800 more match-ups on Modal, on worlds nobody had seen. "
+           "The planner won 1,780. Can a machine learn it instead?",
+    "n11": "We trained one from scratch. On average it out-scored 8 of the 9 models, and still lost to the planner.",
+}
+# What lines n8 and n11 say in words, as `makers.tier_table` counts it; the build stops if the runs say otherwise.
+SAID2 = {"best_mean_percent": 37, "reference_percent": 48, "below_learned": 8}
+DIVE2, LAND2, RISE2 = 2.4, 3.0, 2.4
+FAST, MID, FLAGSHIP, FLAT = "campaign-agent-gpt-6-luna-1", "campaign-agent-sonnet-1", "campaign-agent-opus-2", "campaign-agent-gemini-4-argon-1"
+STORY_LEAD = 11.8               # ticks before a moment at which story mode is started, to arrive on a word (see shots2)
+
+
+def shots2(durations: Dict[str, float], words: Dict[str, List[Dict[str, Any]]], stretch: float = 0.0) -> List[Dict[str, Any]]:
+    """The second draft, shot by shot. `stretch` lengthens the last card (see `make.fit`)."""
+    say = base.Words(words)                                # reads the lines the build has switched to (LINES2)
+    at = lambda line, phrase, lead=0.0: round(say.at(line, phrase) + lead, 2)          # noqa: E731
+    chase = "A.setCam('chase'); A.view.k = 1; A.view.snap = true; A.setSpeed(1); A.setPlaying(true);"
+    orbit = round(max(6.0, 0.9 + at("n1", "So who") - 0.25), 2)      # the fall begins on the question
+    miss = round(0.3 + at("n4", "misses") + 0.35, 2)                 # the sample fails as "misses" is said
+    stop = round(0.3 + at("n5", "The rover freezes") + 0.2, 2)       # the first safety stop on "freezes"
+    flat = round(0.4 + at("n6", "It will not make it") + 0.95, 2)    # the battery is flat as the sentence ends
+    return [
+        # 1. The opening: Mars from orbit while the viewer is put in the driver's seat; the fall on the question; the landing
+        #    on our own map and the rise to the overview while the game is explained; the title.
+        {"name": "v2_intro", "page": "campaign", "site": 1, "addon": "intro.js",
+         "addon_settings": {"orbit": orbit, "dive": DIVE2, "land": LAND2, "rise": RISE2}, "vacuum": [0.0, round(orbit + DIVE2 - 0.2, 2)],
+         "fade_in": 0.9, "beats": [
+            {"min": round(orbit + DIVE2, 2), "vo": "n1", "vo_at": 0.9, "over": True, "trackers": False,
+             "js": "A.showTitle(false); A.seek(0); A.setCam('map'); A.setPlaying(false);",
+             "sfx": [{"t": 0.4, "kind": "hit_soft"}, {"t": round(orbit - 0.3, 2), "kind": "riser", "len": DIVE2 + 0.3}]},
+            {"min": LAND2 + RISE2, "vo": "n2", "vo_at": 0.4, "over": True, "trackers": False, "sfx": [{"t": 0.0, "kind": "whoosh", "len": 2.2}]},
+            {"min": 3.4, "pad": 0.45, "trackers": False, "js": "A.setSpeed(4); A.setPlaying(true);",
+             "overlay": [{"kind": "title", "from": 0.1, "to": 99}], "sfx": [{"t": 0.15, "kind": "hit"}]},
+        ]},
+        # 2. Who drives: three labs, three tiers, nine models.
+        {"name": "v2_lineup", "page": "film", "scene": "lineup", "beats": [{"vo": "n3", "vo_at": 0.5, "pad": 0.9, "min": 7.4}]},
+        # 3. The ladder. A fast model: behind GPT-6 Luna at site 3 as it samples 3 cm too far from a rock.
+        {"name": "v2_fast", "page": "campaign", "site": 3, "beats": [
+            {"vo": "n4", "vo_at": 0.3, "pad": 0.9,
+             "js": "A.showTitle(false); A.follow('%s'); A.seek(%.2f); %s" % (FAST, 104 - base.PACE * miss, chase),
+             "overlay": [
+                 {"kind": "caption", "side": "left", "from": round(miss + 0.25, 2), "to": round(0.3 + at("n4", "Nine tries") - 0.1, 2), "text": "3 CM TOO FAR · NO POINTS"},
+                 {"kind": "caption", "side": "left", "from": round(0.3 + at("n4", "Nine tries"), 2), "to": 99, "text": "9 TRIES · 1 ROCK"},
+             ]},
+        ]},
+        #    A balanced one: Claude Sonnet 5.5 at the scarp of the same site, stopped by the tilt limit again and again.
+        {"name": "v2_mid", "page": "campaign", "site": 3, "beats": [
+            {"vo": "n5", "vo_at": 0.3, "pad": 1.0,
+             "js": "A.showTitle(false); A.follow('%s'); A.seek(%.2f); %s" % (MID, 302 - base.PACE * stop, chase),
+             "overlay": [{"kind": "caption", "side": "left", "from": round(stop + 0.25, 2), "to": 99, "text": "TOO STEEP · 30 SAFETY STOPS"}],
+             "sfx": [{"t": 0.0, "kind": "cut"}]},
+        ]},
+        #    A flagship: behind Claude Opus 5.5 at site 1, timed so that its battery runs out as "it will not make it"
+        #    ends; then the camera rises and the score-card says what happened.
+        {"name": "v2_flagship", "page": "campaign", "site": 1, "beats": [
+            {"vo": "n6", "vo_at": 0.4, "over": True, "until": "A.state.t >= 409",
+             "js": "A.showTitle(false); A.HOLD.lost = 999; A.follow('%s'); A.seek(%.2f); "
+                   "A.setCam('chase'); A.view.k = 1; A.view.snap = true; A.setSpeed(2); A.setPlaying(true);" % (FLAGSHIP, 409 - 3 * flat),
+             "overlay": [{"kind": "caption", "side": "left", "from": round(0.4 + at("n6", "thirteen metres"), 2), "to": round(flat - 0.05, 2),
+                          "text": "13 M FROM HOME · 21 SAMPLES ON BOARD"}],
+             "sfx": [{"t": 0.0, "kind": "cut"}]},
+            {"min": 0.9, "thump": 0.0, "js": "A.setPlaying(false); A.seek(409); document.getElementById('mini').style.opacity = '0';"},
+            {"vo": "n6b", "vo_at": 1.0, "min": 4.4, "pad": 1.1, "js": "A.startStory();", "sfx": [{"t": 0.0, "kind": "whoosh", "len": 1.3}]},
+        ]},
+        # 4. Why: the sun. Site 3 from above in story mode: Gemini 4 Argon runs flat at tick 62; a cut to tick 93, where the
+        #    reference stops and waits for light.
+        {"name": "v2_energy", "page": "campaign", "site": 3, "beats": [
+            {"vo": "n7", "vo_at": 0.3, "over": True, "until": "!!(A.story.active && A.story.active.kind === 'lost')",
+             "js": "A.showTitle(false); A.HOLD.lost = 999; A.HOLD.ref_wait = 999; A.follow('%s'); A.seek(%.2f); A.setCam('map'); A.startStory();" % (FLAT, 62 - STORY_LEAD),
+             "overlay": [{"kind": "caption", "from": 0.35, "to": round(0.3 + at("n7", "This rover") - 0.1, 2), "text": "THE ONLY FUEL IS THE SUN"}]},
+            {"min": 3.0, "thump": 0.0},
+            {"vo": "n7b", "vo_at": 0.35, "over": True, "until": "!!(A.story.active && A.story.active.kind === 'ref_wait')",
+             "js": "A.stopStory(); A.seek(90.4); A.startStory();", "sfx": [{"t": 0.0, "kind": "cut"}]},
+            {"min": 3.0, "pad": 1.0},
+        ]},
+        # 5. Every run of all nine models against the planner.
+        {"name": "v2_tiers", "page": "film", "scene": "tiers", "beats": [
+            {"vo": "n8", "vo_at": 0.4, "pad": 1.5, "min": 8.0,
+             "cues": [round(0.4 + at("n8", "The best run") - 0.1, 2), round(0.4 + at("n8", "Ours") - 0.1, 2)]}]},
+        # 6. What our driver is (Kristján's scene), and the 300 fresh worlds on Modal (his).
+        {"name": "v2_reference", "page": "film", "scene": "reference", "beats": [
+            {"vo": "n9", "vo_at": 0.4, "pad": 1.3,
+             "cues": [round(0.4 + at("n9", "Not an AI") + 0.1, 2), round(0.4 + at("n9", "A planner") - 0.1, 2),
+                      round(0.4 + at("n9", "plain code") - 0.1, 2), round(0.4 + at("n9", "before the wheels") - 0.1, 2)]}]},
+        {"name": "v2_farm", "page": "film", "scene": "farm", "beats": [
+            {"vo": "n10", "vo_at": 0.4, "pad": 1.0, "min": 9.0,
+             "cues": [round(0.4 + at("n10", "The planner won") - 0.1, 2), round(0.4 + at("n10", "Can a machine") - 0.1, 2)]}]},
+        # 7. The trained agent beside the planner, and the end card.
+        {"name": "v2_drivers", "page": "film", "scene": "drivers", "beats": [{"vo": "n11", "vo_at": 0.5, "pad": 1.6, "min": 7.4}]},
+        {"name": "v2_end", "page": "film", "scene": "end", "fade_out": 0.8, "beats": [
+            {"vo": "n12", "vo_at": 0.5, "pad": round(1.4 + stretch, 3), "min": 6.0,
+             "cues": [round(0.5 + at("n12", "It can't yet") - 0.1, 2), round(0.5 + at("n12", "Can your agent") - 0.15, 2)]}]},
+    ]

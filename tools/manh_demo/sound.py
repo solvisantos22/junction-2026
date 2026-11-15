@@ -596,6 +596,8 @@ def build(timeline: List[Dict[str, Any]], spoken: List[Dict[str, Any]], folder: 
                 for event in frame.get("events", []):
                     if event["k"] in ("sample", "late", "miss", "stop", "card", "way"):
                         cues.append({**event, "at": at, "kind": event["k"]})
+                    elif event["k"] == "then":                                  # the second line of a score-card arrives
+                        cues.append({"at": at, "kind": "chime_soft", "step": 2})
         for cue in item.get("sfx", []):
             cues.append({**cue, "at": begin + cue["at"]})
         thumps += [round(begin + at, 3) for at in item.get("thumps", [])]
