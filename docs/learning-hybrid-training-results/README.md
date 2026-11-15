@@ -1,6 +1,6 @@
 # Greedy-prior PPO training
 
-All six fresh training runs are active on Modal. Source and resources were published before launch.
+Five original training calls continue; `prior-29` terminated with a wrapper interruption after 1760 recorded missions. The published all-six completion gate cannot pass, so fresh worlds 629000–629127 remain unopened. Source and resources were published before launch.
 [Protocol](../learning-hybrid-training.md) · [six-run configuration](campaign.json).
 
 The new learner starts with greedy as its most likely action and learns
@@ -124,3 +124,20 @@ with all 51 source hashes matching the freeze/receipt and 896 completed missions
 The cause is unconfirmed; no persistent report corruption was found. The next
 watcher poll was healthy for all six runs. [Preserved diagnosis and identity checks](progress-read-recovery/diagnosis.json).
 No source, policy, training job or cloud reservation was changed to recover.
+
+## Interrupted seed — 15 November 00:33 UTC
+
+Original call `fc-01M7E7ZGG2JXNY7Z09VTXECPHV` (`prior-29`) returned terminal
+`wrapper_error` / `KeyboardInterrupt` at **00:21:13 UTC**. The traceback points
+to the wrapper waiting for its training subprocess, rather than an optimizer
+or simulator exception. The wrapper's cleanup terminates that subprocess
+group. Its last committed report records **1760/4096 missions**, with initial
+and 512-mission validations retained. The precise external interruption cause
+is unconfirmed. No resume, replacement seed or substituted checkpoint is
+authorized by this experiment's fixed protocol.
+
+The other five original calls continue within their original allocation and
+will be retained as **descriptive development evidence**. They cannot rescue
+the six-run primary comparison. No final policy freeze or fresh evaluation
+will be represented as complete; worlds **629000–629127 stay unopened**.
+Remaining jobs are not restarted, and the team reference stays unchanged.

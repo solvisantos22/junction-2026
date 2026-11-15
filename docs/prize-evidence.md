@@ -917,3 +917,24 @@ Codex also delivered a read-only completion watcher outside both frozen source c
 - **Verification:** 74 tests pass, among them: a mission's rewards add up to its score, home is final, a masked choice raises, the policy never picks a masked action, PPO gradients with a mask match finite differences, reserved worlds are refused, a stopped run resumes from its checkpoint, and the campaign tool scores all missions together. The campaign tool gives the reference 0.476, as Harbor does (0.476257). The first-round policy plays exactly as the nearest rule on all 300 fresh worlds.
 - **Evidence:** [README section](../lightlag_ppo_icm/README.md), [policies, run logs, check and campaign rows](../lightlag_ppo_icm/policies/), [tests](../tests/lightlag_ppo_icm/test_targets.py).
 - **Scope and limits:** a sandbox learner, not a rules or reference decision; `lightlag_traverse/` and the campaign task are unchanged. The steering, the charging and the turn for home are Kristján's pilot's, and the agent never chose home itself. The mask is not airtight: about one rover in a thousand training missions ran its battery flat, and one in the 2,100 target-mode missions of the fresh check (not the kept policy's). The hand rule is still ahead of the learned policy.
+
+### 15 November — Sölvi / Codex: interruption diagnosis without repeated work
+
+Under Sölvi's authorized parallel experiment and completion wake-up, Codex
+reconciled the original Modal coordinator and six training call IDs. The hybrid
+coordinator returned `KeyboardInterrupt`; all **3145 submitted cases** were
+retained, including 15 completed results it had not collected. Independent
+Codex review verified every row's original job/call/source/spec/map/artifact
+and audit bindings, with 3145 home/alive and no invalid calls; full archived
+trajectories were not re-downloaded or re-executed in this diagnosis. The
+remaining 5175 cases require a separately published continuation freeze.
+[Failure and call evidence](learning-hybrid-results/development/interruption/diagnosis.json).
+
+The separate `prior-29` training wrapper also returned `KeyboardInterrupt`,
+with 1760 recorded missions. Codex retained the failure and enforced the
+published all-six completion gate: no resumed/replacement training and no
+fresh evaluation of an incomplete primary comparison. Five original calls
+continue as descriptive development evidence. External interruption cause is
+unconfirmed. [Training handoff](learning-hybrid-training-results/README.md#interrupted-seed--15-november-0033-utc).
+No new cloud job, model API call, reference change or claimed improvement in
+this diagnosis increment.

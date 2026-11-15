@@ -1,6 +1,6 @@
 # RL–greedy hybrid search
 
-The 65-mission Modal smoke passed; the 8320-mission development search is running. [Fixed protocol](../learning-hybrid.md).
+The 65-mission Modal smoke passed. The development coordinator was interrupted after submitting 3145 of 8320 missions; all 3145 submitted cases completed successfully. An audited continuation of only the 5175 never-submitted cases is being prepared, with no new launch yet. [Fixed protocol](../learning-hybrid.md).
 
 The 65-arm development search compares individual-policy shortlists, rank
 ensembles across all retained seeds, and RL–greedy rank blends. It uses new
@@ -55,3 +55,27 @@ Smoke app: [`ap-SiN8z0aHUAlm2IPQLFEXoU`](https://modal.com/apps/solvisantos22/ma
 Development app: [`ap-ggXtMuvzfCF8qtxLc2Aghg`](https://modal.com/apps/solvisantos22/main/ap-ggXtMuvzfCF8qtxLc2Aghg), [receipt](development/receipt.json). Initial production observation: 249/8320 audited completions, no reported failures, roughly 73 missions/minute including startup. The earlier 20–40 minute estimate underestimated coordination overhead; allow about two hours for development at this observed rate. This is an initial estimate, not a completion promise. A separate read-only continuation watcher is being prepared in the claimed `tools/learning_hybrid_ops/` scope, outside both frozen source closures; it will request this chat to resume at terminal stages and respect pause/stop markers.
 
 The [shared completion watcher](../learning-hybrid-training-results/README.md#completion-watcher-and-first-checkpoints) is now active for development, confirmation, final evaluation and the six new training calls. It preserves pause/stop behavior and never launches work itself. The first healthy watcher snapshot showed 2075/8320 development cases audited, no reported job failure.
+
+## Interruption and recovery decision — 15 November 00:33 UTC
+
+The original coordinator returned terminal `failed` / `KeyboardInterrupt` at
+00:21:37 UTC. Its final snapshot contained 3130 completed rows and 15
+submitted calls without collected results. Read-only reconciliation retrieved
+all 15 original results: **3145 submitted missions completed**, with no failed
+worker among them. The original failed state and every call identity remain
+retained. An operations-only continuation will be published before launching
+the remaining **5175 never-submitted cases**. It must verify absence of prior
+launch intents/calls for every case, preserve the frozen worker/source/weights,
+and produce a separately identified combined record only after all 8320
+original cases satisfy their audits. No partial-data selection is permitted.
+
+Both this coordinator and the separate `prior-29` training wrapper received
+`KeyboardInterrupt` within about 24 seconds. The observed exception does not
+establish its external cause. Modal documents interruption on
+[container preemption](https://modal.com/docs/guide/preemption); that is a
+plausible explanation, not a confirmed diagnosis. The continuation will use
+a non-preemptible coordinator under a separately published resource freeze.
+No completed mission, existing training run, or protected source is restarted.
+Confirmation **611000–611255** and final **612000–612255** remain unopened.
+
+[Retained failure, original coordinator result and retrieved call evidence](development/interruption/diagnosis.json). An independent metadata/source audit verified every submitted row and the 54 source pins; full episode archives remain on Modal and were not re-downloaded or replayed in this diagnosis.
