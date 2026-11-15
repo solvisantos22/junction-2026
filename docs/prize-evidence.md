@@ -622,6 +622,16 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
 - **Evidence:** [video](demo-video/lightlag-traverse-demo.mp4), [README](demo-video/README.md), [pipeline](../tools/demo_video/).
 - **Scope:** new files, one addition at the end of `viewer/traverse/app.js` with its two generated pages rebuilt, and my own `TEAM_STATUS.md` row. Nothing uploaded or submitted.
 
+### 15 November — Kristján / Claude Code: the integrity review and the README front page
+
+- **Human direction:** Kristján asked what the open "exploit hunt" in the checklist was, then said to take it over from his Codex session's claim of Saturday 19:04 (which had published nothing) and to do the README. He decides when the entry is submitted and the video uploaded.
+- **Tool:** Claude Code; the session reported its model as Claude Fable 5.2. Harbor 0.25.0 and Docker on his laptop. No model API was called and nothing was paid for.
+- **Claude Code contribution:** `tools/traverse_integrity/`: a Harbor agent that runs an attack script inside the agent's container of a copy of the campaign task with its own seeds, a runner that sets the reward Harbor reports beside the simulator's own result and transcript, and a measurement of the one known limit. Eleven tests. The write-up [`traverse-integrity.md`](traverse-integrity.md) with its records. And the repository's `README.md`, rewritten from the Saturday draft as the submission's front page, with the GPT and Gemini runs Manh recorded, Sölvi's final learning result and the review.
+- **Result:** 27 attacks, none changed the reward or disclosed a hidden value; forged reward, result and grader files had no effect, and blocking the reward files had none. The reference reran at 0.476257 and doing nothing at 0.000. One limit is disclosed and not fixed, because the task is frozen: with this repository's code the public map gives away a world's seed (found among 2,000 candidates in 46 seconds), and a copy of the simulator then predicts the mission. The agent's container holds neither the code nor the seed.
+- **Verification:** both probe runs went through Harbor end to end and their reports are saved; the first run's one alarm was the probe's own check being too strict (an undeclared argument is dropped by the MCP layer and changes nothing), which was corrected and rerun. 11 new tests and the 75 Traverse tests pass on `main`'s code. Every number in the README was read from the file it links to. **Not verified:** a Linux host, exhausting the simulator, whether a model would try any of this on its own, and the README's commands from a clean clone of a public repository.
+- **Evidence:** [review](traverse-integrity.md), [records](traverse-integrity-results/), [tool](../tools/traverse_integrity/), [README](../README.md).
+- **Scope:** new files, `README.md`, the integrity row of `TEAM_STATUS.md`, a notice on `docs/submission-readme.md` and the rows of `docs/submission-checklist.md` this work settles. No task, simulator or reference file was edited. Nothing uploaded or submitted.
+
 ### 14 November — Kristján / Codex: make the 3D mission demo easier to present
 
 - **Human direction:** Kristján asked Codex to inspect the demo and improve its looks, controls and mission presentation. Claude Code authored the existing 3D scene; this increment builds on it.

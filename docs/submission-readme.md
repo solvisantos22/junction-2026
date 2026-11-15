@@ -1,6 +1,6 @@
 # Lightlag Traverse: a Mars rover campaign where frontier agents lose to a planner
 
-*Draft of the submission README (Saturday 14 November, about 22:15 Helsinki). Meant to become the repository's front page once the team agrees; numbers are from the files linked in each section.*
+*Superseded on Sunday 15 November, about 05:10 Helsinki: this draft became the repository's [README](../README.md), which adds the GPT and Gemini runs, Sölvi's final learning result and the integrity review. The text below is the Saturday draft (about 22:15), kept as it was; its numbers are older.*
 
 **AfterQuery: Break the Agent, Junction 2026.** One rover, three Mars-like sites in a row, a battery charged by the sun, and every command arriving three ticks late. Every rule and formula is public through five tools. A scripted planner brings its rover home at every site; seven Claude agent runs through OpenCode all score less, the closest by 0.18.
 
