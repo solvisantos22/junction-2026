@@ -1,16 +1,16 @@
 # Lightlag — Codex and Modal prize submission
 
-Prepared Sunday 15 November 2026; public-source access verified at **06:12 Helsinki**. **Use the existing Lightlag submission for AfterQuery and verify that both Best Use of Codex and Best Use of Modal are saved as tech challenges. Entry is not yet verified.** This is the team's concise sponsor case; the detailed [evidence log](prize-evidence.md) retains attribution, failures, app IDs and costs.
+Prepared Sunday 15 November 2026; public-source access verified at **06:12 Helsinki**. **Sölvi confirms saving both Best Use of Codex and Best Use of Modal in the application.** This is user-confirmed selection, not an independent UI check or confirmation of FINAL submission. This is the team's sponsor case; the detailed [evidence log](prize-evidence.md) retains attribution, failures, app IDs and costs.
 
 **Source access resolved:** at Sölvi's explicit request, the repository is now **PUBLIC**. GitHub metadata confirms public visibility, and anonymous requests to both the [repository](https://github.com/solvisantos22/junction-2026) and [this sponsor case](https://github.com/solvisantos22/junction-2026/blob/main/docs/sponsor-submission.md) returned **HTTP 200** with the expected content. The Modal app is also public. The remaining entry check is the Junction form, not source access.
 
 ## Finish the entry
 
-The last authenticated watcher observation, approximately **05:23 Helsinki**, showed Lightlag as **Draft**, with the tech-challenge selection and material fields empty. This is a dated observation, not proof that nobody has changed it since. This session could not access the authenticated browser; it has **not** changed or submitted the form.
+The last authenticated watcher observation, approximately **05:23 Helsinki**, showed Lightlag as **Draft**, with empty selections and material fields. **Sölvi's subsequent confirmation that both prizes are saved supersedes that older selection snapshot.** FINAL status and the current material fields are not independently verified. This session could not access the authenticated browser; it has **not** changed or submitted the form.
 
 One teammate should finish and check the existing [saved Lightlag entry](https://hackjunction.app/participate/45/submissions):
 
-1. Keep **AfterQuery / Break the Agent** as the main challenge. Select **Best Use of Codex** and **Best Use of Modal**, save, then reopen and verify both persist. The briefs permit tech challenges alongside a main challenge; the exact current multi-selection controls have not been verified. If the form only accepts one, ask Info Team how to enter both against this same project before creating a duplicate submission.
+1. Keep **AfterQuery / Break the Agent** as the main challenge and the two already-saved **Codex + Modal** selections. Recheck they persist when reviewing the final entry; do not create another project submission for them.
 2. Put the [public Modal app](https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run/) in **Project Demo**, the now-public [repository](https://github.com/solvisantos22/junction-2026) in **Source Code**, and [this sponsor case](https://github.com/solvisantos22/junction-2026/blob/main/docs/sponsor-submission.md) in **Other Links** or the description. Use the two paragraphs below in any sponsor-specific fields; if none exist, include their short combined version in the project description. Source and sponsor links have been checked anonymously; check the final video and PDF links the same way.
 3. Add the team's final **public video (at most two minutes)** and **PDF deck**. Give each sponsor visible credit in the deck; the short video line below can fit alongside the project's main story. This does not require a second video or a raw conversation dump.
 4. Check the current [Codex brief](https://hackjunction.app/participate/45/tech-challenges/49) and [Modal brief](https://hackjunction.app/participate/45/tech-challenges/40) for any additional entry control or updated instruction. No separate prize form was found in the retained briefs or community copies; this is **not** confirmation that no additional step exists.
@@ -20,7 +20,19 @@ One teammate should finish and check the existing [saved Lightlag entry](https:/
 
 ## Best Use of Codex — copy-ready case
 
-> Codex was our implementation and verification partner throughout Lightlag. With the team setting the research direction, budgets and stopping decisions, it built the early simulator and public-tool evaluator, then small reinforcement-learning controllers, Modal orchestration and reproducible reports around the final Traverse environment. Parallel Codex agents implemented and independently reviewed changes while shared claims and small verified commits kept three teammates coordinated. Codex reconciled interrupted jobs, preserved failures, froze policies before fresh tests and packaged auditable results instead of selecting only successes. Our final hybrid evaluation contains 2,560 matched missions and a reproducible source bundle. We retained the stronger reference when learning fell short. Kristján and Claude Code authored the final Traverse simulator and reference; Manh's Claude Code contributions remain separately credited. The evidence log connects human decisions to code, tests, commits and results.
+> Sölvi used Codex throughout his development work on Lightlag: turning research ideas into prototypes, implementing controllers and evaluation tools, debugging experiments, and shipping verified increments. The team set the hypotheses, budgets and stopping decisions. Parallel Codex agents implemented and independently reviewed changes; shared task claims and frequent commits kept concurrent work coordinated. Codex helped deliver small reinforcement-learning controllers, Modal orchestration, interruption recovery and reproducible reports, including 2,560 final hybrid evaluations. We also tested the team's frozen environment with three OpenAI models in 18 scored agent runs, retaining configurations, trajectories and rewards. Our case is the complete path from a human research question to implemented software and inspectable experimental evidence, with actual OpenAI agent behavior available for comparison.
+
+Suggested headline: **“Built with Codex. Tested with OpenAI agents.”** In the explanation, give each its precise role: Codex was a development tool; the OpenAI API models were benchmark participants. The short sponsor pitch can focus on Codex without listing every development tool. Detailed ownership remains in the [evidence log](prize-evidence.md#attribution-boundary); this wording does not claim that Codex authored every part of the project or the separate tier-evaluation runner.
+
+Sölvi's 20–25 second spoken version:
+
+> “I used Codex throughout my coding on Lightlag, from prototypes and reinforcement-learning controllers to debugging and verifying experiments. We used parallel agents and small reviewed commits to keep the work reviewable. Then our team tested the environment with three OpenAI models across eighteen scored agent runs. We can show the code, the model behavior and the evidence behind each result.”
+
+### OpenAI evaluation evidence supporting the project
+
+The saved [run ledger](tier-comparison/runs.jsonl), [method](tier-comparison.md) and [tables](tier-comparison/tables.md) record **18 scored OpenAI agent runs**: GPT-6.1 Sol, GPT-6.1 Terra and GPT-6 Luna, three repeats per model on each of two tasks. Nine runs use the three-mission campaign (worlds 2027–2029); nine use the single-mission task (world 2026). All 18 saved model configurations and rewards match the ledger. The agents used **OpenCode 1.19.5 in Harbor 0.25.0** to operate the rover through its tools.
+
+This strengthens the project's evidence of testing with real OpenAI agents. It is separate from evidence of **using Codex to develop software**: the tested agents are not Codex sessions, and their model names do not identify the model behind our development sessions. The tier-evaluation implementation remains credited to its owner in the linked report. Seventeen of the 18 saved runs retain nonzero-exit errors; the verifier still saved their scores. Say “scored runs,” not “18 error-free completions.” Three additional OpenAI one-request program evaluations are a separate set, excluded from the 18 count. No new inference was run for this submission narrative.
 
 Three concrete things to show a Codex judge:
 
@@ -34,7 +46,29 @@ If showing a session capture, use an existing genuine project excerpt or label a
 
 ## Best Use of Modal — copy-ready case
 
-> Modal is Lightlag's experiment infrastructure and public demo host. Our rollout farm ran 1,500 rover missions in seven minutes using up to 100 CPU containers, comparing saved model-written controllers on the same unseen worlds while keeping their execution off our laptops. Six small-controller training calls produced 47,840 missions, with checkpoints, failures and provenance retained. Separate frozen evaluations tested whether learning and greedy ensembles transferred to new maps; the result was a modest gain, not a replacement for the reference. Modal Functions parallelize the work, Volumes retain checkpoints and replay pages, and Dicts track asynchronous progress. Judges can open our deployed Modal app to explore rover replays, with new worlds generated on demand. Modal made broad, reproducible evaluation and a usable demonstration practical within the hackathon.
+> We built Lightlag into a parallel laboratory for finding agent failures and testing whether learning fixes them. Modal powered the whole cycle: generate rover missions, train competing policies, evaluate them on fresh worlds, and let judges explore the results in a live app. Our six RL jobs produced 47,840 training missions: 14.4 hours of recorded run durations overlapped into 2 hours 58 minutes. A separate 1,500-mission comparison contained 10.3 hours of recorded execution time and finished in about seven minutes on up to 100 CPU containers. That capacity let us compare methods and training seeds while teammates built the presentation. Modal Functions ran the jobs, Volumes retained checkpoints and replays, and Dicts tracked progress. Every result stayed tied to its source and weights, including failures. The deployed demo makes the same environment accessible to judges.
+
+### The argument for the prize
+
+**The strongest differentiator is the complete experiment cycle, with both parallel learning and an interactive deployment.** Tie scale to the questions it let the team answer: does a failure recur across worlds, does a controller actually learn, and does its gain survive a fresh comparison? Modal supported repeated, auditable answers within the event's time limit. This is our specific case; we have not surveyed every competitor or established that nobody else built a similar system.
+
+Our small replay learner improved from **8.27% to 36.29%** on 40 fresh worlds, averaged across three initializations. Greedy scored 37.99% and the reference 50.82% on those worlds. The result demonstrates learning on the navigation scaffold; the stronger controls and unequal latest replay budgets remain in the [full result](learning-final-results/README.md). The later hybrid test and its small gain are a separate study.
+
+![Six overlapping RL jobs](modal-parallelism/training-overlap.png)
+
+[1920×1080 PNG for the deck/video](modal-parallelism/training-overlap.png) · [SVG](modal-parallelism/training-overlap.svg) · [Measured data and source hashes](modal-parallelism-evidence.json) · [Offline reproduction script](modal-parallelism/generate.py).
+
+| What we can say | What the comparison measures |
+|---|---|
+| **Six RL jobs: 14h 22m 36s of recorded run durations within a 2h 58m 27s window.** | Exact saved wrapper starts and returned elapsed durations. All six overlapped for 1h 57m; starts were within 3.90 seconds. Includes validation/bookkeeping, excludes pre-wrapper setup/queue time. Each job requested 8 CPUs / 16 GiB; these are allocations, not measured utilization. |
+| **Those durations placed end to end are 4.83× the observed parallel window.** | A same-duration sequential scenario. It is **not a measured laptop speedup**, a CPU-hours total, or proof that all non-Modal infrastructure would take that long. A local multiprocess pool or another cloud could also parallelize work. |
+| **1,500 missions: 10.28 hours of summed execution time, about seven minutes for the batch.** | The execution sum comes from the exact original 1,500 rows. The approximately seven-minute batch time and 100-container peak are documented by the farm owner; exact batch timestamps were not retained. Timers exclude startup and final grading. |
+
+For “what would it take without Modal?”, use **“running these six recorded jobs one after another would add up to 14.4 hours at their observed runtimes.”** We did not run a matched laptop benchmark. The benefit we demonstrated is simultaneous work and a ready deployment, with persistent evidence, while the team kept its machines available for development. No fresh training or local timing run is needed for this pitch.
+
+Suggested 25–30 second explanation for a sponsor conversation or live pitch (if used in the video, replace a segment and keep the total within two minutes):
+
+> “Modal powered our learning loop. Six reinforcement-learning jobs ran together: fourteen hours of recorded run time in just under three hours. Our rollout farm handled fifteen hundred missions in about seven minutes. That let us compare training methods, check fresh worlds, and retain every checkpoint and failure while the team kept building. Then we deployed the same environment on Modal so you can explore the rover runs yourself.”
 
 | Modal criterion from the retained brief | Evidence to show |
 |---|---|
@@ -53,11 +87,11 @@ Use efficiency, not spend, as the argument. The original final training's **$7.2
 
 ## Short combined copy for the description or deck
 
-> Built with Codex and Claude Code under human direction. Codex implemented and reviewed evaluation, learning and experiment orchestration, preserving reproducible evidence and unsuccessful results. Modal powered parallel rover rollouts, 47,840 missions across six controller-training calls, and our public interactive demo. Our repository links code, checkpoints, app IDs, audits and measured outcomes to the people and tools that produced them. Entering Best Use of Codex and Best Use of Modal alongside AfterQuery.
+> Codex supported implementation, review, debugging and reproducible experiments under human direction. The team also tested its environment with three OpenAI models in 18 scored agent runs. Modal powered parallel rover rollouts, 47,840 missions across six controller-training calls, and our public interactive demo. Our repository links code, checkpoints, app IDs, audits and measured outcomes to their contributors. We have selected Best Use of Codex and Best Use of Modal alongside AfterQuery.
 
-Change “Entering” to “Entered” only after both selections are verified saved.
+Both selections are now saved according to Sölvi. This does not establish that the overall project is FINAL; retain the final-status check above.
 
-Optional video line (about 12 seconds): **“Codex helped us build, test and audit the experiment pipeline. Modal ran the parallel rollouts and training, and hosts the live demo you can try.”** Put the demo URL and `docs/sponsor-submission.md` on the closing slide. Keep the full video within its two-minute limit; the video owners decide placement.
+Optional video line (about 12 seconds): **“Codex helped us build and audit the learning pipeline. We tested OpenAI agents, trained controllers in parallel on Modal, and deployed a live demo.”** Put the demo URL and `docs/sponsor-submission.md` on the closing slide. Keep the full video within its two-minute limit; the video owners decide placement.
 
 ## Source freshness and checks
 

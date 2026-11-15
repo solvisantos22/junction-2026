@@ -1,0 +1,165 @@
+{
+  "schema": "modal-parallelism-evidence-v1",
+  "method": "Read-only arithmetic on existing records; no training, evaluation or cloud job.",
+  "training": {
+    "app_id": "ap-GGkMI4eQi8N9MVVuTef5Au",
+    "runs": [
+      {
+        "run_id": "ppo-17",
+        "call_id": "fc-01M7DS9YXES0WN18VYK6MRQ51C",
+        "started_unix": 1794685342.7434099,
+        "started_utc": "2026-11-14T19:42:22.743410+00:00",
+        "elapsed_seconds": 7649.378446340561,
+        "derived_ended_unix": 1794692992.1218562,
+        "derived_ended_utc": "2026-11-14T21:49:52.121856+00:00",
+        "missions": 8192,
+        "status": "complete",
+        "wrapper_status": "completed"
+      },
+      {
+        "run_id": "ppo-29",
+        "call_id": "fc-01M7DS9ZM32PE3HB8R0NK1CQ3G",
+        "started_unix": 1794685343.8004158,
+        "started_utc": "2026-11-14T19:42:23.800416+00:00",
+        "elapsed_seconds": 7050.394563913345,
+        "derived_ended_unix": 1794692394.1949797,
+        "derived_ended_utc": "2026-11-14T21:39:54.194980+00:00",
+        "missions": 8192,
+        "status": "complete",
+        "wrapper_status": "completed"
+      },
+      {
+        "run_id": "ppo-43",
+        "call_id": "fc-01M7DSA0D2VBKSHF3PTFG11MAP",
+        "started_unix": 1794685343.7706335,
+        "started_utc": "2026-11-14T19:42:23.770633+00:00",
+        "elapsed_seconds": 7875.869189739227,
+        "derived_ended_unix": 1794693219.6398232,
+        "derived_ended_utc": "2026-11-14T21:53:39.639823+00:00",
+        "missions": 8192,
+        "status": "complete",
+        "wrapper_status": "completed"
+      },
+      {
+        "run_id": "replay-17",
+        "call_id": "fc-01M7DSA14ZBJ84SMHY94G1E4SN",
+        "started_unix": 1794685343.1732976,
+        "started_utc": "2026-11-14T19:42:23.173298+00:00",
+        "elapsed_seconds": 9291.968574047089,
+        "derived_ended_unix": 1794694635.1418717,
+        "derived_ended_utc": "2026-11-14T22:17:15.141872+00:00",
+        "missions": 8192,
+        "status": "complete",
+        "wrapper_status": "completed"
+      },
+      {
+        "run_id": "replay-29",
+        "call_id": "fc-01M7DSA1VXVVVJT377CZC994DB",
+        "started_unix": 1794685343.7453988,
+        "started_utc": "2026-11-14T19:42:23.745399+00:00",
+        "elapsed_seconds": 9185.228934049606,
+        "derived_ended_unix": 1794694528.9743328,
+        "derived_ended_utc": "2026-11-14T22:15:28.974333+00:00",
+        "missions": 8192,
+        "status": "complete",
+        "wrapper_status": "completed"
+      },
+      {
+        "run_id": "replay-43",
+        "call_id": "fc-01M7DSA2JBQF2CZSGCPXPBQZHC",
+        "started_unix": 1794685346.6395361,
+        "started_utc": "2026-11-14T19:42:26.639536+00:00",
+        "elapsed_seconds": 10703.117155075073,
+        "derived_ended_unix": 1794696049.7566912,
+        "derived_ended_utc": "2026-11-14T22:40:49.756691+00:00",
+        "missions": 6880,
+        "status": "deadline",
+        "wrapper_status": "stopped_deadline"
+      }
+    ],
+    "missions": 47840,
+    "sum_recorded_wrapper_seconds": 51755.9568631649,
+    "observed_wrapper_window_seconds": 10707.013281345367,
+    "sum_to_window_ratio": 4.833836991062517,
+    "serial_same_duration_minus_window_seconds": 41048.943581819534,
+    "all_six_overlap_seconds": 7047.555443525314,
+    "launch_spread_seconds": 3.8961262702941895,
+    "resources_per_run": {
+      "buffer_containers": 0,
+      "cpu_limit": 8,
+      "cpu_request": 8,
+      "function_timeout_seconds": 10920,
+      "gpu": null,
+      "max_containers": 6,
+      "memory_limit_mib": 16384,
+      "memory_mib": 16384,
+      "min_containers": 0,
+      "retries": 0,
+      "startup_timeout_seconds": 120,
+      "workers": 6
+    },
+    "limitations": [
+      "Window is first saved wrapper start to last derived wrapper end; excludes pre-wrapper deployment/queue time.",
+      "End is saved start plus returned elapsed_seconds; wrapper time includes validation and bookkeeping.",
+      "Summed durations give a same-duration serial scenario, not a measured laptop runtime or CPU-hours total.",
+      "Allocations are requested resources, not measured CPU utilization. Five runs reached 8192; one stopped at deadline after 6880."
+    ]
+  },
+  "farm": {
+    "app_id": "ap-gBRd5446NAlbSopK5sdrI4",
+    "missions": 1500,
+    "worlds": [
+      600,
+      899
+    ],
+    "groups": [
+      {
+        "policy": "pilot",
+        "candidate": "pilot",
+        "count": 300
+      },
+      {
+        "policy": "program",
+        "candidate": "program:traverse-oneshot-opus-1",
+        "count": 300
+      },
+      {
+        "policy": "program",
+        "candidate": "program:traverse-oneshot-sonnet-1",
+        "count": 300
+      },
+      {
+        "policy": "program",
+        "candidate": "program:traverse-oneshot-haiku-1",
+        "count": 300
+      },
+      {
+        "policy": "program",
+        "candidate": "agent:traverse-agent-opus-1",
+        "count": 300
+      }
+    ],
+    "sum_recorded_execution_seconds": 37015.948,
+    "documented_approximate_batch_minutes": 7,
+    "documented_container_limit_reached": 100,
+    "duration_source": "docs/traverse-farm.md and docs/prize-evidence.md",
+    "historical_rows_checked_at_commit": "b980ec2a",
+    "limitations": [
+      "First 1500 rows match the original five-controller comparison; later 600 rows excluded.",
+      "Seconds are controller/program wall time, not CPU time; exclude startup and evaluator horizon-fill/final grading.",
+      "Seven minutes is the owner's approximate recorded duration; exact batch timestamps were not retained.",
+      "No measured laptop benchmark or exact end-to-end speedup is claimed."
+    ]
+  },
+  "source_sha256": {
+    "docs/learning-final-results/fit/status.json": "b52b2858839ed7422fa1ed91fa43a6197b19b8c256542c6ed44390857363c34a",
+    "docs/learning-final-results/fit/receipt.json": "bffdd1fd9a7f9700bfcc4132bb8adfec208a73bc49f6065eb48f24f77d9d76a2",
+    "docs/learning-final-results/fit/runs/ppo-17/report.json": "776f92030121ee5ea7ee0d61e6284503c522c05a05209bf954041db798aa4e3f",
+    "docs/learning-final-results/fit/runs/ppo-29/report.json": "1ddb1b8ec4128cba1518963cbe4702858a64c2bd31f87ad3828cba078d2b55ea",
+    "docs/learning-final-results/fit/runs/ppo-43/report.json": "f6f7f60bdaa4e6b7965c1b6f4b2e02754226e4f4c0599223e69df2ab446b1092",
+    "docs/learning-final-results/fit/runs/replay-17/report.json": "772e6dd79a1f8460716db306369cc71befc60acea870ab804ae92820f9901cfe",
+    "docs/learning-final-results/fit/runs/replay-29/report.json": "04e1be2ed6cf1953536fe7a6b60f65b8c24b04782e15949006ffbeb40384a4f4",
+    "docs/learning-final-results/fit/runs/replay-43/report.json": "23677499a3c74cdb3a512bfec3b09aee2db2623e9e5d30d6db17b0058520ed16",
+    "docs/traverse-farm/programs-1/rows.jsonl": "a1be664759520d4b0670299aedc0c7b2a06cdcefb589322f42e0039cdf8b28d6"
+  }
+}
