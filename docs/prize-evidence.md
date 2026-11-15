@@ -1102,6 +1102,15 @@ and a new guarded program. Production performance remains pending. Existing refe
 prior results, tasks and teammate jobs are unchanged. [Artifacts](planner-lab-results/README.md).
 
 
+Selection increment: all 7,232 training/validation missions completed, four actual
+Modal model fits retained, and all Linux physics replays match exactly. Independent
+checks reproduce the 24 validation settings and all checkpoint predictions. Random
+Forest is selected primary (.520685 vs .516814 reference on 64 validation worlds,
+all home/alive), pooled forest second; the MLP fails eligibility. These are
+selection results only. Publish [weights/selection](planner-lab-results/selection.json)
+before 192 fresh worlds; Mac audit remains in progress. A concurrency check also
+verifies atomic report writes. No reference promotion or new Claude result.
+
 ### Sölvi / Codex — confirmation audit and frozen final selection (15 November)
 
 - **Human direction:** continue the authorized RL–greedy composition experiment, preserve failures and freezes, and publish selection before reserved worlds.

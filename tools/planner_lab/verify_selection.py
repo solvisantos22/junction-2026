@@ -10,7 +10,7 @@ import numpy as np
 
 from lightlag_planner_lab.model import ALGORITHMS, settings
 from lightlag_planner_lab.policy import PROFILE_NAMES
-from lightlag_planner_lab.worker import digest, file_hash, load_model, source_manifest
+from lightlag_planner_lab.worker import LEGACY_SHA, digest, file_hash, load_model, source_manifest
 from .common import OUT, TRAIN, VALIDATION, FRESH, matrix, rows, require, utc, write
 
 
@@ -67,7 +67,7 @@ def selection():
                 and stats['errors']==0 and stats['invalid']==0)
             candidates.append({'algorithm':algorithm,'setting':setting,'stats':stats,'eligible':eligible,
                 'choices':choices,'spec':{'kind':'learned','algorithm':algorithm,'setting':setting,'model_sha256':sha}})
-    require(len(candidates)==24,'candidate grid differs')
+    require(len(candidates)==len(selected['validation_candidates'])==24,'candidate grid differs')
     for a,b in zip(candidates,selected['validation_candidates']): close(a,b)
     ranked=sorted(candidates,key=lambda c:(not c['eligible'],-c['stats']['delta'],c['algorithm'],
         -c['setting']['threshold'],-c['setting']['disagreement'],-c['setting']['risk_penalty']))
@@ -83,6 +83,10 @@ def selection():
     close(fixed,selected['fixed_validation'])
     best=max(PROFILE_NAMES,key=lambda n:(fixed[n]['mean'],-PROFILE_NAMES.index(n)))
     require(best==selected['best_static'],'best fixed strategy differs')
+    require(selected['arms'][:3]==[
+        {'name':'reference','spec':{'kind':'fixed','profile':'baseline'}},
+        {'name':'old_extra_trees','spec':{'kind':'legacy','model_sha256':LEGACY_SHA}},
+        {'name':'static_best','spec':{'kind':'fixed','profile':best}}], 'control arms differ')
     require(selected['fresh_seeds']==FRESH,'fresh seeds differ')
     old={r['seed']:r for r in all_rows if r['split']=='validation' and r['name']=='old_extra_trees'}
     close(measure([old[s] for s in VALIDATION],base),selected['old_policy_validation'])
@@ -96,6 +100,7 @@ def selection():
 
 def final():
     chosen=json.loads((OUT/'selection.json').read_text()); saved=json.loads((OUT/'final/summary.json').read_text())
+    require(saved['primary']==chosen['primary'],'summary primary differs from frozen selection')
     all_rows=rows('final'); lookup={(r['name'],r['seed']):r for r in all_rows}
     names=[a['name'] for a in chosen['arms']]
     require(len(all_rows)==len(lookup)==len(FRESH)*5,'final grid count differs')
