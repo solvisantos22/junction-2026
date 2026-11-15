@@ -55,6 +55,8 @@ No run beats the reference at any single site either. Two Gemini 4 Carbon runs t
 
 **Not three lucky worlds.** Eleven programs the models wrote (six by Claude, five by GPT and Gemini) were replayed on Modal on 300 worlds none of them had seen. In 3,300 match-ups the reference scored higher 3,265 times and tied 9. The programs won 26, never by more than 0.05, and the reference lost no rover ([Claude's programs](docs/traverse-farm.md), [GPT's and Gemini's](docs/traverse-farm/programs-tiers/evaluation.json)).
 
+The autopilots that GPT and Gemini agents wrote during their own missions get closer, and still fall short on ground they had not seen. On the same 300 worlds the reference averages 0.502. The best two, by Gemini 4 Hydrogen and GPT-6.1 Sol, average 0.454 and 0.446 and win about one world in six. The Gemini 4 Carbon program that scored 0.567 on its own world averages 0.410 ([tables](docs/tier-comparison/tables.md)).
+
 ## Why the agents lose
 
 Read from the Claude runs' trajectories, replays and own reports:
