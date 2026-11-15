@@ -53,7 +53,7 @@ image = (
     .add_local_dir(REPO / "lightlag_traverse_max", "/root/farm/lightlag_traverse_max", ignore=_skip)   # Manh's MAX map
 )
 app = modal.App("lightlag-traverse-farm", image=image)
-MAX_CONTAINERS = 100
+MAX_CONTAINERS = int(os.environ.get("TRAVERSE_FARM_CONTAINERS", "100"))   # more makes a batch of slow programs finish sooner
 
 
 @app.function(cpu=1.0, memory=1024, timeout=1800, max_containers=MAX_CONTAINERS)
