@@ -301,6 +301,121 @@
     });
   };
 
+  // ---------------------------------------------------------------- the long film's own slides
+  // The game: the five tools every driver gets, then the six catches, each lit when the voice gets to it (cues).
+  const RULES = { tools: 0.7, rows: 1.6, step: 0.14 };
+  SCENES.rules = (t, D, data, cues) => {
+    backdrop('THE GAME');
+    const G = M.game;
+    heading(t, 'ONE ROVER · ONE DAY · FIVE TOOLS', `${G.ticks} STEPS OF DAYLIGHT · ${G.width} × ${G.height} M OF GROUND · ${G.targets_at_launch} TARGETS AT SUNRISE, MORE ON THE WAY · ${G.sites} SITES IN A ROW`);
+    const notes = ['WHAT IS FIXED', 'THE GROUND', 'WHAT THE ROVER REPORTS', 'SEND COMMANDS', 'LET TIME PASS'], wide = 312, gap = 30;
+    G.tools.forEach((name, i) => {
+      const x = 120 + i * (wide + gap), k = appear(t, RULES.tools + i * 0.1, 0.35);
+      if (k <= 0.003) return;
+      g.save(); g.globalAlpha = k; g.translate(0, (1 - out((t - RULES.tools - i * 0.1) / 0.5)) * 18);
+      rect(x, 262, wide, 96, C.key); rect(x, 262, wide, 4, C.ice);
+      text(name + '()', x + 24, 308, { size: 30, font: MONO, weight: 500, color: C.ink, spacing: 0 });
+      text(notes[i], x + 24, 342, { size: 20, color: C.dim, spacing: 0.14 });
+      g.restore();
+    });
+    const rows = [
+      ['COMMANDS LAND LATE', `SENT NOW, CARRIED OUT ${G.delay + 1} STEPS LATER, ONE PER STEP`],
+      ['THE NEWS IS OLD', `EVERY REPORT SHOWS THE ROVER WHERE IT WAS ${G.delay} STEPS AGO, WITH NOISE`],
+      ['WHEELS SLIP', 'DIFFERENTLY ON SAND, REGOLITH, ROCK FIELD AND BEDROCK · HOW MUCH IS HIDDEN'],
+      ['TOO STEEP MEANS STOP', `ABOVE A ${G.tilt_percent}% SLOPE THE ROVER STOPS AND EVERY QUEUED ORDER IS WIPED`],
+      ['THE ONLY FUEL IS THE SUN', 'LOW AT DAWN AND DUSK, HIGH AT NOON · A BATTERY AT ZERO ENDS THE ROVER'],
+      ['HOME, OR HALF, OR NOTHING', 'AT THE LANDER: EVERYTHING · ANYWHERE ELSE: HALF · BATTERY FLAT: NOTHING'],
+    ];
+    rows.forEach(([title, line], i) => {
+      const y = 426 + i * 92, k = appear(t, RULES.rows + i * RULES.step, 0.35);
+      if (k <= 0.003) return;
+      const lit = cues[i] !== undefined ? appear(t, cues[i], 0.4) : 1, last = i === rows.length - 1;
+      g.save(); g.globalAlpha = k;
+      rect(120, y, 1680, 78, C.key); rect(120, y, 8, 78, lit > 0.5 ? (last ? C.red : C.gold) : C.faint);
+      text(String(i + 1), 156, y + 52, { size: 40, color: C.faint, spacing: 0.02 });
+      text(title, 214, y + 50, { size: 36, color: C.faint, spacing: 0.1, alpha: 1 - lit });
+      text(title, 214, y + 50, { size: 36, color: last ? C.red : C.gold, spacing: 0.1, alpha: lit });
+      text(line, 760, y + 49, { size: 24, color: C.dim, spacing: 0.11, alpha: 0.45 + 0.55 * lit });
+      g.restore();
+    });
+  };
+
+  // How every site of every campaign run ended, model by model (window.__MANH.outcomes, from makers.outcomes_table):
+  // a square per site, three per run, in the order of the average. The cues turn the light on one lab after another
+  // (Google, OpenAI, Anthropic), then on the fast model with the best average, then on everything with what a run cost.
+  const OUTCOMES = { rows: 0.8, step: 0.11, top: 300, row: 66, x0: 610, box: 30, legend: 0.6,
+    colour: { home: '#9fd8ff', away: '#ffd27a', lost: '#ff4a2f', idle: '#4a3a33' },
+    label: { home: 'HOME', away: 'HALF', lost: 'LOST', idle: 'NEVER LEFT' } };
+  SCENES.outcomes = (t, D, data, cues) => {
+    backdrop('THE RESULTS');
+    const O = M.outcomes, L = OUTCOMES, focus = [['google'], ['openai'], ['anthropic'], ['GEMINI 4 HYDROGEN'], null];
+    heading(t, 'EVERY LAB FAILS IN ITS OWN WAY', 'A SQUARE IS ONE SITE OF ONE RUN · THREE SITES TO A RUN · BEST RUN FIRST');
+    rise(t, L.legend, () => {
+      let x = 120;
+      for (const [kind, words] of [['home', 'HOME: KEEPS EVERYTHING'], ['away', 'ALIVE, NOT HOME: KEEPS HALF'], ['lost', 'BATTERY FLAT: KEEPS NOTHING'], ['idle', 'NEVER LEFT THE LANDER']]) {
+        rect(x, 244, 22, 22, L.colour[kind]); x += 34; x += text(words, x, 263, { size: 22, color: C.dim, spacing: 0.12 }) + 44;
+      }
+    });
+    let stage = -1;
+    cues.forEach((cue, i) => { if (cue !== undefined && t >= cue) stage = i; });
+    const turn = stage >= 0 ? appear(t, cues[stage], 0.45) : 0;
+    const lit = (row, which) => which < 0 || !focus[which] ? 1 : (focus[which].includes(row.maker) || focus[which].includes(row.name) ? 1 : 0.24);
+    O.rows.forEach((row, r) => {
+      const y = L.top + r * L.row, at = L.rows + r * L.step, k = appear(t, at, 0.35);
+      if (k <= 0.003) return;
+      const colour = M.tiles[row.maker].text, bright = lerp(lit(row, stage - 1), lit(row, stage), turn);
+      g.save(); g.globalAlpha = k * bright; g.translate((1 - out((t - at) / 0.45)) * -24, 0);
+      tile(row.maker, 120, y + 2, 44);
+      text(row.name, 180, y + 37, { size: 33, color: colour, spacing: 0.08, bare: true });
+      text(row.tier, L.x0 - 24, y + 34, { size: 18, color: C.faint, spacing: 0.14, align: 'right' });
+      row.runs.forEach((run, n) => {
+        const x = L.x0 + n * 134, show = appear(t, at + 0.2 + n * 0.07, 0.3);
+        run.sites.forEach((kind, site) => rect(x + site * (L.box + 6), y + 2, L.box, L.box, L.colour[kind], show));
+        text(two(run.score), x, y + 54, { size: 19, color: C.dim, spacing: 0.08, alpha: show });
+      });
+      text(three(row.mean), 1242, y + 38, { size: 38, color: C.ink, spacing: 0.04, align: 'right', alpha: appear(t, at + 0.3, 0.3) });
+      const parts = ['home', 'away', 'lost', 'idle'].filter(kind => row.count[kind]).map(kind => `${row.count[kind]} ${L.label[kind]}`);
+      text(parts.join(' · '), 1290, y + 35, { size: 23, color: C.dim, spacing: 0.11, alpha: appear(t, at + 0.35, 0.3) });
+      g.restore();
+    });
+    rise(t, 0.9, () => text('AVERAGE', 1242, L.top - 14, { size: 19, color: C.faint, spacing: 0.14, align: 'right' }));
+    if (cues[4] !== undefined) rise(t, cues[4], () => {
+      const c = O.costs, dollars = v => '$' + v.toFixed(2);
+      rect(120, 918, 1680, 2, C.line);
+      text(`WHAT AN AGENT RUN COST, ON AVERAGE: FROM ${dollars(c['GPT-6 LUNA'])} (GPT-6 LUNA) TO ${dollars(c['GEMINI 4 ARGON'])} (GEMINI 4 ARGON) · THE BEST AVERAGE SCORE, GEMINI 4 HYDROGEN: ${dollars(c['GEMINI 4 HYDROGEN'])} A RUN`,
+        120, 968, { size: 25, color: C.gold, spacing: 0.12 });
+      text(`CLAUDE OPUS 5.5 ${dollars(c['CLAUDE OPUS 5.5'])} · CLAUDE SONNET 5.5 ${dollars(c['CLAUDE SONNET 5.5'])} · GPT-6.1 SOL ${dollars(c['GPT-6.1 SOL'])} · GEMINI 4 CARBON ${dollars(c['GEMINI 4 CARBON'])} · AS THE AGENT TOOL COUNTED IT`,
+        120, 1006, { size: 22, color: C.dim, spacing: 0.12 });
+    });
+  };
+
+  // Why the planner is a fair thing to measure against: five reasons with the number behind each (window.__MANH.game,
+  // .tiers, .worlds), one lit per cue.
+  SCENES.why = (t, D, data, cues) => {
+    backdrop('THE REFERENCE');
+    const G = M.game, T = M.tiers, F = M.worlds, count = v => v.toLocaleString('en-US');
+    heading(t, 'WHY MEASURE AGAINST THIS ONE?', 'A YARDSTICK HAS TO BE OPEN, REPEATABLE, SAFE AND BEATABLE');
+    const rows = [
+      [`${G.tools.length} TOOLS`, 'IT PLAYS THROUGH THE SAME FIVE TOOLS AS EVERY AGENT', 'NO HIDDEN INFORMATION · WHAT IT KNOWS, IT LEARNED FROM THE MAP AND THE TELEMETRY'],
+      [`${count(G.reference_lines)} LINES`, 'PLAIN PYTHON, STANDARD LIBRARY ONLY', 'READ IT, RUN IT, CHANGE IT · NO MODEL, NO WEIGHTS, NO GPU'],
+      [three(T.reference), 'THE SAME SCORE EVERY TIME', 'ON A LAPTOP, ON MODAL AND THROUGH HARBOR · ONE COMMAND, ABOUT TWO MINUTES'],
+      [`${F.reference_lost} LOST`, 'IT HAS NEVER LOST A ROVER', `${G.sites} CAMPAIGN SITES AND ${F.worlds} FRESH WORLDS · IT WAITS FOR THE SUN INSTEAD`],
+      [`${100 - T.reference_percent}%`, 'IT CAN BE BEATEN', `IT LEAVES ${100 - T.reference_percent}% OF THE VALUE ON THE GROUND · A MODEL'S PROGRAM SCORED HIGHER IN ${F.wins} OF ${count(F.pairs)} MATCH-UPS`],
+    ];
+    rows.forEach(([big, title, line], i) => {
+      const y = 262 + i * 144, k = appear(t, 0.7 + i * 0.13, 0.35);
+      if (k <= 0.003) return;
+      const lit = cues[i] !== undefined ? appear(t, cues[i], 0.4) : 1;
+      g.save(); g.globalAlpha = k;
+      rect(120, y, 1680, 124, C.key); rect(120, y, 8, 124, lit > 0.5 ? C.gold : C.faint);
+      text(big, 160, y + 84, { size: 70, color: C.faint, spacing: 0.03, alpha: 1 - lit });
+      text(big, 160, y + 84, { size: 70, color: C.gold, spacing: 0.03, alpha: lit });
+      text(title, 560, y + 56, { size: 38, color: C.ink, spacing: 0.1, alpha: 0.5 + 0.5 * lit });
+      text(line, 560, y + 96, { size: 23, color: C.dim, spacing: 0.12, alpha: 0.5 + 0.5 * lit });
+      g.restore();
+    });
+  };
+
   // When each thing on a chart starts to move, in seconds from the start of the scene. `check` marks a time
   // the page's own appear() must have used; the kinds are the sounds of tools/manh_demo/sound.py.
   const SFX = {
@@ -360,6 +475,24 @@
       for (let i = 0; i < 2; i++) for (let n = 0; n < 3; n++) list.push({ at: P.lines + i * 0.2 + n * 0.32, kind: 'tick', step: n + i, check: true });
       list.push({ at: P.scores, kind: 'bar', score: 0.476, gold: true, check: true }, { at: P.scores + 0.3, kind: 'bar', score: 0.366, check: true });
       list.push({ at: P.note, kind: 'chime_soft', step: 1, check: true });
+      return list;
+    },
+    rules(D, data, cues) {
+      const list = [];
+      for (let i = 0; i < 5; i++) list.push({ at: RULES.tools + i * 0.1, kind: 'tick', step: i, check: true });
+      for (let i = 0; i < 6; i++) if (cues[i] !== undefined) list.push({ at: cues[i], kind: i === 5 ? 'hit_soft' : 'chime_soft', step: i, check: true });
+      return list;
+    },
+    outcomes(D, data, cues) {
+      const L = OUTCOMES, list = [{ at: L.legend, kind: 'chime_soft', check: true }];
+      M.outcomes.rows.forEach((row, r) => list.push({ at: L.rows + r * L.step, kind: 'tick', step: r % 6, check: true }));
+      cues.forEach((cue, i) => { if (cue !== undefined) list.push({ at: cue, kind: i === 4 ? 'hit_soft' : 'swell', check: true }); });
+      return list;
+    },
+    why(D, data, cues) {
+      const list = [];
+      for (let i = 0; i < 5; i++) list.push({ at: 0.7 + i * 0.13, kind: 'tick', step: i, check: true });
+      for (let i = 0; i < 5; i++) if (cues[i] !== undefined) list.push({ at: cues[i], kind: i === 4 ? 'hit_soft' : 'chime_soft', step: i, check: true });
       return list;
     },
     planner(D, data, cues) { return SFX.reference(D, data, cues); },      // his scene's sounds: the tabs light with his links

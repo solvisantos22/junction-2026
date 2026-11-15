@@ -291,3 +291,80 @@ def worlds_table() -> Dict[str, Any]:
             "widest_win": max(row["margin"] for row in rows), "reference_mean": reference["mean"], "reference_lost": reference["lost"],
             "all": {"programs": len(programs), "pairs": reference["worlds"] * len(programs),
                     "reference_higher": sum(program["reference_higher"] for program in programs.values())}}
+
+
+# ---------------------------------------------------------------- the long film: the same story, in depth
+# Manh, 15 November about 07:15: a ten-minute film of the same idea, not rushed, with the statistics and the analysis
+# behind each lab's result, the reference in detail and the learned agent as a baseline. Its replay shows Gemini 4
+# Carbon in its best run (0.473, the run that came within a hair), since the film follows that rover home.
+CAST3: Dict[str, str] = {**CAST, "Gemini 4 Carbon": "campaign-agent-gemini-4-carbon-2"}
+REPO_ROOT = HERE.parents[1]
+
+
+def outcomes_table() -> Dict[str, Any]:
+    """How every site of every campaign run ended, model by model, read from the evaluator's results: `home` (at the
+    lander: keeps everything), `away` (alive elsewhere: keeps half), `lost` (battery flat: keeps nothing) or `idle`
+    (alive at the lander with nothing sampled: the rover never left, because the agent's session ended before its
+    program drove). Rows are in the order of the average score, as on the chart of all runs."""
+    import json
+
+    saved, rows = REPO_ROOT / "docs" / "lightlag-runs", []
+    for key, models in LINEUP.items():
+        for tier, name in enumerate(models):
+            slug = name.split()[1].lower() if name.startswith("Claude") else name.lower().replace(" ", "-")
+            runs = []
+            for folder in sorted(saved.glob("campaign-agent-{}-[0-9]*".format(slug))):
+                sites, value, most = [], 0.0, 0.0
+                for mission in sorted((folder / "artifacts" / "evaluator" / "missions").iterdir()):
+                    result = json.loads((mission / "result.json").read_text(encoding="utf-8"))
+                    value, most = value + result["raw_score"], most + result["max_available_value"]
+                    sites.append("lost" if not result["alive"] else "away" if not result["at_base"] else "idle" if not result["sampled_targets"] else "home")
+                runs.append({"run": folder.name, "sites": sites, "score": value / most})
+            if not runs:
+                raise SystemExit("manh_demo: no campaign run found for {}".format(name))
+            runs.sort(key=lambda run: -run["score"])
+            count = {kind: sum(run["sites"].count(kind) for run in runs) for kind in ("home", "away", "lost", "idle")}
+            rows.append({"name": name.upper(), "maker": key, "tier": TIERS[tier], "runs": runs, "mean": sum(run["score"] for run in runs) / len(runs),
+                         "count": count, "never_started": sum(set(run["sites"]) == {"idle"} for run in runs)})
+    rows.sort(key=lambda row: -row["mean"])
+    labs = {key: {kind: sum(row["count"][kind] for row in rows if row["maker"] == key) for kind in ("home", "away", "lost", "idle")} for key in LINEUP}
+    for key in LINEUP:
+        labs[key]["runs"] = sum(len(row["runs"]) for row in rows if row["maker"] == key)
+        labs[key]["never_started"] = sum(row["never_started"] for row in rows if row["maker"] == key)
+    return {"rows": rows, "labs": labs, "costs": costs()}
+
+
+def costs() -> Dict[str, float]:
+    """What an agent run cost on average, in dollars, by model in capitals: GPT and Gemini from the tier comparison's
+    table (OpenCode's own count over that model's runs), Claude from the cost Kristján saved with each campaign run."""
+    import json
+
+    found: Dict[str, float] = {}
+    table = (REPO_ROOT / "docs" / "tier-comparison" / "tables.md").read_text(encoding="utf-8")
+    block = table[table.index("### Cost per agent run"):]
+    for name, mean in re.findall(r"^\| ([^|]+?) \| \d+ \| ([\d.]+) \| [\d.]+ \|$", block, re.M):
+        found[name.strip().upper()] = float(mean)
+    spent: Dict[str, Any] = {}
+    for path in sorted((REPO_ROOT / "docs" / "lightlag-runs").glob("campaign-agent-*/run.json")):
+        meta = json.loads(path.read_text(encoding="utf-8"))
+        if meta.get("kind") == "claude" and meta.get("cost_usd") is not None:
+            spent.setdefault(meta["model"].upper(), []).append(float(meta["cost_usd"]))
+    for name, values in spent.items():
+        found[name] = sum(values) / len(values)
+    return found
+
+
+def game_facts() -> Dict[str, Any]:
+    """The game in numbers, read from the reference's saved replay of the campaign's first site and from the code of
+    the reference itself: for the long film's slides on the rules and on why the reference is a fair yardstick."""
+    import json
+
+    saved = REPO_ROOT / "docs" / "lightlag-runs" / "campaign-reference"
+    replay = json.loads((saved / "artifacts" / "evaluator" / "missions" / "01" / "replay.json").read_text(encoding="utf-8"))
+    config, world = replay["config"], replay["world"]
+    lines = sum(len((REPO_ROOT / "lightlag_traverse" / name).read_text(encoding="utf-8").splitlines()) for name in ("pilot.py", "planning.py", "surface.py"))
+    return {"ticks": config["max_ticks"], "delay": config["delay_ticks"], "tilt_percent": round(replay["physics"]["max_tilt"] * 100),
+            "width": round(world["width"]), "height": round(world["height"]), "targets_at_launch": sum(target["appear_tick"] == 0 for target in world["targets"]),
+            "targets": len(world["targets"]), "target_radius": config["target_radius"], "base_radius": config["base_radius"],
+            "sites": len(list((saved / "artifacts" / "evaluator" / "missions").iterdir())), "reference_lines": lines,
+            "tools": ["rules", "map", "telemetry_log", "uplink", "advance"]}

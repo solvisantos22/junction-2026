@@ -49,7 +49,7 @@ Recording it well matters more than any processing afterwards:
 
 ## Splicing: one read-through into the film
 
-`splice` measures the recording's own room noise and voice level, finds the pauses, and takes the long ones as the borders between lines (a pause counts when it is at least half as long as your typical pause between lines). It then cuts out the 15 lines with a quarter of a second of room around each, throws the rest away, and puts each line's first word on its time in the film. A line that is too long for its place is **sped up by at most 12%, pitch unchanged**; if that is not enough the tool says which line, and the next line waits for it.
+`splice` measures the recording's own room noise and voice level, finds the pauses, and takes the long ones as the borders between lines (a pause counts when it is at least half as long as your typical pause between lines). It then cuts out the 15 lines with a quarter of a second of room around each, throws the rest away, and puts each line's first word on its time in the film. A line that is too long for its place first has **the pauses inside it cut down to 0.35 s** (`--breath`), and only then is **sped up, by at most 12%, pitch unchanged**; if that is not enough the tool says which line, and the next line waits for it. A line that fits is left exactly as it was spoken.
 
 ```bash
 python3 lay_narration.py splice my_reading.m4a --dry          # only say what it found; write nothing
@@ -65,8 +65,21 @@ python3 lay_narration.py lines lines/                         # after re-recordi
 | "STILL 0.8 s TOO LONG" | Say that line faster or drop a word, record just that line and use `--keep` and `lines`; or allow more speed with `--max-speed 1.18` (above about 15% it starts to sound hurried) |
 | "the voice is hardly louder than the room" | Too far from the microphone or too noisy a room: record again, closer |
 | A line starts a touch early or late for the picture | `--shift n8=0.2` starts line `n8` 0.2 s later |
+| A false start, a cough, a word said twice | `--remove 66.6-69.6` throws those seconds of the recording away first (several ranges with commas). Times given to `--cuts` stay times of the recording as it was |
+| The take was recorded while watching the film, so the pauses between lines are no longer than the ones inside them | The pauses cannot tell the lines apart: give the 14 border times with `--cuts`. Run `--dry` once to see the blocks and their times, and pick the gaps between lines |
 
 Two other ways in, if he prefers: `lines folder/` takes one recording per line (`n1.wav`, `n2.wav`, … with the ids of `narration.md`), and `one take.wav` takes a single take recorded while the film was playing (`--offset` if it did not start on the first frame).
+
+## The first real take (15 November, about 07:40)
+
+[`manh_demo_2_narrated.mp4`](manh_demo_2_narrated.mp4) is the film with the first human narration, a 1:58 take recorded against the running film (`K-Market 2.qt`, kept outside the repository). It followed the script but drifted up to four seconds from the picture in the middle, and "On three maps" was said twice. This is how it was laid in, as a worked example:
+
+```bash
+python3 lay_narration.py splice "K-Market 2.qt" --remove 66.6-69.6 \
+    --cuts 7.95,16.25,22.4,30.85,38.05,44.35,47.4,55.25,60.55,66.3,80.85,88.9,99.7,111.2
+```
+
+`--remove` cuts the false start; `--cuts` are the gaps between the 15 lines, read off a `--dry` run and checked against a speech recogniser's transcript. Every line then sat on its own time without being sped up. Afterwards the recogniser heard all 15 lines of the narrated film at their times, each with its first word. **One thing is missing in the recording itself:** line `n11` ends on "gained less"; the words "than half a point" were not spoken. Record that line again (`--keep lines/`, replace `lines/n11.wav`, then `lines lines/`) or accept it. Nobody has judged the voice treatment by ear yet.
 
 ## The radio voice
 

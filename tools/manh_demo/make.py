@@ -67,6 +67,10 @@ FILMS: Dict[int, Dict[str, Any]] = {
         "poster": cut.POSTER, "extra": {}, "cast": None, "style": "clean", "said": {}},
     2: {"name": cut.NAME2, "folder": "film2", "lines": cut.LINES2, "subtitles": cut.SUBTITLES2, "voice": cut.VOICE2, "shots": cut.shots2,
         "poster": None, "extra": {"cards": "score", "tiers": makers.cast_tiers()}, "cast": makers.CAST, "style": "deep", "said": cut.SAID2},
+    # 3 is the long film: the same story in about ten minutes (no fixed length: nothing is stretched to fit).
+    3: {"name": cut.NAME3, "folder": "film3", "lines": cut.LINES3, "subtitles": cut.SUBTITLES3, "voice": cut.VOICE3, "shots": cut.shots3,
+        "poster": None, "extra": {"cards": "score", "tiers": {**makers.cast_tiers(), makers.CAST3["Gemini 4 Carbon"]: "FLAGSHIP"}}, "cast": makers.CAST3,
+        "style": "deep", "said": cut.SAID3, "limit": 660.0, "target": None, "crf": "26"},
 }
 FILM = FILMS[1]
 
@@ -160,9 +164,12 @@ def record(context: Any, shot: Dict[str, Any], lengths: Dict[str, float], source
     for number, beat in enumerate(beats):
         last, start = number == len(beats) - 1, frame
         spoken = lengths[beat["vo"]] if beat.get("vo") else 0.0
+        said = beat.get("vo_at", 0.0) + spoken                   # when the beat's last line ends: its own, or a later one laid in the same beat
+        for extra in beat.get("more", []):
+            said = max(said, extra["at"] + lengths[extra["vo"]])
         if beat.get("vo"):
-            talking = max(talking, start / FPS + beat.get("vo_at", 0.0) + spoken)
-        held = (beat.get("vo_at", 0.0) + spoken + beat.get("pad", 0.0)) if beat.get("vo") and not beat.get("over") else 0.0
+            talking = max(talking, start / FPS + said)
+        held = (said + beat.get("pad", 0.0)) if beat.get("vo") and not beat.get("over") else 0.0
         if last:
             held = max(held, talking - start / FPS + beat.get("pad", 0.0))
         need = math.ceil(max(beat.get("min", 0.0), held) * FPS)
@@ -179,6 +186,8 @@ def record(context: Any, shot: Dict[str, Any], lengths: Dict[str, float], source
                 act(beat["js"])
         if beat.get("vo"):
             events.append({"line": beat["vo"], "at": round(frame / FPS + beat.get("vo_at", 0.0), 3)})
+        for extra in beat.get("more", []):
+            events.append({"line": extra["vo"], "at": round(frame / FPS + extra["at"], 3)})
         if "thump" in beat:
             thumps.append(round(frame / FPS + beat["thump"], 3))
             last_thump = frame / FPS + beat["thump"]
@@ -245,8 +254,22 @@ def chart_numbers(data: Dict[str, Any]) -> Dict[str, Any]:
         claude.setdefault(item["model"].upper(), []).append(item["score"])
     tiers = makers.tier_table(claude, data["campaign"]["reference"]["score"], facts["rl"])
     fresh, gain = data["final"]["fresh"], data["planner"]["first"]["gain"]
-    return {"facts": {**facts, "models": len(tiers["rows"]), "below_rl": tiers["below_learned"], "best_model": tiers["best_mean"]}, "tiers": tiers,
-            "worlds": makers.worlds_table(),
+    worlds, outcomes, game = makers.worlds_table(), makers.outcomes_table(), makers.game_facts()
+    sol = next(row for row in outcomes["rows"] if row["name"] == "GPT-6.1 SOL")
+    long = {"ticks": game["ticks"], "targets_at_launch": game["targets_at_launch"], "width": game["width"], "runs": tiers["count"],
+            "reference_percent": tiers["reference_percent"], "best_run_per_mille": round(tiers["best_run"]["score"] * 1000),
+            "best_mean_percent": tiers["best_mean_percent"], "best_mean_model": tiers["best_mean"]["name"],
+            "google_runs": outcomes["labs"]["google"]["runs"], "google_never_started": outcomes["labs"]["google"]["never_started"],
+            "anthropic_lost": outcomes["labs"]["anthropic"]["lost"], "sol_away_on_site_one": sum(run["sites"][0] == "away" for run in sol["runs"]),
+            "sol_lost_or_idle": sol["count"]["lost"] + sol["count"]["idle"],
+            "cheapest_cents": round(min(outcomes["costs"][row["name"]] for row in outcomes["rows"] if row["maker"] != "anthropic") * 100),
+            "dearest_cents": round(max(outcomes["costs"].values()) * 100), "best_mean_cents": round(outcomes["costs"][tiers["best_mean"]["name"]] * 100),
+            "reference_lines_hundreds": game["reference_lines"] // 100, "worlds": worlds["worlds"], "pairs": worlds["pairs"], "worlds_percent": worlds["percent"],
+            "reference_lost": worlds["reference_lost"], "programs_lost": worlds["lost"], "initial_percent": round(fresh["initial"] * 100),
+            "ppo_percent": round(fresh["ppo"] * 100), "gain_under_half_a_point": 0 < gain < 0.5,
+            "training_missions_thousands": data["final"]["training_missions"] // 1000}
+    return {"long": long, "outcomes": outcomes, "game": game, "facts": {**facts, "models": len(tiers["rows"]), "below_rl": tiers["below_learned"], "best_model": tiers["best_mean"]}, "tiers": tiers,
+            "worlds": worlds,
             "final": {"initial_percent": round(fresh["initial"] * 100), "ppo_percent": round(fresh["ppo"] * 100), "gain_under_half_a_point": 0 < gain < 0.5}}
 
 
@@ -320,6 +343,9 @@ def fit() -> float:
     saved = BUILD / "fit.json"
     before = json.loads(saved.read_text(encoding="utf-8"))["stretch"] if saved.exists() else 0.0
     total = sum(item["seconds"] for item in timeline)
+    if "target" in FILM and FILM["target"] is None:
+        print("  the film is {:.2f}s ({}:{:04.1f}); this film has no fixed length, nothing is stretched".format(total, int(total // 60), total % 60))
+        return 0.0
     stretch = round(max(0.0, before + cut.TARGET_SECONDS - total), 3)
     saved.write_text(json.dumps({"stretch": stretch}), encoding="utf-8")
     print("  the film is {:.2f}s; the last card is held {:.2f}s longer to make it {:.1f}s".format(total, stretch, cut.TARGET_SECONDS))
@@ -349,8 +375,8 @@ def assemble(mute: Optional[List[str]] = None, voice: Optional[str] = None, vari
     if [item["name"] for item in timeline] != names:
         raise SystemExit("not every shot is recorded yet: run `make capture`")
     total = sum(item["seconds"] for item in timeline)
-    if total > cut.LIMIT_SECONDS:
-        raise SystemExit("the video would be {:.1f}s, over the {:.1f}s this cut allows: shorten the script".format(total, cut.LIMIT_SECONDS))
+    if total > FILM.get("limit", cut.LIMIT_SECONDS):
+        raise SystemExit("the video would be {:.1f}s, over the {:.1f}s this cut allows: shorten the script".format(total, FILM.get("limit", cut.LIMIT_SECONDS)))
     OUT.mkdir(parents=True, exist_ok=True)
     listing = BUILD / "shots.txt"
     listing.write_text("".join("file '{}'\n".format(BUILD / "shots" / "{}.mp4".format(name)) for name in names), encoding="utf-8")
@@ -360,7 +386,7 @@ def assemble(mute: Optional[List[str]] = None, voice: Optional[str] = None, vari
     # quarter smaller in the repository, and not to be told apart (SSIM 0.995 against the joined shots).
     newest = max((BUILD / "shots" / "{}.mp4".format(name)).stat().st_mtime for name in names)
     if not silent.exists() or silent.stat().st_mtime < newest:
-        run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(joined), "-an", "-c:v", "libx264", "-preset", "slow", "-crf", "21.5", "-pix_fmt", "yuv420p",
+        run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(joined), "-an", "-c:v", "libx264", "-preset", "slow", "-crf", FILM.get("crf", "21.5"), "-pix_fmt", "yuv420p",
              "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv", str(silent)])
 
     spoken = spoken_lines(timeline)

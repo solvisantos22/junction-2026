@@ -309,6 +309,70 @@ class SecondDraftTest(unittest.TestCase):
         self.assertEqual(before, {path: digest(path) for path in KRISTJANS})
 
 
+class LongFilmTest(unittest.TestCase):
+    """The ten-minute film (manh_demo_long): its script, its shots and the tables behind its slides."""
+
+    def setUp(self):
+        self.kept = base.LINES
+        base.LINES = cut.LINES3
+        self.lengths, self.words = fake_words(cut.LINES3)
+        self.shots = cut.shots3(self.lengths, self.words)
+
+    def tearDown(self):
+        base.LINES = self.kept
+
+    def test_every_line_is_spoken_once_and_in_order(self):
+        spoken = []
+        for shot in self.shots:
+            for beat in shot["beats"]:
+                if beat.get("vo"):
+                    spoken.append((beat["vo"], beat.get("vo_at", 0.0)))
+                previous = beat.get("vo_at", 0.0) + self.lengths.get(beat.get("vo"), 0.0)
+                for extra in beat.get("more", []):
+                    self.assertGreaterEqual(extra["at"], previous)                           # a line starts after the one before it has ended
+                    spoken.append((extra["vo"], extra["at"]))
+                    previous = extra["at"] + self.lengths[extra["vo"]]
+        self.assertEqual([line for line, _ in spoken], list(cut.LINES3))
+        self.assertEqual(set(cut.SUBTITLES3), set(cut.LINES3))
+        names = [shot["name"] for shot in self.shots]
+        self.assertEqual(len(names), len(set(names)))
+        film = (REPO / "tools" / "demo_video" / "film.html").read_text(encoding="utf-8")
+        mine = (REPO / "tools" / "manh_demo" / "scenes.js").read_text(encoding="utf-8")
+        for shot in self.shots:
+            if shot["page"] == "film":
+                self.assertIn("SCENES.{} = ".format(shot["scene"]), film + mine, shot["name"])
+
+    def test_how_every_site_ended_is_counted_from_the_results(self):
+        table = makers.outcomes_table()
+        self.assertEqual(len(table["rows"]), 9)
+        self.assertEqual(sum(len(row["runs"]) for row in table["rows"]), 25)
+        for row in table["rows"]:
+            for run in row["runs"]:
+                self.assertEqual(len(run["sites"]), 3)
+                self.assertLessEqual(set(run["sites"]), {"home", "away", "lost", "idle"})
+            self.assertEqual(sum(row["count"].values()), 3 * len(row["runs"]))
+        by = {row["name"]: row for row in table["rows"]}
+        self.assertEqual([run["sites"][0] for run in by["GPT-6.1 SOL"]["runs"]], ["away"] * 3)          # "on the first map it ended every run away from the lander"
+        self.assertEqual(by["GPT-6.1 SOL"]["count"]["lost"] + by["GPT-6.1 SOL"]["count"]["idle"], 0)    # "never lost, never idle"
+        self.assertEqual(table["labs"]["google"]["never_started"], 3)                                    # "three of nine runs never left the lander"
+        self.assertEqual(table["labs"]["anthropic"]["lost"], 4)                                          # "loses rovers to the battery: four of them"
+        self.assertEqual(by["CLAUDE HAIKU 5.5"]["count"], {"home": 0, "away": 0, "lost": 0, "idle": 3})
+        self.assertEqual(table["rows"][0]["name"], "GEMINI 4 HYDROGEN")                                  # the best average is the fast model's
+        self.assertEqual(table["rows"][0]["never_started"], 0)                                           # "all three of its runs had a program driving"
+        self.assertEqual(round(table["costs"]["GPT-6 LUNA"] * 100), 3)
+        self.assertEqual(round(table["costs"]["GEMINI 4 ARGON"] * 100), 191)
+
+    def test_the_game_in_numbers(self):
+        game = makers.game_facts()
+        self.assertEqual((game["ticks"], game["delay"], game["tilt_percent"], game["targets_at_launch"], game["sites"]), (420, 3, 36, 38, 3))
+        self.assertEqual(game["tools"], ["rules", "map", "telemetry_log", "uplink", "advance"])
+        instruction = (REPO / "harbor" / "lightlag-traverse-campaign" / "instruction.md").read_text(encoding="utf-8")
+        for tool in game["tools"]:
+            self.assertIn("`{}`".format(tool), instruction)
+        self.assertEqual(game["reference_lines"] // 100, cut.SAID3["long"]["reference_lines_hundreds"])  # "about thirteen hundred lines"
+        self.assertEqual(makers.CAST3["Gemini 4 Carbon"], cut.BEST)
+
+
 class NarrationKitTest(unittest.TestCase):
     """docs/manh-demo/narration-kit/: what a teammate records the narration from."""
 
@@ -344,6 +408,12 @@ class NarrationKitTest(unittest.TestCase):
         said_twice = quiet[:3] + [(15.0, 17.0)] + quiet[4:]             # the breath is now a full pause: six blocks, and the tool says so
         self.assertEqual(len(self.tool.spoken_blocks(said_twice, 31.0, 5, None)[0]), 6)
         self.assertEqual(len(self.tool.spoken_blocks(quiet, 31.0, 5, 0.5)[0]), 6)                # --pause set too low splits at the breath
+
+    def test_a_long_line_is_tightened_at_its_pauses_first(self):
+        piece = {"start": 10.0, "end": 22.9, "pauses": [(11.5, 12.8), (15.2, 15.9), (17.5, 18.4), (21.5, 22.3)]}      # the first real take's line n8
+        self.assertAlmostEqual(self.tool.tightened(piece, 0.35), 12.9 - (0.95 + 0.35 + 0.55 + 0.45))
+        self.assertAlmostEqual(self.tool.tightened(piece, 2.0), 12.9)                                                  # a breath longer than every pause changes nothing
+        self.assertEqual(self.tool.inner_pauses([(0.0, 1.0), (4.0, 4.6), (9.0, 12.0)], 1.0, 9.0), [(4.0, 4.6)])       # the silence around a line is not inside it
 
     def test_the_voice_chain_ends_at_the_films_loudness(self):
         full = {"afftdn", "agate", "deesser", "acompressor", "rubberband"}

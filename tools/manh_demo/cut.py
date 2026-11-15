@@ -277,3 +277,268 @@ SYNC2: Dict[str, Dict[str, Any]] = {
     "v2_learning": {"cues": ["the campaign row comes up (on \"still short\")", "the panel about the planner itself comes up (on \"Even a model\")"]},
     "v2_end": {"cues": ["the live-demo line comes up (on \"It can't yet\")", "the question comes up (on \"Can your agent\")"]},
 }
+
+
+# ---------------------------------------------------------------- the long film: the same story in about ten minutes
+# Manh, 15 November about 07:15: "a 10 minute demo of essentially the same idea except it's more in depth, and it's
+# not as rushed": what happens and why, how the models compare and why each lab did as it did, the reference in
+# detail and why it is a fair one to measure against, and the learned agent as a baseline. Same pictures and the same
+# kind of words as the two-minute draft, at a calmer pace (the voice a little slower, longer pauses), with three
+# slides of its own (`scenes.js`: rules, outcomes, why). The claims about the labs are the tier comparison's
+# (docs/tier-comparison.md) and are counted from the saved runs; `SAID3` holds what the narration states in numbers.
+NAME3 = "manh_demo_long"
+VOICE3 = {"voice": "af_heart", "speed": 0.96}
+LINES3: Dict[str, str] = {
+    "a1": "Imagine driving a car where everything you see happened three seconds ago, and the car obeys you three seconds late. "
+          "On Mars, that is every day. A signal from Earth takes minutes to arrive, so a rover cannot be steered. It has to be trusted. "
+          "So who do you trust to drive?",
+    "a2": "We built that day. One rover, one day of sunlight, and a map full of rocks worth collecting. "
+          "And one rule above all: be home before the battery dies.",
+    "b1": "This is Lightlag Traverse. Six hundred metres of craters, sand and bedrock. Thirty-eight targets at sunrise, more appearing "
+          "through the day, and never enough time to reach them all. Every rover starts at the lander with a full battery, "
+          "and four hundred and twenty steps of daylight.",
+    "b2": "The driver gets five tools: read the rules, read the map, read the telemetry, send commands, and let time pass. Then come the catches.",
+    "b3": "Commands land late. The news from the rover is already old. Wheels slip, differently on every surface. "
+          "Ground that is too steep stops the rover and wipes its orders. The only fuel is the sun.",
+    "b4": "And the score is unforgiving. Come home, and keep everything. Stop short, and keep half. Run flat, and keep nothing.",
+    "c1": "Then we handed the keys to nine AI models from three labs: Anthropic, Google and OpenAI. From each lab, the fast model, "
+          "the everyday one, and the flagship.",
+    "c2": "Each gets the same task, the same five tools, and forty-five minutes to write its own autopilot. No practice run. "
+          "Three maps in a row. Surely one of them makes it home?",
+    "d1": "Start with a fast one. GPT-6 Luna reaches for a rock, and misses. By three centimetres. The rover has to stand within "
+          "two and a half metres when the command lands, and the command lands late. Nine tries on this map. One rock.",
+    "d2": "A bigger one. Claude Sonnet drives onto a slope too steep. The rover freezes, and every order it was carrying is wiped. "
+          "It sends new ones, and freezes again. Thirty times on this one map. When the day ends it is seventy-two metres from home, "
+          "and its samples count half.",
+    "d3": "And a flagship. Claude Opus has had a good day: twenty-one samples on board, thirteen metres from the lander. It will not make it.",
+    "d3b": "Battery flat. Zero points for the whole map. Nothing broke. So what went wrong?",
+    "d4": "Ask the model. Its own closing report says the route planner only counted time. It never checked whether the battery would last.",
+    "d4b": "And its autopilot played all three maps in forty-five seconds, without checking a single result in between. "
+           "It did not fail at coding. It failed at planning the day.",
+    "d5": "And it is not one lab's problem. Here Google's Gemini 4 Argon drives its battery flat, sixteen metres from the lander, "
+          "with most of the day still ahead.",
+    "d5b": "A wait of four steps for the sun would have saved it.",
+    "d5c": "On the same map, our own driver sees its battery fall to nine percent, stops, and waits for light.",
+    "d6": "Not every run fails. This is the one that came within a hair: Gemini 4 Carbon, on its second run. On this map it brings home "
+          "twenty-six samples, as many as our planner, and is back at the lander before dark. So the task can be done. "
+          "The same model's third run never left the lander.",
+    "e1": "So how did all nine do? Twenty-five live runs, three maps each. A dot is one run. The bar is the model's average. "
+          "The gold line is our driver: forty-eight percent of everything on the maps, brought home.",
+    "e1b": "No run crosses it. One comes within a hair: Google's flagship, Gemini 4 Carbon, at forty-seven point three. "
+           "On average, Gemini 4 Hydrogen and GPT-6.1 Sol lead. Claude Sonnet and Opus sit in the middle. "
+           "And at the bottom, the models that missed, or never moved.",
+    "e2": "Look closer, and every lab fails in its own way. Gemini is all or nothing. When its agents drive, they drive best. "
+          "But three of nine runs never left the lander: the agent used up its forty-five minutes before its program drove a metre.",
+    "e2b": "OpenAI's flagship, GPT-6.1 Sol, is the steadiest of all nine: never lost, never idle. But on the first map it ended "
+           "every run away from the lander, and kept half. Its smaller models come home with little on board.",
+    "e2c": "Claude writes its autopilot within minutes, and then loses rovers to the battery: four of them. "
+           "Its fast model never left the lander at all.",
+    "e3": "And the tiers? They do not decide it. Google's fast model, Gemini 4 Hydrogen, has the best average of all nine: "
+          "thirty-seven percent. Not because it drives better than its big brother. Carbon's best runs beat it. "
+          "But all three of its runs had a program driving in time. On this task, finishing beats thinking longer.",
+    "e3b": "Price does not buy it either. A run cost from three cents to almost two dollars, and the best average came at ninety-three cents.",
+    "f1": "So what is our driver? Not an AI. It is a planner: about thirteen hundred lines of plain Python, "
+          "playing through the same five tools as everyone else. It does four things.",
+    "f2": "An extended Kalman filter tracks where the rover really is, through the delay and the noise. "
+          "It learns how each surface slips, from its own wheels. It prices every leg of every route, in time and in energy, against the sun. "
+          "And it searches for the best day: which rocks, in which order, and home before dark. Then it plans again, every few steps.",
+    "f4": "Watch it work. By evening it turns for home with nineteen samples and a third of its battery left, "
+          "and reaches the lander twenty-six steps before dark.",
+    "f3": "Why is that a fair yardstick? It uses the same five tools, and nothing hidden. It is plain code that anyone can read. "
+          "It gives the same score every time: on a laptop, on Modal, and through Harbor.",
+    "f3b": "It has never lost a rover. And it can be beaten: it leaves more than half of the value on the ground.",
+    "g1": "Lucky maps? We wondered too. So we took every model's best program and replayed it on three hundred fresh worlds, on Modal. "
+          "Worlds no model had seen. Twenty-seven hundred match-ups.",
+    "g1b": "The planner scored higher in ninety-five of every hundred, and lost no rover. The models' programs lost a hundred and fifty-four.",
+    "g2": "And look at who holds up. Programs that scored fifty-six percent on the one map they were written for "
+          "fall to the low forties on new ground. The planner holds fifty. A program tuned to one map is not yet a driver.",
+    "h1": "One more driver. Can a machine learn this, instead of being told? We trained small controllers from scratch on Modal. "
+          "No language model: trial and error, over forty-seven thousand practice missions.",
+    "h2": "Before training they bring home eight percent. After, thirty-six, on worlds they had never seen. "
+          "On the campaign, every trained seed passes every Claude run.",
+    "h2b": "And there they stop: level with a simple greedy rule, and well short of the planner. "
+           "We even trained a model to pick the planner's own strategy mid-mission. It gained less than half a point.",
+    "h3": "So the task comes with two baselines. The planner is the bar to beat. The learned agent is an honest picture of where "
+          "learning stands today. Bring your own model, and you know at once where it lands.",
+    "i1": "One command reruns all of it, and a live demo on Modal lets you pick any world and watch eight drivers take it on. "
+          "AI can write the code. It cannot yet plan the day. Can your agent make it home?",
+}
+SUBTITLES3: Dict[str, str] = {
+    **LINES3,
+    "b1": "This is Lightlag Traverse. 600 metres of craters, sand and bedrock. 38 targets at sunrise, more appearing "
+          "through the day, and never enough time to reach them all. Every rover starts at the lander with a full battery, and 420 steps of daylight.",
+    "c2": "Each gets the same task, the same five tools, and 45 minutes to write its own autopilot. No practice run. "
+          "Three maps in a row. Surely one of them makes it home?",
+    "d1": "Start with a fast one. GPT-6 Luna reaches for a rock, and misses. By 3 centimetres. The rover has to stand within "
+          "2.5 metres when the command lands, and the command lands late. 9 tries on this map. 1 rock.",
+    "d2": "A bigger one. Claude Sonnet drives onto a slope too steep. The rover freezes, and every order it was carrying is wiped. "
+          "It sends new ones, and freezes again. 30 times on this one map. When the day ends it is 72 metres from home, and its samples count half.",
+    "d3": "And a flagship. Claude Opus has had a good day: 21 samples on board, 13 metres from the lander. It will not make it.",
+    "d4b": "And its autopilot played all three maps in 45 seconds, without checking a single result in between. "
+           "It did not fail at coding. It failed at planning the day.",
+    "d5": "And it is not one lab's problem. Here Google's Gemini 4 Argon drives its battery flat, 16 metres from the lander, with most of the day still ahead.",
+    "d5c": "On the same map, our own driver sees its battery fall to 9%, stops, and waits for light.",
+    "d6": "Not every run fails. This is the one that came within a hair: Gemini 4 Carbon, on its second run. On this map it brings home "
+          "26 samples, as many as our planner, and is back at the lander before dark. So the task can be done. "
+          "The same model's third run never left the lander.",
+    "e1": "So how did all nine do? 25 live runs, three maps each. A dot is one run. The bar is the model's average. "
+          "The gold line is our driver: 48% of everything on the maps, brought home.",
+    "e1b": "No run crosses it. One comes within a hair: Google's flagship, Gemini 4 Carbon, at 47.3. "
+           "On average, Gemini 4 Hydrogen and GPT-6.1 Sol lead. Claude Sonnet and Opus sit in the middle. And at the bottom, the models that missed, or never moved.",
+    "e2": "Look closer, and every lab fails in its own way. Gemini is all or nothing. When its agents drive, they drive best. "
+          "But 3 of 9 runs never left the lander: the agent used up its 45 minutes before its program drove a metre.",
+    "e3": "And the tiers? They do not decide it. Google's fast model, Gemini 4 Hydrogen, has the best average of all nine: 37%. "
+          "Not because it drives better than its big brother. Carbon's best runs beat it. But all three of its runs had a program driving in time. "
+          "On this task, finishing beats thinking longer.",
+    "e3b": "Price does not buy it either. A run cost from 3 cents to almost 2 dollars, and the best average came at 93 cents.",
+    "f1": "So what is our driver? Not an AI. It is a planner: about 1,300 lines of plain Python, playing through the same five tools as everyone else. It does four things.",
+    "f4": "Watch it work. By evening it turns for home with 19 samples and a third of its battery left, and reaches the lander 26 steps before dark.",
+    "g1": "Lucky maps? We wondered too. So we took every model's best program and replayed it on 300 fresh worlds, on Modal. Worlds no model had seen. 2,700 match-ups.",
+    "g1b": "The planner scored higher in 95 of every 100, and lost no rover. The models' programs lost 154.",
+    "g2": "And look at who holds up. Programs that scored 56% on the one map they were written for fall to the low forties on new ground. "
+          "The planner holds 50. A program tuned to one map is not yet a driver.",
+    "h1": "One more driver. Can a machine learn this, instead of being told? We trained small controllers from scratch on Modal. "
+          "No language model: trial and error, over 47,000 practice missions.",
+    "h2": "Before training they bring home 8%. After, 36, on worlds they had never seen. On the campaign, every trained seed passes every Claude run.",
+}
+# What the long film's narration states in numbers, as `make.chart_numbers` counts them ("long"); the build stops if the runs say otherwise.
+SAID3 = {"long": {"ticks": 420, "targets_at_launch": 38, "width": 600, "runs": 25, "reference_percent": 48, "best_run_per_mille": 473, "best_mean_percent": 37,
+                  "best_mean_model": "GEMINI 4 HYDROGEN", "google_runs": 9, "google_never_started": 3, "anthropic_lost": 4, "sol_away_on_site_one": 3,
+                  "sol_lost_or_idle": 0, "cheapest_cents": 3, "dearest_cents": 191, "best_mean_cents": 93, "reference_lines_hundreds": 13,
+                  "worlds": 300, "pairs": 2700, "worlds_percent": 95, "reference_lost": 0, "programs_lost": 154,
+                  "initial_percent": 8, "ppo_percent": 36, "gain_under_half_a_point": True, "training_missions_thousands": 47}}
+RL_ROVER, BEST = "campaign-rl-ppo-43", "campaign-agent-gemini-4-carbon-2"
+
+
+def shots3(durations: Dict[str, float], words: Dict[str, List[Dict[str, Any]]], stretch: float = 0.0) -> List[Dict[str, Any]]:
+    """The long film, shot by shot. Lines that share a chart follow each other inside one beat (`more`)."""
+    say = base.Words(words)
+    at = lambda line, phrase, lead=0.0: round(say.at(line, phrase) + lead, 2)          # noqa: E731
+    chase = "A.setCam('chase'); A.view.k = 1; A.view.snap = true; A.setSpeed(1); A.setPlaying(true);"
+    gap = 0.7                                               # the breath between two lines that share a picture
+
+    def chain(first: float, *lines: str) -> List[float]:   # when each of several lines starts, one after the other
+        starts, clock = [], first
+        for line in lines:
+            starts.append(round(clock, 2))
+            clock += durations[line] + gap
+        return starts
+
+    orbit = round(max(8.0, 0.9 + at("a1", "So who") - 0.25), 2)
+    miss = round(0.4 + at("d1", "and misses") + 0.45, 2)
+    stop = round(0.4 + at("d2", "The rover freezes") + 0.25, 2)
+    flat = round(0.5 + at("d3", "It will not make it") + 1.05, 2)
+    rules = chain(0.6, "b2", "b3", "b4")
+    lineup = chain(0.5, "c1", "c2")
+    quote = chain(0.5, "d4", "d4b")
+    tiers = chain(0.5, "e1", "e1b")
+    labs = chain(0.6, "e2", "e2b", "e2c", "e3", "e3b")
+    planner = chain(0.5, "f1", "f2")
+    why = chain(0.6, "f3", "f3b")
+    worlds = chain(0.5, "g1", "g1b", "g2")
+    learn = chain(0.5, "h2", "h2b")
+    more = lambda starts, *lines: [{"vo": line, "at": start} for line, start in zip(lines, starts[1:])]      # noqa: E731
+    return [
+        # 0. The hook: orbit, the fall, the landing, the title.
+        {"name": "l_intro", "page": "campaign", "site": 1, "addon": "intro.js", "addon_settings": {"orbit": orbit, "dive": 2.6, "land": 3.2, "rise": 2.4},
+         "vacuum": [0.0, round(orbit + 2.4, 2)], "fade_in": 0.9, "beats": [
+            {"min": round(orbit + 2.6, 2), "vo": "a1", "vo_at": 0.9, "over": True, "trackers": False,
+             "js": "A.showTitle(false); A.seek(0); A.setCam('map'); A.setPlaying(false);",
+             "sfx": [{"t": 0.4, "kind": "hit_soft"}, {"t": round(orbit - 0.3, 2), "kind": "riser", "len": 2.9}]},
+            {"min": 5.6, "vo": "a2", "vo_at": 0.5, "over": True, "trackers": False, "sfx": [{"t": 0.0, "kind": "whoosh", "len": 2.2}]},
+            {"min": 4.0, "pad": 1.0, "trackers": False, "js": "A.setSpeed(4); A.setPlaying(true);",
+             "overlay": [{"kind": "title", "from": 0.1, "to": 99}], "sfx": [{"t": 0.15, "kind": "hit"}]},
+        ]},
+        # 1. The game: the first site from above with all ten rovers leaving the lander, then the rules.
+        {"name": "l_day", "page": "campaign", "site": 1, "beats": [
+            {"vo": "b1", "vo_at": 0.6, "pad": 1.4, "js": "A.showTitle(false); A.seek(1); A.setCam('map'); A.setSpeed(3); A.setPlaying(true);",
+             "overlay": [{"kind": "caption", "from": round(0.6 + at("b1", "Six hundred"), 2), "to": round(0.6 + at("b1", "Thirty-eight") - 0.1, 2), "text": "600 × 400 M OF CRATERS, SAND AND BEDROCK"},
+                         {"kind": "caption", "from": round(0.6 + at("b1", "Thirty-eight"), 2), "to": round(0.6 + at("b1", "Every rover") - 0.1, 2), "text": "38 TARGETS AT SUNRISE · MORE ON THE WAY"},
+                         {"kind": "caption", "from": round(0.6 + at("b1", "Every rover"), 2), "to": 99, "text": "ONE BATTERY · 420 STEPS OF DAYLIGHT"}]}]},
+        {"name": "l_rules", "page": "film", "scene": "rules", "beats": [
+            {"vo": "b2", "vo_at": rules[0], "more": more(rules, "b3", "b4"), "pad": 1.8,
+             "cues": [round(rules[1] + at("b3", "Commands land late") - 0.1, 2), round(rules[1] + at("b3", "The news") - 0.1, 2), round(rules[1] + at("b3", "Wheels slip") - 0.1, 2),
+                      round(rules[1] + at("b3", "Ground that is too steep") - 0.1, 2), round(rules[1] + at("b3", "The only fuel") - 0.1, 2), round(rules[2] + at("b4", "And the score") - 0.1, 2)]}]},
+        # 2. The drivers.
+        {"name": "l_lineup", "page": "film", "scene": "lineup", "beats": [{"vo": "c1", "vo_at": lineup[0], "more": more(lineup, "c2"), "pad": 1.4}]},
+        # 3. What goes wrong, one tier at a time.
+        {"name": "l_fast", "page": "campaign", "site": 3, "beats": [
+            {"vo": "d1", "vo_at": 0.4, "pad": 1.2,
+             "js": "A.showTitle(false); A.follow('%s'); A.seek(%.2f); %s" % (FAST, 104 - base.PACE * miss, chase),
+             "overlay": [{"kind": "caption", "side": "left", "from": round(miss + 0.3, 2), "to": round(0.4 + at("d1", "Nine tries") - 0.1, 2), "text": "3 CM TOO FAR · NO POINTS"},
+                         {"kind": "caption", "side": "left", "from": round(0.4 + at("d1", "Nine tries"), 2), "to": 99, "text": "9 TRIES · 1 ROCK"}]}]},
+        {"name": "l_mid", "page": "campaign", "site": 3, "beats": [
+            {"vo": "d2", "vo_at": 0.4, "pad": 1.2,
+             "js": "A.showTitle(false); A.follow('%s'); A.seek(%.2f); %s" % (MID, 302 - base.PACE * stop, chase),
+             "overlay": [{"kind": "caption", "side": "left", "from": round(stop + 0.3, 2), "to": round(0.4 + at("d2", "When the day ends") - 0.1, 2), "text": "TOO STEEP · 30 SAFETY STOPS"},
+                         {"kind": "caption", "side": "left", "from": round(0.4 + at("d2", "When the day ends"), 2), "to": 99, "text": "72 M FROM HOME · SAMPLES COUNT HALF"}],
+             "sfx": [{"t": 0.0, "kind": "cut"}]}]},
+        {"name": "l_flagship", "page": "campaign", "site": 1, "beats": [
+            {"vo": "d3", "vo_at": 0.5, "over": True, "until": "A.state.t >= 409",
+             "js": "A.showTitle(false); A.HOLD.lost = 999; A.follow('%s'); A.seek(%.2f); "
+                   "A.setCam('chase'); A.view.k = 1; A.view.snap = true; A.setSpeed(2); A.setPlaying(true);" % (FLAGSHIP, 409 - 3 * flat),
+             "overlay": [{"kind": "caption", "side": "left", "from": round(0.5 + at("d3", "twenty-one samples"), 2), "to": round(flat - 0.05, 2),
+                          "text": "21 SAMPLES ON BOARD · 13 M FROM HOME"}], "sfx": [{"t": 0.0, "kind": "cut"}]},
+            {"min": 1.0, "thump": 0.0, "js": "A.setPlaying(false); A.seek(409); document.getElementById('mini').style.opacity = '0';"},
+            {"vo": "d3b", "vo_at": 0.9, "min": 5.0, "pad": 1.4, "js": "A.startStory();", "sfx": [{"t": 0.0, "kind": "whoosh", "len": 1.3}]},
+        ]},
+        {"name": "l_quote", "page": "film", "scene": "quote", "beats": [
+            {"vo": "d4", "vo_at": quote[0], "more": more(quote, "d4b"), "pad": 1.6,
+             "cues": [round(quote[0] + at("d4", "Its own closing report") - 0.1, 2), round(quote[1] - 0.1, 2), round(quote[1] + at("d4b", "It did not fail") - 0.15, 2)]}]},
+        # the sun: Gemini 4 Argon runs flat at tick 62 of site 3; a cut to tick 93, where the planner waits
+        {"name": "l_energy", "page": "campaign", "site": 3, "beats": [
+            {"vo": "d5", "vo_at": 0.5, "over": True, "min": round(max(0.6, 0.5 + at("d5", "flat") - 5.3), 2),
+             "js": "A.showTitle(false); A.HOLD.lost = 999; A.HOLD.ref_wait = 999; A.follow('%s'); A.seek(48); A.setCam('map'); A.setPlaying(false);" % FLAT,
+             "overlay": [{"kind": "caption", "from": 0.4, "to": 99, "text": "THE ONLY FUEL IS THE SUN"}]},
+            {"until": "!!(A.story.active && A.story.active.kind === 'lost')", "js": "A.startStory();"},
+            {"vo": "d5b", "vo_at": 2.2, "min": 5.6, "thump": 0.0},
+            {"vo": "d5c", "vo_at": 0.5, "over": True, "until": "!!(A.story.active && A.story.active.kind === 'ref_wait')",
+             "js": "A.card.style.transition = 'none'; A.stopStory(); A.seek(90.4); A.startStory();",
+             "at": [{"t": 0.2, "js": "A.card.style.transition = '';"}], "sfx": [{"t": 0.0, "kind": "cut"}]},
+            {"min": 4.6, "pad": 1.4},
+        ]},
+        # ... and one that gets it right: Gemini 4 Carbon's second run at site 2, five samples in thirty steps (ticks 212 to 238)
+        {"name": "l_best", "page": "campaign", "site": 2, "beats": [
+            {"vo": "d6", "vo_at": 0.5, "pad": 1.2, "js": "A.showTitle(false); A.follow('%s'); A.seek(207); %s" % (BEST, chase),
+             "overlay": [{"kind": "caption", "side": "left", "from": round(0.5 + at("d6", "On this map"), 2), "to": round(0.5 + at("d6", "So the task") - 0.1, 2),
+                          "text": "26 SAMPLES · HOME BEFORE DARK"}], "sfx": [{"t": 0.0, "kind": "cut"}]}]},
+        # 4. The scoreboard, then how each lab's runs ended.
+        {"name": "l_tiers", "page": "film", "scene": "tiers", "beats": [
+            {"vo": "e1", "vo_at": tiers[0], "more": more(tiers, "e1b"), "pad": 1.6,
+             "cues": [round(tiers[1] + at("e1b", "One comes within") - 0.1, 2), round(tiers[0] + at("e1", "The gold line") - 0.1, 2)]}]},
+        {"name": "l_outcomes", "page": "film", "scene": "outcomes", "beats": [
+            {"vo": "e2", "vo_at": labs[0], "more": more(labs, "e2b", "e2c", "e3", "e3b"), "pad": 1.8,
+             "cues": [round(labs[0] + at("e2", "Gemini is all") - 0.1, 2), round(labs[1] - 0.1, 2), round(labs[2] - 0.1, 2),
+                      round(labs[3] + at("e3", "Google's fast model") - 0.1, 2), round(labs[4] - 0.1, 2)]}]},
+        # 5. The reference: what it is, how it ends its day, why it is a fair one to measure against.
+        {"name": "l_planner", "page": "film", "scene": "planner", "beats": [
+            {"vo": "f1", "vo_at": planner[0], "more": more(planner, "f2"), "pad": 1.6,
+             "cues": [round(planner[1] + 0.05, 2), round(planner[1] + at("f2", "It learns how") - 0.1, 2),
+                      round(planner[1] + at("f2", "It prices every leg") - 0.1, 2), round(planner[1] + at("f2", "And it searches") - 0.1, 2)]}]},
+        {"name": "l_home", "page": "campaign", "site": 3, "beats": [
+            {"vo": "f4", "vo_at": 0.5, "over": True, "until": "!!(A.story.active && A.story.active.kind === 'ref_home')",
+             "js": "A.showTitle(false); A.HOLD.ref_home = 999; A.seek(372); A.setCam('map'); A.startStory();"},
+            {"min": 5.0, "pad": 1.4},
+        ]},
+        {"name": "l_why", "page": "film", "scene": "why", "beats": [
+            {"vo": "f3", "vo_at": why[0], "more": more(why, "f3b"), "pad": 1.8,
+             "cues": [round(why[0] + at("f3", "It uses the same") - 0.1, 2), round(why[0] + at("f3", "It is plain code") - 0.1, 2),
+                      round(why[0] + at("f3", "It gives the same score") - 0.1, 2), round(why[1] - 0.05, 2), round(why[1] + at("f3b", "And it can be beaten") - 0.1, 2)]}]},
+        # 6. At scale.
+        {"name": "l_worlds", "page": "film", "scene": "worlds", "beats": [
+            {"vo": "g1", "vo_at": worlds[0], "more": more(worlds, "g1b", "g2"), "pad": 1.8,
+             "cues": [round(worlds[1] - 0.1, 2), round(worlds[2] - 0.1, 2)]}]},
+        # 7. A learned baseline.
+        {"name": "l_rl", "page": "campaign", "site": 1, "beats": [
+            {"vo": "h1", "vo_at": 0.5, "pad": 1.2, "js": "A.showTitle(false); A.follow('%s'); A.seek(112); %s" % (RL_ROVER, chase),
+             "overlay": [{"kind": "caption", "side": "left", "from": round(0.5 + at("h1", "We trained"), 2), "to": 99, "text": "OUR RL AGENT · TRAINED FROM SCRATCH"}],
+             "sfx": [{"t": 0.0, "kind": "cut"}]}]},
+        {"name": "l_learning", "page": "film", "scene": "learning3", "beats": [
+            {"vo": "h2", "vo_at": learn[0], "more": more(learn, "h2b"), "pad": 1.6,
+             "cues": [round(learn[0] + at("h2", "On the campaign") - 0.15, 2), round(learn[1] + at("h2b", "We even trained") - 0.15, 2)]}]},
+        {"name": "l_drivers", "page": "film", "scene": "drivers", "beats": [{"vo": "h3", "vo_at": 0.6, "pad": 1.6, "min": 9.0}]},
+        # 8. Try it.
+        {"name": "l_end", "page": "film", "scene": "end", "fade_out": 1.0, "beats": [
+            {"vo": "i1", "vo_at": 0.6, "pad": round(2.4 + stretch, 3), "min": 8.0,
+             "cues": [round(0.6 + at("i1", "and a live demo") - 0.1, 2), round(0.6 + at("i1", "Can your agent") - 0.15, 2)]}]},
+    ]

@@ -131,6 +131,12 @@
       return { head: 'WAITS FOR THE SUN', stats: [[String(Math.round(charge[0])), '%', 'BATTERY LEFT'], [stops[0], '', 'STOPS TO CHARGE'], [String(Math.floor(lowest)), '%', 'ITS LOWEST ALL DAY']],
         then: 'IT CHECKS THE BATTERY BEFORE EVERY LEG' };
     },
+    ref_home(m) {
+      const samples = found(m.did, /(\d+) samples/), charge = found(m.did, /battery ([\d.]+)%/), spare = found(m.better, /(\d+) ticks before the end/);
+      if (!samples || !charge || !spare) return null;
+      return { head: 'HEADS HOME', stats: [[samples[0], '', 'SAMPLES ON BOARD'], [String(Math.round(charge[0])), '%', 'BATTERY LEFT'], [spare[0], '', 'STEPS TO SPARE']],
+        then: 'IT LEAVES WHILE THE WAY HOME IS STILL OPEN' };
+    },
     misses(m) {
       const reach = found(m.did, /Sampled ([\d.]+) m from the nearest target; it must be within ([\d.]+) m/), count = found(m.did, /(\d+) missed samples/), ours = found(m.better, /reference missed (\d+)/);
       if (!reach || !count || !ours) return null;

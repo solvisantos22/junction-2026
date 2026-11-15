@@ -19,11 +19,13 @@ flac, aac or ogg.
   splice
     --pause 1.0         the shortest silence, in seconds, that separates two lines (default: worked out from the reading)
     --drop 4,9          throw away these spoken blocks (numbered as the tool lists them): a line you said twice
+    --remove 66.6-69.6  throw away these seconds of the reading first: a false start, a cough (repeatable with commas)
     --cuts 7.2,15.0     cut the reading at these seconds instead of looking for pauses (one fewer than there are lines)
     --keep folder/      also save the cut lines as n1.wav, n2.wav, ...: listen, re-record one, then use `lines`
 
   fitting (splice and lines)
-    --max-speed 1.12    a line that is too long for its place is sped up by at most this much, pitch unchanged
+    --breath 0.35       a line that is too long for its place first has the pauses inside it cut down to this many seconds
+    --max-speed 1.12    ... and is then sped up by at most this much, pitch unchanged
     --shift n8=0.2      start a line this many seconds later than its time (repeatable)
 
   one
@@ -50,7 +52,7 @@ HERE = Path(__file__).resolve().parent
 KINDS = (".wav", ".m4a", ".mp3", ".flac", ".aac", ".ogg")
 STEREO = "aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo"
 FRAME = 0.02                    # seconds: a recording's loudness is measured in steps of this
-LEAD, TAIL = 0.25, 0.30         # seconds of the room kept before and after a line's speech, so a soft first word is not cut
+LEAD, TAIL = 0.30, 0.35         # seconds of the room kept before and after a line's speech, so a soft first word is not cut
 GAP = 0.15                      # the least silence between the end of one line's speech and the start of the next
 WORKING_LEVEL = -18.0           # dB: every recording is brought to this before it is cleaned, whatever level it was recorded at
 
@@ -141,6 +143,17 @@ def hear(path: Path, work: Path, sure: bool = True) -> Tuple[List[Tuple[float, f
     for flag, a, b in runs(loud):                               # a click or a bump in a pause is not speech
         if flag and (b - a) * FRAME < 0.125:
             loud[a:b] = [False] * (b - a)
+    # a soft first syllable ("We", "A", "Its") or a fading last one sits under that line: speech already found is
+    # grown outwards, by up to half a second, for as long as the level stays clearly above the room
+    soft, reach = room + max(4.0, 0.15 * (voice - room)), int(0.5 / FRAME)
+    for flag, a, b in runs(loud):
+        if not flag:
+            continue
+        for step, edge in ((-1, a - 1), (1, b)):
+            frame, grown = edge, 0
+            while 0 <= frame < len(levels) and not loud[frame] and levels[frame] > soft and grown < reach:
+                loud[frame] = True
+                frame, grown = frame + step, grown + 1
     return [(a * FRAME, b * FRAME) for flag, a, b in runs(loud) if not flag and (b - a) * FRAME >= 0.3], room, voice, length
 
 
@@ -160,14 +173,33 @@ def spoken_blocks(quiet: List[Tuple[float, float]], length: float, wanted: int, 
     return [(a, b) for a, b in zip(edges[0::2], edges[1::2]) if b - a > 0.25], limit
 
 
-def cut_out(source: Path, target: Path, start: float, end: float, before: float, after: float) -> Dict[str, Any]:
-    """Write the speech from `start` to `end` of a recording as a file of its own, with up to LEAD and TAIL of the
-    room around it (never more than `before` and `after` allow), faded at both ends."""
-    lead, tail = max(0.0, min(LEAD, before)), max(0.0, min(TAIL, after))
-    a, b = start - lead, end + tail
-    run(["ffmpeg", "-y", "-loglevel", "error", "-ss", "{:.3f}".format(a), "-t", "{:.3f}".format(b - a), "-i", str(source), "-ac", "1", "-ar", "48000",
-         "-af", "afade=t=in:d=0.015,afade=t=out:st={:.3f}:d=0.05".format(max(0.0, b - a - 0.05)), str(target)])
-    return {"path": target, "lead": lead, "speech": end - start, "tail": tail}
+def inner_pauses(quiet: List[Tuple[float, float]], start: float, end: float) -> List[Tuple[float, float]]:
+    """The pauses that lie inside a line's speech."""
+    return [(a, b) for a, b in quiet if a > start + 0.05 and b < end - 0.05]
+
+
+def cut_out(source: Path, target: Path, piece: Dict[str, Any], breath: Optional[float]) -> Dict[str, Any]:
+    """Write a line's speech as a file of its own, with up to LEAD and TAIL of the room around it, faded at both
+    ends. With `breath`, every pause inside the line that is longer is cut down to that length, from its middle."""
+    lead, tail = max(0.0, min(LEAD, piece["before"])), max(0.0, min(TAIL, piece["after"]))
+    parts, clock_ = [], piece["start"] - lead
+    for a, b in (piece["pauses"] if breath else []):
+        if b - a > breath:
+            parts.append((clock_, a + breath / 2.0))
+            clock_ = b - breath / 2.0
+    parts.append((clock_, piece["end"] + tail))
+    steps = ["[0:a]atrim=start={:.3f}:end={:.3f},asetpts=PTS-STARTPTS,afade=t=in:d=0.008,afade=t=out:st={:.3f}:d=0.008[p{}]".format(
+        a, b, max(0.0, b - a - 0.008), number) for number, (a, b) in enumerate(parts)]
+    length = sum(b - a for a, b in parts)
+    steps.append("{}concat=n={}:v=0:a=1,afade=t=in:d=0.015,afade=t=out:st={:.3f}:d=0.05[line]".format(
+        "".join("[p{}]".format(number) for number in range(len(parts))), len(parts), max(0.0, length - 0.05)))
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(source), "-filter_complex", ";".join(steps), "-map", "[line]", "-ac", "1", "-ar", "48000", str(target)])
+    return {"path": target, "lead": lead, "speech": length - lead - tail, "tail": tail}
+
+
+def tightened(piece: Dict[str, Any], breath: float) -> float:
+    """How long a line's speech is once the pauses inside it are cut down to `breath`."""
+    return piece["end"] - piece["start"] - sum(max(0.0, b - a - breath) for a, b in piece["pauses"])
 
 
 def clock(seconds: float) -> str:
@@ -183,8 +215,10 @@ def main() -> int:
     parser.add_argument("--voice-gain", type=float, default=0.0)
     parser.add_argument("--pause", type=float, default=None)
     parser.add_argument("--drop", default="")
+    parser.add_argument("--remove", default="")
     parser.add_argument("--cuts", default="")
     parser.add_argument("--keep", type=Path, default=None)
+    parser.add_argument("--breath", type=float, default=0.35)
     parser.add_argument("--max-speed", type=float, default=1.12)
     parser.add_argument("--shift", action="append", default=[], metavar="LINE=SECONDS")
     parser.add_argument("--offset", type=float, default=0.0)
@@ -225,7 +259,8 @@ def main() -> int:
             quiet, room, voice, length = hear(found, work, sure=False)       # where the words are in the file: silence before and after is left out
             start = quiet[0][1] if quiet and quiet[0][0] <= 0.05 else 0.0
             end = quiet[-1][0] if quiet and quiet[-1][1] >= length - 0.05 else length
-            pieces[line["id"]] = {**cut_out(found, work / "{}.wav".format(line["id"]), start, end, start, length - end), "gain": WORKING_LEVEL - voice}
+            pieces[line["id"]] = {"source": found, "start": start, "end": end, "before": start, "after": length - end,
+                                  "pauses": inner_pauses(quiet, start, end), "gain": WORKING_LEVEL - voice}
         missing = [line["id"] for line in lines if line["id"] not in pieces]
         if not pieces:
             raise SystemExit("no recordings found in {}: name them n1.wav, n2.wav, ... as in narration.md".format(args.source))
@@ -236,9 +271,23 @@ def main() -> int:
             raise SystemExit("no such recording: {}".format(args.source))
         reading = work / "reading.wav"
         run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(args.source), "-ac", "1", "-ar", "48000", str(reading)])
+        removed = sorted(tuple(float(value) for value in item.split("-", 1)) for item in args.remove.split(",") if item.strip())
+        if removed:                                  # a false start or a cough goes first; every time given afterwards is still a time of the recording as it was
+            whole, keep, clock_ = reading, [], 0.0
+            for a, b in removed:
+                keep.append((clock_, a))
+                clock_ = b
+            keep.append((clock_, seconds_of(whole)))
+            reading = work / "reading-kept.wav"
+            steps = ["[0:a]atrim=start={:.3f}:end={:.3f},asetpts=PTS-STARTPTS,afade=t=in:d=0.01,afade=t=out:st={:.3f}:d=0.01[k{}]".format(
+                a, b, max(0.0, b - a - 0.01), number) for number, (a, b) in enumerate(keep)]
+            steps.append("{}concat=n={}:v=0:a=1[kept]".format("".join("[k{}]".format(number) for number in range(len(keep))), len(keep)))
+            run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(whole), "-filter_complex", ";".join(steps), "-map", "[kept]", "-ac", "1", "-ar", "48000", str(reading)])
+            print("removed from the reading: {}".format(", ".join("{} to {}".format(clock(a), clock(b)) for a, b in removed)))
+        moved = lambda t: t - sum(min(t, b) - a for a, b in removed if t > a)             # noqa: E731  a time of the recording, in the reading that is left
         quiet, room, voice, length = hear(reading, work)
         if args.cuts:
-            marks, blocks, limit = [0.0] + sorted(float(value) for value in args.cuts.split(",")) + [length], [], None
+            marks, blocks, limit = [0.0] + sorted(moved(float(value)) for value in args.cuts.split(",")) + [length], [], None
             if len(marks) - 1 != len(lines):
                 raise SystemExit("--cuts needs {} times for {} lines, got {}".format(len(lines) - 1, len(lines), len(marks) - 2))
             for a, b in zip(marks, marks[1:]):              # each part, trimmed to its speech
@@ -272,11 +321,12 @@ def main() -> int:
             a, b = blocks[number - 1]
             before = a - (blocks[number - 2][1] if number > 1 else 0.0)                    # the pause on either side, shared with the neighbour
             after = (blocks[number][0] if number < len(blocks) else length) - b
-            pieces[line["id"]] = {**cut_out(reading, work / "{}.wav".format(line["id"]), a, b, 0.45 * before, 0.45 * after), "gain": WORKING_LEVEL - voice}
+            pieces[line["id"]] = {"source": reading, "start": a, "end": b, "before": 0.45 * before, "after": 0.45 * after,
+                                  "pauses": inner_pauses(quiet, a, b), "gain": WORKING_LEVEL - voice}
         if args.keep:
             args.keep.mkdir(parents=True, exist_ok=True)
             for key, piece in pieces.items():
-                shutil.copyfile(piece["path"], args.keep / "{}.wav".format(key))
+                cut_out(piece["source"], args.keep / "{}.wav".format(key), piece, None)
             print("the cut lines are in {} (n1.wav, ...): re-record one there and run `lines` on that folder".format(args.keep))
 
     if pieces:
@@ -290,15 +340,20 @@ def main() -> int:
                 continue
             begins = max(line["start"] + shifts.get(line["id"], 0.0), free)
             until = lines[number + 1]["start"] - GAP if number + 1 < len(lines) else total - 0.25
-            speed = min(args.max_speed, max(1.0, piece["speech"] / max(0.5, until - begins)))
+            room_, said, breath = max(0.5, until - begins), piece["end"] - piece["start"], None
+            if said > room_ + 0.02 and tightened(piece, args.breath) < said - 0.05:      # too long as it is: first the pauses inside it
+                breath = args.breath
+            piece = {**piece, **cut_out(piece["source"], work / "{}.wav".format(line["id"]), piece, breath)}
+            speed = min(args.max_speed, max(1.0, piece["speech"] / room_))
             ends = begins + piece["speech"] / speed
-            note = "as recorded" if speed <= 1.001 else "sped up {:.0f}%".format((speed - 1) * 100)
+            note = " and ".join(part for part in ("pauses inside it cut to {:.2f} s ({:.1f} s saved)".format(breath, said - piece["speech"]) if breath else "",
+                                                  "sped up {:.0f}%".format((speed - 1) * 100) if speed > 1.001 else "") if part) or "as recorded"
             if ends - until > 0.05:
                 late += 1
                 note += "; STILL {:.1f} s TOO LONG: the next line starts late. Say it faster, cut words, or record it again".format(ends - until)
             if begins > line["start"] + 0.4:
                 note += "; starts {:.1f} s late".format(begins - line["start"])
-            print("  {:<4} {} to {}  {:5.1f} s of speech, {:5.1f} s for the placeholder: {}".format(line["id"], clock(begins), clock(ends), piece["speech"], line["placeholder_seconds"], note))
+            print("  {:<4} {} to {}  {:5.1f} s of speech, {:5.1f} s for the placeholder: {}".format(line["id"], clock(begins), clock(ends), said, line["placeholder_seconds"], note))
             placed.append((piece["path"], begins - piece["lead"] / speed, speed, piece["gain"]))
             free = ends + GAP
         if free - GAP > total:
