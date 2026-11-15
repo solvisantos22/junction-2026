@@ -30,12 +30,12 @@ PIECES: Dict[str, Dict[str, Any]] = {
     "lineup": {"page": "film", "scene": "lineup", "fade_out": 0.4, "beats": [{"min": 8.6}]},
     # what the models are measured against: the reference (a model-based planner) and the team's own RL agent
     "drivers": {"page": "film", "scene": "drivers", "fade_out": 0.4, "beats": [{"min": 9.0}]},
-    # the opening: Mars from orbit, a dive through the dust, a landing on the real map, the title (`intro.js`)
-    "intro": {"page": "campaign", "site": 1, "addon": "intro.js", "addon_settings": {"orbit": 9.0, "dive": 2.6, "land": 3.2},
+    # the opening: Mars from orbit, a dive through the dust, a landing beside the rover on the real map, a rise to the overview, the title (`intro.js`)
+    "intro": {"page": "campaign", "site": 1, "addon": "intro.js", "addon_settings": {"orbit": 9.0, "dive": 2.6, "land": 3.2, "rise": 2.4},
               "vacuum": [0.0, 10.4], "fade_in": 0.9, "fade_out": 0.5, "beats": [
         {"min": 11.6, "trackers": False, "js": "A.showTitle(false); A.seek(0); A.setCam('map'); A.setPlaying(false);",
          "sfx": [{"t": 0.4, "kind": "hit_soft"}, {"t": 8.7, "kind": "riser", "len": 2.9}]},
-        {"min": 3.2, "trackers": False, "sfx": [{"t": 0.0, "kind": "whoosh", "len": 2.2}]},
+        {"min": 5.6, "trackers": False, "sfx": [{"t": 0.0, "kind": "whoosh", "len": 2.2}]},
         {"min": 4.4, "trackers": False, "js": "A.setSpeed(4); A.setPlaying(true);",
          "overlay": [{"kind": "title", "from": 0.1, "to": 3.9}], "sfx": [{"t": 0.15, "kind": "hit"}]},
     ]},

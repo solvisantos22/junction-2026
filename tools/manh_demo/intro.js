@@ -4,13 +4,14 @@
 // Three parts on one clock (seconds into the shot):
 //   orbit   a low-poly Mars turning under a low sun, stars behind it, the camera drifting closer;
 //   dive    the camera falls at the planet; streaks, then dust, fill the frame;
-//   land    the dust clears on the real demo page: its camera comes down from far above the map to its
-//           usual overview, and the page's own bars and standings fade in around it.
+//   land    the dust clears on the real demo page: the camera comes straight down onto the spot where the rovers
+//           start and ends low beside the reference rover; the page's own bars and standings fade in around it;
+//   rise    up and back to the page's usual overview, where the title comes up.
 // The planet is made here from noise (no picture of Mars is used), in the flat-shaded style of the page.
 // window.__piece.draw(seconds) draws one frame; the recorder calls it after the page has drawn its own.
 (() => {
   const A = window.LIGHTLAG_TRAVERSE_APP, T = A.THREE, P = window.__PIECE || {};
-  const ORBIT = P.orbit === undefined ? 9.0 : P.orbit, DIVE = P.dive === undefined ? 2.6 : P.dive, LAND = P.land === undefined ? 3.2 : P.land;
+  const ORBIT = P.orbit === undefined ? 9.0 : P.orbit, DIVE = P.dive === undefined ? 2.6 : P.dive, LAND = P.land === undefined ? 3.2 : P.land, RISE = P.rise === undefined ? 2.4 : P.rise;
   const W = window.innerWidth, H = window.innerHeight;
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -139,13 +140,21 @@
         g.restore();
       }
     } else {
-      // landing: the page has drawn its map from its usual place; draw it again from far above, coming down
-      const view = A.view, k = 1 - Math.pow(1 - down, 4);
-      far.copy(view.eye).sub(view.look).multiplyScalar(lerp(7.0, 1, k)).add(view.look);
-      aim.copy(view.look);
-      A.camera.position.copy(far); A.camera.lookAt(aim); A.camera.updateProjectionMatrix();
-      A.scene.fog.density = lerp(0.00009, A.scene.fog.density, k);
+      // landing: the page has drawn its map from its usual place; draw it again. First straight down out of the dust
+      // onto the spot where the rovers start, ending low beside the reference rover; then up and back to the
+      // page's own overview, so the next shot carries on from where the page left it.
+      const view = A.view, k = 1 - Math.pow(1 - down, 3), up = smooth(0, 1, (t - ORBIT - DIVE - LAND) / RISE);
+      const pose = A.REF.track.at(0), spot = A.P(pose.x, pose.y);
+      const home = view.eye.distanceTo(view.look), high = lerp(1.15, 0.13, k) * home;  // from a little above the overview's height down to a few rover lengths
+      const lean = lerp(0.04, 0.62, smooth(0.35, 1, down));             // from looking straight down to looking in from the south
+      far.set(spot.x, spot.y + Math.cos(lean) * high, spot.z + Math.sin(lean) * high);
+      far.lerp(view.eye, up); aim.copy(spot).lerp(view.look, up);
+      A.camera.position.copy(far); A.camera.up.set(0, 1, 0); A.camera.lookAt(aim); A.camera.updateProjectionMatrix();
+      // the page sized its names and flags for its own camera; shrink them with the distance so they keep their size on screen
+      const shrink = far.distanceTo(aim) / home, sprites = [];
+      A.scene.traverse(o => { if (o.isSprite) { sprites.push([o, o.scale.clone()]); o.scale.multiplyScalar(shrink); } });
       A.renderer.render(A.scene, A.camera);
+      for (const [o, scale] of sprites) o.scale.copy(scale);
       ui.style.opacity = smooth(0.0, 0.12, down).toFixed(3);          // the page's bars and standings are there before the dust thins, so no bare margins show
     }
     // the dust: thick at the end of the dive, thinning as the map comes up under it
@@ -162,7 +171,7 @@
       g.globalAlpha = smooth(0.55, 1, dust); g.fillStyle = '#d78c5c'; g.fillRect(0, 0, W, H);
       g.restore();
     }
-    return { part: t < ORBIT ? 'orbit' : t < ORBIT + DIVE ? 'dive' : down < 1 ? 'land' : 'map' };
+    return { part: t < ORBIT ? 'orbit' : t < ORBIT + DIVE ? 'dive' : down < 1 ? 'land' : t < ORBIT + DIVE + LAND + RISE ? 'rise' : 'map' };
   }
-  window.__piece = { draw, parts: { orbit: ORBIT, dive: DIVE, land: LAND } };
+  window.__piece = { draw, parts: { orbit: ORBIT, dive: DIVE, land: LAND, rise: RISE } };
 })();
