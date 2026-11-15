@@ -5,14 +5,18 @@
 
 Kristján's note on his runs: "program/ was rebuilt from the trajectory (agent/trajectory.json):
 the agent's file writes and later edits replayed in order, nothing executed". This does that
-for OpenCode's file tools: `write` and `edit` (Claude, Gemini) and `apply_patch` (GPT). Files
-under /app are kept (the agent's working folder in the task); scratch files elsewhere are not.
-The program is the last .py file the agent started under /app (`python3 /app/detach.py python3
-X.py`, or `python3 X.py`); a run that never started one drove by hand and has no program.
+for OpenCode's file tools: `write` and `edit` (Claude, Gemini) and `apply_patch` (GPT), and for
+`cat << EOF > file` blocks in shell commands. The program is the last .py file the agent started
+(`python3 /app/detach.py [--log F] python3 X.py`, or `python3 X.py`) that sends commands, itself
+or through a module beside it, to the mission (a report script run after the mission, or a
+simulator of the agent's own, is not it); the files in
+its folder are kept. A run that never started such a file drove by hand or never drove, and has
+no program. A file changed by a script the agent ran (not by a write or edit) is not replayed.
 
 Writes <run>/program/ and <run>/run.json in the shape of Kristján's run.json, and prints the
-farm policy, `agent:<run>/program/<entry>`. An edit that does not apply (its old text is
-missing, as when the agent's own edit failed) is skipped and listed in run.json.
+farm policy, `agent:<run>/program/<entry>`. An edit whose old text is not found exactly is
+applied the way OpenCode's edit tool applies it (trimmed lines, then first and last lines), and
+listed in run.json; one that does not apply at all (the agent's own edit failed) is skipped.
 """
 
 from __future__ import annotations
@@ -20,13 +24,14 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import sys
 from pathlib import Path, PurePosixPath
 
 NAMES = {"gpt-6-luna": "GPT-6 Luna", "gpt-6.1-terra": "GPT-6.1 Terra", "gpt-6.1-sol": "GPT-6.1 Sol",
          "gemini-4-hydrogen": "Gemini 4 Hydrogen", "gemini-4-argon": "Gemini 4 Argon",
          "gemini-4-carbon": "Gemini 4 Carbon"}
-LAUNCH = re.compile(r"python3?\s+(?:-u\s+)?(?:/app/detach\.py\s+python3?\s+(?:-u\s+)?)?(\S+\.py)\b")
+LAUNCH = re.compile(r"python3?\s+(?:-u\s+)?(?:\S*detach\.py\s+(?:--\w+\s+\S+\s+)*python3?\s+(?:-u\s+)?)?(\S+\.py)\b")
 
 
 def resolve(path: str, workdir: str = "/app") -> str:
@@ -97,6 +102,72 @@ def apply_patch(files: dict, text: str, skipped: list) -> None:
             i += 1
 
 
+HEREDOC_START = re.compile(r"""^\s*cat\s+(?:<<-?\s*['"]?(\w+)['"]?\s*>\s*(\S+)|>\s*(\S+)\s+<<-?\s*['"]?(\w+)['"]?)\s*$""")
+
+
+def heredoc_writes(command: str):
+    """`cat << 'EOF' > path` (or `cat > path << EOF`) blocks in a shell command: a file write."""
+    lines = command.split("\n")
+    i = 0
+    while i < len(lines):
+        match = HEREDOC_START.match(lines[i])
+        i += 1
+        if not match:
+            continue
+        marker, path = (match.group(1), match.group(2)) if match.group(1) else (match.group(4), match.group(3))
+        body = []
+        while i < len(lines) and lines[i].strip() != marker:
+            body.append(lines[i])
+            i += 1
+        i += 1
+        yield path, "\n".join(body) + "\n"
+
+
+def drives(script: str, files: dict) -> bool:
+    """True when the script, with the modules beside it that it imports, talks to the mission
+    (`lightlag_client`) and sends commands (`uplink`); a simulator of the agent's own is not it."""
+    folder = str(PurePosixPath(script).parent)
+    seen, todo, found = set(), [script], set()
+    while todo:
+        path = todo.pop()
+        if path in seen or path not in files:
+            continue
+        seen.add(path)
+        text = files[path]
+        found.update(word for word in ("lightlag_client", "uplink(") if word in text)
+        if len(found) == 2:
+            return True
+        for module in re.findall(r"^\s*(?:from|import)\s+(\w+)", text, re.M):
+            todo.append(folder + "/" + module + ".py")
+    return False
+
+
+def loose_match(content: str, old: str):
+    """OpenCode's edit tool falls back when the old text is not found exactly: lines equal once
+    trimmed, then a block whose first and last lines match (one such block only)."""
+    lines, want = content.split("\n"), old.split("\n")
+    while want and not want[-1].strip():
+        want = want[:-1]
+    n = len(want)
+    trimmed = [i for i in range(len(lines) - n + 1)
+               if all(lines[i + k].strip() == want[k].strip() for k in range(n))]
+    if len(trimmed) == 1:
+        return "trimmed-line", "\n".join(lines[trimmed[0]:trimmed[0] + n])
+    if n >= 3:
+        blocks = []
+        for i, line in enumerate(lines):
+            if line.strip() != want[0].strip():
+                continue
+            for j in range(i + 2, len(lines)):
+                if lines[j].strip() == want[-1].strip():
+                    blocks.append((i, j))
+                    break
+        if len(blocks) == 1:
+            i, j = blocks[0]
+            return "first-and-last-line", "\n".join(lines[i:j + 1])
+    return None
+
+
 def replay(trajectory: dict):
     files, skipped, launches = {}, [], []
     for step in trajectory.get("steps", []):
@@ -109,15 +180,21 @@ def replay(trajectory: dict):
                 old, new = args.get("oldString", ""), args.get("newString", "")
                 if path in files and old and old in files[path]:
                     files[path] = files[path].replace(old, new) if args.get("replaceAll") else files[path].replace(old, new, 1)
+                elif path in files and old and loose_match(files[path], old):
+                    kind, found = loose_match(files[path], old)
+                    files[path] = files[path].replace(found, new, 1)
+                    skipped.append("edit to {} applied by {} match, as OpenCode's edit tool does".format(path, kind))
                 else:
                     skipped.append("edit not applied to " + path)
             elif name == "apply_patch":
                 apply_patch(files, args.get("patchText") or args.get("patch") or "", skipped)
             elif name == "bash":
                 command, workdir = args.get("command", ""), args.get("workdir") or "/app"
+                for path, text in heredoc_writes(command):
+                    files[resolve(path, workdir)] = text
                 for match in LAUNCH.finditer(command):
                     script = resolve(match.group(1), workdir)
-                    if not script.endswith("/detach.py") and script in files:
+                    if not script.endswith("/detach.py") and script in files and drives(script, files):
                         launches.append(script)
     return files, skipped, launches
 
@@ -131,8 +208,9 @@ def main(argv=None) -> int:
     config = json.loads((run / "config.json").read_text(encoding="utf-8"))
     result = json.loads((run / "result.json").read_text(encoding="utf-8"))
     files, skipped, launches = replay(trajectory)
-    app = {path: text for path, text in files.items() if path.startswith("/app/") and path.count("/") == 2}
-    entry = launches[-1] if launches and launches[-1] in app else None
+    entry = launches[-1] if launches else None
+    folder = str(PurePosixPath(entry).parent) if entry else "/app"
+    app = {path: text for path, text in files.items() if str(PurePosixPath(path).parent) == folder}
 
     model = config["agent"]["model_name"]
     short = model.split("/", 1)[1]
@@ -152,19 +230,21 @@ def main(argv=None) -> int:
             "task_version": version}
     if entry:
         program = run / "program"
-        program.mkdir(exist_ok=True)
+        if program.exists():
+            shutil.rmtree(program)
+        program.mkdir()
         for path, text in app.items():
             if path.endswith(".py"):
                 (program / PurePosixPath(path).name).write_text(text, encoding="utf-8")
         meta["program"] = ("program/ was rebuilt from the trajectory (agent/trajectory.json) by "
                            "tools/tier_agents/rebuild_program.py: the agent's file writes and later edits replayed "
-                           "in order, nothing executed. Entry: {} (the last program the agent started; started {} "
-                           "time(s) in all).".format(PurePosixPath(entry).name, len(launches)))
+                           "in order, nothing executed. Entry: {} (the last program the agent started that sends commands; "
+                           "{} such start(s) in all; the agent's folder was {}).".format(PurePosixPath(entry).name, len(launches), folder))
         if skipped:
             meta["program_skipped_edits"] = skipped
         print("agent:{}/program/{}".format(run.as_posix(), PurePosixPath(entry).name))
     else:
-        meta["program"] = "none: the agent never started a program under /app (it drove by hand or left none)"
+        meta["program"] = "none: the agent never started a saved program that sends commands (it drove by hand or never drove)"
         print("no program: {}".format(run.name), file=sys.stderr)
     (run / "run.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     return 0

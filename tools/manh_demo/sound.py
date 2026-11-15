@@ -568,10 +568,12 @@ def build(timeline: List[Dict[str, Any]], spoken: List[Dict[str, Any]], folder: 
         starts[item["name"]] = offset
         offset += item["seconds"]
     rover, charts = np.zeros((n, 2)), np.zeros((n, 2))
-    on_ground, thumps, cues = np.zeros(n), [], []
+    on_ground, air, thumps, cues = np.zeros(n), np.ones(n), [], []
     for number, item in enumerate(timeline):
         begin = starts[item["name"]]
         a, b = int(begin * RATE), int((begin + item["seconds"]) * RATE)
+        if item.get("vacuum"):                                                # a stretch in space: no wind there, no rover
+            air[int((begin + item["vacuum"][0]) * RATE): int((begin + item["vacuum"][1]) * RATE)] = 0.0
         tele = folder / "tele" / "{}.json".format(item["name"])
         if item.get("page") != "film" and tele.exists():
             frames = json.loads(tele.read_text(encoding="utf-8"))
@@ -611,8 +613,9 @@ def build(timeline: List[Dict[str, Any]], spoken: List[Dict[str, Any]], folder: 
         clip, lead = render({"kind": "thump"}, rng)
         place(charts, clip, at - lead, db(MIX["thump"]))
 
-    ground = one_pole(on_ground, 0.4)
-    blow = wind(total, ground, 7)
+    ground, air = one_pole(on_ground, 0.4), one_pole(air, 0.5)
+    blow = wind(total, ground, 7) * air[:, None]
+    rover *= air[:, None]
     title = next((starts[item["name"]] for item in timeline if item["name"] == "world"), 11.0)
     end = starts[timeline[-1]["name"]]
     swell = ramps(total, [(0.0, 0.0), (2.5, 0.85), (title - 0.5, 0.9), (title + 0.6, 1.5), (title + 5.0, 0.9), (end - 6.0, 0.8), (end + 1.0, 1.0),

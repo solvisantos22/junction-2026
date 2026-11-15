@@ -94,6 +94,10 @@ def open_page(context: Any, shot: Dict[str, Any], sources: Dict[str, Any], probl
         whose = {run: makers.maker_of(label + " " + model) for run, kind, label, model in runs if kind != "reference"}
         page.evaluate("m => { window.__MANH = m; }", {"tiles": tiles, "makers": {run: key for run, key in whose.items() if key}})
         page.evaluate(sources["tracker.js"])
+        if shot.get("addon"):                 # a piece that draws frames of its own on top of the page (the opening in space)
+            settings = {**(makers.icon_settings() if shot["addon"] == "icons.js" else {}), **shot.get("addon_settings", {})}
+            page.evaluate("p => { window.__PIECE = p; }", settings)
+            page.evaluate((HERE / shot["addon"]).read_text(encoding="utf-8"))
     page.evaluate("() => window.__manh.ready")
     return page
 
@@ -157,7 +161,8 @@ def record(context: Any, shot: Dict[str, Any], lengths: Dict[str, float], source
             else:
                 since = None if last_thump is None or frame / FPS < last_thump else frame / FPS - last_thump
                 seen = page.evaluate(
-                    "([ts, black, shot, fx]) => { window.__film.step(1000 / %d); window.__overlay.draw(ts, black, shot); return window.__manh.draw(fx); }" % FPS,
+                    "([ts, black, shot, fx]) => { window.__film.step(1000 / %d); window.__overlay.draw(ts, black, shot); const seen = window.__manh.draw(fx); "
+                    "if (window.__piece) window.__piece.draw(shot); return seen; }" % FPS,
                     [local, black, frame / FPS, {"dt": 1.0 / FPS, "since": since, "shot": frame / FPS, "trackers": beat.get("trackers")}])
                 telemetry.append(seen)
             if encoder:
@@ -191,7 +196,10 @@ def record(context: Any, shot: Dict[str, Any], lengths: Dict[str, float], source
     if telemetry:
         (BUILD / "tele").mkdir(parents=True, exist_ok=True)
         (BUILD / "tele" / "{}.json".format(shot["name"])).write_text(json.dumps(telemetry, separators=(",", ":")), encoding="utf-8")
-    return {"name": shot["name"], "page": shot["page"], "frames": frame, "seconds": round(frame / FPS, 3), "lines": events, "thumps": thumps, "sfx": sounds}
+    made = {"name": shot["name"], "page": shot["page"], "frames": frame, "seconds": round(frame / FPS, 3), "lines": events, "thumps": thumps, "sfx": sounds}
+    if shot.get("vacuum"):
+        made["vacuum"] = shot["vacuum"]       # seconds of the shot spent in space: no wind there
+    return made
 
 
 def browser_sources() -> Dict[str, Any]:
@@ -242,8 +250,10 @@ def frames(shot_name: str, moments: List[float]) -> None:
     """Save single frames of one shot (seconds into the shot) to build/frames/, without recording it."""
     lengths = kmake.durations()
     shot = next((item for item in plan() if item["name"] == shot_name), None)
+    if shot is None and shot_name in cut.PIECES:
+        shot = {"name": "piece_" + shot_name, **cut.PIECES[shot_name]}
     if shot is None:
-        raise SystemExit("no shot called {}".format(shot_name))
+        raise SystemExit("no shot or piece called {}".format(shot_name))
     with_browser(lambda context, sources: record(context, shot, lengths, sources, stills=moments))
 
 
