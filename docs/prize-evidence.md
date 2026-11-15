@@ -1080,3 +1080,19 @@ existing read-only watcher recognized the receipt without rearming.
 [Live evidence and next gate](learning-hybrid-results/confirmation/README.md#live-handoff--15-november-0209-utc).
 No confirmed performance claim or final-map opening follows this progress
 checkpoint; actual stage compute will be reconciled at completion.
+
+### Kristján / Codex — earlier adaptive planner learning (15 November)
+
+Kristján requested continuing model/idea experiments on Modal after the prior
+small Extra Trees gain. Codex implemented a separate 16-strategy, 61-feature
+experiment with earlier choices, energy/time guards, scheduled resets, altered
+route preferences and multiple search starts. Four fixed model families compare
+Extra Trees, Random Forest, pooled strategy-conditioned forests with failure
+prediction, and an MLP. The team's frozen pilot still navigates.
+
+Eight local tests pass, including prefix-copy isolation, baseline/reference and
+prior-model parity, schedules, seed boundaries and all model/checkpoint fits.
+The runner archives unordered batches independently to avoid the previous
+ordered-stream stall. New ranges and [protocol](planner-lab.md) are claimed before
+cloud production; smoke and performance results are pending. Existing reference,
+prior results, tasks and teammate jobs are unchanged. [Artifacts](planner-lab-results/README.md).
