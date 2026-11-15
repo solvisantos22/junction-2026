@@ -1094,5 +1094,7 @@ Eight local tests pass, including prefix-copy isolation, baseline/reference and
 prior-model parity, schedules, seed boundaries and all model/checkpoint fits.
 The runner archives unordered batches independently to avoid the previous
 ordered-stream stall. New ranges and [protocol](planner-lab.md) are claimed before
-cloud production; smoke and performance results are pending. Existing reference,
+cloud production. All 34 Modal smoke missions replay exactly on Linux and Mac;
+three full-controller reruns match the original reference, prior learned policy
+and a new guarded program. Production performance remains pending. Existing reference,
 prior results, tasks and teammate jobs are unchanged. [Artifacts](planner-lab-results/README.md).
