@@ -1,17 +1,21 @@
 """The target mode of the PPO + ICM agent, trained and checked on Modal.
 
     pip install modal && modal setup        # once, with your own Modal workspace (it bills that workspace)
-    modal run --detach lightlag_ppo_icm/modal_train.py::fit --out traverse-targets-ppo --int-coef 0
-    modal volume get lightlag-ppo-icm-runs traverse-targets-ppo lightlag_ppo_icm/runs/
-    modal run lightlag_ppo_icm/modal_train.py::check --policy traverse-targets-ppo/policy.npz \
-        --seeds 430000-430299 --players ppo_icm,pilot,greedy,nearest_targets,random_targets --out rows.json
+    export PYTHONPATH=.                     # from the repository root
+    modal run --detach lightlag_ppo_icm/modal_train.py::fit --out traverse-targets-ent10 --int-coef 0 \
+        --ent-coef 0.1 --ent-final 0.1     # the settings of the kept policy
+    modal volume get lightlag-ppo-icm-runs traverse-targets-ent10 lightlag_ppo_icm/runs/
+    modal run lightlag_ppo_icm/modal_train.py::check --policy traverse-targets-ent10/policy.npz \
+        --seeds 430000-430299 --players ppo_icm,pilot,greedy,nearest_targets,cluster_targets,random_targets \
+        --out rows.json
 
 `fit` runs train.train() in one container (the learner, 2 cores) and sends its rollouts
 to up to MAX_CONTAINERS one-core containers, one mission per call: a target-mode mission takes a
 few seconds, so an update of 128 missions on 64 containers, two missions each, takes about as long
 as the slowest pair. Containers stay up (and billed) while the learner updates between rollouts, so
-more of them cost more without being faster: with 100, a 200-update run cost $2.70 (PPO alone)
-and $5.20 (with curiosity, whose learner is slower), measured on 14 November. The run folder
+the cost follows the run's length: a 200-update run of PPO alone cost about $2.70 with 100
+containers (54 minutes) and with 64 (44 and 49 minutes), and $5.60 with curiosity, whose learner
+is slower (83 minutes, 100 containers); measured on 14-15 November. The run folder
 (log.jsonl, best.npz, policy.npz, summary.json) lives in the Modal volume `lightlag-ppo-icm-runs`,
 committed after every development check, so a run that stops early keeps its best policy, and
 `fit` with the same `--out` continues it from there.
@@ -92,7 +96,7 @@ def fit(out: str, updates: int = 200, episodes: int = 128, int_coef: float = 0.0
 
 
 @app.local_entrypoint()
-def check(policy: str, seeds: str, players: str = "ppo_icm,pilot,greedy,nearest_targets,random_targets",
+def check(policy: str, seeds: str, players: str = "ppo_icm,pilot,greedy,nearest_targets,cluster_targets,random_targets",
           also: str = "", out: str = "", upload: str = ""):
     """Every player on every world, paired; `also` is NAME=PATH[,NAME=PATH] of more policies in the volume."""
     from lightlag_dynamic.biomes.max_check import seed_range, table

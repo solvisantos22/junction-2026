@@ -1,7 +1,7 @@
 """Players on Kristján's three-mission campaign, scored as the Harbor task scores it.
 
     python3 -m lightlag_ppo_icm.campaign --policy lightlag_ppo_icm/policies/traverse-targets.npz \
-        --players ppo_icm,pilot,greedy,nearest_targets,random_targets
+        --players ppo_icm,pilot,greedy,nearest_targets,cluster_targets,random_targets
 
 The campaign is `harbor/lightlag-traverse-campaign/`: worlds 2027, 2028 and 2029, one 420-tick
 mission each, played one after another with no reset (lightlag_traverse/campaign.py, the same
@@ -58,7 +58,7 @@ def play_campaign(job):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--policy", help="a target-mode policy.npz (for the ppo_icm player)")
-    parser.add_argument("--players", default="ppo_icm,pilot,greedy,nearest_targets,random_targets")
+    parser.add_argument("--players", default="ppo_icm,pilot,greedy,nearest_targets,cluster_targets,random_targets")
     parser.add_argument("--also", action="append", default=[], metavar="NAME=POLICY",
                         help="another target-mode policy under this name; may be repeated")
     parser.add_argument("--worlds", default=",".join(str(w) for w in WORLDS))
