@@ -1004,3 +1004,28 @@ No candidate was selected and no later-stage job was launched in this increment.
   private wrapper metadata/logs are not copied to the repository. Use the
   completed original final-learning evidence for the headline submission claim;
   keep the current reference. The separate hybrid-composition search continues.
+
+### 15 November — Sölvi / Codex: recover hybrid inference without losing failures
+
+- **Human direction:** Sölvi authorized parallel Modal evaluation within the
+  shared budget and required immutable sources, retained failures and a team
+  handoff. No training or task/reference change is included.
+- **Codex contribution:** reconciled the exact original calls after two worker
+  interruptions; preserved 5810 verified cases and both failed attempts; checked
+  a full 29,398-key inventory, stable missing artifacts and stopped calls.
+  Prepared a separate one-shot recovery for two failed and 2508 unstarted
+  cases, explicit attempt storage, non-preemptible resources and later-stage
+  gates that retain the original scientific selection.
+- **Verification:** 50 focused tests pass; independent code review and actual
+  source-checked freeze validation passed. All 54 scientific source pins and
+  the parent policy remain exact in the execution snapshot. Teammates' newer
+  harness edits on main are preserved. No new map or cloud invocation during
+  preparation. The watcher remains read-only and respects pause/stop markers.
+- **Evidence:** [diagnosis, resource freeze and handoff](learning-hybrid-results/development/recovery2/README.md).
+  New source/resource/lineage freeze SHA `953247698699653d4ea3a8800e3e0710097be4d1f6fd784e3f184393d44f7527`.
+  Conservative combined running-allocation bound $65.443 under the shared $75
+  ceiling; not an invoice, excludes ancillary charges. App/call IDs and actual
+  observed progress are recorded only after the single authorized launch.
+- **Limit:** lost uncommitted work on the two old failed attempts cannot be
+  excluded. No complete case is repeated, no partial-result selection is
+  permitted and no hybrid performance gain is claimed by this recovery work.

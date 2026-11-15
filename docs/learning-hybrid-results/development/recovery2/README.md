@@ -1,4 +1,4 @@
-# Second development recovery: diagnosed, not yet launched
+# Second development recovery: verified freeze, not yet launched
 
 The first recovery stopped at **01:12:02 UTC on 15 November** after collecting
 all 2667 calls it had submitted: 2665 complete and two failed. Together with
@@ -53,3 +53,50 @@ unchanged selection gates. Confirmation 611000–611255 and final
 The separate greedy-prior training experiment is closed and published; its
 late watcher alert was reconciled against all six original calls in
 `88279ee`. It requires no launch, restart, new download or final evaluation.
+
+## Verified execution freeze — 15 November 01:36 UTC
+
+[Freeze](freeze.json), SHA256
+`953247698699653d4ea3a8800e3e0710097be4d1f6fd784e3f184393d44f7527`,
+was created with full source checks in `/tmp/junction-hybrid-recovery2-frozen`.
+[Verification](prelaunch-verification.json): 16 recovery, nine later-stage and
+25 watcher tests pass; independent code review cleared. All 54 original
+scientific source files and the parent-policy file match their protected pins.
+New teammate one-shot harness changes on `main` are preserved; this experiment
+uses its earlier frozen snapshot. Neither the science nor the weights changed.
+
+The new operations code rejects completed development cases at the worker
+boundary, binds each permitted attempt to its one-shot intent, checks both
+failed original calls and late case/temp artifacts before reservation, and
+rechecks the global stop/deadline before spawning. Original rows and guards
+are never reset. Attempt storage and raw-row hashes are explicit; worker
+costs use the non-preemptible 3× rate. No automatic further recovery.
+
+The conservative combined running-allocation ledger is **$65.443 maximum**:
+$9.092736 for the entire earlier training allowance, $8.360583 for the prior
+hybrid allocation allowance and $47.989679 for all 65 non-preemptible
+containers continuously through 05:30 UTC. It excludes ancillary charges and
+is not a predicted bill. Actual recorded usage is much smaller.
+
+Execute only once, after this freeze reaches `origin/main`, from the snapshot:
+
+```sh
+MODAL_PROFILE=solvi-junction PYTHONPATH=/tmp/junction-hybrid-recovery2-frozen /tmp/junction-learning-venv/bin/python -m tools.learning_hybrid_ops.recovery2 --launch docs/learning-hybrid-results/development/recovery2/freeze.json --receipt /tmp/junction-hybrid-recovery2-monitor/development-receipt.json --root /tmp/junction-hybrid-recovery2-frozen
+```
+
+Inspect that original receipt with `--status`; after terminal completion use
+`--download RECEIPT --output NEW_DIRECTORY`. Never reuse the launch command
+for an existing reservation. The complete aggregate retains the 5810 previous
+rows exactly and explicitly binds both earlier failures.
+
+For later stages, use **`tools.learning_hybrid_ops.stages2`** from this same
+snapshot, with the unchanged `experiment analyze` / `experiment prepare`
+selection commands. Confirmation requires its complete development aggregate,
+this recovery freeze and original receipt. Final requires the original
+confirmation state/analysis, its operations freeze and receipt. Each selection
+and stage freeze must reach `main` before its new maps open. Standard receipts
+remain compatible with the original watcher at
+`/tmp/junction-learning-hybrid-monitor/{confirmation,final}-receipt.json`.
+The adapter checks the actual original terminal FunctionCall results before
+launch and remotely; final downloads verify both raw worker rows and mapped
+artifact paths. No confirmation/final selection or execution has occurred.
