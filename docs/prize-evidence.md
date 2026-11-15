@@ -855,8 +855,18 @@ agree and the baseline controller exactly matches the local trajectory. All 12
 physics replays, 4,874 commands and 5,052 states independently verify. The original
 SDK cleanup warning is retained; `eb4f9e2` fixed it before production and disabled
 implicit source upload. Modal data app `ap-tctysvmd3CxtowroSpSlM0` is running the
-frozen 2,880 missions, with 97 concurrent workers observed. Training and fresh
-results are pending. No canonical reference change or new LLM-performance claim.
+frozen 2,880 missions; 100 concurrent workers were observed. A local DNS outage
+interrupted the first app after 833 archived outcomes. Codex retained those and
+resumed only missing jobs in `ap-vmIsFVOKPZVhhmunxtJuuB` using a process-local DNS
+workaround. A cross-platform hash discrepancy was traced to a 1e-16 decorative
+terrain value; commands, states and grade match, and the Linux replay is exact.
+All 2,880 data missions are now complete and independently replayed on Linux:
+1,147,531 commands, 1,212,480 states, exact original hashes/grades. Three actual
+Modal model fits completed; saved checkpoints and local refits reproduce their
+training predictions. Validation selects Extra Trees (50.7287%) and ridge
+(50.6527%) against the reference (50.1011%); the best fixed strategy is 50.7567%.
+Weights/selection are frozen before 96 fresh worlds. No canonical reference
+change or new LLM-performance claim.
 Initial implementation `570c7e5`, production launch source `78cfb5d`.
 [Protocol](learned-portfolio.md), [evidence](learned-portfolio-results/README.md).
 
@@ -876,3 +886,8 @@ Initial implementation `570c7e5`, production launch source `78cfb5d`.
 Sölvi authorized combining the retained learned policies with greedy and using parallel Modal capacity before submission. Codex prepared a separate 65-arm experiment, grouped selection across every training seed, rank ensembles/blends, immutable source/weight checks and hybrid decision/physics audits. The frozen simulator, reference, prior learners and prior results are unchanged. Nineteen focused tests passed, including full-mission equivalence with an original policy, tampering rejection and a complete controller repeat on used smoke world 1. [Protocol](learning-hybrid.md); code in `lightlag_hybrid/` and `tools/learning_hybrid/`; tests in `tests/learning_hybrid/`. Thirteen additional orchestration tests passed for detached execution, retained call IDs, source/resource limits, terminal reuse, ambiguous-restart refusal and efficient metadata downloads. Modal execution and measured outcomes are pending; no improvement or additional training is claimed. Simulator/navigation authorship remains with the team. This entry will be extended with actual app IDs, costs and results after execution.
 
 Hybrid cloud smoke delivered: app `ap-SiN8z0aHUAlm2IPQLFEXoU`, 65/65 audited cases on used world 1, all home/alive, zero invalid calls. Estimated worker compute $0.01034, excluding coordinator and ancillary costs. [Evidence](learning-hybrid-results/smoke/summary.json). This validates execution, not an ensemble improvement.
+
+
+### 15 November — Sölvi / Codex: matched greedy-prior PPO preparation
+
+Sölvi authorized further parallel compute before submission. Codex designed and implemented a new greedy-prior residual policy and a matched plain-PPO control, reusing the frozen PPO objective, simulator and navigator with explicit team attribution. Each variant retains all three training seeds and a fixed 4096-mission target. The initial prior is exactly greedy, so its useful learning claim must beat greedy after training; the initial prior advantage over a uniform plain policy is not called learning. [Protocol](learning-hybrid-training.md) and [run/evaluation handoff](learning-hybrid-training-results/README.md) record split maps, limits and frozen-selection requirements. Local 32-mission prior/plain smokes on used worlds 1/2 passed, including checkpoint/optimizer restoration; focused tests verify effective-logit consistency, original plain PPO gradient equivalence, deadline/duplicate safeguards and complete fresh-case audit logic. No new production training or gain is claimed yet; actual Modal calls and cost will be recorded after launch.
