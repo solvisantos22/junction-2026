@@ -9,7 +9,7 @@ Deadline: **10:00 Helsinki, saved as FINAL.** A draft is not reviewed. The entry
 | # | Step | Who | State at 06:25 |
 |---|---|---|---|
 | 1 | Make the repository public, or arrange judge access | Sölvi (owner) | ✅ Public since about 06:14 (seen at 06:22) |
-| 2 | Choose the video and upload it as a public video of at most two minutes | Kristján | Two candidates: the fallback, [`docs/demo-video/lightlag-traverse-demo.mp4`](demo-video/lightlag-traverse-demo.mp4), 1:58, and Manh's second draft, [`docs/manh-demo/manh_demo_2.mp4`](manh-demo/manh_demo_2.mp4), 1:59. The team has not chosen |
+| 2 | Choose the video and upload it as a public video of at most two minutes | Kristján | **Manh, Sunday 07:45: upload [`docs/submission-video/lightlag-traverse-submission.mp4`](submission-video/lightlag-traverse-submission.mp4)**, 1:59: his second draft with the team's own narration laid in ([what was checked](submission-video/README.md)). The fallback stays [`docs/demo-video/lightlag-traverse-demo.mp4`](demo-video/lightlag-traverse-demo.mp4), 1:58. Not uploaded yet |
 | 3 | Put the video's link in the README's "See it" section | whoever uploads | The README links the file in the repository |
 | 4 | Fill the saved **Lightlag** entry with the text below, attach the deck, select both sponsor challenges | one teammate | Draft with empty fields at 05:23 |
 | 5 | Save as FINAL, reopen it, and check every link without being logged in | the same teammate | |
