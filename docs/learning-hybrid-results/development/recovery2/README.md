@@ -139,3 +139,22 @@ correct source/reservation/receipt/owner identities, and **all 14 earlier
 control records plus both failed-row files unchanged**. The subsequent
 read-only watcher checkpoint records **317/2510** with zero read errors.
 These are progress snapshots; the full development result is still pending.
+
+The delayed greedy-prior completion wake was reconciled at **01:47 UTC**:
+all six original training results still match their published closure, so
+there is no new training action. A [fresh read-only hybrid check](queued-training-completion-status.json)
+confirmed this same recovery call at **850/2510 new completions**, or
+**6660/8320 overall**, with no error or pause/stop marker and an active watcher.
+No new launch, download, selection or fresh map followed this stale alert.
+The next decision remains gated on all 8320 development results.
+
+At **01:49 UTC**, the delayed first-recovery failure notification was also
+[reconciled against its original calls](queued-recovery1-alert-reconciliation.json).
+The original coordinator result, both failed worker results and all 14 earlier
+control records remain unchanged. This is the already-diagnosed 01:12 UTC
+failure, not a second-recovery failure. The [current original recovery2 call](queued-old-recovery-status.json)
+remains running at **1250/2510 new completions**, or **7060/8320 overall**, with
+no reported errors, no pause/stop markers and its watcher active. No restart,
+new launch, trajectory download, selection or new map followed this alert.
+The full-development gate and subsequent freeze-before-evaluation sequence
+remain unchanged.

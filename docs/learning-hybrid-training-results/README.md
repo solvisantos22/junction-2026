@@ -57,7 +57,7 @@ download.
 for the submission's headline learning evidence. This follow-up does not
 establish an improvement from the greedy prior. Keep the reference unchanged.
 The separately frozen hybrid composition search continues under its own
-[recovery and stage gates](../learning-hybrid-results/development/recovery/README.md).
+[recovery and stage gates](../learning-hybrid-results/development/recovery2/README.md).
 
 
 [Protocol](../learning-hybrid-training.md) · [six-run configuration](campaign.json).
@@ -234,3 +234,15 @@ at 512 here, with later surviving prior runs shown individually. The missing
 seed is never imputed. Six focused tests and independent review of the reporter passed; all 22 actual
 archived milestones now validate. The production figures and data are published
 above; the additional plotting regression prevents clipping higher points.
+
+## Delayed completion notification reconciled — 15 November 01:47 UTC
+
+The queued `terminal_with_incomplete` notification describes the closure
+already published in `d72e65f`. [Fresh read-only reconciliation](interruption/queued-completion-reconciliation.json)
+checked all six **original** terminal results against the retained closure: all
+are unchanged, with five 4096-mission completions and the original 1760-mission
+interruption. All 51 source pins match in the frozen training snapshot.
+No training, artifact download, policy substitution, final evaluation or new
+spend follows this alert. The six-run gate still fails; fresh 629000–629127
+stays unopened. The separate hybrid recovery has its own active watcher and
+[published handoff](../learning-hybrid-results/development/recovery2/README.md).
