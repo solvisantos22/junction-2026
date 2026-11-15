@@ -4,7 +4,7 @@
 
 ![A rover on Mars-like ground, with the mission's map and battery beside it](docs/demo-video/poster.jpg)
 
-One rover, three Mars-like sites in a row, a battery charged by the sun, and every command arriving three ticks late. Every rule and formula is public through five tools. A scripted planner scores **0.476**. Nineteen agent runs by seven models from Anthropic, OpenAI and Google, each through OpenCode in Harbor, all score less: the best reaches 0.442 and the average is 0.24.
+One rover, three Mars-like sites in a row, a battery charged by the sun, and every command arriving three ticks late. Every rule and formula is public through five tools. A scripted planner scores **0.476**. Twenty-five agent runs by nine models from Anthropic, OpenAI and Google, each through OpenCode in Harbor, all score less. Most are far below, with an average of 0.23; Google's top model comes within 0.004 on its best run.
 
 ## Run it
 
@@ -34,11 +34,13 @@ Every formula and number is in `rules()`. The practical way to play is to write 
 
 ## Results
 
-| Driver | Runs | Campaign score of each run | Mean | Sites where the rover did not come home |
+| Driver | Runs | Campaign score of each run | Mean | Sites where the rover was lost or left away |
 |---|---:|---|---:|---:|
 | **Reference planner** (scripted, no model) | | **0.476** | **0.476** | 0 of 3 |
+| Gemini 4 Carbon | 3 | 0.473, 0.449, 0.000 | 0.307 | 0 of 9 |
 | Gemini 4 Hydrogen | 3 | 0.442, 0.404, 0.261 | 0.369 | 2 of 9 |
 | GPT-6.1 Sol | 3 | 0.379, 0.353, 0.350 | 0.361 | 3 of 9 |
+| Gemini 4 Argon | 3 | 0.297, 0.000, 0.000 | 0.099 | 1 of 9 |
 | Claude Sonnet 5.5 | 2 | 0.293, 0.213 | 0.253 | 2 of 6 |
 | GPT-6.1 Terra | 3 | 0.291, 0.229, 0.214 | 0.245 | 0 of 9 |
 | Claude Opus 5.5 | 4 | 0.267, 0.247, 0.244, 0.120 | 0.220 | 3 of 12 |
@@ -47,9 +49,13 @@ Every formula and number is in `rules()`. The practical way to play is to write 
 | The reference, stopped after the first site | | 0.149 | | |
 | Doing nothing | | 0.000 | | |
 
-The models are off the shelf, not fine-tuned. No run beats the reference at any single site either; the closest is 0.457 against 0.459 at the first. Per-site scores and what each Claude run did are in the [campaign write-up](docs/lightlag-traverse-campaign.md); the GPT and Gemini runs are in the [ledger](docs/tier-comparison/runs.jsonl) as of Sunday 05:00. Every run's trajectory and the simulator's replay are under [`docs/lightlag-runs/`](docs/lightlag-runs/) as `campaign-*`.
+Sorted by each model's best run. The models are off the shelf, not fine-tuned. The three Gemini runs at 0.000 ran out their 45-minute session before the rover had sampled anything.
+
+No run beats the reference at any single site either. Two Gemini 4 Carbon runs tie it at the third site with the same raw score; elsewhere the closest are 0.457 against 0.459 and 0.502 against 0.508. Per-site scores and what each Claude run did are in the [campaign write-up](docs/lightlag-traverse-campaign.md); the GPT and Gemini runs are in [Manh's comparison](docs/tier-comparison.md) and its [ledger](docs/tier-comparison/runs.jsonl), as of Sunday 05:45. Every run's trajectory and the simulator's replay are under [`docs/lightlag-runs/`](docs/lightlag-runs/) as `campaign-*`.
 
 **Not three lucky worlds.** Eleven programs the models wrote (six by Claude, five by GPT and Gemini) were replayed on Modal on 300 worlds none of them had seen. In 3,300 match-ups the reference scored higher 3,265 times and tied 9. The programs won 26, never by more than 0.05, and the reference lost no rover ([Claude's programs](docs/traverse-farm.md), [GPT's and Gemini's](docs/traverse-farm/programs-tiers/evaluation.json)).
+
+The autopilots that GPT and Gemini agents wrote during their own missions get closer, and still fall short on ground they had not seen. On the same 300 worlds the reference averages 0.502. The best two, by Gemini 4 Hydrogen and GPT-6.1 Sol, average 0.454 and 0.446 and win about one world in six. The Gemini 4 Carbon program that scored 0.567 on its own world averages 0.410 ([tables](docs/tier-comparison/tables.md)).
 
 ## Why the agents lose
 
@@ -59,13 +65,17 @@ Read from the Claude runs' trajectories, replays and own reports:
 2. **Flat batteries with home in reach.** Three of the six Opus and Sonnet runs ran a battery flat, one of them 13 m from the lander with 21 samples on board. On 300 fresh worlds, 87% of the Claude rovers that were lost ran flat while the way home was still open. Under these rules the sun always out-charges the idle drain, so stopping to wait would have saved every one of them.
 3. **Write once, look later.** The agents' autopilots played a whole site in 8 to 30 seconds of real time. Three agents' own reports say the damage was done before they had looked.
 
-The GPT and Gemini runs have been scored but not yet read as closely. Two things show in their results: GPT-6.1 Sol came home at the second and third sites with scores near the reference's, and ended the first site away from the lander in all three runs, for half credit; and the best run of all, by Gemini 4 Hydrogen, came home everywhere with 23, 21 and 20 samples against the reference's 23, 26 and 19.
+The GPT and Gemini runs have been scored but not yet read as closely. What shows so far:
+
+- **Gemini 4 Carbon is the one model that nearly matches the reference, when it finishes.** In its best run it wrote a path-finder in C, an estimator, a planner and its own simulator, and tested the autopilot there before it started the mission. It came home everywhere with 22, 26 and 20 samples against the reference's 23, 26 and 19; at the second site they are the same 26 targets. In one run of three its session ran out before the rover had sampled anything.
+- **GPT-6.1 Sol** came home at the second and third sites with scores near the reference's, and ended the first site away from the lander in all three runs, for half credit.
+- **Gemini 4 Hydrogen**, Google's smallest, came home everywhere in two of three runs with 18 to 24 samples a site.
 
 ## The reference
 
 The reference is a planner, not a model: [`lightlag_traverse/pilot.py`](lightlag_traverse/pilot.py). It plays through the same five tools and sees nothing an agent does not. It tracks the rover through the delay with a filter, learns how each surface slips from its own odometry, and searches for a route whose every leg the battery can pay for against the sun, ending at the lander.
 
-It is hard to improve. Of fourteen changes to its parts, the best combination gained 0.001 on fresh worlds, with an interval that spans zero ([ablations](docs/reference-ablation-results/README.md)). A model trained on Modal to pick among twelve planner strategies mid-mission gained 0.5 points on 96 fresh worlds, under the 1 point we had set as the bar, so the reference stayed as it was ([learned planner](docs/learned-portfolio-results/README.md)).
+It is hard to improve. Of fourteen changes to its parts, the best combination gained 0.001 on fresh worlds, with an interval that spans zero ([ablations](docs/reference-ablation-results/README.md)). A model trained on Modal to pick among twelve planner strategies mid-mission gained 0.5 points on 96 fresh worlds, under the 1 point we had set as the bar, so the reference stayed as it was ([learned planner](docs/learned-portfolio-results/README.md)). A second round, with sixteen strategies and four model families over 8,192 missions, found the same: a Random Forest gained 0.2 points on 192 fresh worlds (95% interval 0.10 to 0.30) and the best fixed strategy 0.35 ([planner lab](docs/planner-lab-results/README.md)).
 
 ## Reward integrity
 
@@ -105,7 +115,7 @@ Modal ran the rollout farm (about 6,000 missions by Saturday evening, the 300-wo
 | Folder | What |
 |---|---|
 | [`harbor/lightlag-traverse-campaign/`](harbor/lightlag-traverse-campaign/) | The task: instruction, environment, tests, solution |
-| [`harbor/lightlag-traverse/`](harbor/lightlag-traverse/) | The same rules on one site (world 2026), as a fallback: reference 0.565, best agent run 0.560 |
+| [`harbor/lightlag-traverse/`](harbor/lightlag-traverse/) | The same rules on one site (world 2026), as a fallback: reference 0.565; of 26 agent runs one is above it, Gemini 4 Carbon at 0.567 |
 | [`lightlag_traverse/`](lightlag_traverse/README.md) | The simulator and the reference; 75 tests in `tests/lightlag_traverse/` |
 | [`docs/lightlag-runs/`](docs/lightlag-runs/) | Every recorded run |
 | [`tools/traverse_farm/`](tools/traverse_farm/) | The rollout farm and the live site on Modal |
@@ -114,10 +124,10 @@ Modal ran the rollout farm (about 6,000 missions by Saturday evening, the 300-wo
 
 ## Caveats
 
-- **The margin is not wide everywhere.** The closest run is 0.034 below the reference on the campaign. On one site alone, the best run is 0.004 below, which is why the campaign of three is the task.
+- **The top Gemini model nearly closes the gap.** Gemini 4 Carbon's best campaign run is 0.004 below the reference (0.473 against 0.476), and on one site alone one of its runs is above it (0.567 against 0.565). It also scored zero in one campaign run of three, when its session ran out. For the other eight models the best run is 0.03 to 0.48 below.
 - **When the reference was built.** It was improved (0.448 to 0.565 on world 2026) after two early agent runs had beaten its first version there. The campaign's worlds and the 300 fresh worlds were played afterwards, and nothing was tuned on them.
 - **Replays measure programs.** The fresh-world comparison replays saved programs without the agents that wrote them.
-- **Run counts are small.** One to four runs a model; enough to see the spread, not to state a rate. The table is as of Sunday 05:00 and runs are still landing in the ledger; Gemini 4 Carbon and Argon had no campaign run by then.
+- **Run counts are small.** One to four runs a model; enough to see the spread, not to state a rate. The table is as of Sunday 05:45.
 
 ## The team
 
