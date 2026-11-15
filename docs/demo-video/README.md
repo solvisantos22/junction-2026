@@ -4,7 +4,7 @@ Sunday 15 November 2026, about 06:15 Helsinki. Owner: Kristján / Claude Code (T
 
 **What changed from the second cut.** The four driving shots, Claude's own words and the reference slide are the same frames and the same narration. Three slides and their lines are new. The results show all 25 campaign runs by nine models from three labs, with Google's top model 0.003 below the reference. The 300-world slide is one sentence shorter and adds the other labs' programs. The learning slide shows Sölvi's final controllers on held-out worlds and the Extra Trees model that picks the planner's strategy, in place of the pilot's development curve. The end card says eight rovers. The second cut is commit `beb0dfb`, and `storyboard.py` still builds it.
 
-**[`lightlag-traverse-demo.mp4`](lightlag-traverse-demo.mp4)**: 1 minute 58 seconds (118.0 s; the Junction guide allows two minutes), 1920×1080, 30 frames a second, narrated, 36 MB. Subtitles: [`lightlag-traverse-demo.srt`](lightlag-traverse-demo.srt). A still for the submission page: [`poster.jpg`](poster.jpg).
+**[`lightlag-traverse-demo.mp4`](lightlag-traverse-demo.mp4)**: 1 minute 59 seconds (118.5 s; the Junction guide allows two minutes), 1920×1080, 30 frames a second, narrated, 36 MB. Subtitles: [`lightlag-traverse-demo.srt`](lightlag-traverse-demo.srt). A still for the submission page: [`poster.jpg`](poster.jpg).
 
 **Not uploaded, at Kristján's word.** The guide asks for a public video: when he uploads it, the link goes in the README and the platform entry.
 
@@ -20,7 +20,7 @@ Sunday 15 November 2026, about 06:15 Helsinki. Owner: Kristján / Claude Code (T
 | 1:02 | The reference | What the planner does, as a chain that lights up link by link, over the battery through the day at site 3 for the reference and two Opus runs |
 | 1:13 | Results | The campaign through Harbor: the reference, then nine models from three labs, each with a bar to its best run and a mark for every run (25 in all); stop after one site; do nothing. Gemini 4 Carbon is marked 0.003 below the reference |
 | 1:25 | 300 fresh worlds on Modal | Every world of six saved Claude programs against the reference; the pooled count; who won the few worlds the reference did not; the other labs' five one-request programs |
-| 1:35 | Models that learn | Sölvi's final controllers on 40 held-out worlds (8% to 36%), then on the campaign, then the Extra Trees model that picks the planner's strategy: +0.48 points, under the 1-point bar |
+| 1:35 | Models that learn | Sölvi's final controllers on 40 held-out worlds (8% to 36%), then on the campaign, then the Extra Trees model that picks the planner's strategy and scores 0.48 points above the planner alone, under the 1-point bar for replacing it |
 | 1:50 | End card | The command that reruns the reference, the live demo on Modal with its eight rovers, the question |
 
 ## What the narrator says
@@ -35,7 +35,7 @@ Sunday 15 November 2026, about 06:15 Helsinki. Owner: Kristján / Claude Code (T
 | 1:02 | The reference is a planner, not a model. It tracks the rover through the delay, learns how each surface slips, and prices every leg of its route against the sun. |
 | 1:13 | The reference scores 0.48. Twenty-five runs by nine models all finish below it. Only Google's top model comes close, at 0.47. Doing nothing scores zero. |
 | 1:25 | On Modal, six of Claude's programs replayed 300 fresh worlds each. The reference scored higher 99 times in 100 and never lost a rover. |
-| 1:36 | A small policy trained from scratch learns too: from 8% to 36% on unseen worlds, and past every Claude run on the campaign. Even a model trained to pick our planner's strategy gained less than half a point. |
+| 1:36 | A small policy trained from scratch learns too: from 8% to 36% on unseen worlds, and past every Claude run on the campaign. And a model that picks our planner's strategy edged past the planner, by under half a point. |
 | 1:50 | One command reruns it all, and a live demo on Modal plays any world you pick. Can your agent make it home? |
 
 ## The worlds Claude's programs won
@@ -61,7 +61,7 @@ Kristján asked whether another 300 worlds would give more than 288 wins, and wh
 | 300 fresh worlds: 1,780 of 1,800 pairs to the reference; per program 288 to 300; no reference rover lost; 15 Claude wins, 5 ties, widest win 0.041; 87% (257 of 294) of Claude's lost rovers still had a way home; up to 100 containers, about 6,000 missions in all | `docs/traverse-farm/programs-1/rows.jsonl` and `docs/traverse-farm.md` (the farm session's, on `main`) |
 | GPT and Gemini's five one-request programs: the reference higher in 1,485 of 1,500 | [`docs/traverse-farm/programs-tiers/evaluation.json`](../traverse-farm/programs-tiers/evaluation.json) (Manh, on Modal, the same 300 worlds) |
 | 40 held-out worlds: before training 0.083, PPO 0.359, replay learner 0.363 (three seeds each), greedy rule 0.380, reference 0.508; PPO home on 117 of 120 missions. The campaign: PPO 0.366, every trained seed above every Claude run (best 0.293), reference 0.476. 47,840 training missions | [`docs/learning-final-results/README.md`](../learning-final-results/README.md) (Sölvi's final report). The controllers choose the next goal above hand-written navigation; they are not fine-tuned language models, and neither beats the greedy rule |
-| Extra Trees picking the planner's strategy mid-mission: +0.48 points on 96 fresh worlds (95% interval +0.27 to +0.72); +0.28 on 192 more (−0.07 to +0.52); the bar was 1 point | [`docs/learned-portfolio-results/final/summary.json`](../learned-portfolio-results/final/summary.json) and [`docs/planner-lab-results/final/summary.json`](../planner-lab-results/final/summary.json) (Kristján's Codex sessions, on Modal). The second figure is the same frozen model as the control of a later round; that round's own Random Forest gained 0.20 and its best fixed strategy 0.35 |
+| Extra Trees picking the planner's strategy mid-mission: the planner with it scored 0.48 points above the planner alone on 96 fresh worlds (50.46% against 49.98%; 95% interval +0.27 to +0.72), and 0.28 above on 192 more (−0.07 to +0.52); the bar for replacing the reference was 1 point | [`docs/learned-portfolio-results/final/summary.json`](../learned-portfolio-results/final/summary.json) and [`docs/planner-lab-results/final/summary.json`](../planner-lab-results/final/summary.json) (Kristján's Codex sessions, on Modal). The second figure is the same frozen model as the control of a later round; that round's own Random Forest gained 0.20 and its best fixed strategy 0.35 |
 | `harbor run -p harbor/lightlag-traverse-campaign -a oracle`, reward 0.476, about two minutes, the same score on a laptop, on Modal and through Harbor | [`campaign-reference`](../lightlag-runs/campaign-reference/) (0.476257, 94 s); `docs/traverse-farm.md`: the farm repeats it mission for mission |
 | The live demo's address | `docs/modal-playbook.md`, `docs/submission-checklist.md` (the farm session's, on `main`) |
 
@@ -76,8 +76,8 @@ The slides read these files when the video is built ([`tools/demo_video/data.py`
 
 ## What was checked, and what was not
 
-- **Length:** 118.0 s; the build refuses to write a video over 119 s.
-- **Words:** a speech recogniser that had not seen the script (Whisper `base.en`, offline) wrote down the finished sound track: 307 of the script's 319 words came back as written. The rest are spellings and near-homophones ("meters", "centimeters", "root" for "route", "two" for "too", "Claudopus" for "Claude Opus", "cloud" for "Claude", "passed" for "past", "one hundred"). It hears every line begin within 0.75 s of where the line was laid, always on the early side, as its word times tend to be. `make check` repeats this.
+- **Length:** 118.5 s; the build refuses to write a video over 119 s.
+- **Words:** a speech recogniser that had not seen the script (Whisper `base.en`, offline) wrote down the finished sound track: 310 of the script's 321 words came back as written. The rest are spellings and near-homophones ("meters", "centimeters", "root" for "route", "two" for "too", "Claudopus" for "Claude Opus", "cloud" for "Claude", "passed" for "past", "one hundred"). It hears every line begin within 0.75 s of where the line was laid, always on the early side, as its word times tend to be. `make check` repeats this.
 - **Levels:** −16.2 LUFS integrated, loudness range 4.6 LU, true peak −1.5 dBFS (ffmpeg `ebur128`).
 - **Picture:** frames from the three new slides and the end card were looked at for overlaps, cut-off text and timing; the other six shots are the second cut's recordings, unchanged.
 - **Not checked by ear.** Claude Code cannot listen. Kristján watched the first cut; nobody has yet watched the third from start to finish. `make assemble --no-bed` gives narration only.
