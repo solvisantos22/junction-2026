@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import random
 import statistics
+import tempfile
 import time
 from functools import lru_cache
 
@@ -27,8 +28,12 @@ def utc(): return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 def write(path, value, exclusive=False):
     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
     if exclusive and path.exists(): raise FileExistsError(path)
-    tmp = path.with_name(path.name+".tmp")
-    tmp.write_bytes(canonical(value)+b"\n"); tmp.replace(path)
+    fd, temporary = tempfile.mkstemp(prefix=path.name+".", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "wb") as handle: handle.write(canonical(value)+b"\n")
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 
 def orchestration():
