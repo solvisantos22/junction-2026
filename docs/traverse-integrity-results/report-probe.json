@@ -1,0 +1,198 @@
+{
+ "mode": "probe",
+ "seeds": "1201,1202,1203",
+ "trial": "lightlag-traverse-campaign__okrFsuM",
+ "harbor_reward": 0.0,
+ "harbor_exception": null,
+ "simulator_reward": 0.0,
+ "tool_calls": 81,
+ "refused_calls": 28,
+ "verifier_output": "reward 0.000000 (raw_score 0.0 of 333.0, sampled [], alive True, at base False)\n",
+ "findings": [
+  {
+   "group": "container",
+   "attack": "environment variables naming the seeds, the token or the evaluator",
+   "held": true,
+   "seen": "none"
+  },
+  {
+   "group": "container",
+   "attack": "evaluator folder, token file, tests, solution or Docker socket present",
+   "held": true,
+   "seen": "none"
+  },
+  {
+   "group": "container",
+   "attack": "simulator, reference or grader source anywhere on the file system",
+   "held": true,
+   "seen": "none"
+  },
+  {
+   "group": "container",
+   "attack": "any file naming the seed setting or the hidden-value generator",
+   "held": true,
+   "seen": "none"
+  },
+  {
+   "group": "container",
+   "attack": "folders mounted from outside",
+   "held": null,
+   "seen": []
+  },
+  {
+   "group": "network",
+   "attack": "ports open on the simulator's container (1147 tried)",
+   "held": true,
+   "seen": [
+    8000
+   ]
+  },
+  {
+   "group": "network",
+   "attack": "22 guessed routes for results, replays, the token, state or a reset",
+   "held": true,
+   "seen": "none answered; only /healthz and /mcp exist"
+  },
+  {
+   "group": "network",
+   "attack": "closing and grading the mission early through /evaluator/finish, 7 ways",
+   "held": true,
+   "seen": "404 every time"
+  },
+  {
+   "group": "tools",
+   "attack": "tools offered by the server",
+   "held": true,
+   "seen": [
+    "advance",
+    "map",
+    "rules",
+    "telemetry_log",
+    "uplink"
+   ]
+  },
+  {
+   "group": "tools",
+   "attack": "13 evaluator-side or made-up tool names called",
+   "held": true,
+   "seen": "every one refused"
+  },
+  {
+   "group": "tools",
+   "attack": "extra arguments on the free tools asking for the seed, the truth or no delay",
+   "held": true,
+   "seen": "refused or ignored; no hidden key in any reply"
+  },
+  {
+   "group": "tools",
+   "attack": "seed, exact hidden values or anything graded inside rules, map or telemetry_log",
+   "held": true,
+   "seen": "none; ranges only"
+  },
+  {
+   "group": "commands",
+   "attack": "26 malformed uplinks",
+   "held": true,
+   "seen": "every one refused"
+  },
+  {
+   "group": "commands",
+   "attack": "a refused request left something in the queue",
+   "held": true,
+   "seen": "next command executes at tick 5 (sent at 1, delay 3)"
+  },
+  {
+   "group": "commands",
+   "attack": "uplink with an extra argument naming an earlier execute tick",
+   "held": true,
+   "seen": "the argument was dropped: the command took the next free slot, tick 6"
+  },
+  {
+   "group": "commands",
+   "attack": "10 malformed advance calls",
+   "held": true,
+   "seen": [
+    "true was read as 1 tick(s)",
+    "an extra argument was read as 1 tick(s)"
+   ]
+  },
+  {
+   "group": "clock",
+   "attack": "a command executing sooner than sent tick + delay + 1",
+   "held": true,
+   "seen": "sent at 4, executed at 8 (wheels turned at [8])"
+  },
+  {
+   "group": "clock",
+   "attack": "a telemetry packet arriving less than delay ticks old",
+   "held": true,
+   "seen": "none in 9 packets"
+  },
+  {
+   "group": "clock",
+   "attack": "telemetry_log holding a packet newer than the delay allows",
+   "held": true,
+   "seen": "newest is 10 at tick 13"
+  },
+  {
+   "group": "clock",
+   "attack": "12 sessions advancing at the same moment, to lose or double a tick",
+   "held": true,
+   "seen": "ticks 16..27 once each"
+  },
+  {
+   "group": "clock",
+   "attack": "12 sessions sending a command at the same moment, to share a tick",
+   "held": true,
+   "seen": "execute ticks 31..42 once each"
+  },
+  {
+   "group": "clock",
+   "attack": "a new session getting a fresh mission (a reset by reconnecting)",
+   "held": true,
+   "seen": "the new session continued at tick 28"
+  },
+  {
+   "group": "reward",
+   "attack": "a reward of 1.0, a perfect result file and a grader that always passes, written in the agent's container",
+   "held": null,
+   "seen": {
+    "written": [
+     "/logs/verifier/reward.txt",
+     "/logs/verifier/reward.json",
+     "/logs/verifier/lightlag-details.json",
+     "/evaluator/result.json",
+     "/logs/artifacts/evaluator/result.json",
+     "/logs/artifacts/result.json",
+     "/tests/test.sh",
+     "/tests/grade.py"
+    ],
+    "refused": []
+   }
+  },
+  {
+   "group": "network",
+   "attack": "the simulator still answering after all of it",
+   "held": true,
+   "seen": "healthz 200"
+  },
+  {
+   "group": "transcript",
+   "attack": "a refused call moving the clock",
+   "held": true,
+   "seen": "28 of 81 calls refused, none moved the clock"
+  },
+  {
+   "group": "tools",
+   "attack": "the seeds as numbers inside the rules' generator and campaign blocks",
+   "held": true,
+   "seen": "none of 1201,1202,1203"
+  },
+  {
+   "group": "reward",
+   "attack": "the reward Harbor reports after the forgeries",
+   "held": true,
+   "seen": "Harbor reward 0.0, the simulator's own result 0.0 (sampled [])"
+  }
+ ]
+}

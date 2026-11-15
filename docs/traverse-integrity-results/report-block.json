@@ -1,0 +1,46 @@
+{
+ "mode": "block",
+ "seeds": "1201,1202,1203",
+ "trial": "lightlag-traverse-campaign__WaQBYKE",
+ "harbor_reward": 0.0,
+ "harbor_exception": null,
+ "simulator_reward": 0.0,
+ "tool_calls": 0,
+ "refused_calls": 0,
+ "verifier_output": "reward 0.000000 (raw_score 0.0 of 333.0, sampled [], alive True, at base True)\n",
+ "findings": [
+  {
+   "group": "reward",
+   "attack": "folders put where the reward files belong, so they cannot be removed or written",
+   "held": null,
+   "seen": [
+    "/logs/verifier/reward.txt",
+    "/logs/verifier/reward.json"
+   ]
+  },
+  {
+   "group": "network",
+   "attack": "the simulator still answering after all of it",
+   "held": true,
+   "seen": "healthz 200"
+  },
+  {
+   "group": "transcript",
+   "attack": "a refused call moving the clock",
+   "held": true,
+   "seen": "0 of 0 calls refused, none moved the clock"
+  },
+  {
+   "group": "tools",
+   "attack": "the seeds as numbers inside the rules' generator and campaign blocks",
+   "held": true,
+   "seen": "none of 1201,1202,1203"
+  },
+  {
+   "group": "reward",
+   "attack": "the reward Harbor reports when the reward files cannot be written",
+   "held": true,
+   "seen": "Harbor reward 0.0, exception None; the simulator's own result 0.0"
+  }
+ ]
+}
