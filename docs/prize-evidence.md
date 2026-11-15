@@ -961,3 +961,10 @@ a stale trainer report, and suppresses method means whenever a seed is missing.
 The interrupted seed's real archive passed; production JSON/learning curves
 await the remaining original calls. [Reporter handoff](learning-hybrid-training-results/README.md#descriptive-report-after-the-original-calls-finish).
 No new simulations or cloud jobs are used by this reporter.
+
+Codex prepared the later confirmation/final operations gates without opening
+new worlds. Thirteen focused tests and independent review verified unchanged
+selection/matrices, live recovery provenance, actual terminal confirmation
+result/receipt binding, original-failure preservation and one-shot resource
+limits; 55 combined operations tests pass. [Commands and gates](learning-hybrid-results/development/recovery/README.md#later-stage-commands-and-gates).
+No candidate was selected and no later-stage job was launched in this increment.

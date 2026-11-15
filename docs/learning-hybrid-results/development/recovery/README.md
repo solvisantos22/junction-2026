@@ -63,3 +63,51 @@ The next-stage operations adapter is being prepared separately because the
 original development control record must remain failed. It must consume the
 complete verified combined record, reproduce the unchanged group-selection
 rules, and publish each selection/stage freeze before opening later maps.
+
+## Later-stage commands and gates
+
+The `tools.learning_hybrid_ops.stages` adapter prepares and launches only
+confirmation/final stages. It recomputes the original analysis/selection and
+exact stage matrix from saved evidence; a missing result or empty eligible
+shortlist refuses to proceed. Before launch and again remotely, it verifies
+the live recovery aggregate provenance. Final launch additionally verifies the
+original confirmation call's complete returned state and receipt against the
+frozen evidence. It leaves the original development failure intact.
+
+1. Download the completed recovery to a new directory. Analyze its
+   `aggregate-state.json` using unchanged `tools.learning_hybrid.experiment
+   analyze`, with the original `development-stage.json`.
+2. Use unchanged `experiment prepare` to create confirmation from that saved
+   development analysis. Then prepare a separate operations freeze:
+
+```sh
+python -m tools.learning_hybrid_ops.stages --write-freeze CONFIRMATION_OPS_FREEZE --master docs/learning-hybrid-results/freeze.json --stage CONFIRMATION_STAGE --parent-stage docs/learning-hybrid-results/development-stage.json --parent-status RECOVERY_DIRECTORY/aggregate-state.json --parent-analysis DEVELOPMENT_ANALYSIS --recovery-freeze docs/learning-hybrid-results/development/recovery/freeze.json --recovery-receipt docs/learning-hybrid-results/development/recovery/development-receipt.json --root FROZEN_SOURCE_ROOT
+```
+
+3. Publish the analysis, selection, stage and operations freeze on `main`
+   **before** `stages --launch CONFIRMATION_OPS_FREEZE --receipt
+   /tmp/junction-learning-hybrid-monitor/confirmation-receipt.json`. Use the
+   frozen stage-adapter/source snapshot for execution.
+4. After confirmation finishes, `stages --download RECEIPT --output NEW_DIR`
+   retains the unchanged stage metadata plus its operations freeze. Analyze
+   the saved confirmation state with the original experiment tool. If no
+   group qualifies, publish the negative result and leave final maps unopened.
+5. If one group qualifies, prepare its original final stage. For the final
+   operations freeze, pass the confirmation stage/status/analysis as the
+   parent evidence and `--previous-ops-freeze CONFIRMATION_OPS_FREEZE
+   --previous-receipt CONFIRMATION_RECEIPT`. Publish all evidence before launch
+   to `/tmp/junction-learning-hybrid-monitor/final-receipt.json`.
+6. Download final artifacts with `--artifacts`, verify hashes/audits and
+   reproduce the original grouped statistics. Final workers already require
+   complete controller repeat, physics and choice audits. Retain every outcome,
+   including unsuccessful or unsafe cases; keep the current team reference.
+
+Standard receipt fields remain compatible with the original read-only watcher
+for confirmation/final; the operations-freeze hash is an additional bound
+field. These are prepared commands, not evidence that later maps have opened.
+No actual selection or next-stage freeze has been created yet.
+
+The later-stage adapter is now verified: **13 focused tests** and independent
+review passed, including the terminal remote confirmation-result hash and
+receipt binding; **55 combined operations tests** pass. This preparation does
+not open any map or choose a group.
