@@ -47,14 +47,15 @@ The interactive-demo invitation was saved and verified at **08:12 Helsinki**. At
 
 The public Modal homepage and featured world **2027** opened while signed out; Story Mode advanced the replay with changing positions, battery values and scores. The invitation describes the current browser experience and points judges to Harbor for evaluating their own agents. This was a sample replay check, not a new benchmark or a test of arbitrary-world execution. The team is still polishing the website; this edit highlights the current stable URL.
 
-The required 1:59 YouTube video was uploaded and saved at about 07:56. The optional 8:35 walkthrough was added at about 08:18; both play publicly while signed out. See the [upload handoff](video-upload.md).
+The required 1:59 YouTube video was uploaded and saved at about 07:56. The optional 8:35 walkthrough was added at about 08:18; both play publicly while signed out. At about 08:25 the Video field was changed to the corrected short video (line 11 recorded again, on Kristján's channel) and the PDF deck was attached; the description was not touched. See the [upload handoff](video-upload.md).
 
 - Project Demo: https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run/
 - Source Code: https://github.com/solvisantos22/junction-2026
-- Video field (required, 1:59): https://youtu.be/GifcHfCczHo
+- Video field (required, 1:59): https://youtu.be/NYYjwijLLm4 (since about 08:25; until then the first upload, https://youtu.be/GifcHfCczHo)
+- Presentation: [`pitch-deck/lightlag-traverse-deck.pdf`](pitch-deck/lightlag-traverse-deck.pdf), attached about 08:25 (the platform shows it as `d3d6614a-653c-40fc-aeee-5629ecf93949.pdf`)
 - Optional extended walkthrough in Description (8:35): https://youtu.be/-Kjtce8-1O4
 - Other Link: https://github.com/solvisantos22/junction-2026/blob/main/docs/sponsor-submission.md
 
 ## Remaining handoff
 
-The **Presentation field is still empty**. The team is finalizing the PDF; attach the chosen deck and save FINAL before **10:00 Helsinki**. Existing video and interactive-demo links are saved. If the finished website uses a different URL, update both Project Demo and the opening description link together. Sölvi specifies sponsor narratives in the written submission, not the demo video.
+The entry is still a **Draft**: save FINAL before **10:00 Helsinki**. The deck is attached and the video and interactive-demo links are saved (state at about 08:35). If the finished website uses a different URL, update both Project Demo and the opening description link together. Sölvi specifies sponsor narratives in the written submission, not the demo video.

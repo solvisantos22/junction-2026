@@ -1,17 +1,17 @@
 # The platform entry: text to paste and steps to take
 
-Sunday 15 November 2026, about 06:25 Helsinki. Prepared by Kristján / Claude Code (Traverse session) at Kristján's word. **Nothing was entered, uploaded or submitted by this session.** The form's exact fields were not seen; the blocks below are sized to fit the usual ones. Sölvi's sponsor texts are in [`sponsor-submission.md`](sponsor-submission.md) and are not repeated here.
+Sunday 15 November 2026, about 06:25 Helsinki. Prepared by Kristján / Claude Code (Traverse session) at Kristján's word. Until 08:15 nothing was entered, uploaded or submitted by this session; at about 08:20 to 08:25, at Kristján's request, it published the corrected video on his channel, put its link in the entry's Video field and attached the deck, saved as a draft ([notes](video-upload.md)). The form's exact fields were not seen; the blocks below are sized to fit the usual ones. Sölvi's sponsor texts are in [`sponsor-submission.md`](sponsor-submission.md) and are not repeated here.
 
 Deadline: **10:00 Helsinki, saved as FINAL.** A draft is not reviewed. The entry stays editable until 10:00, so save FINAL early and improve it after.
 
 ## Steps, in order
 
-| # | Step | Who | State at 06:25 |
+| # | Step | Who | State (Sunday, latest about 08:35) |
 |---|---|---|---|
 | 1 | Make the repository public, or arrange judge access | Sölvi (owner) | ✅ Public since about 06:14 (seen at 06:22) |
-| 2 | Choose the video and upload it as a public video of at most two minutes | Kristján | **Manh, Sunday 07:45: upload [`docs/submission-video/lightlag-traverse-submission.mp4`](submission-video/lightlag-traverse-submission.mp4)**, 1:59: his second draft with the team's own narration laid in ([what was checked](submission-video/README.md)). The fallback stays [`docs/demo-video/lightlag-traverse-demo.mp4`](demo-video/lightlag-traverse-demo.mp4), 1:58. Not uploaded yet |
-| 3 | Put the video's link in the README's "See it" section | whoever uploads | The README links the file in the repository |
-| 4 | Fill the saved **Lightlag** entry with the text below, attach the deck, select both sponsor challenges | one teammate | Draft with empty fields at 05:23 |
+| 2 | Choose the video and upload it as a public video of at most two minutes | Kristján | ✅ Public at https://youtu.be/NYYjwijLLm4 since about 08:20, on Kristján's channel: [`docs/submission-video/lightlag-traverse-submission.mp4`](submission-video/lightlag-traverse-submission.mp4), 1:59, Manh's film with the team's own narration and line 11 recorded again ([what was checked](submission-video/README.md), [upload notes](video-upload.md)). The first upload, on Sölvi's channel since 07:56, has the old line. The fallback, not uploaded, stays [`docs/demo-video/lightlag-traverse-demo.mp4`](demo-video/lightlag-traverse-demo.mp4), 1:58 |
+| 3 | Put the video's link in the README's "See it" section | whoever uploads | ✅ The README's Video line links it |
+| 4 | Fill the saved **Lightlag** entry with the text below, attach the deck, select both sponsor challenges | one teammate | ✅ Filled by Sölvi's session (description, links, both challenges; [the saved text](submission-draft.md)); the Video link replaced and the deck attached at about 08:25. Still a Draft |
 | 5 | Save as FINAL, reopen it, and check every link without being logged in | the same teammate | |
 | 6 | Reselect the table number: Platform → Team → Team Management → Table Number | Kristján | Reset by the organisers on Saturday |
 
@@ -65,7 +65,7 @@ Python, Harbor, OpenCode, MCP, Docker, Modal, PyTorch, scikit-learn, three.js, C
 |---|---|
 | Project Demo | `https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run` |
 | Source Code | `https://github.com/solvisantos22/junction-2026` (after step 1) |
-| Video | the public link from step 2 |
+| Video | `https://youtu.be/NYYjwijLLm4` |
 | PDF deck | upload [`docs/pitch-deck/lightlag-traverse-deck.pdf`](pitch-deck/lightlag-traverse-deck.pdf) |
 | Other links | the sponsor case: `https://github.com/solvisantos22/junction-2026/blob/main/docs/sponsor-submission.md` |
 

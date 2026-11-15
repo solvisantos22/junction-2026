@@ -9,11 +9,11 @@ Saturday 14 November, about 22:20 Helsinki; rows for the README, the integrity r
 | Harbor task (instruction, task.toml, environment, tests, solution) | ✅ | Traverse session | `harbor/lightlag-traverse-campaign/` |
 | One reward in [0, 1] in `/logs/verifier/reward.txt` | ✅ | Traverse session | `tests/grade.py` |
 | At least one real model log and score | ✅ 25 agent runs, nine models, three labs | Traverse session, Manh | `docs/lightlag-runs/campaign-*`, `docs/tier-comparison/runs.jsonl` |
-| Short README with the one-command rerun | ✅ the front page since Sunday 05:10 | Traverse session | `README.md`; put the public video link in it once the video is uploaded |
-| Public video, at most 2 minutes | 🟡 the fallback is ready: the third cut, 1:58, with Sunday's numbers (nine models, the final learning result, Extra Trees). **Manh, Sunday 07:45: the film to upload is `docs/submission-video/lightlag-traverse-submission.mp4`** (1:59: his second draft, plain words, all nine models in the replay, with the team's own narration). Nothing uploaded | Kristján uploads | `docs/submission-video/` (fallback: `docs/demo-video/`) |
-| PDF pitch deck (the Junction guide requires it beside the video) | ✅ built, a proposal nobody has read yet: eleven slides | Traverse session | `docs/pitch-deck/lightlag-traverse-deck.pdf`, talk track in `docs/pitch-deck/README.md` |
+| Short README with the one-command rerun | ✅ the front page since Sunday 05:10 | Traverse session | `README.md`, with the public video link |
+| Public video, at most 2 minutes | ✅ public since Sunday about 08:20: https://youtu.be/NYYjwijLLm4, 1:59. Manh's second draft (plain words, all nine models in the replay) with the team's own narration, line 11 recorded again. The first upload (Sölvi's channel, 07:56) has the old line. The fallback, not uploaded: the third cut, 1:58 | uploaded on Kristján's channel by the Traverse session, at his word | `docs/submission-video/`, `docs/video-upload.md` (fallback: `docs/demo-video/`) |
+| PDF pitch deck (the Junction guide requires it beside the video) | ✅ eleven slides, attached to the entry Sunday about 08:25 | Traverse session | `docs/pitch-deck/lightlag-traverse-deck.pdf`, talk track in `docs/pitch-deck/README.md` |
 | Repository visible to the judges | ✅ public since Sunday about 06:14 | Sölvi (owner) | GitHub settings. The current files hold no key-shaped string (scanned Sunday 04:30), and no commit on `main` adds or removes one (history scanned at 06:25 for Anthropic, OpenAI project, Google and GitHub key shapes; the runs' replay artifacts, videos and built pages were left out) |
-| Platform entry (links: repo, video, README) | ⬜ still a draft | Kristján | Junction platform; final submit only on Kristján's word |
+| Platform entry (links: repo, video, README) | 🟡 a draft with every field filled at 08:35 (description, demo, source, video, sponsor link, deck, both tech challenges). **Submit Final before 10:00**; the table number on the Team page is empty | Kristján | Junction platform; final submit only on Kristján's word |
 
 ## The rubric (100 points)
 
