@@ -156,3 +156,77 @@ def scene_icon_settings() -> Dict[str, Any]:
     marks = {key: {"path": mark_path(key), "ink": spec["ink"], "tile": spec["tile"], "text": spec["text"]} for key, spec in MAKERS.items()}
     marks["reference"] = {"route": True, "ink": REFERENCE["ink"], "tile": REFERENCE["tile"], "text": REFERENCE["tile"]}
     return {"loader": pages.svg_loader(), "marks": marks}
+
+
+# ---------------------------------------------------------------- the second draft: nine models in one replay
+# Manh, 15 November: the replay should show all the different agents, not seven rovers of one lab. One saved campaign
+# run per model, so the map carries nine rovers of three labs (and the team's own trained agent). Which run of each:
+# the three the story follows (Opus 2: battery flat 13 m from home; Sonnet 1: thirty safety stops on the scarp;
+# Argon 1: the only Argon run that left the lander, flat at site 3), and for every other model the middle one of its
+# runs by campaign score. Every run of every model is on the film's chart (`tier_table`), whichever drives here.
+CAST: Dict[str, str] = {
+    "Claude Opus 5.5": "campaign-agent-opus-2",
+    "Claude Sonnet 5.5": "campaign-agent-sonnet-1",
+    "Claude Haiku 5.5": "campaign-agent-haiku-1",
+    "GPT-6.1 Sol": "campaign-agent-gpt-6.1-sol-1",
+    "GPT-6.1 Terra": "campaign-agent-gpt-6.1-terra-3",
+    "GPT-6 Luna": "campaign-agent-gpt-6-luna-1",
+    "Gemini 4 Carbon": "campaign-agent-gemini-4-carbon-1",
+    "Gemini 4 Argon": "campaign-agent-gemini-4-argon-1",
+    "Gemini 4 Hydrogen": "campaign-agent-gemini-4-hydrogen-1",
+}
+
+
+def tier_of(model: str) -> str:
+    """FAST, BALANCED or FLAGSHIP for a model of the lineup."""
+    for models in LINEUP.values():
+        if model in models:
+            return TIERS[models.index(model)]
+    raise KeyError(model)
+
+
+def cast_tiers() -> Dict[str, str]:
+    """For the standings beside the replay: each cast run's tier, by run id."""
+    return {run: tier_of(model) for model, run in CAST.items()}
+
+
+def tier_runs() -> Dict[str, Any]:
+    """Every campaign run of the GPT and Gemini models of the tier comparison (`docs/tier-comparison/runs.jsonl`), by
+    the model's name as the lineup writes it. A run that timed out counts with the reward it was given, 0."""
+    import json
+
+    ledger = HERE.parents[1] / "docs" / "tier-comparison" / "runs.jsonl"
+    names = {name.lower().replace(" ", "-"): name.upper() for models in LINEUP.values() for name in models}
+    found: Dict[str, Any] = {}
+    for line in ledger.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        short = row["model"].split("/")[-1]
+        if "campaign" in row["task"] and short in names:
+            found.setdefault(names[short], []).append(round(float(row.get("reward") or 0.0), 6))
+    return found
+
+
+def tier_table(claude: Dict[str, Any], reference: float, learned: float) -> Dict[str, Any]:
+    """Every campaign run of all nine models beside the planner, for the film's chart, and what the narration says
+    about them, checked: no run above the planner (line n8), the best average as a whole percentage (n8), and how
+    many models the trained agent out-scores on average (n11). `claude` maps a Claude model's name in capitals to
+    its campaign scores (Kristján's runs, from his film's numbers)."""
+    runs = {**{name: list(scores) for name, scores in claude.items()}, **tier_runs()}
+    rows = []
+    for key, models in LINEUP.items():
+        for tier, name in enumerate(models):
+            scores = sorted(runs.get(name.upper(), []), reverse=True)
+            if not scores:
+                raise SystemExit("manh_demo: no campaign run found for {}".format(name))
+            rows.append({"name": name.upper(), "maker": key, "tier": TIERS[tier], "runs": scores, "mean": sum(scores) / len(scores)})
+    rows.sort(key=lambda row: -row["mean"])
+    best = max(rows, key=lambda row: row["runs"][0])
+    if best["runs"][0] >= reference:
+        raise SystemExit("manh_demo: a run of {} scored {:.3f}, at or above the planner's {:.3f}: line n8 (\"none beat our driver\") "
+                         "has to change".format(best["name"], best["runs"][0], reference))
+    return {"rows": rows, "reference": reference, "count": sum(len(row["runs"]) for row in rows),
+            "best_run": {"name": best["name"], "score": best["runs"][0]}, "best_mean": {"name": rows[0]["name"], "score": rows[0]["mean"]},
+            "best_mean_percent": round(rows[0]["mean"] * 100), "reference_percent": round(reference * 100),
+            "below_learned": sum(row["mean"] < learned for row in rows)}

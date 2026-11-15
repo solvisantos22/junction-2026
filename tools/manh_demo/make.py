@@ -12,6 +12,10 @@
     ... make clip --shot ground            # one recorded shot as a clip of its own, without narration
     ... make check       # a speech recogniser writes down the finished sound track; compare with the script
     ... make frames --shot energy --at 2.5,9   # look at single frames of one shot without recording it
+    ... make all --film 2                      # the second draft (manh_demo_2): script v2, nine models in the replay
+
+`--film 2` goes with every step. The second draft has its own script, shots and build folder
+(`build/film2/`), so the first cut and its recordings stay as they are.
 
 Run it with the Python of `tools/manh_demo/build/venv` (playwright, numpy, scipy, soundfile). Needs
 Docker with Kristján's narrator image (`docker build -t lightlag-narrator tools/demo_video/voice`),
@@ -41,7 +45,8 @@ from . import cut, makers, pages
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
-BUILD = HERE / "build"
+ROOT = HERE / "build"                    # the venv, the fonts' cache and the draft clips (out/), whichever film is built
+BUILD = ROOT                             # the film's own recordings, voice and sound; see `use`
 OUT = REPO / "docs" / "manh-demo"
 VIDEO = OUT / (cut.NAME + ".mp4")
 FPS, SIZE = kmake.FPS, kmake.SIZE
@@ -53,6 +58,26 @@ CHROME_ARGS = ["--enable-gpu", "--ignore-gpu-blocklist", "--hide-scrollbars", "-
 kmake.BUILD, kmake.OUT, kmake.VIDEO = BUILD, OUT, VIDEO
 
 run = kmake.run
+
+# The films this tool builds. 1 is the cinematic cut of Kristján's film: his script, his shots. 2 is the next draft:
+# the plain-words script, the pieces Manh has looked at one by one, and a replay with nine models in it (`makers.CAST`).
+FILMS: Dict[int, Dict[str, Any]] = {
+    1: {"name": cut.NAME, "folder": None, "lines": cut.LINES, "subtitles": cut.SUBTITLES, "voice": cut.VOICE, "shots": cut.shots,
+        "poster": cut.POSTER, "extra": {}, "cast": None, "style": "clean", "said": {}},
+    2: {"name": cut.NAME2, "folder": "film2", "lines": cut.LINES2, "subtitles": cut.SUBTITLES2, "voice": cut.VOICE2, "shots": cut.shots2,
+        "poster": None, "extra": {"cards": "score", "tiers": makers.cast_tiers()}, "cast": makers.CAST, "style": "deep", "said": cut.SAID2},
+}
+FILM = FILMS[1]
+
+
+def use(number: int) -> None:
+    """Build film `number` from here on: its script, its shots, its own build folder."""
+    global FILM, BUILD, VIDEO
+    FILM = FILMS[number]
+    BUILD = ROOT / FILM["folder"] if FILM["folder"] else ROOT
+    VIDEO = OUT / (FILM["name"] + ".mp4")
+    kmake.BUILD, kmake.VIDEO = BUILD, VIDEO
+    kmake.storyboard.LINES, kmake.storyboard.SUBTITLES, kmake.storyboard.VOICE = FILM["lines"], FILM["subtitles"], FILM["voice"]
 
 
 class SavedRuns(type(film_data.RUNS)):
@@ -70,7 +95,7 @@ def plan(stretch: Optional[float] = None) -> List[Dict[str, Any]]:
     if stretch is None:
         saved = BUILD / "fit.json"
         stretch = json.loads(saved.read_text(encoding="utf-8"))["stretch"] if saved.exists() else 0.0
-    return cut.shots(kmake.durations(), kmake.spoken_words(), stretch)
+    return FILM["shots"](kmake.durations(), kmake.spoken_words(), stretch)
 
 
 # ---------------------------------------------------------------- picture
@@ -81,7 +106,7 @@ def open_page(context: Any, shot: Dict[str, Any], sources: Dict[str, Any], probl
     tiles = makers.for_page()
     if shot["page"] == "film":
         page.add_init_script("window.FILM_DATA = {}; window.__MANH = {};".format(
-            sources["facts"], json.dumps({"tiles": tiles, "lineup": makers.lineup(), "facts": makers.facts()})))
+            sources["facts"], json.dumps({"tiles": tiles, "lineup": makers.lineup(), **sources["numbers"]})))
         page.goto(sources["film"].as_uri() + "?scene=" + shot["scene"])
         page.wait_for_function("window.__scene !== undefined && document.fonts.status === 'loaded'", polling=50)
         page.evaluate(sources["scenes.js"])
@@ -91,9 +116,16 @@ def open_page(context: Any, shot: Dict[str, Any], sources: Dict[str, Any], probl
         page.evaluate(sources["overlay.js"])
         page.evaluate("window.__overlay.chapter({})".format(json.dumps(shot.get("chapter"))))
         runs = page.evaluate("() => window.LIGHTLAG_TRAVERSE_APP.RUNS.map(run => [run.id, run.kind, run.label, run.model || ''])")
-        whose = {run: makers.maker_of(label + " " + model) for run, kind, label, model in runs if kind != "reference"}
-        page.evaluate("m => { window.__MANH = m; }", {"tiles": tiles, "makers": {run: key for run, key in whose.items() if key},
-                                                         "icons": makers.scene_icon_settings()})        # the floating marks over the rovers
+        whose = {run: "rl" if label.startswith("RL agent") else makers.maker_of(label + " " + model) for run, kind, label, model in runs if kind != "reference"}
+        icons = makers.scene_icon_settings()                                                            # the floating marks over the rovers
+        tiers = dict(sources.get("extra", {}).get("tiers", {}))
+        for run, key in whose.items():
+            if key == "rl":                                                                             # the team's own trained agent: its lime network, and whose it is
+                from . import learned
+                icons["marks"]["rl"] = learned.icon_mark()
+                tiers[run] = "OURS · BEST OF 3 SEEDS"                                                   # one rover, so one seed: the best, and it says so
+        page.evaluate("m => { window.__MANH = m; }", {"tiles": tiles, "makers": {run: key for run, key in whose.items() if key}, "icons": icons,
+                                                         **sources.get("extra", {}), "tiers": tiers})   # a draft's own settings, say cards: "score"
         page.evaluate(sources["tracker.js"])
         if shot.get("addon"):                 # a piece that draws frames of its own on top of the page (the opening in space)
             given = shot.get("addon_settings", {})
@@ -205,11 +237,28 @@ def record(context: Any, shot: Dict[str, Any], lengths: Dict[str, float], source
     return made
 
 
+def chart_numbers(data: Dict[str, Any]) -> Dict[str, Any]:
+    """What this cut's own charts show: the trained agent beside the planner, and every campaign run of all nine models."""
+    facts, claude = makers.facts(), {}
+    for item in data["campaign"]["claude"]:
+        claude.setdefault(item["model"].upper(), []).append(item["score"])
+    tiers = makers.tier_table(claude, data["campaign"]["reference"]["score"], facts["rl"])
+    return {"facts": {**facts, "models": len(tiers["rows"]), "below_rl": tiers["below_learned"], "best_model": tiers["best_mean"]}, "tiers": tiers}
+
+
 def browser_sources() -> Dict[str, Any]:
+    data = film_data.build()
+    numbers = chart_numbers(data)
+    for key, said in FILM["said"].items():                # the narration states these in words
+        if numbers["tiers"][key] != said:
+            raise SystemExit("{}: the narration says {} = {}, the runs now say {}: change the line in tools/manh_demo/cut.py".format(
+                FILM["name"], key, said, numbers["tiers"][key]))
     return {
-        "campaign": pages.campaign_page(BUILD), "film": pages.film_page(BUILD), "overlay.js": pages.overlay_script(),
+        "campaign": pages.cast_page(BUILD, FILM["cast"]) if FILM["cast"] else pages.campaign_page(BUILD),
+        "film": pages.film_page(BUILD), "overlay.js": pages.overlay_script(),
         "tracker.js": (HERE / "tracker.js").read_text(encoding="utf-8"), "scenes.js": (HERE / "scenes.js").read_text(encoding="utf-8"),
-        "facts": json.dumps({**film_data.build(), "live_url": cut.LIVE_URL}, separators=(",", ":")),
+        "facts": json.dumps({**data, "live_url": cut.LIVE_URL}, separators=(",", ":")),
+        "numbers": numbers, "extra": dict(FILM["extra"]),
     }
 
 
@@ -218,7 +267,7 @@ def with_browser(work: Any) -> Any:
 
     sources = browser_sources()
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True, args=CHROME_ARGS, env=pages.font_environment(BUILD))
+        browser = p.chromium.launch(headless=True, args=CHROME_ARGS, env=pages.font_environment(ROOT))
         context = browser.new_context(viewport={"width": SIZE[0], "height": SIZE[1]}, device_scale_factor=1)
         context.add_init_script((REPO / "tools" / "demo_video" / "clock.js").read_text(encoding="utf-8"))
         try:
@@ -249,7 +298,7 @@ def capture(only: Optional[List[str]] = None, stretch: Optional[float] = None) -
     return timeline
 
 
-def frames(shot_name: str, moments: List[float]) -> None:
+def frames(shot_name: str, moments: List[float], extra: Optional[Dict[str, Any]] = None) -> None:
     """Save single frames of one shot (seconds into the shot) to build/frames/, without recording it."""
     lengths = kmake.durations()
     shot = next((item for item in plan() if item["name"] == shot_name), None)
@@ -257,7 +306,7 @@ def frames(shot_name: str, moments: List[float]) -> None:
         shot = {"name": "piece_" + shot_name, **cut.PIECES[shot_name]}
     if shot is None:
         raise SystemExit("no shot or piece called {}".format(shot_name))
-    with_browser(lambda context, sources: record(context, shot, lengths, sources, stills=moments))
+    with_browser(lambda context, sources: record(context, shot, lengths, {**sources, "extra": {**sources["extra"], **(extra or {})}}, stills=moments))
 
 
 def fit() -> float:
@@ -284,7 +333,7 @@ def spoken_lines(timeline: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return spoken
 
 
-def assemble(mute: Optional[List[str]] = None, voice: str = "clean", variant: Optional[str] = None) -> Path:
+def assemble(mute: Optional[List[str]] = None, voice: Optional[str] = None, variant: Optional[str] = None) -> Path:
     """Join the shots, synthesise the sound and write the film. A `variant` (say "no_voice") is a side copy for
     looking or listening: it goes to the build folder and leaves the film, its subtitles and its poster alone."""
     from . import sound
@@ -310,8 +359,8 @@ def assemble(mute: Optional[List[str]] = None, voice: str = "clean", variant: Op
              "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv", str(silent)])
 
     spoken = spoken_lines(timeline)
-    report = sound.build(timeline, spoken, BUILD, mute=mute or [], voice_style=voice)
-    target = VIDEO if variant is None else BUILD / "out" / "{}_{}.mp4".format(cut.NAME, variant)
+    report = sound.build(timeline, spoken, BUILD, mute=mute or [], voice_style=voice or FILM["style"])
+    target = VIDEO if variant is None else ROOT / "out" / "{}_{}.mp4".format(FILM["name"], variant)
     target.parent.mkdir(parents=True, exist_ok=True)
     # the limiter's ceiling leaves room for what AAC adds between samples, as in Kristján's cut
     run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(silent), "-i", str(report["mix"]), "-map", "0:v", "-map", "1:a",
@@ -319,9 +368,10 @@ def assemble(mute: Optional[List[str]] = None, voice: str = "clean", variant: Op
          "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(target)])
     if variant is None:
         VIDEO.with_suffix(".srt").write_text(kmake.subtitles(spoken, lengths, words), encoding="utf-8")
-        shot, into = cut.POSTER
-        title_at = sum(item["seconds"] for item in timeline[:names.index(shot)]) + into + cut.TITLE_LEAD
-        run(["ffmpeg", "-y", "-loglevel", "error", "-ss", "{:.2f}".format(title_at), "-i", str(VIDEO), "-frames:v", "1", "-q:v", "2", str(OUT / "poster.jpg")])
+        if FILM["poster"]:
+            shot, into = FILM["poster"]
+            title_at = sum(item["seconds"] for item in timeline[:names.index(shot)]) + into + cut.TITLE_LEAD
+            run(["ffmpeg", "-y", "-loglevel", "error", "-ss", "{:.2f}".format(title_at), "-i", str(VIDEO), "-frames:v", "1", "-q:v", "2", str(OUT / "poster.jpg")])
         (BUILD / "spoken.json").write_text(json.dumps({"total": round(total, 2), "lines": spoken, "thumps": report["thumps"]}, indent=1), encoding="utf-8")
     probe = run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", str(target)]).stdout.strip()
     print("  {} {:.2f}s (the file says {}s), {:.1f} MB".format(target.relative_to(REPO), total, probe, target.stat().st_size / 1e6))
@@ -329,7 +379,7 @@ def assemble(mute: Optional[List[str]] = None, voice: str = "clean", variant: Op
         print("    " + line)
     if variant is None:
         for item in spoken:
-            print("    {:>6.1f}s  {}  {}".format(item["at"], item["line"], cut.SUBTITLES[item["line"]][:80]))
+            print("    {:>6.1f}s  {}  {}".format(item["at"], item["line"], FILM["subtitles"][item["line"]][:80]))
     return target
 
 
@@ -360,7 +410,7 @@ def voices() -> Path:
         line *= min(1.0, 0.89 / float(np.max(np.abs(line))))
         pieces += [line, np.zeros(int(0.9 * sound.RATE))]
         print("  option {}: {} ({:.1f}s)".format(number, what, len(line) / sound.RATE))
-    target = BUILD / "out" / "voice_options.wav"
+    target = ROOT / "out" / "voice_options.wav"
     target.parent.mkdir(parents=True, exist_ok=True)
     sf.write(str(target), np.clip(np.concatenate(pieces), -1.0, 1.0), sound.RATE, subtype="PCM_16")
     print("  " + str(target.relative_to(REPO)))
@@ -376,13 +426,24 @@ def clip(name: str, tag: Optional[str] = None, item: Optional[Dict[str, Any]] = 
     if item is None:
         raise SystemExit("no recorded shot called {}".format(name))
     report = sound.build([item], [], BUILD, mute=["voice"], into="audio-clip-" + (tag or name), whole=False)     # a folder of its own: two clips may be cut at once
-    target = BUILD / "out" / "{}.mp4".format(tag or name)
+    target = ROOT / "out" / "{}.mp4".format(tag or name)
     target.parent.mkdir(parents=True, exist_ok=True)
     run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(BUILD / "shots" / "{}.mp4".format(name)), "-i", str(report["mix"]), "-map", "0:v", "-map", "1:a",
          "-af", "alimiter=limit=0.8:level=disabled,apad,atrim=0:{:.3f}".format(item["seconds"]),
          "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(target)])
     print("  {} {:.2f}s, {:.1f} MB".format(target.relative_to(REPO), item["seconds"], target.stat().st_size / 1e6))
     return target
+
+
+def alt(shot_name: str, tag: str, extra: Dict[str, Any]) -> Path:
+    """One shot of the film recorded again with a draft setting (say the cards as score-cards), as a clip of its own.
+    The film's own recording of that shot is left alone."""
+    shot = next((dict(item) for item in plan() if item["name"] == shot_name), None)
+    if shot is None:
+        raise SystemExit("no shot called {}".format(shot_name))
+    shot["name"] = "alt_" + tag
+    item = with_browser(lambda context, sources: record(context, shot, kmake.durations(), {**sources, "extra": {**sources["extra"], **extra}}))
+    return clip(shot["name"], tag=tag, item=item)
 
 
 def piece(name: str) -> Path:
@@ -412,7 +473,7 @@ def split() -> List[Path]:
         _, alone = sound.voice_bus(spoken_lines(timeline), BUILD / "voice", total, style)
         alone = alone * math.sqrt(2.0)                                               # one channel as loud as the film's two
         alone *= min(1.0, 0.89 / float(np.max(np.abs(alone))))                       # and never clipped: the film has a limiter, this file has none
-        target = BUILD / "out" / "{}_voice_{}.wav".format(cut.NAME, style)
+        target = ROOT / "out" / "{}_voice_{}.wav".format(FILM["name"], style)
         sf.write(str(target), np.clip(alone, -1.0, 1.0), sound.RATE, subtype="PCM_16")
         print("  {} {:.1f}s, {:.1f} LUFS, peak {:.1f} dBFS".format(target.relative_to(REPO), total, sound.loudness(alone),
                                                                     20 * math.log10(float(np.max(np.abs(alone))) + 1e-12)))
@@ -430,23 +491,26 @@ def levels() -> None:
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("step", choices=["voice", "capture", "fit", "assemble", "all", "check", "frames", "levels", "split", "voices", "clip", "piece"])
+    parser.add_argument("step", choices=["voice", "capture", "fit", "assemble", "all", "check", "frames", "levels", "split", "voices", "clip", "piece", "alt"])
     parser.add_argument("--only", default=None, help="capture: comma-separated shot names")
     parser.add_argument("--shot", default=None, help="frames, clip: the shot")
     parser.add_argument("--tag", default=None, help="clip: the name of the file written to build/out/")
     parser.add_argument("--name", default=None, help="piece: which draft piece to record (see cut.PIECES)")
+    parser.add_argument("--cards", default=None, help="alt, frames: 'score' draws the story cards as score-cards")
     parser.add_argument("--at", default="1", help="frames: comma-separated seconds into the shot")
     parser.add_argument("--mute", default="", help="assemble: comma-separated layers to leave out: voice, rover, charts, music, wind, duck")
-    parser.add_argument("--voice", default="clean", help="assemble: the narrator's style, clean or deep")
+    parser.add_argument("--voice", default=None, help="assemble: the narrator's style, clean or deep (default: the film's own)")
+    parser.add_argument("--film", type=int, default=1, choices=sorted(FILMS), help="which film: 1 the cinematic cut, 2 the second draft")
     args = parser.parse_args(argv)
+    use(args.film)
     if not shutil.which("ffmpeg"):
         raise SystemExit("ffmpeg is needed and was not found")
     if args.step in ("voice", "all"):
         print("narration:")
         lengths = kmake.voice()
-        print("  {:.1f}s of speech in {} lines".format(sum(lengths[key] for key in cut.LINES), len(cut.LINES)))
+        print("  {:.1f}s of speech in {} lines".format(sum(lengths[key] for key in FILM["lines"]), len(FILM["lines"])))
     if args.step == "frames":
-        frames(args.shot, [float(value) for value in args.at.split(",")])
+        frames(args.shot, [float(value) for value in args.at.split(",")], {"cards": args.cards} if args.cards else {})
     if args.step in ("capture", "all"):
         print("picture:")
         capture(args.only.split(",") if args.only else None)
@@ -457,6 +521,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         print("video:")
         assemble([name for name in args.mute.split(",") if name], voice=args.voice)
         levels()
+    if args.step == "alt":
+        print("draft of a shot:")
+        alt(args.shot, args.tag or args.shot + "_alt", {"cards": args.cards} if args.cards else {})
     if args.step == "piece":
         print("piece:")
         for name in args.name.split(","):

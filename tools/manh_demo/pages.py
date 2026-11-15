@@ -19,10 +19,13 @@ What is changed:
 from __future__ import annotations
 
 import base64
+import json
 import os
 import re
+import shutil
+import sys
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
@@ -50,13 +53,16 @@ def patch_app(source: str) -> str:
     return swap(source, """const FONT = '"DIN Condensed",""", """const FONT = '""" + DISPLAY + """"DIN Condensed",""", 1, "the demo page's script")
 
 
-def campaign_page(build: Path) -> Path:
-    """The campaign demo page with its script's internals handed out and the film's typefaces."""
-    html = CAMPAIGN.read_text(encoding="utf-8")
+def campaign_page(build: Path, html: Optional[str] = None, cast: bool = False) -> Path:
+    """The campaign demo page with its script's internals handed out and the film's typefaces. `html` is a page
+    built from other runs than Kristján's (see `cast_page`); such a page drives more than Claude's models."""
+    html = CAMPAIGN.read_text(encoding="utf-8") if html is None else html
     block = re.search(r'(<script id="src-app" type="application/octet-stream">)([A-Za-z0-9+/=\s]+)(</script>)', html)
     if not block:
         raise SystemExit("manh_demo: the demo page no longer carries its script as `src-app`")
     app = patch_app(base64.b64decode(block.group(2)).decode("utf-8"))
+    if cast:                             # the legend under the map names the followed run's kind
+        app = swap(app, "'Claude run you follow'", "'AI run you follow'", 1, "the demo page's script")
     html = html[:block.start(2)] + base64.b64encode(app.encode("utf-8")).decode("ascii") + html[block.end(2):]
     html = swap(html, '--display: "DIN Condensed",', '--display: ' + DISPLAY + '"DIN Condensed",', 1, "the demo page's styles")
     # the cards' running text: the system sans on a Mac, Inter here
@@ -66,6 +72,35 @@ def campaign_page(build: Path) -> Path:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
     return out
+
+
+def cast_page(build: Path, cast: Dict[str, str], learned: bool = True) -> Path:
+    """The campaign page with one rover per model instead of Kristján's seven Claude runs: the reference, the saved
+    campaign run named for each model in `cast` (model name -> run folder in docs/lightlag-runs) and, with `learned`,
+    the team's own trained agent (`learned.py`). Nothing of the runs is changed or invented: a folder of links is
+    laid out in the build folder and Kristján's own page builder (`viewer/build_traverse.py`) reads it, checking as
+    always that every run played the reference's worlds."""
+    saved, root = REPO / "docs" / "lightlag-runs", build / "runs"
+    if root.exists():
+        shutil.rmtree(root)
+    root.mkdir(parents=True)
+    (root / "campaign-reference").symlink_to(saved / "campaign-reference", target_is_directory=True)
+    for model, name in cast.items():
+        if not (saved / name / "artifacts" / "evaluator" / "missions").is_dir():
+            raise SystemExit("manh_demo: no saved campaign run {} for {}".format(name, model))
+        (root / name).mkdir()
+        (root / name / "artifacts").symlink_to(saved / name / "artifacts", target_is_directory=True)
+        # the tier comparison's runs carry no run.json; "claude" is the page's word for "a model's run"
+        (root / name / "run.json").write_text(json.dumps({"kind": "claude", "label": model, "model": model, "how": "OpenCode agent"}), encoding="utf-8")
+    if learned:
+        from . import learned as own
+        own.write_run(root)
+    for path in (str(REPO), str(REPO / "viewer")):
+        if path not in sys.path:
+            sys.path.insert(0, path)
+    import build_traverse
+
+    return campaign_page(build, build_traverse.standalone(build_traverse.campaign(root)), cast=True)
 
 
 def film_page(build: Path) -> Path:

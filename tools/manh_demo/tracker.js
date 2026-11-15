@@ -9,7 +9,13 @@
 //   The reference, which is a planner and not a model, carries a gold route instead. A rover
 //   whose battery has run out loses its mark: the light goes out, and the page's own red LOST
 //   label takes its place;
-// - the same logo on the card that explains a failure, in the standings and in the top-left tag;
+// - the same logo on the card that explains a failure, in the standings and in the top-left tag; and, when the
+//   replay carries models of several tiers (window.__MANH.tiers), each one's tier beside its name;
+// - with window.__MANH.cards = 'score', that card as a score-card instead of two paragraphs: the headline,
+//   three large numbers with a small label each, and a second later one line with what would have saved
+//   the rover or why the reference's way works. The numbers are read out of the page's own sentences;
+//   the sentences themselves are left to the narrator. A kind of card this file does not know keeps
+//   the page's text;
 // - a soft vignette, and where a battery runs flat the picture dropping dark for a moment, red
 //   closing in from the edges and the colour draining away;
 // - what the sound track needs, returned from every draw(): how fast the followed rover is
@@ -39,7 +45,19 @@
     #moment.mk-on > i, #moment.mk-on > b { margin-left: calc(63px * var(--s)); }
     #moment b small { margin-left: .9em; font-size: .8em; font-weight: 400; letter-spacing: .14em; color: var(--dim); }
     .row .who b img.mk { height: 1.02em; width: 1.02em; margin-right: .42em; vertical-align: -.14em; }
+    #rows.tiers .cell { flex-basis: 40%; }                 /* the bar gives up some width to the tier beside it */
+    .cells .tier { flex: 0 0 auto; font-size: calc(var(--rh) * .2); letter-spacing: .15em; color: var(--dim); white-space: nowrap; }
     #film .caption { font-size: 50px !important; letter-spacing: .075em !important; }   /* Barlow Condensed is wider than the DIN Condensed the captions were sized for */
+    #moment.sc { width: min(calc(700px * var(--s)), 88%); padding-bottom: calc(15px * var(--s)); }
+    #moment.sc > p, #moment.sc > i span { display: none; }
+    #moment .sc-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(16px * var(--s)); margin-top: calc(11px * var(--s)); padding-top: calc(13px * var(--s)); border-top: 1px solid rgba(243, 234, 217, .16); }
+    #moment .sc-row b { display: block; margin: 0; font-size: calc(48px * var(--s)); letter-spacing: .03em; line-height: .95; color: var(--ink); white-space: nowrap; }
+    #moment .sc-row b.bad { color: var(--red); }
+    #moment.gold .sc-row b { color: var(--gold); }
+    #moment .sc-row b small { margin-left: .1em; font-size: .46em; font-weight: 700; letter-spacing: .08em; color: inherit; }
+    #moment .sc-row span { display: block; margin-top: calc(5px * var(--s)); font-size: calc(14px * var(--s)); letter-spacing: .15em; color: var(--dim); white-space: nowrap; }
+    #moment .sc-then { margin-top: calc(13px * var(--s)); padding-top: calc(10px * var(--s)); border-top: 1px solid rgba(243, 234, 217, .16); font-size: calc(19px * var(--s)); letter-spacing: .12em; color: var(--lime); white-space: nowrap; }
+    #moment.gold .sc-then { color: var(--gold); }
     #moment .skip { display: none !important; }            /* the page's own "Skip" button on a story card is for a viewer at the page, not for the film */
     #tag.mk b::before { content: ''; display: inline-block; width: .8em; height: .8em; margin-right: .3em; vertical-align: -.04em; background: var(--mk) center / contain no-repeat; }
   `;
@@ -57,8 +75,12 @@
   // the standings: a logo in front of every name, once
   for (const run of A.RUNS) {
     const key = makerOf(run); if (!key || !run.row) continue;
-    const node = img(key); node.className = 'mk';
-    run.row.querySelector('.who b').prepend(node);
+    const node = img(key), name = run.row.querySelector('.who b'); node.className = 'mk';
+    name.prepend(node);
+    if (M.tiers && M.tiers[run.id]) {                       // FAST, BALANCED or FLAGSHIP, between the bar and the small print
+      run.cell.insertAdjacentHTML('afterend', `<span class="tier">${M.tiers[run.id]}</span>`);
+      document.getElementById('rows').classList.add('tiers');
+    }
   }
   window.__manh = { ready: Promise.all(images.map(node => node.decode().catch(() => null))).then(() => true) };
 
@@ -91,7 +113,50 @@
     return { actor, run: actor.run, icon, k: 0, born: -1, shown: false, hidden: false, heard: true, phase: actor.run.index * 1.7 };
   }).filter(Boolean);
 
-  let last = { t: null, follow: null, card: false, way: false };
+  // ---------------------------------------------------------------- the card as a score-card
+  // For each kind of moment: a headline, three numbers with their labels, and the line that follows. The numbers
+  // come out of the page's own sentences (viewer/traverse_story.py writes them); null when a sentence has changed.
+  const found = (text, pattern) => { const hit = (text || '').match(pattern); return hit ? hit.slice(1) : null; };
+  const SCORE = {
+    lost(m) {
+      const far = found(m.did, /(\d+) m from the lander/), carried = found(m.did, /(\d+) samples/), floor = found(m.better, /below ([\d.]+)%/);
+      if (!far || !carried) return null;
+      return { head: 'BATTERY FLAT', stats: [[far[0], 'M', 'FROM HOME'], [carried[0], '', carried[0] === '1' ? 'SAMPLE LOST' : 'SAMPLES LOST'], ['0', '', 'POINTS HERE', 'bad']],
+        then: m.wait ? 'A SHORT WAIT FOR THE SUN WOULD HAVE SAVED IT' : floor ? `THE REFERENCE NEVER WENT BELOW ${Math.floor(floor[0])}% HERE` : null };
+    },
+    ref_wait(m) {
+      const charge = found(m.did, /Battery ([\d.]+)%/), stops = found(m.did, /(\d+) times/);
+      if (!charge || !stops) return null;
+      const lowest = Math.min(...m.run.track.raw.b) / A.CFG.battery * 100;
+      return { head: 'WAITS FOR THE SUN', stats: [[String(Math.round(charge[0])), '%', 'BATTERY LEFT'], [stops[0], '', 'STOPS TO CHARGE'], [String(Math.floor(lowest)), '%', 'ITS LOWEST ALL DAY']],
+        then: 'IT CHECKS THE BATTERY BEFORE EVERY LEG' };
+    },
+    misses(m) {
+      const reach = found(m.did, /Sampled ([\d.]+) m from the nearest target; it must be within ([\d.]+) m/), count = found(m.did, /(\d+) missed samples/), ours = found(m.better, /reference missed (\d+)/);
+      if (!reach || !count || !ours) return null;
+      return { head: 'MISSED SAMPLE', stats: [[String(Math.round((reach[0] - reach[1]) * 100)), 'CM', 'TOO FAR'], [count[0], '', 'MISSES HERE', 'bad'], [ours[0], '', 'FOR THE REFERENCE']],
+        then: 'THE REFERENCE AIMS WHERE THE ROVER WILL BE' };
+    },
+    steep(m) {
+      const limit = found(m.did, /([\d.]+)% tilt limit/), stops = found(m.did, /(\d+) safety stops/), ours = found(m.better, /reference stopped (\d+) times/);
+      if (!limit || !stops || !ours) return null;
+      return { head: 'TOO STEEP', stats: [[limit[0], '%', 'TILT LIMIT'], [stops[0], '', 'SAFETY STOPS HERE', 'bad'], [ours[0], '', 'FOR THE REFERENCE']],
+        then: "EVERY STOP WIPES THE ROVER'S ORDERS" };
+    },
+  };
+  function scoreCard(m, now) {                                // rebuild the page's card once, when it has just come up
+    const made = SCORE[m.kind] ? SCORE[m.kind](m) : null;
+    if (!made) return false;
+    const card = A.card, head = card.querySelector('i');
+    if (head && head.firstChild && head.firstChild.nodeType === 3) head.firstChild.textContent = made.head;
+    card.insertAdjacentHTML('beforeend', `<div class="sc-row">${made.stats.map(([big, unit, label, tone]) =>
+      `<div style="opacity:0"><b${tone ? ` class="${tone}"` : ''}>${big}${unit ? `<small>${unit}</small>` : ''}</b><span>${label}</span></div>`).join('')}</div>`
+      + (made.then ? `<div class="sc-then" style="opacity:0">${made.then}</div>` : ''));
+    card.classList.add('sc'); card.dataset.sc = String(now);
+    return true;
+  }
+
+  let last = { t: null, follow: null, card: false, way: false, then: false };
   function draw(fx) {
     const now = window.__film.now() / 1000, dt = fx.dt || 1 / 30, state = A.state, story = A.story, t = state.t;
     const chase = smooth(0, 1, A.view.k), overhead = chase < 0.35;
@@ -140,10 +205,22 @@
       const key = makerOf(moment.run);
       if (key) {
         const node = img(key); node.className = 'mk'; A.card.prepend(node); A.card.classList.add('mk-on');
-        const by = moment.run.ref ? 'A PLANNER, NOT A MODEL' : `${M.tiles[key].family} · ${M.tiles[key].name}`;
+        const tier = M.tiers && M.tiers[moment.run.id];
+        const by = moment.run.ref ? 'A PLANNER, NOT A MODEL' : `${tier || M.tiles[key].family} · ${M.tiles[key].name}`.toUpperCase();
         A.card.querySelector('b').insertAdjacentHTML('beforeend', `<small>${by}</small>`);
       }
     }
+    // as a score-card: the numbers come up one after another, and a moment later the line that follows them
+    let then = false;
+    if (cardOn && M.cards === 'score') {
+      if (!A.card.querySelector('.sc-row') && !A.card.dataset.plain && !scoreCard(moment, now)) A.card.dataset.plain = '1';
+      const since = now - parseFloat(A.card.dataset.sc || now), tiles = A.card.querySelectorAll('.sc-row > div'), line = A.card.querySelector('.sc-then');
+      tiles.forEach((node, i) => { const k = smooth(0, 1, (since - 0.25 - i * 0.16) / 0.32); node.style.opacity = k.toFixed(3); node.style.transform = `translateY(${((1 - k) * 12).toFixed(1)}px)`; });
+      if (line) { const k = smooth(0, 1, (since - 1.3) / 0.4); line.style.opacity = k.toFixed(3); then = since >= 1.3; }
+    }
+    if (!cardOn) { delete A.card.dataset.plain; delete A.card.dataset.sc; A.card.classList.remove('sc'); }
+    if (then && !last.then) events.push({ k: 'then' });
+    last.then = then;
     if (cardOn && !last.card) events.push({ k: 'card', tone: moment.kind.startsWith('ref') ? 'gold' : 'bad' });
     const held = moment ? (A.HOLD[moment.kind] || 5) - story.hold : 0, way = !!(moment && moment.path && held > 0.2);
     if (way && !last.way) events.push({ k: 'way', open: !!moment.open });
