@@ -18,8 +18,10 @@ the saved campaign runs) and the scenes of `film.html`, both drawn on a virtual 
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import math
+import os
 import shutil
 import subprocess
 import sys
@@ -27,7 +29,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from . import data as film_data
-from . import storyboard
+
+# The script to build: storyboard.py (the second cut) unless LIGHTLAG_STORYBOARD names another module
+# of this package, for example storyboard3 (the third cut).
+storyboard = importlib.import_module("{}.{}".format(__package__, os.environ.get("LIGHTLAG_STORYBOARD", "storyboard")))
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
@@ -193,7 +198,8 @@ def capture(only: Optional[List[str]] = None) -> List[Dict[str, Any]]:
     lengths = durations()
     plan = storyboard.shots(lengths, spoken_words())
     (BUILD / "shots").mkdir(parents=True, exist_ok=True)
-    facts = json.dumps({**film_data.build(), "live_url": storyboard.LIVE_URL}, separators=(",", ":"))
+    more = storyboard.facts() if hasattr(storyboard, "facts") else {}          # what a later cut's slides add
+    facts = json.dumps({**film_data.build(), **more, "live_url": storyboard.LIVE_URL}, separators=(",", ":"))
     timeline_path = BUILD / "timeline.json"
     known = {item["name"]: item for item in json.loads(timeline_path.read_text())} if timeline_path.exists() else {}
     with sync_playwright() as p:
