@@ -105,6 +105,7 @@ A separate frozen composition test combined all six retained policies with a gre
 - **Live on Modal:** [kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run](https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run). Pick any world; Modal drives eight rovers on it (the reference, a textbook controller and six Claude-written autopilots) and plays the replay. A new world takes about a minute.
 - **The judged runs, replayed:** open [`viewer/traverse-campaign.html`](viewer/traverse-campaign.html) from a clone, one file with no server. Keys 1 to 3 pick the site, S starts the story of what went wrong, N skips to the next moment.
 - **Video:** the two-minute film is [`docs/demo-video/lightlag-traverse-demo.mp4`](docs/demo-video/lightlag-traverse-demo.mp4), with the [source of every number in it](docs/demo-video/README.md).
+- **Deck:** [`docs/pitch-deck/lightlag-traverse-deck.pdf`](docs/pitch-deck/lightlag-traverse-deck.pdf), eleven slides, with a [talk track](docs/pitch-deck/README.md).
 
 ## What Modal did
 
