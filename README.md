@@ -115,7 +115,7 @@ Modal ran the rollout farm (about 6,000 missions by Saturday evening, the 300-wo
 - **The margin is not wide everywhere.** The closest run is 0.034 below the reference on the campaign. On one site alone, the best run is 0.004 below, which is why the campaign of three is the task.
 - **When the reference was built.** It was improved (0.448 to 0.565 on world 2026) after two early agent runs had beaten its first version there. The campaign's worlds and the 300 fresh worlds were played afterwards, and nothing was tuned on them.
 - **Replays measure programs.** The fresh-world comparison replays saved programs without the agents that wrote them.
-- **Run counts are small.** One to four runs a model; enough to see the spread, not to state a rate. No agent runs of Gemini 4 Carbon or Argon are recorded.
+- **Run counts are small.** One to four runs a model; enough to see the spread, not to state a rate. The table is as of Sunday 05:00 and runs are still landing in the ledger; Gemini 4 Carbon and Argon had no campaign run by then.
 
 ## The team
 
