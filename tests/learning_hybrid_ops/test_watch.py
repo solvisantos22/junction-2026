@@ -45,7 +45,7 @@ class WatchTests(unittest.TestCase):
     def receipt(self, target, status='submitted'):
         value = {'schema': watch.RECEIPT_SCHEMAS[target['kind']],
                  'status': status, 'freeze_sha256': target['freeze_sha256'], 'stage': target['id']}
-        if target['kind'] == 'recovery':
+        if target['kind'] in {'recovery','recovery2'}:
             value['recovery_id'] = value.pop('stage')
         Path(target['receipt_path']).write_text(json.dumps(value))
 
@@ -173,6 +173,35 @@ class WatchTests(unittest.TestCase):
         (self.monitor / 'wake-stop').touch()
         state = self.tick(NOW + 60)
         self.assertEqual(state['status'], 'disabled')
+        self.assertEqual(self.queues(), [])
+
+    def test_second_recovery_keeps_separate_identity_and_single_wake(self):
+        recovery = self.add_target('development-recovery-2', 'recovery2')
+        self.config['targets'] = [recovery]
+        self.receipt(recovery)
+        self.set_hybrid(recovery, 'complete', jobs_complete=2510, jobs_total=2510)
+        self.responses[recovery['id']]['stage'] = 'development-recovery-1'
+        self.assertEqual(self.tick()['targets'][recovery['id']]['error_type'], 'ValueError')
+        self.assertEqual(self.queues(), [])
+        self.set_hybrid(recovery, 'complete', jobs_complete=2510, jobs_total=2510)
+        state = self.tick(NOW + 60)
+        self.assertEqual(state['status'], 'finished')
+        self.tick(NOW + 120)
+        self.assertEqual(len(self.queues()), 1)
+        reads = [call[0] for call in self.calls if call[0][1] == '-m']
+        self.assertTrue(all(call[2] == 'tools.learning_hybrid_ops.recovery2' and call[-2] == '--status'
+                            for call in reads))
+
+    def test_second_recovery_cannot_use_first_recovery_receipt(self):
+        recovery = self.add_target('development-recovery-2', 'recovery2')
+        self.config['targets'] = [recovery]
+        self.receipt(recovery)
+        path = Path(recovery['receipt_path'])
+        receipt = json.loads(path.read_text())
+        receipt['schema'] = 'learning-hybrid-recovery-receipt-v1'
+        path.write_text(json.dumps(receipt))
+        self.set_hybrid(recovery, 'complete')
+        self.assertEqual(self.tick()['targets'][recovery['id']]['error_type'], 'ValueError')
         self.assertEqual(self.queues(), [])
 
     def test_recovery_rejects_original_stage_receipt_schema(self):

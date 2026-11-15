@@ -1,6 +1,6 @@
 # RL–greedy hybrid search
 
-The 65-mission Modal smoke passed. The development coordinator was interrupted after submitting 3145 of 8320 missions; all 3145 submitted cases completed successfully. The audited continuation of only the 5175 never-submitted cases is now running; no completed case is repeated. [Fixed protocol](../learning-hybrid.md).
+The 65-mission Modal smoke passed. Development currently retains **5810/8320 verified cases**. The original coordinator and its first recovery both stopped; the latter collected two failed worker attempts with no saved completed episode. A [diagnosed second recovery](development/recovery2/README.md) is being prepared for exactly two failed and 2508 unstarted cases. No completed case or training is repeated. Later maps remain unopened. [Fixed protocol](../learning-hybrid.md).
 
 The 65-arm development search compares individual-policy shortlists, rank
 ensembles across all retained seeds, and RL–greedy rank blends. It uses new

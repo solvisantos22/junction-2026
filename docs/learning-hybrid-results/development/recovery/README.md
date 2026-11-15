@@ -1,5 +1,7 @@
 # Development continuation after coordinator interruption
 
+**Terminal update, 15 November 01:12 UTC:** this first recovery failed after 2665 successful cases and two worker interruptions. Its state is preserved. The commands and running checkpoint below are historical; the old stage adapter cannot advance this failed recovery. See the [second recovery diagnosis](../recovery2/README.md) for the current handoff.
+
 Only the **5175 never-submitted jobs** in the original 8320-case matrix may
 run. The original 3145 submissions all completed and remain retained. The
 original failed coordinator state and its call/owner keys are unchanged.
