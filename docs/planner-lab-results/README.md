@@ -18,6 +18,11 @@ guarded strategy run without prefix copying.
 [Inventory](smoke/inventory-audit.json), [Linux replay](smoke/cloud-audit.json),
 [local replay](smoke/local-audit.json), [full repeats](smoke/repeat-audit.json).
 
+Production is running on [Modal](https://modal.com/apps/kristjansolvi03/main/ap-TtfKs4QfMlfHhGfWIsbP7n).
+The [first immutable checkpoint](checkpoints/data-001.json) preserves 1308 completed
+missions and their batch hashes, with no controller errors/invalid calls.
+Two platform preemptions were automatically restarted; completed outcomes retained.
+
 Production will collect 7,232 training/validation missions, fit all four models,
 and publish the selection before opening the 960-mission fresh comparison.
 No new performance claim yet. The canonical simulator, reference, prior study
