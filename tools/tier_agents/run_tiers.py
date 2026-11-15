@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 import os
 import subprocess
 import sys
@@ -181,6 +182,8 @@ def main(argv=None) -> int:
             if not (trials[0] / "result.json").read_text().strip() or json.loads((trials[0] / "result.json").read_text()).get("finished_at") is None:
                 print(run["name"], "still running")
                 continue
+            if time.time() - (trials[0] / "result.json").stat().st_mtime < 600:
+                continue  # just finished: its own driver may be recording it now
             record(run, trials[0])
         return 0
 
