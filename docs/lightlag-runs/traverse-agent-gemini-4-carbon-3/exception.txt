@@ -1,0 +1,97 @@
+Traceback (most recent call last):
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/synchronicity/synchronizer.py", line 613, in _run_function_async
+    value = await asyncio.shield(a_fut)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/supermanh/miniconda3/lib/python3.14/asyncio/tasks.py", line 488, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/agents/installed/base.py", line 194, in wrapper
+    return await fn(self, instruction, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/agents/installed/opencode.py", line 908, in run
+    await self.exec_as_agent(
+    ...<12 lines>...
+    )
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/agents/installed/base.py", line 1081, in exec_as_agent
+    return await self._exec(
+           ^^^^^^^^^^^^^^^^^
+        environment, command, env=env, cwd=cwd, timeout_sec=timeout_sec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/agents/installed/base.py", line 1032, in _exec
+    result = await environment.exec(
+             ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/environments/modal.py", line 1569, in exec
+    return await self._strategy.exec(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/environments/dind_compose.py", line 122, in exec
+    return await self._compose_exec(parts, timeout_sec=timeout_sec)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/environments/modal.py", line 687, in _compose_exec
+    return await self._vm_exec(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/environments/modal.py", line 509, in _vm_exec
+    return await self._env._sdk_exec(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        command, cwd=cwd, env=env, timeout_sec=timeout_sec, shell=shell
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/environments/modal.py", line 1373, in _sdk_exec
+    stdout = await process.stdout.read.aio()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/synchronicity/async_wrap.py", line 30, in wrapper
+    return await user_wrapper(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/synchronicity/async_wrap.py", line 30, in wrapper
+    return await user_wrapper(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/synchronicity/async_wrap.py", line 30, in wrapper
+    return await user_wrapper(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/synchronicity/synchronizer.py", line 628, in _run_function_async
+    await a_fut  # wait for cancellation logic to complete - this *normally* raises CancelledError
+    ^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/trial/trial.py", line 769, in _run_agent_phase
+    await asyncio.wait_for(
+    ...<6 lines>...
+    )
+  File "/home/supermanh/miniconda3/lib/python3.14/asyncio/tasks.py", line 487, in wait_for
+    async with timeouts.timeout(timeout):
+               ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/supermanh/miniconda3/lib/python3.14/asyncio/timeouts.py", line 115, in __aexit__
+    raise TimeoutError from exc_val
+TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/trial/single_step.py", line 76, in _run_agent
+    await self._run_agent_phase(
+    ...<5 lines>...
+    )
+  File "/home/supermanh/miniconda3/lib/python3.14/site-packages/harbor/trial/trial.py", line 778, in _run_agent_phase
+    raise AgentTimeoutError(
+        f"Agent execution timed out after {timeout_sec} seconds"
+    ) from exc
+harbor.trial.errors.AgentTimeoutError: Agent execution timed out after 1800.0 seconds

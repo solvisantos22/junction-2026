@@ -3,8 +3,8 @@
 GPT-6.1 Sol agent 2 prepared its autopilot by hand (calls 7, 11, 15, 16 and 19): inspect_mission.py
 saved the world and rules to /app, mission_plan.py wrote /app/route.json, the agent sent one
 `wait` and advanced one tick through its own tools, then started autopilot.py (which expects
-that wait at tick 4). It installed numpy 2.5.4 and scipy 1.18.1 first (call 9); the replay
-needs them.
+that wait at tick 4). It installed numpy 2.5.4, scipy 1.18.1 and matplotlib 3.11.2 first (call 9);
+the replay needs them (sandbox: an image with them, --image; farm: TRAVERSE_FARM_PIP).
 This script repeats that on any world so the farm (or the sandbox) can replay the program:
 
     agent:docs/lightlag-runs/traverse-agent-gpt-6.1-sol-2/program/farm_prepare.py

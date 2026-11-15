@@ -27,3 +27,6 @@ Production will collect 7,232 training/validation missions, fit all four models,
 and publish the selection before opening the 960-mission fresh comparison.
 No new performance claim yet. The canonical simulator, reference, prior study
 and teammate learners are unchanged.
+
+Second progress checkpoint: [3964 missions archived](checkpoints/data-002.json),
+zero controller errors/invalid calls; raw batches and common prefixes verified.

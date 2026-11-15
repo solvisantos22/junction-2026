@@ -92,7 +92,8 @@ def open_page(context: Any, shot: Dict[str, Any], sources: Dict[str, Any], probl
         page.evaluate("window.__overlay.chapter({})".format(json.dumps(shot.get("chapter"))))
         runs = page.evaluate("() => window.LIGHTLAG_TRAVERSE_APP.RUNS.map(run => [run.id, run.kind, run.label, run.model || ''])")
         whose = {run: makers.maker_of(label + " " + model) for run, kind, label, model in runs if kind != "reference"}
-        page.evaluate("m => { window.__MANH = m; }", {"tiles": tiles, "makers": {run: key for run, key in whose.items() if key}})
+        page.evaluate("m => { window.__MANH = m; }", {"tiles": tiles, "makers": {run: key for run, key in whose.items() if key},
+                                                         "icons": makers.scene_icon_settings()})        # the floating marks over the rovers
         page.evaluate(sources["tracker.js"])
         if shot.get("addon"):                 # a piece that draws frames of its own on top of the page (the opening in space)
             given = shot.get("addon_settings", {})

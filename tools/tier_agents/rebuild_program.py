@@ -123,23 +123,30 @@ def heredoc_writes(command: str):
         yield path, "\n".join(body) + "\n"
 
 
-def drives(script: str, files: dict) -> bool:
-    """True when the script, with the modules beside it that it imports, talks to the mission
-    (`lightlag_client`) and sends commands (`uplink`); a simulator of the agent's own is not it."""
-    folder = str(PurePosixPath(script).parent)
-    seen, todo, found = set(), [script], set()
+def modules_of(script: str, files: dict) -> list:
+    """The script and the agent's own modules it imports, found beside it or in a folder it puts
+    on sys.path (`sys.path.insert(0, "/tmp/opencode")`), recursively."""
+    seen, todo = [], [script]
     while todo:
         path = todo.pop()
         if path in seen or path not in files:
             continue
-        seen.add(path)
+        seen.append(path)
         text = files[path]
-        found.update(word for word in ("lightlag_client", "uplink(") if word in text)
-        if len(found) == 2:
-            return True
+        folders = [str(PurePosixPath(path).parent)] + re.findall(r"sys\.path\.(?:insert\(\s*\d+\s*,|append\()\s*['\"]([^'\"]+)['\"]", text)
         for module in re.findall(r"^\s*(?:from|import)\s+(\w+)", text, re.M):
-            todo.append(folder + "/" + module + ".py")
-    return False
+            for folder in folders:
+                if folder.rstrip("/") + "/" + module + ".py" in files:
+                    todo.append(folder.rstrip("/") + "/" + module + ".py")
+                    break
+    return seen
+
+
+def drives(script: str, files: dict) -> bool:
+    """True when the script, with the agent's modules it imports, talks to the mission
+    (`lightlag_client`) and sends commands (`uplink`); a simulator of the agent's own is not it."""
+    text = "\n".join(files[path] for path in modules_of(script, files))
+    return "lightlag_client" in text and "uplink(" in text
 
 
 def loose_match(content: str, old: str):
@@ -210,7 +217,12 @@ def main(argv=None) -> int:
     files, skipped, launches = replay(trajectory)
     entry = launches[-1] if launches else None
     folder = str(PurePosixPath(entry).parent) if entry else "/app"
-    app = {path: text for path, text in files.items() if str(PurePosixPath(path).parent) == folder}
+    folders = {folder} | {str(PurePosixPath(path).parent) for path in (modules_of(entry, files) if entry else [])}
+    app = {}
+    for path, text in files.items():   # the entry's folder first, so its own files win a name clash
+        if str(PurePosixPath(path).parent) in folders and (PurePosixPath(path).name not in {PurePosixPath(p).name for p in app}
+                                                         or str(PurePosixPath(path).parent) == folder):
+            app[path] = text
 
     model = config["agent"]["model_name"]
     short = model.split("/", 1)[1]
@@ -230,20 +242,32 @@ def main(argv=None) -> int:
             "task_version": version}
     if entry:
         program = run / "program"
+        prepare = (program / "farm_prepare.py").read_text(encoding="utf-8") if (program / "farm_prepare.py").exists() else None
         if program.exists():
             shutil.rmtree(program)
         program.mkdir()
+        if prepare:   # added by hand for the farm, as Kristján did for Opus 3; kept
+            (program / "farm_prepare.py").write_text(prepare, encoding="utf-8")
         for path, text in app.items():
             if path.endswith(".py"):
                 (program / PurePosixPath(path).name).write_text(text, encoding="utf-8")
         meta["program"] = ("program/ was rebuilt from the trajectory (agent/trajectory.json) by "
                            "tools/tier_agents/rebuild_program.py: the agent's file writes and later edits replayed "
                            "in order, nothing executed. Entry: {} (the last program the agent started that sends commands; "
-                           "{} such start(s) in all; the agent's folder was {}).".format(PurePosixPath(entry).name, len(launches), folder))
+                           "{} such start(s) in all; files kept from {}).".format(PurePosixPath(entry).name, len(launches), ", ".join(sorted(folders))))
         if skipped:
             meta["program_skipped_edits"] = skipped
+        if prepare and (run / "run.json").exists():   # keep the note on the hand-added farm_prepare.py
+            before = json.loads((run / "run.json").read_text(encoding="utf-8"))
+            note = before.get("program", "").partition(" farm_prepare.py was added")
+            if note[1]:
+                meta["program"] += note[1] + note[2]
+            if before.get("farm_policy"):
+                meta["farm_policy"] = before["farm_policy"]
         print("agent:{}/program/{}".format(run.as_posix(), PurePosixPath(entry).name))
     else:
+        if (run / "program").exists():
+            shutil.rmtree(run / "program")
         meta["program"] = "none: the agent never started a saved program that sends commands (it drove by hand or never drove)"
         print("no program: {}".format(run.name), file=sys.stderr)
     (run / "run.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")

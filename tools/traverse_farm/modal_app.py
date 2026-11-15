@@ -39,8 +39,13 @@ def _skip(path) -> bool:
     return "__pycache__" in path.parts or path.suffix == ".pyc"
 
 
+# Packages an agent installed in its task container (e.g. TRAVERSE_FARM_PIP="numpy==2.5.4 scipy==1.18.1"
+# for GPT-6.1 Sol agent 2). Unset, the image is the same as without it.
+base = modal.Image.debian_slim(python_version="3.12")
+if os.environ.get("TRAVERSE_FARM_PIP"):
+    base = base.pip_install(*os.environ["TRAVERSE_FARM_PIP"].split())
 image = (
-    modal.Image.debian_slim(python_version="3.12")
+    base
     .env({"PYTHONPATH": "/root/farm", "TRAVERSE_FARM_ALLOW_PROGRAMS": "1", "PYTHONDONTWRITEBYTECODE": "1"})
     .add_local_dir(REPO / "lightlag", "/root/farm/lightlag", ignore=_skip)       # lightlag.model, used by Traverse
     .add_local_dir(SOURCE / "lightlag_traverse", "/root/farm/lightlag_traverse", ignore=_skip)
@@ -48,7 +53,7 @@ image = (
     .add_local_dir(REPO / "lightlag_traverse_max", "/root/farm/lightlag_traverse_max", ignore=_skip)   # Manh's MAX map
 )
 app = modal.App("lightlag-traverse-farm", image=image)
-MAX_CONTAINERS = 100
+MAX_CONTAINERS = int(os.environ.get("TRAVERSE_FARM_CONTAINERS", "100"))   # more makes a batch of slow programs finish sooner
 
 
 @app.function(cpu=1.0, memory=1024, timeout=1800, max_containers=MAX_CONTAINERS)

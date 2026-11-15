@@ -15,12 +15,21 @@ deadlines and duplicate-launch refusal. Only used smoke worlds 1/2 have been
 opened locally. No hybrid performance claim is available yet.
 
 The experiment uses 64 single-CPU, 2-GiB Modal workers plus one coordinator,
-with an absolute 05:30 UTC cutoff and a $75 running-compute ceiling. The
-declared six-hour maximum allocation is about $24.63, excluding ancillary
-costs. Sölvi's workspace was read-only checked before launch: the old training
-app was stopped with zero tasks. This is not a live credit balance.
+with an absolute 05:30 UTC cutoff and a $75 shared running-compute ceiling.
+After the diagnosed interruptions, the published recovery2 and subsequent
+stage freezes use non-preemptible workers/coordinators at 3× the original rate.
+Their cumulative conservative allocation ledger is $65.443, including prior
+training and all remaining stage allocation through the cutoff. The original
+preemptible six-hour estimate was $24.63. Neither is an invoice or live credit
+balance; measured costs and exclusions are reported at each stage's closure.
 
 ## Reproduction and stage gates
+
+**Current continuation:** follow the [final-stage handoff](final/README.md).
+It uses the unchanged `tools.learning_hybrid_ops.stages2` adapter from the
+immutable snapshot, including its attempt-aware artifact verification. The
+original setup commands below document the initial campaign; do not relaunch
+an old stage or use its original downloader for the newer attempt paths.
 
 Use the pinned Python 3.12 / NumPy 2.3.4 / Torch 2.9.1 / Modal 1.6.4 runtime.
 The local runtime for this worktree is `/tmp/junction-learning-venv`.

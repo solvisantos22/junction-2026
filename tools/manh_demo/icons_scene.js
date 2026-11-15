@@ -81,7 +81,7 @@
     MARK(spec) {
       const group = new T.Group(), turning = new T.Group(); group.add(turning);
       turning.add(mark(spec, 0.98, 0.2, spec.text, { emissive: spec.text, emissiveIntensity: 0.55, roughness: 0.3, outline: 0.45 }));
-      group.userData = { turning, sways: true, smallest: 35 };       // Manh, 15 November: a little smaller from overhead, and a tiny outline
+      group.userData = { turning, sways: true, smallest: 29 };       // Manh, 15 November: smaller from overhead (twice), and a tiny outline
       return group;
     },
     BEACON(spec, tier) {
