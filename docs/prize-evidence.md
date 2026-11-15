@@ -1070,3 +1070,13 @@ errors. These are progress checkpoints, not completed performance findings.
   64 non-preemptible workers plus coordinator, same $75 shared ceiling and
   05:30 UTC cutoff. Freeze publication precedes any confirmation launch.
   Final maps need a separate later selection freeze; keep the team reference.
+
+Confirmation was launched once after `2256f63`: app
+**`ap-mAROrYr7XrA7sT2t7Z5zMI`**, original call
+**`fc-01M7EFBZEQXETSYPQH3PCREV4D`**. Independent live audit at 02:09 UTC
+confirmed **265/5376 completed**, no errors/stop markers, exact frozen-source
+and receipt identities, and preserved parent failure/recovery records. The
+existing read-only watcher recognized the receipt without rearming.
+[Live evidence and next gate](learning-hybrid-results/confirmation/README.md#live-handoff--15-november-0209-utc).
+No confirmed performance claim or final-map opening follows this progress
+checkpoint; actual stage compute will be reconciled at completion.
