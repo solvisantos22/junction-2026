@@ -4,7 +4,7 @@
 
 Kristján measured Anthropic's models on his Traverse tasks ([`lightlag-traverse-campaign.md`](lightlag-traverse-campaign.md)). This page repeats his measurements, unchanged, with the matching models of OpenAI and Google DeepMind, so the reference can be judged against today's models across labs rather than one lab. Claude was not rerun: Claude's numbers are Kristján's runs.
 
-**Status: runs still landing.** The tables are regenerated as they do; this page's text is written around them.
+**Status: complete.** All 36 GPT and Gemini agent runs, the six one-request runs and the farm replays are saved. Final API cost: about $30.40 Google, $3.60 OpenAI (OpenCode's own count).
 
 ## The lineup
 
@@ -26,7 +26,13 @@ Three measurements, each exactly as Kristján made it for Claude.
 
 ## Results
 
-See [`tier-comparison/tables.md`](tier-comparison/tables.md). The reference scores 0.476 on the campaign, 0.565 on world 2026 and 0.502 over worlds 600–899.
+Full tables: [`tier-comparison/tables.md`](tier-comparison/tables.md). The reference scores 0.476 on the campaign, 0.565 on world 2026 and 0.502 over worlds 600–899.
+
+- **No model beats the reference on average, on any measure.** The closest single runs: Gemini 4 Carbon's campaign runs 0.449 and 0.473 (reference 0.476), and its one world-2026 run that drove, 0.567 (reference 0.565).
+- **GPT-6.1 Sol is the steadiest.** Every agent run 0.35 to 0.55 (campaign mean 0.361, world 2026 0.523); its one-request program scores 0.433 over 300 unseen worlds, the best of any one-request program, Claude's included (Opus 0.321).
+- **Gemini is all or nothing.** Carbon, Argon and Hydrogen each have runs that score 0, mostly agents that ran out of session time before starting a mission (all three Argon runs on world 2026). When a Gemini agent did drive, its program held up best on unseen worlds: Hydrogen agent 2 scores 0.454 over 300 worlds, Carbon agent 2 0.410, against GPT-6.1 Sol's agents 0.421, 0.380, 0.446 and Opus's best 0.309.
+- **Tier names do not order the results.** Gemini's bottom tier, Hydrogen, scores above Anthropic's Opus and Sonnet on the campaign (0.369 against 0.220 and 0.253). GPT-6.1's middle tier, Terra, scores above Opus on world 2026 (0.403 against 0.268).
+- **Every agent program that scored well on world 2026 lost ground on worlds it had not seen**, as Kristján found for Claude: the best fell from 0.56–0.57 live to 0.41–0.45 over 300 worlds, against the reference's 0.502.
 
 ## Reproducing it
 
