@@ -259,6 +259,8 @@ def _run_program(job: Dict[str, Any], tools: Any, time_limit: Optional[float]) -
         os.chdir(saved_cwd)
         sys.path[:] = saved_path
         for name in set(sys.modules) - saved_modules:   # nothing a program imported leaks into the next job
+            if "site-packages" in (getattr(sys.modules.get(name), "__file__", None) or ""):
+                continue   # an installed package (numpy cannot be loaded twice in one process); not the program's
             sys.modules.pop(name, None)
         sys.modules.pop("lightlag_client", None)
         shutil.rmtree(work, ignore_errors=True)
