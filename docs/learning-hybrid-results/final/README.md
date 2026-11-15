@@ -98,3 +98,53 @@ further experiments. Deliver the verified final comparison, a clean figure,
 copy-ready README/presentation wording, limitations and prize evidence; hand
 these to the submission owners without changing their video or task. A failed
 performance gate must be reported plainly, not extended into another search.
+
+## Faster archive transport after completion
+
+The frozen full downloader makes 7683 sequential Volume file reads. To avoid
+network latency delaying submission, the existing Modal 1.6.4 CLI can download
+the two exact final prefixes in parallel, then the **unchanged** `stages2`
+downloader verifies them through a cache-only Volume adapter. This changes
+transport only; real original-call and control-store checks remain live. It
+launches no job, repeats no mission and changes no protected source or weight.
+
+[Adapter](download-from-cache.py), SHA256
+`bcf29d0d1aeeba3baa273ee60afd62cb88759a2463f8dfae49f1b7cffdd92aaf`;
+[11 offline checks](cache-offline-check.json). Checks include exact final
+receipt/call/operations identity, 58 source/policy pins, real CLI path-layout
+behavior with a local fake volume, missing-file refusal without network
+fallback, symlinks, pauses, source/receipt drift and output overwrite refusal.
+Independent review found no material blocker. No production archive has been
+downloaded at this handoff.
+
+**Only after the original final call is complete with all 2560 cases**, check
+local/global stop markers and use the following fresh paths. The two CLI
+commands run sequentially; each uses its existing parallel file transfers.
+The destination layout matters: the CLI appends `final` or `jobs` itself.
+
+```sh
+cd /tmp/junction-hybrid-recovery2-frozen
+hybrid_archive_cache=/tmp/junction-hybrid-final-cache-20261115
+hybrid_archive_output=/tmp/junction-hybrid-final-verified-20261115
+hybrid_archive_receipt=/tmp/junction-learning-hybrid-monitor/final-receipt.json
+hybrid_archive_helper=/tmp/junction-hybrid-final-download-from-cache-20261115.py
+hybrid_stop_args=()
+for hybrid_stop_root in /Users/solvisantos/.codex/worktrees/6974/Junction /Users/solvisantos/.codex/junction-learning-hybrid-watch-20261115 /tmp/junction-learning-hybrid-monitor /tmp/junction-greedy-prior-monitor /tmp/junction-hybrid-recovery2-frozen /tmp/junction-hybrid-frozen; do
+  for hybrid_stop_name in pause.json wake-stop stop; do
+    hybrid_stop_args+=(--stop-file "$hybrid_stop_root/$hybrid_stop_name")
+  done
+done
+/tmp/junction-learning-venv/bin/python "$hybrid_archive_helper" prepare --cache "$hybrid_archive_cache" --receipt "$hybrid_archive_receipt" "${hybrid_stop_args[@]}"
+MODAL_PROFILE=solvi-junction /tmp/junction-learning-venv/bin/modal volume get junction-learning-hybrid final "$hybrid_archive_cache"
+MODAL_PROFILE=solvi-junction /tmp/junction-learning-venv/bin/modal volume get junction-learning-hybrid final-ops2/artifacts/final/jobs "$hybrid_archive_cache/final-ops2/artifacts/final"
+MODAL_PROFILE=solvi-junction /tmp/junction-learning-venv/bin/python "$hybrid_archive_helper" verify --cache "$hybrid_archive_cache" --receipt "$hybrid_archive_receipt" --output "$hybrid_archive_output" "${hybrid_stop_args[@]}"
+```
+
+Execute and check each step separately; do not proceed after an error or pause.
+Both cache and verified output must be new. Do not add `--force`. If a transfer
+fails, retain the partial cache, diagnose and retrieve only missing files;
+never blindly repeat a whole prefix. The adapter refuses missing/unsafe files
+and cannot fetch them itself. The verified output retains the original
+download manifest, raw worker rows, compressed cases and mapped rows, with an
+additional transport-verification record. This replaces a separate serial
+archive download; do not download the same archive twice.
