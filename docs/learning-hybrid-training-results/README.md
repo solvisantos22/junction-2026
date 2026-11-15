@@ -81,3 +81,46 @@ The existing reference stays in place regardless of this experiment's result.
 Training app: [`ap-59QwuUBGJ18ZztGfLBhd9u`](https://modal.com/apps/solvisantos22/main/ap-59QwuUBGJ18ZztGfLBhd9u). [Six original call IDs](receipt.json) · [first live status](launch-status.json). Code was published in `d1c6dbf`, the exact [source/resource freeze](freeze.json) in `fd7f4e5`, then all six calls were submitted once. All six initialize successfully and report running, with no stop marker or poll/progress errors in this initial observation. The client log-stream timeout happened after successful detached submission and is not a training failure.
 
 Launch was approximately 23:58 UTC on 14 November; the shared three-hour cutoff is **15 November 02:58 UTC / 04:58 Helsinki**, earlier than the absolute 05:30 UTC ceiling. Expected completion remains approximately 1–1.5 hours from launch, with 2–3 hours allowed. Milestone scores are development data. Read-only monitoring and final continuation use the fixed checkout `/tmp/junction-hybrid-frozen` at `fd7f4e5`; all 51 training and 54 composition-search pins were verified there. No previous supervisor is restarted.
+
+
+## Completion watcher and first checkpoints
+
+The read-only watcher is active: PID **37521**, with idle-sleep guard **37522**.
+Runtime/config/state are in
+`/Users/solvisantos/.codex/junction-learning-hybrid-watch-20261115/`.
+It polls every 60 seconds from the fixed checkout and requests this same Codex
+chat continue when a hybrid stage finishes, any training run fails, all six
+training calls finish, or three consecutive reads fail. One durable reservation
+per event prevents duplicate dispatch, including ambiguous CLI outcomes.
+The final fallback is **05:35 UTC**. It performs no launches, downloads,
+selection or training. Twenty synthetic tests and an independent review passed;
+a real read-only poll verified both current experiments running, with no errors
+or queued messages before activation. Queued continuation still depends on this
+Mac, Codex and connectivity remaining available.
+
+To disable future wake-ups, create `wake-stop` in that runtime directory.
+`pause.json` or `stop` there, in the receipt directories or working checkouts,
+also disables queueing; a remote stop marker suppresses it. Terminal observations
+are cached, so local `wake-stop` is authoritative after a stage finishes. This
+does not stop running cloud work: use the relevant experiment's explicit stop
+command when that is intended. Do not restart old supervisors. Disable this
+watcher after both experiments have their final handoff.
+
+Future hybrid receipts must use
+`/tmp/junction-learning-hybrid-monitor/confirmation-receipt.json` and
+`/tmp/junction-learning-hybrid-monitor/final-receipt.json`; these are watched
+only after they exist. The current training receipt is
+`/tmp/junction-greedy-prior-monitor/receipt.json`.
+
+[First checkpoint snapshot](progress.json): the three prior policies retain the
+greedy deterministic development score at 512 missions. This is not yet an
+improvement. The plain controls are learning from their zero-score deterministic
+initialization; report their all-seed mean only when all three checkpoint files
+are available. The unchanged formal final gates still apply.
+
+One live `plain-17/report.json` read raised `UnicodeDecodeError`, and a diagnostic
+read also stalled. Two subsequent bounded reads returned identical valid JSON,
+with all 51 source hashes matching the freeze/receipt and 896 completed missions.
+The cause is unconfirmed; no persistent report corruption was found. The next
+watcher poll was healthy for all six runs. [Preserved diagnosis and identity checks](progress-read-recovery/diagnosis.json).
+No source, policy, training job or cloud reservation was changed to recover.
