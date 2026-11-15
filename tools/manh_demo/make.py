@@ -92,10 +92,13 @@ def open_page(context: Any, shot: Dict[str, Any], sources: Dict[str, Any], probl
         page.evaluate("window.__overlay.chapter({})".format(json.dumps(shot.get("chapter"))))
         runs = page.evaluate("() => window.LIGHTLAG_TRAVERSE_APP.RUNS.map(run => [run.id, run.kind, run.label, run.model || ''])")
         whose = {run: makers.maker_of(label + " " + model) for run, kind, label, model in runs if kind != "reference"}
-        page.evaluate("m => { window.__MANH = m; }", {"tiles": tiles, "makers": {run: key for run, key in whose.items() if key}})
+        page.evaluate("m => { window.__MANH = m; }", {"tiles": tiles, "makers": {run: key for run, key in whose.items() if key},
+                                                         "icons": makers.scene_icon_settings()})        # the floating marks over the rovers
         page.evaluate(sources["tracker.js"])
         if shot.get("addon"):                 # a piece that draws frames of its own on top of the page (the opening in space)
-            settings = {**(makers.icon_settings() if shot["addon"] == "icons.js" else {}), **shot.get("addon_settings", {})}
+            given = shot.get("addon_settings", {})
+            settings = {**(makers.icon_settings(company=bool(given.get("company"))) if shot["addon"] == "icons.js" else {}),
+                        **({**makers.scene_icon_settings(), "makers": {run: key for run, key in whose.items() if key}} if shot["addon"] == "icons_scene.js" else {}), **given}
             page.evaluate("p => { window.__PIECE = p; }", settings)
             page.evaluate((HERE / shot["addon"]).read_text(encoding="utf-8"))
     page.evaluate("() => window.__manh.ready")
@@ -372,7 +375,7 @@ def clip(name: str, tag: Optional[str] = None, item: Optional[Dict[str, Any]] = 
         item = next((found for found in json.loads((BUILD / "timeline.json").read_text(encoding="utf-8")) if found["name"] == name), None)
     if item is None:
         raise SystemExit("no recorded shot called {}".format(name))
-    report = sound.build([item], [], BUILD, mute=["voice"], into="audio-clip", whole=False)
+    report = sound.build([item], [], BUILD, mute=["voice"], into="audio-clip-" + (tag or name), whole=False)     # a folder of its own: two clips may be cut at once
     target = BUILD / "out" / "{}.mp4".format(tag or name)
     target.parent.mkdir(parents=True, exist_ok=True)
     run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(BUILD / "shots" / "{}.mp4".format(name)), "-i", str(report["mix"]), "-map", "0:v", "-map", "1:a",

@@ -25,6 +25,7 @@
 
   // ---------------------------------------------------------------- the studio
   const lab = new T.Scene(), eye = new T.PerspectiveCamera(27, W / H, 0.1, 400);
+  lab.fog = new T.Fog(0x0b0807, 20, 52);                              // the floor runs out into the dark instead of ending at a line
   lab.add(new T.HemisphereLight(0xfff0e0, 0x2a1810, 1.15));
   const key = new T.DirectionalLight(0xfff3e2, 3.1);
   key.position.set(7, 12, 9); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; key.shadow.normalBias = 0.04;
@@ -43,7 +44,7 @@
   }
 
   // ---------------------------------------------------------------- the parts an icon is made of
-  const solid = (color, more = {}) => new T.MeshStandardMaterial({ color, roughness: 0.42, metalness: 0.04, ...more });
+  const solid = (color, { outline, ...more } = {}) => new T.MeshStandardMaterial({ color, roughness: 0.42, metalness: 0.04, ...more });
   function markShape(lab_) {                                          // the lab's mark as flat shapes, one unit across, centred
     const data = new SVGLoader().parse(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${lab_.path}"/></svg>`), shapes = [];
     for (const path of data.paths) shapes.push(...SVGLoader.createShapes(path));
@@ -53,6 +54,11 @@
     const geometry = new T.ExtrudeGeometry(markShape(lab_), { depth: depth * 24 / across, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.14, bevelSegments: 2, curveSegments: 8 });
     geometry.center(); geometry.scale(across / 24, across / 24, across / 24); geometry.rotateX(Math.PI);      // an SVG's y runs down
     const mesh = new T.Mesh(geometry, solid(color, more)); mesh.castShadow = true;
+    if (more && more.outline) {                                       // a hair of dark around it (Manh's note on the bare mark): the same shape grown a little, seen only where it sticks out
+      const grown = new T.ExtrudeGeometry(markShape(lab_), { depth: depth * 24 / across, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.14, bevelOffset: more.outline, bevelSegments: 2, curveSegments: 8 });
+      grown.center(); grown.scale(across / 24, across / 24, across / 24); grown.rotateX(Math.PI);
+      mesh.add(new T.Mesh(grown, new T.MeshBasicMaterial({ color: 0x1b1310, side: T.BackSide })));
+    }
     return mesh;
   }
   function rounded(w, h, r) {
@@ -90,12 +96,12 @@
     },
     MARK(lab_) {
       const group = new T.Group(), turning = new T.Group(); group.add(turning);
-      turning.add(mark(lab_, 0.98, 0.2, lab_.text, { emissive: lab_.text, emissiveIntensity: 0.45, roughness: 0.3 }));
-      group.userData = { turning, height: 3.3 };
+      turning.add(mark(lab_, 0.98, 0.2, lab_.text, { emissive: lab_.text, emissiveIntensity: 0.45, roughness: 0.3, outline: 0.45 }));
+      group.userData = { turning, height: 3.3, sways: true };
       return group;
     },
     BEACON(lab_, tier) {
-      const group = BUILD.TILE(lab_, tier), top = 3.7;
+      const group = BUILD.TILE(lab_, tier), top = 3.5;
       const line = new T.Mesh(new T.CylinderGeometry(0.012, 0.012, 1, 8), new T.MeshBasicMaterial({ color: lab_.text, transparent: true, opacity: 0.85 }));
       const ring = new T.Mesh(new T.RingGeometry(1.5, 1.58, 72).rotateX(-Math.PI / 2), new T.MeshBasicMaterial({ color: lab_.text, transparent: true, opacity: 0.8 }));
       ring.position.y = 0.03;
@@ -132,7 +138,7 @@
   function draw(t) {
     const which = Math.min(KINDS.length - 1, Math.floor(t / SHOW)), into = t - which * SHOW, out = clamp((SHOW - into) / 0.3, 0, 1), arrive = back(into / 0.55) * out;
     const around = lerp(-0.42, 0.42, smooth(0, KINDS.length * SHOW, t)) + 0.05 * Math.sin(t * 0.5);
-    eye.position.set(Math.sin(around) * 21, 5.4, Math.cos(around) * 21); eye.lookAt(0, 1.9, 0);
+    eye.position.set(Math.sin(around) * 16.5, 4.4, Math.cos(around) * 16.5); eye.lookAt(0, 1.72, 0);
     for (const stand of stands) stand.icons.forEach((icon, k) => {
       const on = k === which, data = icon.userData;
       icon.visible = on;
@@ -140,11 +146,12 @@
       if (!on) return;
       const bob = 0.045 * Math.sin(t * 2.1 + stand.x);
       icon.position.set(stand.x, data.height + bob, 0); icon.scale.setScalar(Math.max(0.001, arrive));
-      if (data.turning) data.turning.rotation.y = t * 1.15 + stand.x;
+      // the coin turns all the way round; the bare mark only sways, so it can always be read
+      if (data.turning) data.turning.rotation.y = data.sways ? around + 0.6 * Math.sin(t * 1.5 + stand.x) : t * 1.15 + stand.x;
       if (data.facing) data.facing.quaternion.copy(eye.quaternion);       // always toward the viewer
       if (data.line) {
-        const low = 2.15, high = data.height + bob - 0.62;
-        data.line.position.set(stand.x + 0.46 * Math.cos(-0.55), (low + high) / 2, 0.3); data.line.scale.set(1, Math.max(0.01, (high - low) * arrive), 1);
+        const low = 0.98, high = data.height + bob - 0.76;              // from the deck up to under the pips
+        data.line.position.set(stand.x, (low + high) / 2, 0); data.line.scale.set(1, Math.max(0.01, (high - low) * arrive), 1);
         data.ring.position.x = stand.x; data.ring.scale.setScalar(arrive * (1 + 0.04 * Math.sin(t * 2.6)));
       }
     });
@@ -153,13 +160,13 @@
     R.render(lab, eye);
     ui.style.opacity = '0';
     g.clearRect(0, 0, W, H);
-    words('FLOATING ICON · DRAFTS', 96, 112, 30, 1, 'rgba(243,234,217,.62)', 0.26);
+    words('FLOATING ICON · DRAFTS', 96, 84, 26, 1, 'rgba(243,234,217,.62)', 0.26);
     const shown = smooth(0.15, 0.6, into) * out;
-    words(`${'ABCD'[which]} · ${KINDS[which][0]}`, 96, H - 150, 84, shown, '#ffb224', 0.16);
-    words(KINDS[which][1], 100, H - 96, 28, shown, 'rgba(243,234,217,.8)', 0.18);
+    words(`${'ABCD'[which]} · ${KINDS[which][0]}`, 96, 152, 64, shown, '#ffb224', 0.16);                 // up in the dark, clear of the rovers
+    words(KINDS[which][1], 99, 190, 23, shown, 'rgba(243,234,217,.8)', 0.18);
     for (const stand of stands) {                                     // which lab each rover stands for, under it
-      at.set(stand.x, -0.25, 1.6).project(eye);
-      words(stand.lab.name, (at.x + 1) / 2 * W, (1 - at.y) / 2 * H, 30, 0.9, stand.lab.text, 0.24, 'center');
+      at.set(stand.x, -0.2, 1.9).project(eye);
+      words(stand.lab.name, (at.x + 1) / 2 * W, (1 - at.y) / 2 * H, 32, 0.9, stand.lab.text, 0.24, 'center');
     }
     return { kind: KINDS[which][0] };
   }

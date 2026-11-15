@@ -7,5 +7,6 @@
  "cost_usd": 0.1803,
  "harbor_exception": "NonZeroAgentExitCodeError",
  "task_version": "0.1.2",
- "program": "program/ was rebuilt from the trajectory (agent/trajectory.json) by tools/tier_agents/rebuild_program.py: the agent's file writes and later edits replayed in order, nothing executed. Entry: autopilot.py (the last program the agent started that sends commands; 7 such start(s) in all; the agent's folder was /app)."
+ "program": "program/ was rebuilt from the trajectory (agent/trajectory.json) by tools/tier_agents/rebuild_program.py: the agent's file writes and later edits replayed in order, nothing executed. Entry: autopilot.py (the last program the agent started that sends commands; 7 such start(s) in all; the agent's folder was /app). farm_prepare.py was added by Claude Code for the farm, as Kristján did for Opus agent 3: it starts autopilot.py from a clean /app, so a checkpoint from one world is never resumed on the next.",
+ "farm_policy": "agent:docs/lightlag-runs/traverse-agent-gpt-6.1-sol-3/program/farm_prepare.py"
 }

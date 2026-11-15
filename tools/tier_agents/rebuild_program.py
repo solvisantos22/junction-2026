@@ -230,9 +230,12 @@ def main(argv=None) -> int:
             "task_version": version}
     if entry:
         program = run / "program"
+        prepare = (program / "farm_prepare.py").read_text(encoding="utf-8") if (program / "farm_prepare.py").exists() else None
         if program.exists():
             shutil.rmtree(program)
         program.mkdir()
+        if prepare:   # added by hand for the farm, as Kristján did for Opus 3; kept
+            (program / "farm_prepare.py").write_text(prepare, encoding="utf-8")
         for path, text in app.items():
             if path.endswith(".py"):
                 (program / PurePosixPath(path).name).write_text(text, encoding="utf-8")
@@ -244,6 +247,8 @@ def main(argv=None) -> int:
             meta["program_skipped_edits"] = skipped
         print("agent:{}/program/{}".format(run.as_posix(), PurePosixPath(entry).name))
     else:
+        if (run / "program").exists():
+            shutil.rmtree(run / "program")
         meta["program"] = "none: the agent never started a saved program that sends commands (it drove by hand or never drove)"
         print("no program: {}".format(run.name), file=sys.stderr)
     (run / "run.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")

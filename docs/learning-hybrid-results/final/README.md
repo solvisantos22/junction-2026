@@ -1,4 +1,4 @@
-# Final selection freeze — awaiting one-shot evaluation
+# Final selection freeze — running
 
 The [complete confirmation analysis](../confirmation/completed/README.md)
 selects exactly **`ensemble-all-rho090`**, the rank ensemble of all six retained
@@ -58,3 +58,43 @@ is not automatic; **keep the current reference**.
 At this freeze's creation, final worlds remain unopened. Greedy-prior's
 629000–629127 range remains unopened and its interrupted six-run comparison
 stays closed. No old training or recovery is resumed.
+
+
+## Live handoff — 15 November 02:54 UTC
+
+The complete confirmation evidence, selected group and exact final freeze
+reached `origin/main` in **`67a9203f` before this single launch**. App
+**`ap-GzqnjGbRi4h0x0SqO4xiQW`**, original coordinator call
+**`fc-01M7EHYJ7272Q4Z5432990CT78`**; [durable receipt](receipt.json),
+[first status](initial-status.json), [independent live audit](launch-verification.json).
+The detached coordinator started at **02:53:09 UTC**. The launcher exited zero;
+its final client log-stream timeout did not stop the submitted call. Never
+relaunch this receipt or reservation.
+
+The independent live check found **30/2560 complete** and the existing watcher
+recognized the same receipt at **58/2560**, with zero read errors or pause/stop
+markers. Source, parent weights, stage and operations freeze match. The original
+confirmation terminal result and all 20 prior failure/recovery/confirmation
+control records are unchanged. These are execution-health observations, not
+final performance or safety claims.
+
+The original watcher remains active at
+`/Users/solvisantos/.codex/junction-learning-hybrid-watch-20261115`, PID **37521**.
+It checks every 60 seconds and requests continuation at a terminal result or
+repeated read failure, with the existing 05:35 UTC fallback. It was not rearmed
+or replaced. Allow roughly **20–40 minutes from 02:53 UTC** for the compute
+stage if health/throughput hold; full archive download and auditing follow.
+
+This is the **last planned run of this experiment**. After completion, audit
+and publish the frozen comparison, figure, paragraph and evidence. No new
+training, retuning on final worlds, automatic extension or recovery follows.
+Any infrastructure failure must be diagnosed before any separate action.
+Greedy-prior remains closed and the current reference stays unchanged.
+
+
+**Sölvi's submission direction, 15 November:** with roughly 3–4 hours left,
+finish this number and then switch entirely to submission preparation. No
+further experiments. Deliver the verified final comparison, a clean figure,
+copy-ready README/presentation wording, limitations and prize evidence; hand
+these to the submission owners without changing their video or task. A failed
+performance gate must be reported plainly, not extended into another search.
