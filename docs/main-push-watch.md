@@ -1,5 +1,7 @@
 # Five-minute main-push watcher
 
+**Stopped at Kristján’s request on 15 November 2026.** The dispatcher is disabled and its LaunchAgent has been removed. Private runtime history, the dedicated task and recovery refs are preserved; no further automatic push checks are scheduled. The operation notes below describe the installed watcher before it was stopped.
+
 At Kristján's request, a dedicated Codex task on his Mac checks this repository
 every 300 seconds for local commits missing from `origin/main`, then verifies
 and publishes finished increments. Its task is **Main push watcher · every
