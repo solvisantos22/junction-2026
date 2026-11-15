@@ -1,6 +1,6 @@
 # RL–greedy hybrid search
 
-**Confirmation is complete:** all 5376 cases are audited, with 5372 jointly home/alive, 3 deaths and zero invalid calls. The fixed rule selects `ensemble-all-rho090` for the [final test](final/README.md): mean 0.380209 versus greedy 0.375202 and reference 0.500510; paired gain +0.005007, 95% interval [−0.000188, +0.010190]. This is selection evidence, not a confirmed improvement. [Full confirmation results](confirmation/completed/README.md). All [8320 development cases and earlier execution failures](development/completed/README.md) remain retained. Final selection/source/weights/resources reached main in `67a9203f` before the single 2560-case launch on 612000–612255. [Final evaluation is running](final/README.md#live-handoff--15-november-0254-utc); no further run is planned for this experiment. [Fixed protocol](../learning-hybrid.md).
+**Final experiment complete; submission only.** On 256 untouched matched worlds, the all-six RL ensemble with a fixed greedy shortlist scores **39.31%**, versus greedy **38.40%** and frozen reference **51.27%**. Paired gain **+0.907 percentage points**, 95% **[+0.323, +1.518]**: a small positive gain that misses the predeclared 1-point target. All **2560 final missions** were home/alive with zero invalid calls; full metadata and decoded archives are independently verified. [Final result, figure and audits](final/completed/README.md) · [copy-ready submission text](final/submission-copy.md). Selection and all freezes were published before final maps (`67a9203f`); earlier failures remain retained. **No further experiments or reference change.**
 
 The 65-arm development search compares individual-policy shortlists, rank
 ensembles across all retained seeds, and RL–greedy rank blends. It uses new
@@ -12,7 +12,7 @@ Nineteen policy/selection/worker tests and thirteen orchestration tests pass. Al
 Checks include original-policy equivalence, whole-group selection, safety
 gates, tamper detection, complete controller replay, source/weight integrity,
 deadlines and duplicate-launch refusal. Only used smoke worlds 1/2 have been
-opened locally. No hybrid performance claim is available yet.
+opened locally for smoke; complete production results are reported above.
 
 The experiment uses 64 single-CPU, 2-GiB Modal workers plus one coordinator,
 with an absolute 05:30 UTC cutoff and a $75 shared running-compute ceiling.

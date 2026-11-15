@@ -1,4 +1,6 @@
-# Final selection freeze — running
+# Final selection freeze — completed
+
+**Closed:** all 2560 final cases and full archives verify, with every mission home/alive and zero invalid calls. Hybrid **39.31%**, greedy **38.40%**, reference **51.27%**. Paired gain **+0.907 pp**, 95% **[+0.323, +1.518]**: a small measured gain, below the predeclared 1 pp target. [Final result, figure and audits](completed/README.md) · [submission copy](submission-copy.md). No more experiments; keep the reference. All launch/download commands below are retained as history and have already been executed once. Do not repeat them.
 
 The [complete confirmation analysis](../confirmation/completed/README.md)
 selects exactly **`ensemble-all-rho090`**, the rank ensemble of all six retained
@@ -114,8 +116,9 @@ launches no job, repeats no mission and changes no protected source or weight.
 receipt/call/operations identity, 58 source/policy pins, real CLI path-layout
 behavior with a local fake volume, missing-file refusal without network
 fallback, symlinks, pauses, source/receipt drift and output overwrite refusal.
-Independent review found no material blocker. No production archive has been
-downloaded at this handoff.
+Independent review found no material blocker. At preparation, no production
+archive had been downloaded. The full archive is now downloaded once and
+verified; see the completed report above.
 
 **Only after the original final call is complete with all 2560 cases**, check
 local/global stop markers and use the following fresh paths. The two CLI

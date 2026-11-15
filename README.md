@@ -88,6 +88,8 @@ Sölvi trained small controllers on Modal that choose the next goal above a fixe
 
 On the campaign every trained seed scored above every recorded Claude run (best 29.3%), and the reference stayed ahead of them all. This is a small controller on a hand-written scaffold, not a fine-tuned language model. PPO lost three of 120 rovers on the fresh worlds, and neither learner beats the greedy rule. Training took 47,840 missions and an estimated $7.26 of Modal compute. A second learner, Manh's PPO choosing targets above the reference's own steering, reached 38.0% on 300 fresh worlds and 0.375 on the campaign ([write-up](lightlag_ppo_icm/README.md)).
 
+A separate frozen composition test combined all six retained policies with a greedy shortlist. On **256 new matched worlds**, the hybrid scored **39.31%** versus greedy **38.40%**, with all **2560 evaluation missions home and alive**. The paired gain was **+0.907 percentage points** (95% interval **+0.323 to +1.518**): a small positive gain, below the predeclared 1-point target. The reference scored **51.27%** on these same worlds and remains unchanged. [Full final results and figure](docs/learning-hybrid-results/final/completed/README.md) · [Copy-ready submission text](docs/learning-hybrid-results/final/submission-copy.md). No new training or tuning followed this final test.
+
 ## See it
 
 - **Live on Modal:** [kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run](https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run). Pick any world; Modal drives eight rovers on it (the reference, a textbook controller and six Claude-written autopilots) and plays the replay. A new world takes about a minute.
