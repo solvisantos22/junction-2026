@@ -40,6 +40,9 @@ def inventory(stage, tag):
             if 'replay' in episode:
                 require(digest(episode['replay']) == episode['replay_sha256'], 'stored replay differs')
                 require(episode['replay']['commands'] == episode['commands'], 'stored commands differ')
+                # The full replay stays in the hash-checked archive. Keeping every
+                # decoded replay would multiply memory across concurrent audits.
+                del episode['replay']
             kind = episode['arm']['spec']['kind']
             if kind != 'legacy':
                 key = seed, episode['decision']['profile']

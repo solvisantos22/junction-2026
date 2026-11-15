@@ -21,11 +21,11 @@ def main():
     colors={n:('#1266cc' if n==primary else '#8495a5') for n in names}; colors['reference']='#253648'
     plt.rcParams.update({'font.family':'DejaVu Sans','font.size':11,'axes.titlesize':13,'axes.labelsize':11,
         'axes.spines.top':False,'axes.spines.right':False,'axes.spines.left':False})
-    fig,(left,right)=plt.subplots(1,2,figsize=(13,5.7),gridspec_kw={'width_ratios':[1.15,1]})
-    fig.patch.set_facecolor('#ffffff'); fig.subplots_adjust(left=.19,right=.97,bottom=.24,top=.78,wspace=.27)
+    fig,(left,right)=plt.subplots(1,2,figsize=(13,6.2),gridspec_kw={'width_ratios':[1.15,1]})
+    fig.patch.set_facecolor('#ffffff'); fig.subplots_adjust(left=.19,right=.97,bottom=.27,top=.78,wspace=.27)
     y=np.arange(len(names)); values=[100*table[n]['mean'] for n in names]
     left.barh(y,values,color=[colors[n] for n in names],height=.58)
-    left.set_yticks(y,[labels[n] for n in names]); left.invert_yaxis(); left.set_xlim(0,max(values)*1.27)
+    left.set_yticks(y,[labels[n] for n in names]); left.invert_yaxis(); left.set_xlim(0,max(values)*1.47)
     left.set_xlabel('Mean mission score (%)'); left.set_title('Performance on 192 fresh worlds',loc='left',pad=16)
     left.set_axisbelow(True); left.grid(axis='x',alpha=.15)
     for i,n in enumerate(names):
@@ -45,11 +45,11 @@ def main():
     right.tick_params(axis='y',length=0); right.grid(axis='x',alpha=.15)
     right.text(1.0,.98,'+1 point target',transform=right.get_xaxis_transform(),ha='center',va='top',fontsize=9,color='#6d7783')
     fig.text(.045,.93,'Can earlier strategy selection improve the reference?',fontsize=20,weight='bold',color='#253648')
-    fig.text(.045,.865,'Four model families trained; two selected on validation; both controls kept frozen.',fontsize=11,color='#536476')
+    fig.text(.045,.865,'Four model families trained; two selected on validation; all policies frozen before fresh evaluation.',fontsize=11,color='#536476')
     verdict='Practical upgrade gate passed.' if report['confirmed'] else 'Practical upgrade gate did not pass.'
-    fig.text(.045,.12,verdict+' Primary: '+labels[primary]+'.',fontsize=11,weight='bold',color='#253648')
-    fig.text(.045,.069,'20,000 paired bootstrap draws. Dark intervals: 95%; pale intervals: 95% across four comparisons.\n'
-        'Fresh worlds 572000–572191 were excluded from training and model selection.',fontsize=9,color='#536476',linespacing=1.5)
+    fig.text(.045,.135,verdict+' Primary: '+labels[primary]+'.',fontsize=11,weight='bold',color='#253648')
+    fig.text(.045,.09,'20,000 paired bootstrap draws. Dark intervals: 95%; pale intervals: 95% across four comparisons.',fontsize=9,color='#536476')
+    fig.text(.045,.055,'Fresh worlds 572000–572191 were excluded from training and model selection.',fontsize=9,color='#536476')
     paths=[]
     for extension in ('png','svg','pdf'):
         path=OUT/('fresh-comparison.'+extension); fig.savefig(path,dpi=180,facecolor=fig.get_facecolor())

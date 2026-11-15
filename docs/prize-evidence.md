@@ -1097,31 +1097,42 @@ checkpoint; actual stage compute will be reconciled at completion.
 
 ### Kristján / Codex — earlier adaptive planner learning (15 November)
 
-Kristján requested continuing model/idea experiments on Modal after the prior
-small Extra Trees gain. Codex implemented a separate 16-strategy, 61-feature
-experiment with earlier choices, energy/time guards, scheduled resets, altered
-route preferences and multiple search starts. Four fixed model families compare
-Extra Trees, Random Forest, pooled strategy-conditioned forests with failure
-prediction, and an MLP. The team's frozen pilot still navigates.
+Kristján requested continuing model/idea experiments on Modal, authorizing parallel
+compute and prioritizing speed. Codex designed and implemented a separate
+16-strategy, 61-public-feature experiment: earlier choices, energy/return guards,
+scheduled resets, route preferences and multiple search starts. Modal actually
+ran **8,192 production missions** using up to 100 workers and fitted four fixed
+families in parallel: Extra Trees, Random Forest, a pooled forest with failure
+prediction, and a two-layer MLP. The reference still handles navigation. Model
+settings, seed ranges and the practical-upgrade criterion were fixed beforehand;
+[weights/selection](planner-lab-results/selection.json) reached main in
+[`49f4736`](https://github.com/solvisantos22/junction-2026/commit/49f4736dca40a3e059572ead258b260d06808f8b)
+before any fresh-world evaluation.
 
-Eight local tests pass, including prefix-copy isolation, baseline/reference and
-prior-model parity, schedules, seed boundaries and all model/checkpoint fits.
-The runner archives unordered batches independently to avoid the previous
-ordered-stream stall. New ranges and [protocol](planner-lab.md) are claimed before
-cloud production. All 34 Modal smoke missions replay exactly on Linux and Mac;
-three full-controller reruns match the original reference, prior learned policy
-and a new guarded program. Production performance remains pending. Existing reference,
-prior results, tasks and teammate jobs are unchanged. [Artifacts](planner-lab-results/README.md).
+On **192 fresh worlds**, the predefined balanced-energy fixed control scored
+**50.3979%** versus reference **50.0434%** (+0.3545 percentage points; paired 95%
+interval +0.1895 to +0.5202). Selected primary Random Forest scored **50.2395%**
+(+0.1961 points); previous frozen Extra Trees **50.3195%**. The new variants and
+reference returned 192/192 home; the previous learner 191/192, with no deaths in
+any fresh arm. The new primary missed the +1-point target and had a lower mean
+than the old learner. Its practical-upgrade gate did not pass. The MLP failed
+validation eligibility; all unsuccessful outcomes and four checkpoints remain.
+The canonical reference was not promoted or modified; no new Claude result is
+claimed.
 
+Verification: all **8,226 archived missions**, including 34 smoke cases, replay
+exactly on Linux. Mac physical trajectories and grades all match; 641 replays
+differ only in decorative map metadata. Eight full-controller reruns match, as
+do model decisions, checkpoint predictions, validation rankings and independent
+paired statistics. Eight controller/model checks and an additional concurrent
+report-write check pass. Codex produced and visually checked PNG/SVG/PDF comparison
+figures. All ten experiment apps are verified stopped; teammate jobs were not
+changed. Recorded mission-worker CPU time is 67.71 hours with shared prefixes,
+excluding restart/startup/idle/audit overhead; this is not an invoice.
 
-Selection increment: all 7,232 training/validation missions completed, four actual
-Modal model fits retained, and all Linux physics replays match exactly. Independent
-checks reproduce the 24 validation settings and all checkpoint predictions. Random
-Forest is selected primary (.520685 vs .516814 reference on 64 validation worlds,
-all home/alive), pooled forest second; the MLP fails eligibility. These are
-selection results only. Publish [weights/selection](planner-lab-results/selection.json)
-before 192 fresh worlds; Mac audit remains in progress. A concurrency check also
-verifies atomic report writes. No reference promotion or new Claude result.
+[Results, limits and reproducible evidence](planner-lab-results/README.md) ·
+[figure](planner-lab-results/fresh-comparison.png) ·
+[all app closures](planner-lab-results/app-status.json).
 
 ### Sölvi / Codex — confirmation audit and frozen final selection (15 November)
 
