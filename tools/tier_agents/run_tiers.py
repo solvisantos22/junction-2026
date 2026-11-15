@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -119,12 +120,38 @@ def summarise(run, trial):
     }
 
 
+def record(run, trial, spent=None, lock=None):
+    """Summarise one finished trial, save it with save_run.py and add its ledger line."""
+    row = summarise(run, trial)
+    saved = subprocess.run([sys.executable, str(REPO / "harbor" / "save_run.py"), str(trial), run["name"],
+                            "--check-env", str(REPO / ".env")], cwd=REPO, capture_output=True, text=True)
+    row["saved"] = saved.returncode == 0
+    if lock:
+        lock.acquire()
+    try:
+        if spent is not None:
+            spent[run["lab"]] += row["cost_usd_from_prices"]
+        LEDGER.parent.mkdir(parents=True, exist_ok=True)
+        with LEDGER.open("a") as ledger:
+            ledger.write(json.dumps(row) + "\n")
+        total = " , {} total ${:.2f}".format(run["lab"], spent[run["lab"]]) if spent is not None else ""
+        print(f'{run["name"]}: reward {row["reward"]}, ${row["cost_usd_from_prices"]:.3f}{total}, '
+              f'errors {row["agent_errors"]}, saved {row["saved"]} {saved.stderr.strip()[:200]}', flush=True)
+    finally:
+        if lock:
+            lock.release()
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--parallel", type=int, default=6, help="trials at once (each is two containers)")
     parser.add_argument("--budget", type=float, default=18.0, help="dollars per lab before it stops taking runs")
     parser.add_argument("--only", help="comma-separated short model names to run, e.g. gpt-6-luna")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--env", default="docker", help="Harbor environment: docker (as Kristján) or modal")
+    parser.add_argument("--collect", action="store_true",
+                        help="record runs that finished in jobs/ but are not in the ledger (their driver was "
+                             "stopped), then stop")
     parser.add_argument("--resave", action="store_true",
                         help="save again every ledger run marked unsaved (save_run.py --check-env .env), then stop")
     args = parser.parse_args(argv)
@@ -142,7 +169,23 @@ def main(argv=None) -> int:
         LEDGER.write_text("".join(json.dumps(row) + "\n" for row in rows))
         return 0
 
-    runs = [r for r in plan() if not (RUNS / r["name"]).exists()]
+    def ledger_names():
+        return {json.loads(line)["name"] for line in LEDGER.read_text().splitlines()} if LEDGER.exists() else set()
+
+    if args.collect:
+        known = ledger_names()
+        for run in plan():
+            trials = sorted((REPO / "jobs" / run["name"]).glob("*__*"))
+            if run["name"] in known or not trials or not (trials[0] / "result.json").exists():
+                continue
+            if not (trials[0] / "result.json").read_text().strip() or json.loads((trials[0] / "result.json").read_text()).get("finished_at") is None:
+                print(run["name"], "still running")
+                continue
+            record(run, trials[0])
+        return 0
+
+    # A run already saved, or already started in jobs/ (by another driver), is not started again.
+    runs = [r for r in plan() if not (RUNS / r["name"]).exists() and not (REPO / "jobs" / r["name"]).exists()]
     if args.only:
         keep = set(args.only.split(","))
         runs = [r for r in runs if r["short"] in keep]
@@ -176,24 +219,13 @@ def main(argv=None) -> int:
 
     def _play(run):
         done = subprocess.run(["bash", str(RUNNER), run["task"], run["model"], run["name"]],
-                              cwd=REPO, capture_output=True, text=True)
+                              cwd=REPO, capture_output=True, text=True, env={**os.environ, "HARBOR_ENV": args.env})
         print(done.stdout.strip() or done.stderr.strip(), flush=True)
         trials = sorted((REPO / "jobs" / run["name"]).glob("*__*"))
         if not trials or not (trials[0] / "result.json").exists():
             print(f'{run["name"]}: no trial result', flush=True)
             return
-        row = summarise(run, trials[0])
-        saved = subprocess.run([sys.executable, str(REPO / "harbor" / "save_run.py"), str(trials[0]), run["name"],
-                                "--check-env", str(REPO / ".env")],
-                               cwd=REPO, capture_output=True, text=True)
-        row["saved"] = saved.returncode == 0
-        with lock:
-            spent[run["lab"]] += row["cost_usd_from_prices"]
-            with LEDGER.open("a") as ledger:
-                ledger.write(json.dumps(row) + "\n")
-            print(f'{run["name"]}: reward {row["reward"]}, ${row["cost_usd_from_prices"]:.3f}, '
-                  f'{run["lab"]} total ${spent[run["lab"]]:.2f}, errors {row["agent_errors"]}, '
-                  f'saved {row["saved"]} {saved.stderr.strip()[:200]}', flush=True)
+        record(run, trials[0], spent, lock)
 
     with ThreadPoolExecutor(max_workers=args.parallel) as pool:
         list(pool.map(one, runs))
