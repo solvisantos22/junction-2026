@@ -10,9 +10,9 @@ Saturday 14 November, about 22:20 Helsinki; rows for the README, the integrity r
 | One reward in [0, 1] in `/logs/verifier/reward.txt` | ✅ | Traverse session | `tests/grade.py` |
 | At least one real model log and score | ✅ 25 agent runs, nine models, three labs | Traverse session, Manh | `docs/lightlag-runs/campaign-*`, `docs/tier-comparison/runs.jsonl` |
 | Short README with the one-command rerun | ✅ the front page since Sunday 05:10 | Traverse session | `README.md`; put the public video link in it once the video is uploaded |
-| Public video, at most 2 minutes | 🟡 two finished cuts and a new script; the team has not chosen; nothing uploaded | Kristján uploads | `docs/demo-video/`, `docs/manh-demo/` |
-| PDF pitch deck (the Junction guide requires it beside the video) | ⬜ none in the repository | unassigned | |
-| Repository visible to the judges | ⬜ private as of Sunday 04:30 | Sölvi (owner) | GitHub settings. The current files hold no key-shaped string (scanned Sunday 04:30); the history was not scanned |
+| Public video, at most 2 minutes | 🟡 the fallback is ready: the third cut, 1:58, with Sunday's numbers (nine models, the final learning result, Extra Trees). Manh's second draft, `manh_demo_2.mp4` (1:59, plain words, all nine models in the replay), is the other candidate; the team has not chosen. Nothing uploaded | Kristján uploads | `docs/demo-video/`, `docs/manh-demo/` |
+| PDF pitch deck (the Junction guide requires it beside the video) | ✅ built, a proposal nobody has read yet: eleven slides | Traverse session | `docs/pitch-deck/lightlag-traverse-deck.pdf`, talk track in `docs/pitch-deck/README.md` |
+| Repository visible to the judges | ✅ public since Sunday about 06:14 | Sölvi (owner) | GitHub settings. The current files hold no key-shaped string (scanned Sunday 04:30), and no commit on `main` adds or removes one (history scanned at 06:25 for Anthropic, OpenAI project, Google and GitHub key shapes; the runs' replay artifacts, videos and built pages were left out) |
 | Platform entry (links: repo, video, README) | ⬜ still a draft | Kristján | Junction platform; final submit only on Kristján's word |
 
 ## The rubric (100 points)
@@ -23,7 +23,7 @@ Saturday 14 November, about 22:20 Helsinki; rows for the README, the integrity r
 | **Meaningful difficulty**: explain the mistakes, information available | 30 | Worse routes (28–53% fewer samples); flat batteries with home in reach (87% of lost rovers); write-once autopilots; a textbook A* + Kalman controller scores like Claude (0.270) while route planning is worth 0.2; every formula in `rules()` | Put the controller ladder in the README and the deck |
 | **Reward integrity**: hard to game | 25 | Doing nothing 0; stopping early 0.149; true-state grading in a separate container; the `NonZeroAgentExitCodeError` explained; [the exploit hunt](traverse-integrity.md): 27 attacks from inside the agent's container, none changed the reward or disclosed a hidden value | One limit is disclosed, not fixed: the seeds and the simulator's code are in the repository, so its holder can predict a mission; judges can change the seeds in one line. Not run on a Linux host |
 | **Craft**: sensible rules, one-command rerun | 15 | Published Mars-like physics; scores repeat exactly on a laptop, on Modal and through Harbor; the README is the front page | Check the commands from a clean clone once the repository is public |
-| **Tiebreaker**: a smaller model improving with training | — | Sölvi's final result: 8.3% → 35.9% (PPO) and 36.3% (replay) on 40 held-out worlds; on the campaign 36.6% and 33.4%, every trained seed above every recorded Claude run; greedy 36.7%, reference 47.6% | The two video cuts still show the pilot's 0.38 |
+| **Tiebreaker**: a smaller model improving with training | — | Sölvi's final result: 8.3% → 35.9% (PPO) and 36.3% (replay) on 40 held-out worlds; on the campaign 36.6% and 33.4%, every trained seed above every recorded Claude run; greedy 36.7%, reference 47.6% | The fallback video and the deck show it; the two earlier cuts still show the pilot's 0.38 |
 
 ## Best use of Modal ($2,000 + $3,000 credits)
 
@@ -37,5 +37,5 @@ Saturday 14 November, about 22:20 Helsinki; rows for the README, the integrity r
 ## Before 10:00
 
 1. Merge anything left on the Traverse branch, push, make the repository public, and check `main` from a clean clone.
-2. Choose and upload the video; put its link in the README. Make the PDF deck.
-3. Platform entry filled and checked (source, video, live demo, deck), saved as FINAL; **submit only when Kristján says so**. Reselect the table number.
+2. Choose and upload the video; put its link in the README. Read the PDF deck once.
+3. Platform entry filled and checked (source, video, live demo, deck), saved as FINAL; **submit only when Kristján says so**. Reselect the table number. The text to paste and the steps in order: [`submission-entry.md`](submission-entry.md).
