@@ -8,7 +8,17 @@ One rover, three Mars-like sites in a row, a battery charged by the sun, and eve
 
 ## Run it
 
-You need Docker and [Harbor](https://docs.harborframework.com) 0.25.0 (`uvx --from harbor==0.25.0 harbor` runs it without installing). From the repository root:
+You need Docker and [Harbor](https://docs.harborframework.com), 0.25.0 or 0.26.0 (`uvx --from harbor==0.25.0 harbor` runs it without installing).
+
+**Get the task.** The whole repository is a download of more than a gigabyte, because every recorded run is saved with its replay. The task alone is 4 MB and arrives in seconds:
+
+```sh
+git clone --depth 1 --filter=blob:none --sparse https://github.com/solvisantos22/junction-2026
+cd junction-2026
+git sparse-checkout set harbor/lightlag-traverse-campaign
+```
+
+**Run it**, from the repository root:
 
 ```sh
 harbor run -p harbor/lightlag-traverse-campaign -a oracle     # the reference: 0.476257, about two minutes
@@ -16,9 +26,11 @@ harbor run -p harbor/lightlag-traverse-campaign -a nop        # doing nothing: 0
 harbor run -p harbor/lightlag-traverse-campaign -a opencode -m anthropic/claude-opus-5-5 --ak version=1.19.5 --env-file .env
 ```
 
-Both baselines were rerun on Sunday 15 November: 0.476257 in 1 minute 50 seconds, and 0.000 in 19 seconds. The score is deterministic: the reference repeats it exactly on a laptop, on Modal and through Harbor.
+**Your own agent or model.** Change `-a` and `-m`. Any Harbor agent that can use an MCP server can play; OpenCode is the one we ran. The task needs nothing of ours: no key, no account and no service beyond what your agent's model needs. The simulator runs in its own container beside the agent's, and the score is written when the agent's container has stopped.
 
-The agent run needs a model key in `.env` (never committed). The runs below used OpenCode 1.19.5 and the task's 45-minute session. On a slow network add `--agent-setup-timeout-multiplier 3`, which lengthens only the install of OpenCode. For GPT and Gemini models use [`tools/tier_agents/run.sh`](tools/tier_agents/run.sh), which adds the OpenCode setting Gemini needs. Harbor reports `NonZeroAgentExitCodeError` on OpenCode runs of this task because OpenCode exits with status 1 after an `EPIPE` at the end of its session; the reward is computed and recorded as usual.
+Checked on Sunday 15 November from a fresh public clone made as above: the reference scored 0.476257 in 1 minute 50 seconds on Harbor 0.25.0, and the same on 0.26.0; doing nothing scored 0.000 in 21 seconds. The score is deterministic: the reference repeats it exactly on a laptop, on Modal and through Harbor.
+
+The agent run needs a model key in `.env` (never committed). The runs below used OpenCode 1.19.5 and the task's 45-minute session. On a slow network add `--agent-setup-timeout-multiplier 3`, which lengthens only the install of OpenCode. For GPT and Gemini models we used [`tools/tier_agents/run.sh`](tools/tier_agents/run.sh) (in the full repository), which adds the OpenCode setting Gemini needs. Harbor reports `NonZeroAgentExitCodeError` on OpenCode runs of this task because OpenCode exits with status 1 after an `EPIPE` at the end of its session; the reward is computed and recorded as usual.
 
 ## The task
 
@@ -53,9 +65,9 @@ Sorted by each model's best run. The models are off the shelf, not fine-tuned. T
 
 No run beats the reference at any single site either. Two Gemini 4 Carbon runs tie it at the third site with the same raw score; elsewhere the closest are 0.457 against 0.459 and 0.502 against 0.508. Per-site scores and what each Claude run did are in the [campaign write-up](docs/lightlag-traverse-campaign.md); the GPT and Gemini runs are in [Manh's comparison](docs/tier-comparison.md) and its [ledger](docs/tier-comparison/runs.jsonl), as of Sunday 05:45. Every run's trajectory and the simulator's replay are under [`docs/lightlag-runs/`](docs/lightlag-runs/) as `campaign-*`.
 
-**Not three lucky worlds.** Eleven programs the models wrote (six by Claude, five by GPT and Gemini) were replayed on Modal on 300 worlds none of them had seen. In 3,300 match-ups the reference scored higher 3,265 times and tied 9. The programs won 26, never by more than 0.05, and the reference lost no rover ([Claude's programs](docs/traverse-farm.md), [GPT's and Gemini's](docs/traverse-farm/programs-tiers/evaluation.json)).
+**Not three lucky worlds.** The programs the models wrote were replayed on Modal on 300 worlds none of them had seen: 22 programs from all nine models, six by Claude and sixteen by GPT and Gemini. The reference scored higher in 6,390 of 6,600 match-ups and lost no rover. Taking only each model's best program, which favours the models, it scored higher in 2,556 of 2,700: 95 times in 100, the figure in the film ([Claude's programs](docs/traverse-farm.md), [GPT's and Gemini's](docs/tier-comparison.md), [how the count is made](docs/manh-demo/README.md)).
 
-The autopilots that GPT and Gemini agents wrote during their own missions get closer, and still fall short on ground they had not seen. On the same 300 worlds the reference averages 0.502. The best two, by Gemini 4 Hydrogen and GPT-6.1 Sol, average 0.454 and 0.446 and win about one world in six. The Gemini 4 Carbon program that scored 0.567 on its own world averages 0.410 ([tables](docs/tier-comparison/tables.md)).
+The best of them get closer, and still fall short on ground they had not seen. The reference averages 0.502 there. The two best programs, written by a Gemini 4 Hydrogen agent and a GPT-6.1 Sol agent, average 0.454 and 0.446 and win about one world in six. The Gemini 4 Carbon program that scored 0.567 on its own world averages 0.410 ([tables](docs/tier-comparison/tables.md)).
 
 ## Why the agents lose
 
@@ -109,7 +121,7 @@ A separate frozen composition test combined all six retained policies with a gre
 
 ## What Modal did
 
-Modal ran the rollout farm (about 6,000 missions by Saturday evening, the 300-world comparisons in minutes on up to 100 containers, with model-written programs isolated from our machines), the training runs above, and the live demo. The farm turned "the reference wins on one world" into the 3,300 match-ups, and found the 87%. Commands, app IDs and spend are in [`docs/traverse-farm.md`](docs/traverse-farm.md) and [`docs/prize-evidence.md`](docs/prize-evidence.md).
+Modal ran the rollout farm (about 6,000 missions by Saturday evening, the 300-world comparisons in minutes on up to 100 containers, with model-written programs isolated from our machines), the training runs above, and the live demo. The farm turned "the reference wins on one world" into the 6,600 match-ups, and found the 87%. Commands, app IDs and spend are in [`docs/traverse-farm.md`](docs/traverse-farm.md) and [`docs/prize-evidence.md`](docs/prize-evidence.md).
 
 ## Where things are
 
