@@ -28,6 +28,8 @@ import modal
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 RUNS = REPO / "docs" / "lightlag-runs"
+# Modal mounts the entrypoint separately from its explicitly packaged static files.
+HOMEPAGE = HERE / "home_preview" if modal.is_local() else Path("/root/farm/traverse_farm/home_preview")
 # The Claude programs a page shows, as farm policies: (kind, saved run, its program inside the run).
 PROGRAMS = (("program", "traverse-oneshot-opus-1", "policy.py"),
             ("program", "traverse-oneshot-sonnet-1", "policy.py"),
@@ -211,7 +213,7 @@ def _page(title: str, body: str) -> str:
 
 
 def _landing() -> str:
-    return (HERE / "home_preview" / "index.html").read_text(encoding="utf-8")
+    return (HOMEPAGE / "index.html").read_text(encoding="utf-8")
 
 
 def _waiting(seed: int, since: float) -> str:
@@ -279,7 +281,7 @@ def web():
     from fastapi.staticfiles import StaticFiles
 
     api = FastAPI(title="Lightlag Traverse, live", docs_url=None, redoc_url=None)
-    home = HERE / "home_preview"
+    home = HOMEPAGE
     api.mount("/assets", StaticFiles(directory=home / "assets"), name="home-assets")
 
     @api.get("/style.css", include_in_schema=False)
