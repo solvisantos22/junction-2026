@@ -858,7 +858,13 @@ interrupted the first app after 833 archived outcomes. Codex retained those and
 resumed only missing jobs in `ap-vmIsFVOKPZVhhmunxtJuuB` using a process-local DNS
 workaround. A cross-platform hash discrepancy was traced to a 1e-16 decorative
 terrain value; commands, states and grade match, and the Linux replay is exact.
-Training and fresh results are pending. No canonical reference change or new LLM-performance claim.
+All 2,880 data missions are now complete and independently replayed on Linux:
+1,147,531 commands, 1,212,480 states, exact original hashes/grades. Three actual
+Modal model fits completed; saved checkpoints and local refits reproduce their
+training predictions. Validation selects Extra Trees (50.7287%) and ridge
+(50.6527%) against the reference (50.1011%); the best fixed strategy is 50.7567%.
+Weights/selection are frozen before 96 fresh worlds. No canonical reference
+change or new LLM-performance claim.
 Initial implementation `570c7e5`, production launch source `78cfb5d`.
 [Protocol](learned-portfolio.md), [evidence](learned-portfolio-results/README.md).
 

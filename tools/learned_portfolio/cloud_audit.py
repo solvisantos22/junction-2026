@@ -14,7 +14,7 @@ from lightlag_learned_portfolio.worker import canonical
 app=modal.App('lightlag-portfolio-replay-audit',image=image)
 
 
-@app.function(cpu=1.,memory=1024,timeout=600,max_containers=8,retries=0,scaledown_window=10,include_source=False)
+@app.function(cpu=1.,memory=1024,timeout=600,max_containers=32,retries=0,scaledown_window=10,include_source=False)
 def physics(bundles,keep_replay=False):
     from collections import defaultdict
     from lightlag_traverse.environment import TraverseEnvironment
