@@ -222,6 +222,29 @@
     });
   };
 
+  // What the planner is, with each block's method named (Manh, 15 November: "each block diagram should have the name of
+  // the method + the text explaining what it is"). Kristján's planner scene is drawn as it is; the name of the method
+  // behind each of its four links goes on a tab above the link, and lights with it. The names are what
+  // lightlag_traverse/pilot.py and planning.py do: a three-state extended Kalman filter (position and heading bias)
+  // with the commands still on their way played forward; a running estimate of each terrain's slip from wheel against
+  // visual odometry; Dijkstra cost-to-go fields over the height grid, priced in ticks and energy against the sun's
+  // curve; and for the route an orienteering search, a beam first and then iterated local search, replanned on the way.
+  const METHODS = ['EKF · EXTENDED KALMAN FILTER', 'ONLINE SLIP ESTIMATE', 'DIJKSTRA FIELDS · SUN MODEL', 'BEAM + ITERATED LOCAL SEARCH'];
+  SCENES.planner = (t, D, data, cues) => {
+    SCENES.reference(t, D, data, cues);
+    const left = 120, between = 58, wide = (1680 - 3 * between) / 4, top = 262;                  // his chain's geometry
+    METHODS.forEach((name, i) => {
+      const x = left + i * (wide + between), shown = appear(t, 0.5 + i * 0.12, 0.4);
+      const lit = appear(t, cues[i] !== undefined ? cues[i] : i === 3 ? D - 2.2 : 1.0 + i * 1.6, 0.4);
+      if (shown <= 0.003) return;
+      g.save(); g.globalAlpha = shown;
+      rect(x, top - 40, wide, 34, C.key); rect(x, top - 40, 6, 34, lit > 0.5 ? C.gold : C.faint);
+      text(name, x + 22, top - 15, { size: 23, color: C.dim, spacing: 0.12, alpha: 1 - lit });
+      text(name, x + 22, top - 15, { size: 23, color: C.gold, spacing: 0.12, alpha: lit });
+      g.restore();
+    });
+  };
+
   // Was it luck? Kristján's 300-world chart, with every model in it instead of Claude's six programs (Manh, 15 November:
   // "it's only Claude? ... such that it includes all the models"). A row per model: its best program, world by world
   // against the planner on the same world (window.__MANH.worlds, from makers.worlds_table). The timing follows his
@@ -339,6 +362,7 @@
       list.push({ at: P.note, kind: 'chime_soft', step: 1, check: true });
       return list;
     },
+    planner(D, data, cues) { return SFX.reference(D, data, cues); },      // his scene's sounds: the tabs light with his links
     learning3(D, data, cues) {                                // Kristján's "and models that learn": five bars, the percentages, then his two panels
       const F = data.final.fresh, list = [];
       [[F.initial, 0.9], [F.ppo, 1.4], [F.replay, 1.7], [F.greedy, 2.0], [F.reference, 2.3]].forEach(([score, at], i) => list.push({ at, kind: 'bar', score, gold: i === 4, step: i, check: true }));

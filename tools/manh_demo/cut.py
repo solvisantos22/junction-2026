@@ -239,9 +239,10 @@ def shots2(durations: Dict[str, float], words: Dict[str, List[Dict[str, Any]]], 
         {"name": "v2_tiers", "page": "film", "scene": "tiers", "beats": [
             {"vo": "n8", "vo_at": 0.4, "pad": 0.8, "min": 8.0,
              "cues": [round(0.4 + at("n8", "The best run") - 0.1, 2), round(0.4 + at("n8", "Ours") - 0.1, 2)]}]},
-        # 6. What our driver is (Kristján's scene), and the 300 fresh worlds on Modal: his chart's look, with every model's
+        # 6. What our driver is (Kristján's scene, with the method behind each of its four links named above it), and the
+        #    300 fresh worlds on Modal: his chart's look, with every model's
         #    best program in it instead of Claude's six (Manh: "it's only Claude? ... such that it includes all the models").
-        {"name": "v2_reference", "page": "film", "scene": "reference", "beats": [
+        {"name": "v2_reference", "page": "film", "scene": "planner", "beats": [
             {"vo": "n9", "vo_at": 0.4, "pad": 0.9,
              "cues": [round(0.4 + at("n9", "Not an AI") + 0.1, 2), round(0.4 + at("n9", "A planner") - 0.1, 2),
                       round(0.4 + at("n9", "plain code") - 0.1, 2), round(0.4 + at("n9", "before the wheels") - 0.1, 2)]}]},

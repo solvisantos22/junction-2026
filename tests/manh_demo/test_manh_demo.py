@@ -260,7 +260,14 @@ class SecondDraftTest(unittest.TestCase):
 
     def test_two_of_kristjans_slides_are_in_it(self):
         scenes = {shot["name"]: shot.get("scene") for shot in self.shots}
-        self.assertEqual((scenes["v2_quote"], scenes["v2_learning"], scenes["v2_reference"], scenes["v2_end"]), ("quote", "learning3", "reference", "end"))
+        self.assertEqual((scenes["v2_quote"], scenes["v2_learning"], scenes["v2_reference"], scenes["v2_end"]), ("quote", "learning3", "planner", "end"))
+        mine = (REPO / "tools" / "manh_demo" / "scenes.js").read_text(encoding="utf-8")
+        self.assertIn("SCENES.reference(t, D, data, cues);", mine)                           # the planner slide is his scene with the methods named on top
+        pilot = (REPO / "lightlag_traverse" / "pilot.py").read_text(encoding="utf-8") + (REPO / "lightlag_traverse" / "planning.py").read_text(encoding="utf-8")
+        for said, found in (("EXTENDED KALMAN FILTER", "3 by 3 covariance"), ("ONLINE SLIP ESTIMATE", "_learn_slip"), ("DIJKSTRA", "Dijkstra"),
+                            ("BEAM + ITERATED LOCAL SEARCH", "Iterated local search"), ("BEAM", "def beam_route")):
+            self.assertIn(said, mine)
+            self.assertIn(found, pilot)                                                       # the methods named are the ones in the code
         film = (REPO / "tools" / "demo_video" / "film.html").read_text(encoding="utf-8")
         for name in ("quote", "learning3", "reference", "end"):
             self.assertIn("SCENES.{} = ".format(name), film)                                  # his scenes, read from his page
