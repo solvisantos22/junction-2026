@@ -123,4 +123,6 @@ Modal ran the rollout farm (about 6,000 missions by Saturday evening, the 300-wo
 
 Kristján, Sölvi and Manh, with Claude Code and Codex. Everything we tried and retired on the way, including the earlier Lightlag environments, is written up under [`docs/`](docs/).
 
+Codex helped implement and review the early evaluator, learning controllers and experiment orchestration, including the frozen evaluations and reproducible reports. The [Codex and Modal prize case](docs/sponsor-submission.md) links concrete contributions, human decisions, app IDs and the live demo to the [full evidence log](docs/prize-evidence.md); final Traverse simulator/reference and Claude Code contributions are credited separately.
+
 Working in this repository: read [AGENTS.md](AGENTS.md) and [TEAM_STATUS.md](TEAM_STATUS.md) first, and follow the [junction-team-workflow](.agents/skills/junction-team-workflow/SKILL.md) skill. Other entry points: the first [Lightlag prototype](lightlag/README.md) and its [handoff](docs/lightlag-handoff.md), [Lightlag Live](docs/lightlag-live.md), [AfterQuery readiness](docs/afterquery-readiness.md), [AfterQuery ideas](afterquery-ideas.md) and [research](docs/research/README.md), [sponsor tools](SPONSOR_OPTIONS.md), [Junction Watch](tools/junction_watch/README.md).

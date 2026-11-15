@@ -1,0 +1,69 @@
+# Lightlag — Codex and Modal prize submission
+
+Prepared Sunday 15 November 2026, approximately **05:48 Helsinki**. **Use the existing Lightlag submission for AfterQuery and verify that both Best Use of Codex and Best Use of Modal are saved as tech challenges. Entry is not yet verified.** This is the team's concise sponsor case; the detailed [evidence log](prize-evidence.md) retains attribution, failures, app IDs and costs.
+
+**Source-access issue found during closeout:** GitHub reports `solvisantos22/junction-2026` as **PRIVATE**, and its unauthenticated URL returned **404**. The Modal app is public, but judges cannot follow this page's repository evidence links without access. The team must choose public release or the organizer-approved judge-access route before finalizing. Repository visibility has not been changed.
+
+## Finish the entry
+
+The last authenticated watcher observation, approximately **05:23 Helsinki**, showed Lightlag as **Draft**, with the tech-challenge selection and material fields empty. This is a dated observation, not proof that nobody has changed it since. This session could not access the authenticated browser; it has **not** changed or submitted the form.
+
+One teammate should finish and check the existing [saved Lightlag entry](https://hackjunction.app/participate/45/submissions):
+
+1. Keep **AfterQuery / Break the Agent** as the main challenge. Select **Best Use of Codex** and **Best Use of Modal**, save, then reopen and verify both persist. The briefs permit tech challenges alongside a main challenge; the exact current multi-selection controls have not been verified. If the form only accepts one, ask Info Team how to enter both against this same project before creating a duplicate submission.
+2. Put the [public Modal app](https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run/) in **Project Demo**. Resolve judge access to the currently private [repository](https://github.com/solvisantos22/junction-2026), then put it in **Source Code** and [this sponsor case](https://github.com/solvisantos22/junction-2026/blob/main/docs/sponsor-submission.md) in **Other Links** or the description. Check those links without your own login or through the agreed judge account. Use the two paragraphs below in any sponsor-specific fields; if none exist, include their short combined version in the project description. Do not rely solely on a repository link the judges cannot open.
+3. Add the team's final **public video (at most two minutes)** and **PDF deck**. Give each sponsor visible credit in the deck; the short video line below can fit alongside the project's main story. This does not require a second video or a raw conversation dump.
+4. Check the current [Codex brief](https://hackjunction.app/participate/45/tech-challenges/49) and [Modal brief](https://hackjunction.app/participate/45/tech-challenges/40) for any additional entry control or updated instruction. No separate prize form was found in the retained briefs or community copies; this is **not** confirmation that no additional step exists.
+5. **Submit FINAL before 10:00 Helsinki today**, reopen the entry, and verify its status, both sponsor selections, video, PDF, judge-accessible source and demo links. One teammate can submit for the team. [Organizer updates and sources](junction-event-updates.md) · [presentation checklist](sunday-presentation-plan.md).
+
+**Handoff to the teammate submitting:** record the verified save time, final status, selected tech challenges and judge-access arrangement here or in `TEAM_STATUS.md`. Until that check, distinguish “materials ready” from “entered.” No further experiments are needed.
+
+## Best Use of Codex — copy-ready case
+
+> Codex was our implementation and verification partner throughout Lightlag. With the team setting the research direction, budgets and stopping decisions, it built the early simulator and public-tool evaluator, then small reinforcement-learning controllers, Modal orchestration and reproducible reports around the final Traverse environment. Parallel Codex agents implemented and independently reviewed changes while shared claims and small verified commits kept three teammates coordinated. Codex reconciled interrupted jobs, preserved failures, froze policies before fresh tests and packaged auditable results instead of selecting only successes. Our final hybrid evaluation contains 2,560 matched missions and a reproducible source bundle. We retained the stronger reference when learning fell short. Kristján and Claude Code authored the final Traverse simulator and reference; Manh's Claude Code contributions remain separately credited. The evidence log connects human decisions to code, tests, commits and results.
+
+Three concrete things to show a Codex judge:
+
+| Story | Delivered proof | Human judgment / limit |
+|---|---|---|
+| Build a benchmark that can be checked | [Public-tool evaluator fix](https://github.com/solvisantos22/junction-2026/commit/73098c6): invalid requests cannot be swallowed while keeping a valid score; regression tests accompany it. | This is the early Lightlag evaluator, not a claim that Codex authored the final Traverse environment. |
+| Coordinate implementation, experiments and independent reviews | [Six-run learning report](learning-final-results/README.md), [shared workflow](../.agents/skills/junction-team-workflow/SKILL.md), [claims and handoffs](../TEAM_STATUS.md). | Sölvi chose priorities, authorized budgets and stopped further experiments. Agent reviews are not human line-by-line review. |
+| Ship evidence even when the result is smaller than hoped | [Final result commit](https://github.com/solvisantos22/junction-2026/commit/a79694bc), [source bundle, audits and figure](learning-hybrid-results/final/completed/README.md). | Hybrid 39.31% versus greedy 38.40%; +0.907 percentage points, below our declared one-point target. Reference 51.27% remains. |
+
+If showing a session capture, use an existing genuine project excerpt or label a later walkthrough as a reconstruction. The task summaries in the log are not verbatim prompts. Do not claim an unrecorded Codex model version, percentage of code authored, hours saved, or sole authorship of the repository.
+
+## Best Use of Modal — copy-ready case
+
+> Modal is Lightlag's experiment infrastructure and public demo host. Our rollout farm ran 1,500 rover missions in seven minutes using up to 100 CPU containers, comparing saved model-written controllers on the same unseen worlds while keeping their execution off our laptops. Six small-controller training calls produced 47,840 missions, with checkpoints, failures and provenance retained. Separate frozen evaluations tested whether learning and greedy ensembles transferred to new maps; the result was a modest gain, not a replacement for the reference. Modal Functions parallelize the work, Volumes retain checkpoints and replay pages, and Dicts track asynchronous progress. Judges can open our deployed Modal app to explore rover replays, with new worlds generated on demand. Modal made broad, reproducible evaluation and a usable demonstration practical within the hackathon.
+
+| Modal criterion from the retained brief | Evidence to show |
+|---|---|
+| **Effective use — 40%** | CPU mission workers, parallel training, persistent artifacts and live serving. [Farm implementation/report](traverse-farm.md), [training receipts and checkpoints](learning-final-results/fit/README.md), [live-app source](../tools/traverse_farm/live_app.py). This is actual infrastructure use, not a logo or credit redemption. |
+| **Technical ambition — 25%** | Matched fresh-world comparisons, policy/source freezes, recorded failure recovery, all-seed learning and deterministic replay audits. [Learning report](learning-final-results/README.md), [hybrid final audit](learning-hybrid-results/final/completed/README.md). |
+| **Impact — 20%** | Tests whether an apparent failure or improvement transfers beyond one example. The farm records where saved agent programs lose their rovers; the learner shows measurable learning while retaining stronger controls. These are benchmark-development results, not proof of deployment on a real rover. |
+| **Live demo — 15%** | [Public Modal URL](https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run/). For a quick judge walkthrough use already-cached [campaign world 2027](https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run/world/2027). Eight controllers are configured; one slower program can join a newly generated replay later. |
+
+The farm/live app was delivered by **Kristján with Claude Code**. Sölvi's learner/hybrid infrastructure was delivered with **Codex**; Kristján also used Codex for learned planner experiments, and Manh used Claude Code for PPO target learning. All count as the team's Modal use; they are not all Codex-authored work.
+
+Useful run references: farm **`ap-gBRd5446NAlbSopK5sdrI4`**, original final learning **`ap-GGkMI4eQi8N9MVVuTef5Au`**, final hybrid **`ap-GzqnjGbRi4h0x0SqO4xiQW`**. The live deployment is **`lightlag-traverse-live`** in Kristján's workspace. Dashboard access may require the owner. The demo is public; the reports become judge-facing evidence once repository access is resolved.
+
+Use efficiency, not spend, as the argument. The original final training's **$7.2624** and cumulative hybrid's **$6.3471** are separate running CPU/memory estimates with exclusions, not bills or team-wide totals. The latter includes its development/recovery/confirmation/final stages; do not add the final stage again. The separate incomplete greedy-prior study is retained in the log. These small controllers used CPUs; do not describe them as GPU training, Modal Dojo, or LLM fine-tuning. The farm uses isolated Modal function containers; do not claim a `modal.Sandbox` integration without one.
+
+## Short combined copy for the description or deck
+
+> Built with Codex and Claude Code under human direction. Codex implemented and reviewed evaluation, learning and experiment orchestration, preserving reproducible evidence and unsuccessful results. Modal powered parallel rover rollouts, 47,840 missions across six controller-training calls, and our public interactive demo. Our repository links code, checkpoints, app IDs, audits and measured outcomes to the people and tools that produced them. Entering Best Use of Codex and Best Use of Modal alongside AfterQuery.
+
+Change “Entering” to “Entered” only after both selections are verified saved.
+
+Optional video line (about 12 seconds): **“Codex helped us build, test and audit the experiment pipeline. Modal ran the parallel rollouts and training, and hosts the live demo you can try.”** Put the demo URL and `docs/sponsor-submission.md` on the closing slide. Keep the full video within its two-minute limit; the video owners decide placement.
+
+## Source freshness and checks
+
+- **Official prize requirements:** authenticated [Codex](https://hackjunction.app/participate/45/tech-challenges/49) and [Modal](https://hackjunction.app/participate/45/tech-challenges/40) briefs last directly read **13 November around 22:10 Helsinki**, as recorded in [sponsor research](../SPONSOR_OPTIONS.md). Codex asks for meaningful development use. Modal's retained rubric is shown above; neither retained brief makes a GPU mandatory.
+- **Public cross-check today:** [Codex copy](https://junction2026.com/challenges/openai-best-use-of-codex) and [Modal copy](https://junction2026.com/challenges/modal-best-use-of-modal) agree with those core requirements. Their footers explicitly say **community-made**. They are corroboration, not newly authenticated official guidance, and do not establish current form mechanics or saved entry status.
+- **Current access limit:** browser host unavailable; native Chrome access not approved; authenticated pages unavailable through web retrieval. No login bypass, platform mutation, external message or prize submission was attempted. The latest saved-entry evidence comes from the dated watcher observation above.
+- **Repository check:** authenticated `gh repo view solvisantos22/junction-2026 --json nameWithOwner,url,visibility,isPrivate` reported `PRIVATE` / `true`; anonymous HTTPS GET returned 404. No visibility or collaborator permissions were changed. This is a separate blocker from the browser access limit.
+- **Live demo check, 05:44–05:45 Helsinki:** homepage HTTP 200 (8,094 bytes); `/world/2027/status` returned `ready`; the existing cached replay returned HTTP 200 (3,219,685 bytes), a replay page rather than a waiting page. These were public HTTP reads, not a new rollout or deployment. Browser rendering/interaction was not retested in this session; the owner's earlier live-build and interaction checks are in the [evidence log](prize-evidence.md). Have the presenter open the cached replay once in a normal browser before pitching.
+- **Entry versus credits:** claiming participant credits does not select a prize. Codex participant usage credits are distinct from the API-credit prizes. The public brief copies list Codex prizes of $10,000/$5,000/$2,500 in API credits and Modal's winner prize of $2,000 cash plus $3,000 Modal credits; use the authenticated briefs if these change.
+
+This closeout adds presentation and entry guidance only. Frozen sources, weights, results, reference and teammate videos are unchanged; **no further experiments**.
