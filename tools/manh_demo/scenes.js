@@ -88,10 +88,10 @@
 
   // The lineup: three labs, three tiers each, rolled out from the fastest tier up to the flagships. Every lab's
   // name, borders and bars are in that lab's own colour.
-  const LINEUP = { left: 372, wide: 462, between: 36, top: 440, row: 152, card: 122, heads: 0.8, first: 2.1, step: 1.05, foot: 5.6 };
+  const LINEUP = { left: 372, wide: 462, between: 36, top: 440, row: 152, card: 122, heads: 0.45, first: 1.15, step: 0.65, foot: 3.3 };     // quicker since Manh's note: "a little bit too long"
   SCENES.lineup = (t, D) => {
     backdrop('THE AGENTS');
-    heading(t, 'THREE LABS · NINE MODELS', 'THE SAME TASK AND THE SAME FIVE TOOLS FOR ALL · OFF THE SHELF, NOT FINE-TUNED · ONE 45-MINUTE SESSION EACH');
+    heading(t, 'THREE LABS · NINE MODELS', 'EVERY MODEL GETS THE SAME TASK AND THE SAME TOOLS');
     const L = LINEUP, labs = M.lineup.labs, tiers = M.lineup.tiers, notes = ['FASTEST · CHEAPEST', 'THE EVERYDAY MODEL', 'THE MOST CAPABLE'];
     labs.forEach((lab, c) => {
       const x = L.left + c * (L.wide + L.between), color = M.tiles[lab.key].text, at = L.heads + c * 0.25, k = appear(t, at, 0.4);
@@ -123,7 +123,7 @@
     });
     rise(t, L.foot, () => {
       rect(120, 952, 1680, 2, C.line);
-      text('ALL NINE DRIVE THE SAME THREE MAPS, ONE AFTER THE OTHER · NO RESET, NO PRACTICE RUN', 120, 1004, { size: 30, color: C.gold, spacing: 0.13 });
+      text('ALL NINE DRIVE THE SAME THREE MAPS', 120, 1004, { size: 30, color: C.gold, spacing: 0.13 });
     });
   };
 
@@ -226,7 +226,7 @@
   // "it's only Claude? ... such that it includes all the models"). A row per model: its best program, world by world
   // against the planner on the same world (window.__MANH.worlds, from makers.worlds_table). The timing follows his
   // scene: the worlds sweep in, each row's count lands, cues[0] brings the totals, cues[1] the note.
-  const WORLDS = { top: 286, row: 52, tall: 38, x0: 566, cell: 3.38, won: 1612, lost: 1782, rows: 0.7, sweep: 1.0 };
+  const WORLDS = { top: 286, row: 52, tall: 28, x0: 566, cell: 3.38, won: 1612, lost: 1782, rows: 0.7, sweep: 1.0 };       // the strips were 38 tall: "perhaps it was too thick"
   const sweepOf = D => Math.min(3.4, D * 0.3);
   SCENES.worlds = (t, D, data, cues) => {
     backdrop('AT SCALE · MODAL');
@@ -240,9 +240,9 @@
       const y = L.top + r * L.row, k = appear(t, L.rows + r * 0.08, 0.3);
       if (k <= 0.003) return;
       g.save(); g.globalAlpha = k;
-      tile(row.maker, 120, y, L.tall);
-      text(row.name, 174, y + 30, { size: 29, color: M.tiles[row.maker].text, spacing: 0.08, bare: true });
-      text(row.tier, L.x0 - 18, y + 28, { size: 18, color: C.faint, spacing: 0.14, align: 'right' });
+      tile(row.maker, 120, y - 5, 38);
+      text(row.name, 174, y + 25, { size: 29, color: M.tiles[row.maker].text, spacing: 0.08, bare: true });
+      text(row.tier, L.x0 - 18, y + 22, { size: 18, color: C.faint, spacing: 0.14, align: 'right' });
       const done = clamp((t - L.sweep - r * 0.12) / sweep, 0, 1), upto = Math.round(done * n);
       rect(L.x0, y, n * L.cell, L.tall, 'rgba(243,234,217,.045)');
       for (let i = 0; i < upto; i++) {
@@ -252,9 +252,9 @@
         g.fillRect(L.x0 + i * L.cell, y, L.cell - 0.8, L.tall);
       }
       g.globalAlpha = k * appear(t, L.sweep + r * 0.12 + sweep, 0.4);     // the row's counts, once its worlds are all in
-      const ahead = text(`${row.reference_higher}`, L.won, y + 33, { size: 38, color: C.gold, spacing: 0.04 });
-      text(`/ ${n}`, L.won + ahead + 10, y + 33, { size: 22, color: C.faint, spacing: 0.08 });
-      text(`${row.lost}`, L.lost, y + 33, { size: 38, color: row.lost ? C.red : C.faint, spacing: 0.04 });
+      const ahead = text(`${row.reference_higher}`, L.won, y + 27, { size: 34, color: C.gold, spacing: 0.04 });
+      text(`/ ${n}`, L.won + ahead + 10, y + 27, { size: 21, color: C.faint, spacing: 0.08 });
+      text(`${row.lost}`, L.lost, y + 27, { size: 34, color: row.lost ? C.red : C.faint, spacing: 0.04 });
       g.restore();
     });
     rise(t, 1.2, () => {
@@ -337,6 +337,14 @@
       for (let i = 0; i < 2; i++) for (let n = 0; n < 3; n++) list.push({ at: P.lines + i * 0.2 + n * 0.32, kind: 'tick', step: n + i, check: true });
       list.push({ at: P.scores, kind: 'bar', score: 0.476, gold: true, check: true }, { at: P.scores + 0.3, kind: 'bar', score: 0.366, check: true });
       list.push({ at: P.note, kind: 'chime_soft', step: 1, check: true });
+      return list;
+    },
+    learning3(D, data, cues) {                                // Kristján's "and models that learn": five bars, the percentages, then his two panels
+      const F = data.final.fresh, list = [];
+      [[F.initial, 0.9], [F.ppo, 1.4], [F.replay, 1.7], [F.greedy, 2.0], [F.reference, 2.3]].forEach(([score, at], i) => list.push({ at, kind: 'bar', score, gold: i === 4, step: i, check: true }));
+      list.push({ at: 2.6, kind: 'chime', step: 2, check: true });
+      const camp = cues && cues[0] !== undefined ? cues[0] : 3.4, plan = cues && cues[1] !== undefined ? cues[1] : camp + 3;
+      list.push({ at: camp, kind: 'swell', check: true }, { at: plan, kind: 'hit_soft', check: true });
       return list;
     },
     worlds(D, data, cues) {

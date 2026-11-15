@@ -243,12 +243,14 @@ def chart_numbers(data: Dict[str, Any]) -> Dict[str, Any]:
     for item in data["campaign"]["claude"]:
         claude.setdefault(item["model"].upper(), []).append(item["score"])
     tiers = makers.tier_table(claude, data["campaign"]["reference"]["score"], facts["rl"])
+    fresh, gain = data["final"]["fresh"], data["planner"]["first"]["gain"]
     return {"facts": {**facts, "models": len(tiers["rows"]), "below_rl": tiers["below_learned"], "best_model": tiers["best_mean"]}, "tiers": tiers,
-            "worlds": makers.worlds_table()}
+            "worlds": makers.worlds_table(),
+            "final": {"initial_percent": round(fresh["initial"] * 100), "ppo_percent": round(fresh["ppo"] * 100), "gain_under_half_a_point": 0 < gain < 0.5}}
 
 
 def browser_sources() -> Dict[str, Any]:
-    data = film_data.build()
+    data = {**film_data.build(), **film_data.extras()}        # extras: what the slides of Kristján's third cut read (the learning slide)
     numbers = chart_numbers(data)
     for table, claims in FILM["said"].items():            # the narration states these in words
         for key, said in claims.items():

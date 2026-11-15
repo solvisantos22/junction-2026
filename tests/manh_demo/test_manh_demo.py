@@ -252,11 +252,23 @@ class SecondDraftTest(unittest.TestCase):
         table = makers.tier_table(claude, reference, makers.facts()["rl"])
         self.assertEqual(len(table["rows"]), 9)
         self.assertLess(table["best_run"]["score"], reference)                              # "none beat our driver"
-        for key, said in cut.SAID2["tiers"].items():                                         # 37 percent, 48, eight of the nine
+        for key, said in cut.SAID2["tiers"].items():                                         # "ours brought home forty-eight percent"
             self.assertEqual(table[key], said, key)
         self.assertEqual([row["mean"] for row in table["rows"]], sorted((row["mean"] for row in table["rows"]), reverse=True))
         with self.assertRaises(SystemExit):
             makers.tier_table(claude, table["best_run"]["score"], 0.3)                       # a run at the planner's score stops the build
+
+    def test_two_of_kristjans_slides_are_in_it(self):
+        scenes = {shot["name"]: shot.get("scene") for shot in self.shots}
+        self.assertEqual((scenes["v2_quote"], scenes["v2_learning"], scenes["v2_reference"], scenes["v2_end"]), ("quote", "learning3", "reference", "end"))
+        film = (REPO / "tools" / "demo_video" / "film.html").read_text(encoding="utf-8")
+        for name in ("quote", "learning3", "reference", "end"):
+            self.assertIn("SCENES.{} = ".format(name), film)                                  # his scenes, read from his page
+        names = [shot["name"] for shot in self.shots]
+        self.assertEqual(names.index("v2_quote"), names.index("v2_flagship") + 1)           # the flagship's own report follows its rover
+        quote = next(shot for shot in self.shots if shot["name"] == "v2_quote")["beats"][0]
+        self.assertGreater(quote["cues"][2], 60)                                              # his verdict line is left to this film's end card
+        self.assertEqual(set(cut.SAID2), {"tiers", "worlds", "final"})
 
     def test_the_300_worlds_hold_every_model(self):
         table = makers.worlds_table()

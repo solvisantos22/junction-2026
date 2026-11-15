@@ -12,6 +12,7 @@
 (() => {
   const A = window.LIGHTLAG_TRAVERSE_APP, T = A.THREE, P = window.__PIECE || {};
   const ORBIT = P.orbit === undefined ? 9.0 : P.orbit, DIVE = P.dive === undefined ? 2.6 : P.dive, LAND = P.land === undefined ? 3.2 : P.land, RISE = P.rise === undefined ? 2.4 : P.rise;
+  const WORDS = P.words || [1.0, 3.2, 3.5];              // when the three lines over the planet come up; a shorter orbit brings them forward
   const W = window.innerWidth, H = window.innerHeight;
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -125,9 +126,9 @@
       R.setClearColor(0x0b0807, 1);
       ui.style.opacity = '0';
       // two quiet lines while it turns: where this is, and why it is hard
-      words('MARS', 120, H * 0.5 - 6, 92, fade(t, 1.0, ORBIT - 0.4, 0.8), '#f3ead9', 0.36);
-      words('A SIGNAL FROM EARTH TAKES', 124, H * 0.5 + 58, 30, fade(t, 3.2, ORBIT - 0.4, 0.8), '#ffb224', 0.2);
-      words('3 TO 22 MINUTES TO ARRIVE', 124, H * 0.5 + 100, 30, fade(t, 3.5, ORBIT - 0.4, 0.8), '#ffb224', 0.2);
+      words('MARS', 120, H * 0.5 - 6, 92, fade(t, WORDS[0], ORBIT - 0.4, 0.8), '#f3ead9', 0.36);
+      words('A SIGNAL FROM EARTH TAKES', 124, H * 0.5 + 58, 30, fade(t, WORDS[1], ORBIT - 0.4, 0.8), '#ffb224', 0.2);
+      words('3 TO 22 MINUTES TO ARRIVE', 124, H * 0.5 + 100, 30, fade(t, WORDS[2], ORBIT - 0.4, 0.8), '#ffb224', 0.2);
       // falling: streaks from the middle of the frame, then dust closing over everything
       if (fall > 0) {
         const cx = W / 2, cy = H / 2, speed = fall * fall;

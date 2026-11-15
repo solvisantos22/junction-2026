@@ -16,24 +16,25 @@ Everything in the film hangs on one question. Three ways to put it; the script b
 
 ## As compiled into the second draft (Sunday about 06:00)
 
-Manh asked for the pieces to be compiled, and for the replay to carry all the different agents as a story from the light models to the heavy ones. So the draft film, [`manh_demo_2.mp4`](manh_demo_2.mp4), keeps the hook and the cliffhangers of the script below but changes the middle: the nine models are introduced first, then one failure per tier is shown on a different lab's rover, then the reason. The words as spoken (`LINES2` in [`tools/manh_demo/cut.py`](../../tools/manh_demo/cut.py)); every number is a moment of a saved run and is tested:
+Manh asked for the pieces to be compiled, and for the replay to carry all the different agents as a story from the light models to the heavy ones. So the draft film, [`manh_demo_2.mp4`](manh_demo_2.mp4), keeps the hook and the cliffhangers of the script below but changes the middle (the table is the third build, about 06:50, after his notes on length and with two of Kristján's slides in it): the nine models are introduced first, then one failure per tier is shown on a different lab's rover, then the reason. The words as spoken (`LINES2` in [`tools/manh_demo/cut.py`](../../tools/manh_demo/cut.py)); every number is a moment of a saved run and is tested:
 
 | # | Picture | Say |
 |---|---|---|
-| 1 | In orbit | Imagine driving a car where everything you see happened three seconds ago, and the car obeys three seconds late. That is every day on Mars. **So who do you trust to drive?** |
+| 1 | In orbit | Imagine driving a car that obeys you three seconds late. That is every day on Mars. **So who do you trust to drive?** |
 | 2 | The dive, the landing, the title | We built that day. One rover, one day of sunlight, rocks to collect, and one rule: be home before the battery dies. |
-| 3 | The lineup: three labs, nine models | Then we handed the keys to nine AI models from three labs, from the fastest to the most powerful. **Surely one of them makes it home?** |
+| 3 | The lineup: three labs, nine models | Then we handed the keys to nine AI models from three labs. **Surely one of them makes it home?** |
 | 4 | FAST · behind GPT-6 Luna, site 3 | Mars doesn't play fair. A fast one reaches for a rock and misses, by three centimetres. No points. **Nine tries, one rock.** |
 | 5 | BALANCED · Claude Sonnet 5.5 on the scarp, site 3 | A bigger one drives onto a slope too steep. The rover freezes and forgets its orders. **Thirty times.** |
 | 6 | FLAGSHIP · behind Claude Opus 5.5, site 1; its score-card | And a flagship: thirteen metres from home, twenty-one samples on board. It will not make it. **Nothing broke. So what went wrong?** |
+| 6c | In Claude's own words (Kristján's slide) | Its own report says why: the planner counted time, never the battery. And it played all three maps without checking one result. |
 | 7 | The sun · Gemini 4 Argon runs flat, the planner waits, site 3 | The sun. It's the only fuel. This rover drove until its battery was flat. Our driver saw its battery fall, stopped, and waited for light. **So how did all nine do?** |
-| 8 | Every run of all nine against the planner | On three maps in a row, none beat our driver. The best run came within a hair; the best average brought home thirty-seven percent. Ours: forty-eight, and it never lost a rover. **So what is it?** |
-| 9 | What our driver is | Not an AI. A planner: plain code that works out the whole day before the wheels turn. **Lucky maps? We wondered too.** |
+| 8 | Every run of all nine against the planner | On three maps in a row, none beat our driver. The best run came within a hair. Ours brought home forty-eight percent, and never lost a rover. **So what is it?** |
+| 9 | What our driver is | Not an AI. A planner: plain code that works out the whole day before the wheels turn. **Lucky maps?** |
 | 10 | 300 fresh worlds on Modal, every model's best program | So we replayed every model's best program on three hundred fresh worlds, on Modal. The planner won ninety-five times in a hundred. **Can a machine learn it instead?** |
-| 11 | The planner and our trained agent | We trained one from scratch. On average it out-scored eight of the nine models, and still lost to the planner. |
+| 11 | And models that learn (Kristján's slide) | We trained a small one from scratch: from eight percent to thirty-six on unseen worlds, still short of the planner. Even a model trained to pick the planner's strategy gained less than half a point. |
 | 12 | The end card | AI can write the code. It can't yet plan the day. **Can your agent make it home?** |
 
-Two things to know before recording it in your own voice. "None beat our driver" is about the three-site campaign, which is what the film shows: the best run there scored 0.473 against the planner's 0.476. On the separate one-site task, one Gemini 4 Carbon run edged the planner (0.567 against 0.565), so keep "on three maps in a row" in the line. The trained agent's 0.366 is the mean of three seeds; the rover of it that drives in the replay is the best seed (0.395), and the standings say so. And "ninety-five times in a hundred" is 2,556 of 2,700 match-ups: each of the nine models' best program on 300 worlds none of them had seen (counting all 22 programs the models left, 6,390 of 6,600).
+Two things to know before recording it in your own voice. "None beat our driver" is about the three-site campaign, which is what the film shows: the best run there scored 0.473 against the planner's 0.476. On the separate one-site task, one Gemini 4 Carbon run edged the planner (0.567 against 0.565), so keep "on three maps in a row" in the line. The trained agent's rover in the replay is the best of three seeds (0.395), and the standings say so; "from eight percent to thirty-six" is the mean of three seeds on 40 held-out worlds, before and after training. And "ninety-five times in a hundred" is 2,556 of 2,700 match-ups: each of the nine models' best program on 300 worlds none of them had seen (counting all 22 programs the models left, 6,390 of 6,600).
 
 ## The script
 
