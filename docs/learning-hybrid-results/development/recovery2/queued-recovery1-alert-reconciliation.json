@@ -1,0 +1,84 @@
+{
+  "decision": "Do not restart recovery1 or repeat its completed cases. This alert refers to the already diagnosed terminal failure; recovery2 has a separate published attempt namespace.",
+  "limits": "Read-only original function-result and control metadata; no trajectories, launches, remote mutations, simulations or selection.",
+  "observed_unix": 1794707405.175116,
+  "old_control_keys_unchanged": {
+    "call:development:development-ensemble-replay-rho050-610088": true,
+    "call:development:development-single-replay-17-rho095-610087": true,
+    "coordinator:development": true,
+    "coordinator:development:owner": true,
+    "intent:development:development-ensemble-replay-rho050-610088": true,
+    "intent:development:development-single-replay-17-rho095-610087": true,
+    "job:development:development-ensemble-replay-rho050-610088": true,
+    "job:development:development-ensemble-replay-rho050-610088:execution": true,
+    "job:development:development-ensemble-replay-rho050-610088:owner": true,
+    "job:development:development-single-replay-17-rho095-610087": true,
+    "job:development:development-single-replay-17-rho095-610087:execution": true,
+    "job:development:development-single-replay-17-rho095-610087:owner": true,
+    "recovery:development:v1:owner": true,
+    "recovery:development:v1:state": true
+  },
+  "old_event": {
+    "app_id": "ap-VMFyA1rZFxPhVr14SGth33",
+    "completed_rows": 2665,
+    "coordinator_call_id": "fc-01M7EB3DJ8C214Z7E14WCVVTNF",
+    "ended_unix": 1794705122.4441638,
+    "ended_utc": "2026-11-15T01:12:02.444164+00:00",
+    "error_type": "JobFailureRequiresDiagnosis",
+    "failed_rows": 2,
+    "freeze_sha256": "4c1c1d16cd54c754a81f7d1b984d4ed187706e6e41fd3c1068639819ee40906a",
+    "status": "failed",
+    "submitted_calls": 2667
+  },
+  "old_watcher": {
+    "events": {
+      "hybrid-development-recovery:completion": {
+        "finished_unix": null,
+        "queued_unix": null,
+        "reason": "failed",
+        "reserved_unix": 1794705172.517826,
+        "returncode": 0,
+        "status": "queued"
+      }
+    },
+    "state_sha256": "208b285b633611188cfdf2af30a8549015637447e27570754b745033c48903f5",
+    "status": "finished",
+    "updated_unix": 1794705172.517826
+  },
+  "original_call_results": [
+    {
+      "call_id": "fc-01M7EB3DJ8C214Z7E14WCVVTNF",
+      "ended_unix": 1794705122.4441638,
+      "error_type": "JobFailureRequiresDiagnosis",
+      "live_sha256": "ed946001ca0df00c8654e6453830441d955d44cdc2704d915ee6ac9fd96802f1",
+      "same_saved_value": true,
+      "saved_sha256": "ed946001ca0df00c8654e6453830441d955d44cdc2704d915ee6ac9fd96802f1",
+      "status": "failed"
+    },
+    {
+      "call_id": "fc-01M7EC3M1P2T01C014NP812N1S",
+      "ended_unix": 1794705059.5230227,
+      "error_type": "AmbiguousExecutionRequiresDiagnosis",
+      "live_sha256": "5ad5ae9b830ae3d6091880573cae873d74e56949fd9e31ebfedfe413ff126e55",
+      "same_saved_value": true,
+      "saved_sha256": "5ad5ae9b830ae3d6091880573cae873d74e56949fd9e31ebfedfe413ff126e55",
+      "status": "failed"
+    },
+    {
+      "call_id": "fc-01M7EC2FSFHY4RVFKPMFPWH11S",
+      "ended_unix": 1794705022.448478,
+      "error_type": "KeyboardInterrupt",
+      "live_sha256": "784765e2cb0751b6053d00858005e25469ecff68df159017d8de004b668d1d57",
+      "same_saved_value": true,
+      "saved_sha256": "784765e2cb0751b6053d00858005e25469ecff68df159017d8de004b668d1d57",
+      "status": "failed"
+    }
+  ],
+  "schema": "learning-hybrid-queued-recovery1-alert-reconciliation-v1",
+  "source_evidence_sha256": {
+    "control.json": "b5d83afa8795c3255ae25e5122f665e3b9c44dc46672dfef84a57736137426ae",
+    "failed-evidence.json": "bceb339e35fc87dbfabce2ebdb8cc7ee49e77385436a4b12deb0ed16c3eba1be",
+    "state.json": "ed946001ca0df00c8654e6453830441d955d44cdc2704d915ee6ac9fd96802f1"
+  },
+  "unchanged": true
+}
