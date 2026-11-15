@@ -1,4 +1,6 @@
-# Second development recovery: running
+# Second development recovery: complete
+
+**Terminal update, 15 November 01:56:45 UTC:** all 2510 permitted new attempts completed. The full 8320-case aggregate and independent audits are published in the [development closure](../completed/README.md). The running checkpoints below are historical. All 5810 retained rows and both earlier failed attempts remain intact.
 
 The first recovery stopped at **01:12:02 UTC on 15 November** after collecting
 all 2667 calls it had submitted: 2665 complete and two failed. Together with

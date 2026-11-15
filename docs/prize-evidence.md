@@ -1042,3 +1042,31 @@ Independent live verification also confirmed the exact source/receipt/owner
 lineage and preserved all 14 earlier control records plus both failed-row
 files. The watcher subsequently recorded 317/2510 completions with zero read
 errors. These are progress checkpoints, not completed performance findings.
+
+### 15 November — Sölvi / Codex: complete hybrid development and freeze confirmation
+
+- **Human direction:** test ensembles/greedy combinations on Modal, preserve
+  frozen code and failures, and publish stage decisions before new maps.
+- **Codex contribution:** reconciled the original recovery2 completion,
+  downloaded terminal metadata once, verified all 8320 job/source/audit
+  identities and 5810 unchanged retained rows, reproduced the original
+  selection and prepared its next operations freeze. Independent review
+  separately recomputed all 41 group summaries and paired intervals exactly.
+- **Measured outcome:** 8300/8320 home/alive, 20 rover deaths, zero invalid calls.
+  Six safe groups qualify under the fixed screening rule. Best development
+  mean **0.394404**, matched greedy **0.383869**, reference **0.501834**. This
+  development selection is not a confirmed improvement; every unsafe/negative
+  group and both earlier infrastructure failures remain in the evidence.
+- **Modal evidence:** recovery2 app `ap-Nnis3HCfoeencYU6ipEpe4`, original call
+  `fc-01M7EDXYD8614C8X0ST20CR7N3`, completed 2510 permitted attempts at
+  01:56:45 UTC. Recorded hybrid running compute including smoke/coordinators
+  **$1.858378**, separate closed prior training **$2.404367**, combined
+  **$4.262745**; excludes ancillary, idle and lost unrecorded work, not an
+  invoice. No model API call or additional training in this closure.
+- **Published artifacts:** [complete results, audits and full aggregate](learning-hybrid-results/development/completed/README.md);
+  [confirmation matrix and freeze](learning-hybrid-results/confirmation/README.md),
+  SHA `9e638ba0decb6e712ff903ca7f213d2fbb13f5f2360b6431b6ab930968e9e87e`.
+  21 arms ×256 fresh confirmation maps, 5376 cases, unchanged weights/source,
+  64 non-preemptible workers plus coordinator, same $75 shared ceiling and
+  05:30 UTC cutoff. Freeze publication precedes any confirmation launch.
+  Final maps need a separate later selection freeze; keep the team reference.
