@@ -844,29 +844,35 @@ call. The study does not make a new Claude-performance claim.
 ### Kristján / Codex — Modal classical planner learning (15 November)
 
 Kristján explicitly requested parallel Modal training, prioritizing speed using
-his remaining credits, to try to beat the reference with a learned model. Codex
-built an isolated public-state strategy selector, counterfactual rollout dataset
-and three classical model fits; the existing reference remains the team's work.
-Seven focused tests pass, including all three fits and checkpoint round trips.
-All 12 initial Modal smoke missions finish home/alive; common prefixes/features
-agree and the baseline controller exactly matches the local trajectory. All 12
-physics replays, 4,874 commands and 5,052 states independently verify. The original
-SDK cleanup warning is retained; `eb4f9e2` fixed it before production and disabled
-implicit source upload. Modal data app `ap-tctysvmd3CxtowroSpSlM0` is running the
-frozen 2,880 missions; 100 concurrent workers were observed. A local DNS outage
-interrupted the first app after 833 archived outcomes. Codex retained those and
-resumed only missing jobs in `ap-vmIsFVOKPZVhhmunxtJuuB` using a process-local DNS
-workaround. A cross-platform hash discrepancy was traced to a 1e-16 decorative
-terrain value; commands, states and grade match, and the Linux replay is exact.
-All 2,880 data missions are now complete and independently replayed on Linux:
-1,147,531 commands, 1,212,480 states, exact original hashes/grades. Three actual
-Modal model fits completed; saved checkpoints and local refits reproduce their
-training predictions. Validation selects Extra Trees (50.7287%) and ridge
-(50.6527%) against the reference (50.1011%); the best fixed strategy is 50.7567%.
-Weights/selection are frozen before 96 fresh worlds. No canonical reference
-change or new LLM-performance claim.
-Initial implementation `570c7e5`, production launch source `78cfb5d`.
-[Protocol](learned-portfolio.md), [evidence](learned-portfolio-results/README.md).
+his credits, to try to improve the reference with a learned model. Codex built
+an isolated selector over the team's frozen pilot, generated counterfactual
+training/validation data with up to 100 mission workers, and submitted three
+classical model fits to Modal. The existing reference remains the team's work.
+Three successful fit calls, weights and local refits are retained; exact fit
+container IDs were unavailable. No model version or time-saving claim is inferred.
+
+The 2,880 data missions led to a model/threshold freeze published in `51e33ba`
+before 96 fresh worlds. **Extra Trees scores 50.4627% vs the reference's 49.9782%:
++0.4845 percentage points, paired 95% +0.2679 to +0.7206; both 96/96 home/alive.**
+Ridge scores 49.7010% with one death; the best fixed aggressive strategy scores
+49.4766% with two deaths. Extra Trees chooses other strategies on those two maps.
+The primary gain misses the predeclared 1 pp practical target, so the reference
+is unchanged. This is a strategy selector using 49 public features; the original
+pilot still navigates. No new LLM-performance claim.
+
+Seven tests pass. All 3,264 production replays, 1,301,528 commands and 1,374,144
+states are verified on Linux, plus 12 smoke missions. Local checks reproduce
+all grades/states/telemetry, with only decorative metadata differing in 264
+replay hashes. All 192 fresh learned decisions and 109 same-strategy replay
+pairs verify; original-reference and full learned-controller repeats are exact
+on Linux. Model fits, selection and statistics reproduce independently.
+
+The original DNS interruption, 833 retained outcomes, process-local DNS recovery
+and platform preemptions are documented. Archived mission execution alone has
+an estimated $2.37 allocation cost; this is not an invoice or the total spend.
+No GPU, new LLM API call, task change or teammate-job change. Source/protocol
+`78cfb5d`, model freeze `dec27dc` / published merge `51e33ba`.
+[Protocol](learned-portfolio.md), [results, receipts and checkpoints](learned-portfolio-results/README.md).
 
 ### 15 November — Sölvi / Codex: audited final learning and exact-campaign comparison
 

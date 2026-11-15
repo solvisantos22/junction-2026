@@ -44,14 +44,61 @@ def physics(bundles,keep_replay=False):
     return {'results':results,'modal_call_id':modal.current_function_call_id()}
 
 
+@app.function(cpu=1.,memory=1024,timeout=600,max_containers=2,retries=0,scaledown_window=10,include_source=False)
+def original_reference(bundle):
+    from lightlag_traverse.environment import TraverseEnvironment
+    from lightlag_traverse.pilot import fly
+    from lightlag_traverse.play import PublicTools
+    from lightlag_learned_portfolio.worker import digest,source_manifest
+    assert digest(source_manifest())==bundle['source_sha256']
+    env=TraverseEnvironment(bundle['job']['seed']);started=time.perf_counter()
+    fly(PublicTools(env));replay=env.replay()
+    result={'seed':bundle['job']['seed'],'full_budget':True,'original_pilot':True,
+            'ok':digest(replay)==bundle['replay_sha256'],'replay_sha256':digest(replay),
+            'expected_replay_sha256':bundle['replay_sha256'],'seconds':time.perf_counter()-started,
+            'modal_call_id':modal.current_function_call_id()}
+    if not result['ok']:result['replay']=replay
+    return result
+
+
+@app.function(cpu=1.,memory=1024,timeout=600,max_containers=2,retries=0,scaledown_window=10,include_source=False)
+def repeat_policy(bundle):
+    from lightlag_learned_portfolio.worker import load_model,run_episode
+    spec=bundle['job']['spec'];model=load_model('/root/project/models/'+spec['algorithm']+'.pkl',spec['model_sha256'])
+    repeated=run_episode(bundle['job'],model)
+    result={'seed':bundle['job']['seed'],'name':bundle['job']['name'],
+            'ok':repeated['replay_sha256']==bundle['replay_sha256'] and repeated['decision']==bundle['decision'],
+            'expected_replay_sha256':bundle['replay_sha256'],'replay_sha256':repeated['replay_sha256'],
+            'seconds':repeated['seconds'],'modal_call_id':modal.current_function_call_id()}
+    if not result['ok']:result['repeated']=repeated
+    return result
+
+
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('stage',choices=['diagnose','data','final'])
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('stage',choices=['diagnose','data','final','reference','repeat'])
     p.add_argument('--system-dns',action='store_true');a=p.parse_args()
     if not a.system_dns:
         from .dns_run import install_resolver
         install_resolver()
-    stage='data' if a.stage=='diagnose' else a.stage
+    stage='data' if a.stage in ('diagnose','reference') else ('final' if a.stage=='repeat' else a.stage)
     rows=read_rows(stage)
+    if a.stage=='reference':
+        row=next(r for r in rows if r['seed']==560000 and r['name']=='baseline')
+        with modal.enable_output(),app.run():
+            result=original_reference.remote(read_bundle(row))
+            result.update({'created_utc':utc(),'app_id':app.app_id,'artifact_sha256':row['sha256']})
+        write(OUT/'reference-parity.json',result)
+        assert result['ok'], 'Original Linux reference differs; full replay retained'
+        print(json.dumps(result,indent=2));return
+    if a.stage=='repeat':
+        selection=json.loads((OUT/'selection.json').read_text())
+        row=next(r for r in rows if r['seed']==min(selection['fresh_seeds']) and r['name']==selection['primary'])
+        with modal.enable_output(),app.run():
+            result=repeat_policy.remote(read_bundle(row))
+            result.update({'created_utc':utc(),'app_id':app.app_id,'artifact_sha256':row['sha256']})
+        write(OUT/'final/controller-repeat.json',result)
+        assert result['ok'],'Learned controller repeat differs; result retained'
+        print(json.dumps(result,indent=2));return
     if a.stage=='diagnose':rows=[r for r in rows if r['seed']==560007 and r['name']=='baseline']
     else:
         freeze=json.loads((OUT/stage/'freeze.json').read_text())

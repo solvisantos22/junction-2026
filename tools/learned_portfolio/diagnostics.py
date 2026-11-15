@@ -47,7 +47,7 @@ def main():
             'successful_mission_seconds':sum(r['seconds'] for r in rows+final_rows),
             'successful_mission_cpu_seconds':sum(r['cpu_seconds'] for r in rows+final_rows),
             'successful_mission_compute_estimate_usd':sum(r['seconds'] for r in rows+final_rows)*(.0000131+.00000222),
-            'compute_estimate_limits':'Allocation-rate estimate for archived mission execution only, not a bill. Excludes preempted/lost work, startup/idle time, fitting, audits, builds, storage and network.'}
+            'compute_estimate_limits':'Allocation-rate estimate for recorded controller execution only, not a bill. Excludes environment initialization/serialization, preempted/lost work, startup/idle time, fitting, audits, builds, storage and network.'}
     write(OUT/'diagnostics.json',result)
     print(json.dumps({'fits':fits,'oracle_gains':{k:v['hindsight_oracle']['delta'] for k,v in splits.items()},
                       'successful_mission_compute_estimate_usd':result['successful_mission_compute_estimate_usd']},indent=2))

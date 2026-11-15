@@ -1,6 +1,6 @@
 {
-  "compute_estimate_limits": "Allocation-rate estimate for archived mission execution only, not a bill. Excludes preempted/lost work, startup/idle time, fitting, audits, builds, storage and network.",
-  "created_utc": "2026-11-14T23:56:19Z",
+  "compute_estimate_limits": "Allocation-rate estimate for recorded controller execution only, not a bill. Excludes environment initialization/serialization, preempted/lost work, startup/idle time, fitting, audits, builds, storage and network.",
+  "created_utc": "2026-11-15T00:17:04Z",
   "fits": {
     "extra_trees": {
       "feature_importance": [
@@ -611,6 +611,32 @@
       "aggressive": 11,
       "baseline": 37
     },
+    "fresh": {
+      "baseline": {
+        "baseline": 96
+      },
+      "extra_trees": {
+        "aggressive": 69,
+        "arrival_wide": 4,
+        "balanced": 15,
+        "refresh": 8
+      },
+      "ridge": {
+        "aggressive": 37,
+        "arrival_wide": 11,
+        "balanced": 7,
+        "baseline": 1,
+        "deadline_early": 2,
+        "deadline_relaxed": 6,
+        "energy_path": 7,
+        "energy_path_strong": 5,
+        "legs_fast": 15,
+        "refresh": 5
+      },
+      "static_best": {
+        "aggressive": 96
+      }
+    },
     "hist_boost@0.0": {
       "aggressive": 19,
       "arrival_wide": 4,
@@ -674,7 +700,7 @@
       "legs_fast": 2
     }
   },
-  "successful_mission_compute_estimate_usd": 2.0796229909692463,
-  "successful_mission_cpu_seconds": 133446.09,
-  "successful_mission_seconds": 135745.626042379
+  "successful_mission_compute_estimate_usd": 2.3679410111194175,
+  "successful_mission_cpu_seconds": 151943.99,
+  "successful_mission_seconds": 154565.340151398
 }

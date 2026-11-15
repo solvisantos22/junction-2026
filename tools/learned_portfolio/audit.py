@@ -247,15 +247,64 @@ def audit_summary():
     write(OUT/'final/summary-audit.json',result);print(json.dumps(result,indent=2))
 
 
+def audit_reference():
+    from lightlag_traverse.pilot import fly
+    from lightlag_traverse.play import PublicTools
+    row=next(r for r in read_rows('data') if r['seed']==TRAIN[0] and r['name']=='baseline')
+    recorded=read_bundle(row);env=TraverseEnvironment(TRAIN[0]);started=time.perf_counter()
+    fly(PublicTools(env))
+    replay=env.replay()
+    wrapped=run_episode(recorded['job'])
+    result={'ok':digest(replay)==wrapped['replay_sha256'],'created_utc':utc(),'seed':TRAIN[0],
+            'full_budget':True,'original_pilot':True,'same_platform_wrapper_equal':digest(replay)==wrapped['replay_sha256'],
+            'cross_platform_replay_equal':digest(replay)==recorded['replay_sha256'],
+            'cross_platform_grade_equal':replay['result']==recorded['result'],
+            'cross_platform_differing_commands':sum(a!=b for a,b in zip(replay['commands'],recorded['commands'])),
+            'original_commands':len(replay['commands']),'cloud_commands':len(recorded['commands']),
+            'local_replay_sha256':digest(replay),'cloud_replay_sha256':recorded['replay_sha256'],
+            'artifact_sha256':row['sha256'],
+            'seconds':time.perf_counter()-started,'source':source_manifest()}
+    write(OUT/'reference-parity-macos.json',result)
+    require(result['ok'],'same-platform original reference differs from baseline wrapper')
+    print(json.dumps({k:v for k,v in result.items() if k!='source'},indent=2))
+
+
+def audit_switches():
+    selection=json.loads((OUT/'selection.json').read_text());rows=read_rows('final')
+    by={(r['seed'],r['name']):r for r in rows};matched=0;failures=[]
+    require(set(by)=={(s,n) for s in CHECK for n in selection['specs']},'incomplete fresh grid')
+    for seed in CHECK:
+        base=by[seed,'baseline'];profile_replays={}
+        for name in selection['specs']:
+            row=by[seed,name];decision=row['decision'];bundle=read_bundle(row)
+            require(row['prefix_sha256']==base['prefix_sha256'],'fresh common-prefix mismatch')
+            require(decision['features']==base['decision']['features'] and decision['tick']==140,'fresh features mismatch')
+            profile=decision['profile']
+            if profile in profile_replays:
+                require(profile_replays[profile]==bundle['replay_sha256'],'same strategy different trajectory')
+                matched+=1
+            profile_replays[profile]=bundle['replay_sha256']
+            if not row['alive'] or not row['at_base']:
+                failures.append({'seed':seed,'failed_method':name,
+                    'compared':{n:{'profile':by[seed,n]['decision']['profile'],'reward':by[seed,n]['reward'],
+                                   'home_alive':bool(by[seed,n]['alive'] and by[seed,n]['at_base'])}
+                                for n in selection['specs']}})
+    result={'ok':True,'created_utc':utc(),'worlds':len(CHECK),'common_prefixes_equal':True,
+            'same_strategy_exact_replay_pairs':matched,'failures':failures}
+    write(OUT/'final/strategy-consistency.json',result);print(json.dumps(result,indent=2))
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument("stage",choices=["smoke","data","final","models","selection","summary"])
+    p.add_argument("stage",choices=["smoke","data","final","models","selection","summary","reference","switches"])
     p.add_argument("--workers",type=int,default=6)
     p.add_argument("--full",default="")
     a=p.parse_args()
     if a.stage=="models":audit_models()
     elif a.stage=="selection":audit_selection()
     elif a.stage=="summary":audit_summary()
+    elif a.stage=="reference":audit_reference()
+    elif a.stage=="switches":audit_switches()
     else:audit(a.stage,a.workers,[n for n in a.full.split(',') if n])
 
 
