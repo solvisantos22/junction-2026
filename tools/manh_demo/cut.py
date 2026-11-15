@@ -44,6 +44,18 @@ PIECES: Dict[str, Dict[str, Any]] = {
         {"min": 20.0, "trackers": False, "js": "A.showTitle(false); A.seek(210); A.setCam('map'); A.setPlaying(false);",
          "sfx": [{"t": 0.25 + 5.0 * k, "kind": "chime_soft", "step": k} for k in range(4)]},
     ]},
+    # the same four drafts with the labs' own logos (Anthropic, Google DeepMind, OpenAI) instead of the model families' marks
+    "icons_labs": {"page": "campaign", "site": 1, "addon": "icons.js", "addon_settings": {"show": 5.0, "company": True}, "vacuum": [0.0, 20.4], "fade_in": 0.5, "fade_out": 0.4, "beats": [
+        {"min": 20.0, "trackers": False, "js": "A.showTitle(false); A.seek(210); A.setCam('map'); A.setPlaying(false);",
+         "sfx": [{"t": 0.25 + 5.0 * k, "kind": "chime_soft", "step": k} for k in range(4)]},
+    ]},
+    # the four drafts over the real environment (`icons_scene.js`): for each kind, three seconds behind a driving rover,
+    # then three and a half from above with every rover on the map. The same two moments each time, to compare fairly.
+    "icons_scene": {"page": "campaign", "site": 1, "addon": "icons_scene.js", "addon_settings": {"show": 6.4}, "fade_in": 0.4, "fade_out": 0.4, "beats": [
+        beat for k in range(4) for beat in (
+            {"min": 3.0, "trackers": False, "js": "A.showTitle(false); A.follow('campaign-agent-sonnet-2'); A.seek(47); A.setCam('chase'); A.view.k = 1; A.view.snap = true; A.setSpeed(1); A.setPlaying(true);", "sfx": [{"t": 0.2, "kind": "chime_soft", "step": k}]},
+            {"min": 3.4, "trackers": False, "js": "A.setCam('map'); A.view.k = 0; A.view.snap = true; A.seek(150); A.setSpeed(3); A.setPlaying(true);"})
+    ]},
     # Kristján's two Modal scenes and his end card, to show Modal's name in its green with its mark
     "modal_farm": {"page": "film", "scene": "farm", "fade_out": 0.4, "beats": [{"min": 9.0, "cues": [4.6, 6.4]}]},
     "modal_learning": {"page": "film", "scene": "learning", "fade_out": 0.4, "beats": [{"min": 7.0}]},

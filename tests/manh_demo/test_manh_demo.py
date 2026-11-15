@@ -84,6 +84,19 @@ class MakersTest(unittest.TestCase):
             self.assertIn(short, runs)
             self.assertTrue(any(short.replace("-", " ") == model.lower().replace("-", " ") for lab in found["labs"] for model in lab["models"]), short)
 
+    def test_the_floating_icons_carry_the_family_marks_unless_asked_for_the_labs(self):
+        family, labs, scene = makers.icon_settings(), makers.icon_settings(company=True), makers.scene_icon_settings()
+        self.assertEqual([lab["name"] for lab in family["labs"]], ["CLAUDE", "GEMINI", "GPT"])
+        self.assertEqual([lab["name"] for lab in labs["labs"]], ["ANTHROPIC", "GOOGLE DEEPMIND", "OPENAI"])
+        self.assertEqual(family["labs"][0]["path"], makers.mark_path("anthropic"))
+        self.assertNotEqual(family["labs"][0]["path"], labs["labs"][0]["path"])
+        self.assertEqual(set(scene["marks"]), {"anthropic", "google", "openai", "reference"})
+        self.assertTrue(scene["marks"]["reference"]["route"])                              # the planner carries no lab's mark
+        self.assertEqual(scene["marks"]["anthropic"]["path"], makers.mark_path("anthropic"))
+        for settings in (family, labs, scene):
+            self.assertIn("return SVGLoader;", settings["loader"])
+            self.assertNotIn("from 'three'", settings["loader"])
+
     def test_the_numbers_on_the_drivers_card_come_from_the_results(self):
         facts = makers.facts()
         self.assertGreater(facts["reference"], facts["rl"])
@@ -147,6 +160,13 @@ class CutTest(unittest.TestCase):
             self.assertNotIn(name, film)
             self.assertIn(piece["page"], ("film", "campaign"))
             self.assertTrue(piece["beats"])
+            if piece.get("addon"):
+                self.assertTrue((REPO / "tools" / "manh_demo" / piece["addon"]).exists(), name)
+        scene = cut.PIECES["icons_scene"]["beats"]                                         # each kind gets the same two moments
+        self.assertEqual(len(scene), 8)
+        self.assertEqual({beat["js"] for beat in scene[0::2]}, {scene[0]["js"]})
+        self.assertEqual({beat["js"] for beat in scene[1::2]}, {scene[1]["js"]})
+        self.assertAlmostEqual(sum(beat["min"] for beat in scene[:2]), cut.PIECES["icons_scene"]["addon_settings"]["show"])
 
     def test_the_length_leaves_a_second_under_two_minutes(self):
         self.assertLess(cut.LIMIT_SECONDS, 120.0)

@@ -137,11 +137,22 @@ def facts() -> Dict[str, Any]:
             "best_claude": max(found["best_recorded_opus"], found["best_recorded_sonnet"])}
 
 
-def icon_settings() -> Dict[str, Any]:
-    """What the floating-icon drafts need: each lab's own logo (Anthropic, Google DeepMind, OpenAI) as a path with
-    its colours, and three.js's SVG loader."""
+def icon_settings(company: bool = False) -> Dict[str, Any]:
+    """What the floating-icon drafts need: each lab's mark as a path with its colours, and three.js's SVG loader.
+    The marks are the model families' (Claude, Gemini, GPT), the ones Manh saw first and liked; with `company`
+    they are the labs' own logos instead (Anthropic, Google DeepMind, OpenAI), the second set of drafts."""
     from . import pages
 
     return {"loader": pages.svg_loader(),
-            "labs": [{"key": key, "name": spec["lab"].upper(), "path": mark_path(key, company=True), "ink": spec["ink"], "tile": spec["tile"], "text": spec["text"]}
-                     for key, spec in MAKERS.items()]}
+            "labs": [{"key": key, "name": spec["lab" if company else "family"].upper(), "path": mark_path(key, company=company),
+                      "ink": spec["ink"], "tile": spec["tile"], "text": spec["text"]} for key, spec in MAKERS.items()]}
+
+
+def scene_icon_settings() -> Dict[str, Any]:
+    """What the icons over the real environment need: the family mark of every lab, the reference's gold route,
+    and three.js's SVG loader. Which rover is whose is added by the recorder, from the page's own runs."""
+    from . import pages
+
+    marks = {key: {"path": mark_path(key), "ink": spec["ink"], "tile": spec["tile"], "text": spec["text"]} for key, spec in MAKERS.items()}
+    marks["reference"] = {"route": True, "ink": REFERENCE["ink"], "tile": REFERENCE["tile"], "text": REFERENCE["tile"]}
+    return {"loader": pages.svg_loader(), "marks": marks}
