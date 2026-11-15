@@ -1,15 +1,15 @@
 # The platform entry: text to paste and steps to take
 
-Sunday 15 November 2026, about 06:45 Helsinki. Prepared by Kristján / Claude Code (Traverse session) at Kristján's word. **Nothing was entered, uploaded or submitted by this session.** The form's exact fields were not seen; the blocks below are sized to fit the usual ones. Sölvi's sponsor texts are in [`sponsor-submission.md`](sponsor-submission.md) and are not repeated here.
+Sunday 15 November 2026, about 06:25 Helsinki. Prepared by Kristján / Claude Code (Traverse session) at Kristján's word. **Nothing was entered, uploaded or submitted by this session.** The form's exact fields were not seen; the blocks below are sized to fit the usual ones. Sölvi's sponsor texts are in [`sponsor-submission.md`](sponsor-submission.md) and are not repeated here.
 
 Deadline: **10:00 Helsinki, saved as FINAL.** A draft is not reviewed. The entry stays editable until 10:00, so save FINAL early and improve it after.
 
 ## Steps, in order
 
-| # | Step | Who | State at 06:45 |
+| # | Step | Who | State at 06:25 |
 |---|---|---|---|
-| 1 | Make the repository public, or arrange judge access | Sölvi (owner) | Private. The current files hold no key-shaped string; the history was not scanned |
-| 2 | Choose the video and upload it as a public video of at most two minutes | Kristján | The fallback is ready: [`docs/demo-video/lightlag-traverse-demo.mp4`](demo-video/lightlag-traverse-demo.mp4), 1:58. Manh's recorded-voice film replaces it if it is ready in time |
+| 1 | Make the repository public, or arrange judge access | Sölvi (owner) | ✅ Public since about 06:14 (seen at 06:22) |
+| 2 | Choose the video and upload it as a public video of at most two minutes | Kristján | Two candidates: the fallback, [`docs/demo-video/lightlag-traverse-demo.mp4`](demo-video/lightlag-traverse-demo.mp4), 1:58, and Manh's second draft, [`docs/manh-demo/manh_demo_2.mp4`](manh-demo/manh_demo_2.mp4), 1:59. The team has not chosen |
 | 3 | Put the video's link in the README's "See it" section | whoever uploads | The README links the file in the repository |
 | 4 | Fill the saved **Lightlag** entry with the text below, attach the deck, select both sponsor challenges | one teammate | Draft with empty fields at 05:23 |
 | 5 | Save as FINAL, reopen it, and check every link without being logged in | the same teammate | |

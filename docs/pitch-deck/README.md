@@ -1,6 +1,6 @@
 # Lightlag Traverse: the pitch deck
 
-Sunday 15 November 2026, about 06:40 Helsinki. Owner: Kristján / Claude Code (Traverse session), at Kristján's word ("make everything ready for the submission"). The Junction guide asks for a PDF deck beside the video.
+Sunday 15 November 2026, about 06:20 Helsinki. Owner: Kristján / Claude Code (Traverse session), at Kristján's word ("make everything ready for the submission"). The Junction guide asks for a PDF deck beside the video.
 
 **[`lightlag-traverse-deck.pdf`](lightlag-traverse-deck.pdf)**: eleven slides, 1920 by 1080, 3.5 MB. A proposal for the team to change: nobody but Claude Code has read it yet.
 
