@@ -1,6 +1,6 @@
 # RL–greedy hybrid search
 
-The 65-mission Modal smoke passed; development production is ready to launch. [Fixed protocol](../learning-hybrid.md).
+The 65-mission Modal smoke passed; the 8320-mission development search is running. [Fixed protocol](../learning-hybrid.md).
 
 The 65-arm development search compares individual-policy shortlists, rank
 ensembles across all retained seeds, and RL–greedy rank blends. It uses new
@@ -51,3 +51,5 @@ will be appended here as stages complete.
 Smoke app: [`ap-SiN8z0aHUAlm2IPQLFEXoU`](https://modal.com/apps/solvisantos22/main/ap-SiN8z0aHUAlm2IPQLFEXoU). [Durable launch receipt](smoke/receipt.json). Source/weights and both smoke/development matrices were published in `4f203d4` before launch. The client log-stream timeout occurred after the detached call was submitted; a read-only status poll confirms the coordinator is running, with no reported error.
 
 [Smoke summary](smoke/summary.json) · [audited rows](smoke/state.json). All 65 cases completed in 63.26 seconds of coordinator time, 589.59 summed worker seconds and $0.01034 estimated worker compute. This used world 1 only and is an execution check, not evidence of performance gains. Production remains the predeclared 8320-mission matrix; estimated 20–40 minutes based on smoke throughput, to be revised from live progress.
+
+Development app: [`ap-ggXtMuvzfCF8qtxLc2Aghg`](https://modal.com/apps/solvisantos22/main/ap-ggXtMuvzfCF8qtxLc2Aghg), [receipt](development/receipt.json). Initial production observation: 249/8320 audited completions, no reported failures, roughly 73 missions/minute including startup. The earlier 20–40 minute estimate underestimated coordination overhead; allow about two hours for development at this observed rate. This is an initial estimate, not a completion promise. A separate read-only continuation watcher is being prepared in the claimed `tools/learning_hybrid_ops/` scope, outside both frozen source closures; it will request this chat to resume at terminal stages and respect pause/stop markers.
