@@ -1099,3 +1099,12 @@ cloud production. All 34 Modal smoke missions replay exactly on Linux and Mac;
 three full-controller reruns match the original reference, prior learned policy
 and a new guarded program. Production performance remains pending. Existing reference,
 prior results, tasks and teammate jobs are unchanged. [Artifacts](planner-lab-results/README.md).
+
+
+### Sölvi / Codex — confirmation audit and frozen final selection (15 November)
+
+- **Human direction:** continue the authorized RL–greedy composition experiment, preserve failures and freezes, and publish selection before reserved worlds.
+- **Codex contribution:** reconciled the original confirmation call, downloaded terminal metadata once, verified all 5376 job/source/attempt/audit identities and preserved parent failure records. Independent reviews recomputed all 13 summaries, map-bootstrap intervals and the unchanged selection, then validated the final source/weight/resource/lineage freeze. No training, policy change or model API call occurred.
+- **Measured outcome:** selected all-six ensemble with 90% greedy-efficiency shortlist scores **0.380209**, greedy **0.375202**, frozen reference **0.500510**. Paired gain **0.005007**, 95% interval **[−0.000188, 0.010190]**; selection evidence, not a confirmed gain. Two higher-scoring candidates each lost a rover and are excluded by the fixed safety gate. All outcomes retained: 5372 jointly home/alive, 3 deaths, 3 away endings, zero invalid calls.
+- **Modal evidence:** app `ap-mAROrYr7XrA7sT2t7Z5zMI`, original call `fc-01M7EFBZEQXETSYPQH3PCREV4D`, completed at 02:43:53 UTC. Confirmation recorded running compute **$2.278476**; cumulative hybrid **$4.136855**, closed prior training **$2.404367**, combined **$6.541221**. Excludes ancillary, idle and lost unrecorded work; not an invoice or credit balance.
+- **Artifacts and next decision:** [all confirmation results, hashes and independent audits](learning-hybrid-results/confirmation/completed/README.md); [final selection and operations freeze](learning-hybrid-results/final/README.md), SHA `f79ce4f9b42549aed0ccdfd53c6ce17da03e259a5c400323ab816ddc3892864d`. Ten arms ×256 reserved worlds, unchanged weights/source and reference. This freeze must reach main before final launch; the final 1 pp/significance/safety gate is unchanged.
