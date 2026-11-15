@@ -1,6 +1,6 @@
 # Greedy-prior PPO training
 
-Preparation is complete; launch is pending the published source freeze.
+All six fresh training runs are active on Modal. Source and resources were published before launch.
 [Protocol](../learning-hybrid-training.md) · [six-run configuration](campaign.json).
 
 The new learner starts with greedy as its most likely action and learns
@@ -75,3 +75,9 @@ reconstructed by the final evaluator.
 
 App IDs, progress, measured estimates, results and submission copy will follow.
 The existing reference stays in place regardless of this experiment's result.
+
+## Live launch and continuation
+
+Training app: [`ap-59QwuUBGJ18ZztGfLBhd9u`](https://modal.com/apps/solvisantos22/main/ap-59QwuUBGJ18ZztGfLBhd9u). [Six original call IDs](receipt.json) · [first live status](launch-status.json). Code was published in `d1c6dbf`, the exact [source/resource freeze](freeze.json) in `fd7f4e5`, then all six calls were submitted once. All six initialize successfully and report running, with no stop marker or poll/progress errors in this initial observation. The client log-stream timeout happened after successful detached submission and is not a training failure.
+
+Launch was approximately 23:58 UTC on 14 November; the shared three-hour cutoff is **15 November 02:58 UTC / 04:58 Helsinki**, earlier than the absolute 05:30 UTC ceiling. Expected completion remains approximately 1–1.5 hours from launch, with 2–3 hours allowed. Milestone scores are development data. Read-only monitoring and final continuation use the fixed checkout `/tmp/junction-hybrid-frozen` at `fd7f4e5`; all 51 training and 54 composition-search pins were verified there. No previous supervisor is restarted.
