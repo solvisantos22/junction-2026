@@ -26,14 +26,14 @@ Manh asked for the pieces to be compiled, and for the replay to carry all the di
 | 4 | FAST · behind GPT-6 Luna, site 3 | Mars doesn't play fair. A fast one reaches for a rock and misses, by three centimetres. No points. **Nine tries, one rock.** |
 | 5 | BALANCED · Claude Sonnet 5.5 on the scarp, site 3 | A bigger one drives onto a slope too steep. The rover freezes and forgets its orders. **Thirty times.** |
 | 6 | FLAGSHIP · behind Claude Opus 5.5, site 1; its score-card | And a flagship: thirteen metres from home, twenty-one samples on board. It will not make it. **Nothing broke. So what went wrong?** |
-| 7 | The sun · Gemini 4 Argon runs flat, the planner waits, site 3 | The sun. It's the only fuel. This rover drove until its battery was flat. Ours saw its battery fall, stopped, and waited for light. **So how did all nine do?** |
+| 7 | The sun · Gemini 4 Argon runs flat, the planner waits, site 3 | The sun. It's the only fuel. This rover drove until its battery was flat. Our driver saw its battery fall, stopped, and waited for light. **So how did all nine do?** |
 | 8 | Every run of all nine against the planner | On three maps in a row, none beat our driver. The best run came within a hair; the best average brought home thirty-seven percent. Ours: forty-eight, and it never lost a rover. **So what is it?** |
 | 9 | What our driver is | Not an AI. A planner: plain code that works out the whole day before the wheels turn. **Lucky maps? We wondered too.** |
-| 10 | 300 fresh worlds on Modal | So we ran eighteen hundred more match-ups on Modal, on worlds nobody had seen. The planner won seventeen hundred and eighty. **Can a machine learn it instead?** |
+| 10 | 300 fresh worlds on Modal, every model's best program | So we replayed every model's best program on three hundred fresh worlds, on Modal. The planner won ninety-five times in a hundred. **Can a machine learn it instead?** |
 | 11 | The planner and our trained agent | We trained one from scratch. On average it out-scored eight of the nine models, and still lost to the planner. |
 | 12 | The end card | AI can write the code. It can't yet plan the day. **Can your agent make it home?** |
 
-Two things to know before recording it in your own voice. "None beat our driver" is about the three-site campaign, which is what the film shows: the best run there scored 0.473 against the planner's 0.476. On the separate one-site task, one Gemini 4 Carbon run edged the planner (0.567 against 0.565), so keep "on three maps in a row" in the line. And the trained agent's 0.366 is the mean of three seeds; the rover of it that drives in the replay is the best seed (0.395), and the standings say so.
+Two things to know before recording it in your own voice. "None beat our driver" is about the three-site campaign, which is what the film shows: the best run there scored 0.473 against the planner's 0.476. On the separate one-site task, one Gemini 4 Carbon run edged the planner (0.567 against 0.565), so keep "on three maps in a row" in the line. The trained agent's 0.366 is the mean of three seeds; the rover of it that drives in the replay is the best seed (0.395), and the standings say so. And "ninety-five times in a hundred" is 2,556 of 2,700 match-ups: each of the nine models' best program on 300 worlds none of them had seen (counting all 22 programs the models left, 6,390 of 6,600).
 
 ## The script
 

@@ -45,7 +45,7 @@
     #moment.mk-on > i, #moment.mk-on > b { margin-left: calc(63px * var(--s)); }
     #moment b small { margin-left: .9em; font-size: .8em; font-weight: 400; letter-spacing: .14em; color: var(--dim); }
     .row .who b img.mk { height: 1.02em; width: 1.02em; margin-right: .42em; vertical-align: -.14em; }
-    #rows.tiers .cell { flex-basis: 40%; }                 /* the bar gives up some width to the tier beside it */
+    #rows.tiers .cell { flex-basis: 36%; }                 /* the bar gives up some width to the tier beside it */
     .cells .tier { flex: 0 0 auto; font-size: calc(var(--rh) * .2); letter-spacing: .15em; color: var(--dim); white-space: nowrap; }
     #film .caption { font-size: 50px !important; letter-spacing: .075em !important; }   /* Barlow Condensed is wider than the DIN Condensed the captions were sized for */
     #moment.sc { width: min(calc(700px * var(--s)), 88%); padding-bottom: calc(15px * var(--s)); }
@@ -218,7 +218,7 @@
       tiles.forEach((node, i) => { const k = smooth(0, 1, (since - 0.25 - i * 0.16) / 0.32); node.style.opacity = k.toFixed(3); node.style.transform = `translateY(${((1 - k) * 12).toFixed(1)}px)`; });
       if (line) { const k = smooth(0, 1, (since - 1.3) / 0.4); line.style.opacity = k.toFixed(3); then = since >= 1.3; }
     }
-    if (!cardOn) { delete A.card.dataset.plain; delete A.card.dataset.sc; A.card.classList.remove('sc'); }
+    if (!cardOn) { delete A.card.dataset.plain; delete A.card.dataset.sc; }      // the dress stays on while the card fades out: the page's paragraphs must not show through (Manh saw them at 1:04)
     if (then && !last.then) events.push({ k: 'then' });
     last.then = then;
     if (cardOn && !last.card) events.push({ k: 'card', tone: moment.kind.startsWith('ref') ? 'gold' : 'bad' });

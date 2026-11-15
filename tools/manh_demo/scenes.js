@@ -222,6 +222,62 @@
     });
   };
 
+  // Was it luck? Kristján's 300-world chart, with every model in it instead of Claude's six programs (Manh, 15 November:
+  // "it's only Claude? ... such that it includes all the models"). A row per model: its best program, world by world
+  // against the planner on the same world (window.__MANH.worlds, from makers.worlds_table). The timing follows his
+  // scene: the worlds sweep in, each row's count lands, cues[0] brings the totals, cues[1] the note.
+  const WORLDS = { top: 286, row: 52, tall: 38, x0: 566, cell: 3.38, won: 1612, lost: 1782, rows: 0.7, sweep: 1.0 };
+  const sweepOf = D => Math.min(3.4, D * 0.3);
+  SCENES.worlds = (t, D, data, cues) => {
+    backdrop('AT SCALE · MODAL');
+    const F = M.worlds, L = WORLDS, n = F.worlds, sweep = sweepOf(D), bottom = L.top + F.rows.length * L.row, count = v => v.toLocaleString('en-US');
+    heading(t, `WAS IT LUCK? ${n} FRESH WORLDS`, `EVERY MODEL'S BEST PROGRAM REPLAYED ON MODAL · ${count(F.pairs)} MATCH-UPS · WORLDS NO MODEL HAD SEEN`);
+    rise(t, 0.9, () => {
+      text('PLANNER HIGHER', L.won, L.top - 16, { size: 20, color: C.faint, spacing: 0.12 });
+      text('ROVERS LOST', L.lost, L.top - 16, { size: 20, color: C.faint, spacing: 0.12 });
+    });
+    F.rows.forEach((row, r) => {
+      const y = L.top + r * L.row, k = appear(t, L.rows + r * 0.08, 0.3);
+      if (k <= 0.003) return;
+      g.save(); g.globalAlpha = k;
+      tile(row.maker, 120, y, L.tall);
+      text(row.name, 174, y + 30, { size: 29, color: M.tiles[row.maker].text, spacing: 0.08, bare: true });
+      text(row.tier, L.x0 - 18, y + 28, { size: 18, color: C.faint, spacing: 0.14, align: 'right' });
+      const done = clamp((t - L.sweep - r * 0.12) / sweep, 0, 1), upto = Math.round(done * n);
+      rect(L.x0, y, n * L.cell, L.tall, 'rgba(243,234,217,.045)');
+      for (let i = 0; i < upto; i++) {
+        const cell = row.cells[i];
+        g.fillStyle = cell === 'x' ? C.red : cell === 'c' ? C.ice : cell === '=' ? C.shade : C.gold;
+        g.globalAlpha = k * (cell === 'r' ? 0.82 : 1);
+        g.fillRect(L.x0 + i * L.cell, y, L.cell - 0.8, L.tall);
+      }
+      g.globalAlpha = k * appear(t, L.sweep + r * 0.12 + sweep, 0.4);     // the row's counts, once its worlds are all in
+      const ahead = text(`${row.reference_higher}`, L.won, y + 33, { size: 38, color: C.gold, spacing: 0.04 });
+      text(`/ ${n}`, L.won + ahead + 10, y + 33, { size: 22, color: C.faint, spacing: 0.08 });
+      text(`${row.lost}`, L.lost, y + 33, { size: 38, color: row.lost ? C.red : C.faint, spacing: 0.04 });
+      g.restore();
+    });
+    rise(t, 1.2, () => {
+      let x = L.x0; const y = bottom + 28;
+      for (const [color, label] of [[C.gold, 'THE PLANNER SCORED HIGHER'], [C.red, "THE MODEL'S ROVER RAN ITS BATTERY FLAT"], [C.ice, "THE MODEL'S PROGRAM SCORED HIGHER"]]) {
+        rect(x, y - 18, 20, 20, color); x += 32; x += text(label, x, y, { size: 22, color: C.dim, spacing: 0.12 }) + 40;
+      }
+    });
+    const at = cues && cues[0] !== undefined ? cues[0] : 1.4 + sweep, note = cues && cues[1] !== undefined ? cues[1] : at + 3;
+    const stats = [[`${count(F.reference_higher)} / ${count(F.pairs)}`, 'MATCH-UPS IN WHICH THE PLANNER SCORED HIGHER', C.gold, 122, 640],
+      [`${F.reference_lost}`, `PLANNER ROVERS LOST ON ${n} WORLDS`, C.gold, 900, 360], [`${F.lost}`, "ROVERS LOST BY THE MODELS' PROGRAMS", C.red, 1330, 470]];
+    stats.forEach(([big, label, color, x, wide], i) => rise(t, at + i * 0.35, () => {
+      text(big, x, 956, { size: 96, color, spacing: 0.03 });
+      paragraph(label, x, 996, wide, 30, { size: 25, color: C.dim, spacing: 0.12 });
+    }));
+    rise(t, note, () => {
+      const y = bottom + 72;
+      rect(L.x0, y - 24, 6, 58, C.ice);
+      text(`A MODEL AHEAD IN ${F.wins} OF ${count(F.pairs)}, NEVER BY MORE THAN ${two(F.widest_win)} · ${F.ties} TIES`, L.x0 + 22, y, { size: 24, color: C.ink, spacing: 0.12 });
+      text(`COUNTING ALL ${F.all.programs} PROGRAMS THE MODELS LEFT: ${count(F.all.reference_higher)} OF ${count(F.all.pairs)} FOR THE PLANNER`, L.x0 + 22, y + 32, { size: 24, color: C.dim, spacing: 0.12 });
+    });
+  };
+
   // When each thing on a chart starts to move, in seconds from the start of the scene. `check` marks a time
   // the page's own appear() must have used; the kinds are the sounds of tools/manh_demo/sound.py.
   const SFX = {
@@ -281,6 +337,14 @@
       for (let i = 0; i < 2; i++) for (let n = 0; n < 3; n++) list.push({ at: P.lines + i * 0.2 + n * 0.32, kind: 'tick', step: n + i, check: true });
       list.push({ at: P.scores, kind: 'bar', score: 0.476, gold: true, check: true }, { at: P.scores + 0.3, kind: 'bar', score: 0.366, check: true });
       list.push({ at: P.note, kind: 'chime_soft', step: 1, check: true });
+      return list;
+    },
+    worlds(D, data, cues) {
+      const L = WORLDS, sweep = sweepOf(D), rows = M.worlds.rows.length, list = [{ at: L.sweep, kind: 'flow', len: sweep + 0.9, rise: 1 }];   // the worlds sweep in
+      for (let r = 0; r < rows; r++) list.push({ at: L.sweep + r * 0.12 + sweep, kind: 'tick', step: r % 6, check: true });               // each row's count
+      const at = cues && cues[0] !== undefined ? cues[0] : 1.4 + sweep, note = cues && cues[1] !== undefined ? cues[1] : at + 3;
+      list.push({ at, kind: 'hit_soft', check: true }, { at: at + 0.35, kind: 'tick', step: 1, check: true }, { at: at + 0.7, kind: 'tick', step: 3, check: true });
+      list.push({ at: note, kind: 'chime_soft', check: true });
       return list;
     },
     tiers(D, data, cues) {

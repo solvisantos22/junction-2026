@@ -230,3 +230,64 @@ def tier_table(claude: Dict[str, Any], reference: float, learned: float) -> Dict
             "best_run": {"name": best["name"], "score": best["runs"][0]}, "best_mean": {"name": rows[0]["name"], "score": rows[0]["mean"]},
             "best_mean_percent": round(rows[0]["mean"] * 100), "reference_percent": round(reference * 100),
             "below_learned": sum(row["mean"] < learned for row in rows)}
+
+
+# The farm: programs the models wrote, replayed on 300 worlds none of them had seen (seeds 600-899), each beside the
+# reference on the same world (`docs/traverse-farm/`, on Modal). Kristján's six Claude programs are `programs-1`; the
+# tier comparison's are the other three sets. A later set replaces an earlier one for the same program (GPT-6.1 Sol's
+# second agent program was replayed again with the packages it had installed).
+FARM_SETS = ("programs-1", "programs-tiers", "programs-agents-tiers", "programs-agents-tiers-2")
+
+
+def worlds_table() -> Dict[str, Any]:
+    """For the film's 300-world chart: one row per model, its best program (the highest mean score over the 300
+    worlds among the programs that model left: one written in a single request, or one an agent run left), world by
+    world against the reference of the same farm run. `cells` holds a letter per world: r the reference scored
+    higher, c the program did, = a tie, x the program's rover ran its battery flat. Also the count over every
+    program, so the choice of the best is seen not to flatter the reference."""
+    import json
+
+    farm = HERE.parents[1] / "docs" / "traverse-farm"
+    slugs: Dict[str, str] = {}
+    for models in LINEUP.values():
+        for name in models:
+            slugs[name.lower().replace(" ", "-")] = name
+            if name.startswith("Claude"):
+                slugs[name.split()[1].lower()] = name            # Kristján's runs are named opus, sonnet, haiku
+    programs: Dict[Tuple[str, str], Dict[str, Any]] = {}
+    reference: Dict[str, Any] = {}
+    for folder in FARM_SETS:
+        rows = [json.loads(line) for line in (farm / folder / "rows.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
+        pilot = {row["seed"]: row for row in rows if row["candidate"] == "pilot"}
+        seeds = sorted(pilot)
+        reference = {"worlds": len(seeds), "mean": sum(pilot[seed]["reward"] for seed in seeds) / len(seeds),
+                     "lost": max(reference.get("lost", 0), sum(not pilot[seed]["alive"] for seed in seeds))}
+        for candidate in sorted({row["candidate"] for row in rows} - {"pilot"}):
+            found = re.match(r"(?:program|agent):traverse-(oneshot|agent)-(.+)-(\d+)$", candidate)
+            if not found or found.group(2) not in slugs:
+                raise SystemExit("manh_demo: {} in {} is not a program of a model of the lineup".format(candidate, folder))
+            mine = {row["seed"]: row for row in rows if row["candidate"] == candidate}
+            cells = "".join("x" if not mine[seed]["alive"] else "c" if mine[seed]["reward"] > pilot[seed]["reward"] + 1e-12
+                            else "r" if mine[seed]["reward"] < pilot[seed]["reward"] - 1e-12 else "=" for seed in seeds)
+            how = "ONE REQUEST" if found.group(1) == "oneshot" else "AGENT RUN " + found.group(3)
+            programs[(slugs[found.group(2)], how)] = {
+                "how": how, "cells": cells, "mean": sum(mine[seed]["reward"] for seed in seeds) / len(seeds),
+                "reference_higher": sum(pilot[seed]["reward"] > mine[seed]["reward"] + 1e-12 for seed in seeds),
+                "wins": sum(mine[seed]["reward"] > pilot[seed]["reward"] + 1e-12 for seed in seeds),
+                "ties": sum(abs(mine[seed]["reward"] - pilot[seed]["reward"]) <= 1e-12 for seed in seeds),
+                "lost": cells.count("x"), "margin": max(mine[seed]["reward"] - pilot[seed]["reward"] for seed in seeds)}
+    rows = []
+    for key, models in LINEUP.items():
+        for tier, name in enumerate(models):
+            left = [program for (model, _), program in programs.items() if model == name]
+            if not left:
+                raise SystemExit("manh_demo: no program of {} was replayed on the farm".format(name))
+            best = max(left, key=lambda program: program["mean"])
+            rows.append({"name": name.upper(), "maker": key, "tier": TIERS[tier], "left": len(left), **best})
+    rows.sort(key=lambda row: -row["mean"])
+    pairs, higher = reference["worlds"] * len(rows), sum(row["reference_higher"] for row in rows)
+    return {"rows": rows, "worlds": reference["worlds"], "pairs": pairs, "reference_higher": higher, "percent": round(100 * higher / pairs),
+            "wins": sum(row["wins"] for row in rows), "ties": sum(row["ties"] for row in rows), "lost": sum(row["lost"] for row in rows),
+            "widest_win": max(row["margin"] for row in rows), "reference_mean": reference["mean"], "reference_lost": reference["lost"],
+            "all": {"programs": len(programs), "pairs": reference["worlds"] * len(programs),
+                    "reference_higher": sum(program["reference_higher"] for program in programs.values())}}

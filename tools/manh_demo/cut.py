@@ -135,12 +135,12 @@ LINES2: Dict[str, str] = {
     "n6": "And a flagship: thirteen metres from home, twenty-one samples on board. It will not make it.",
     "n6b": "Nothing broke. So what went wrong?",
     "n7": "The sun. It's the only fuel. This rover drove until its battery was flat.",
-    "n7b": "Ours saw its battery fall, stopped, and waited for light. So how did all nine do?",
+    "n7b": "Our driver saw its battery fall, stopped, and waited for light. So how did all nine do?",
     "n8": "On three maps in a row, none beat our driver. The best run came within a hair; the best average brought home "
           "thirty-seven percent. Ours: forty-eight, and it never lost a rover. So what is it?",
     "n9": "Not an AI. A planner: plain code that works out the whole day before the wheels turn. Lucky maps? We wondered too.",
-    "n10": "So we ran eighteen hundred more match-ups on Modal, on worlds nobody had seen. "
-           "The planner won seventeen hundred and eighty. Can a machine learn it instead?",
+    "n10": "So we replayed every model's best program on three hundred fresh worlds, on Modal. "
+           "The planner won ninety-five times in a hundred. Can a machine learn it instead?",
     "n11": "We trained one from scratch. On average it out-scored eight of the nine models, and still lost to the planner.",
     "n12": "AI can write the code. It can't yet plan the day. Can your agent make it home?",
 }
@@ -151,12 +151,13 @@ SUBTITLES2: Dict[str, str] = {
     "n6": "And a flagship: 13 metres from home, 21 samples on board. It will not make it.",
     "n8": "On three maps in a row, none beat our driver. The best run came within a hair; the best average brought home "
           "37%. Ours: 48, and it never lost a rover. So what is it?",
-    "n10": "So we ran 1,800 more match-ups on Modal, on worlds nobody had seen. "
-           "The planner won 1,780. Can a machine learn it instead?",
+    "n10": "So we replayed every model's best program on 300 fresh worlds, on Modal. "
+           "The planner won 95 times in 100. Can a machine learn it instead?",
     "n11": "We trained one from scratch. On average it out-scored 8 of the 9 models, and still lost to the planner.",
 }
-# What lines n8 and n11 say in words, as `makers.tier_table` counts it; the build stops if the runs say otherwise.
-SAID2 = {"best_mean_percent": 37, "reference_percent": 48, "below_learned": 8}
+# What lines n8, n10 and n11 say in words, as `makers.tier_table` and `makers.worlds_table` count it; the build stops
+# if the runs say otherwise.
+SAID2 = {"tiers": {"best_mean_percent": 37, "reference_percent": 48, "below_learned": 8}, "worlds": {"percent": 95, "worlds": 300, "reference_lost": 0}}
 DIVE2, LAND2, RISE2 = 2.4, 3.0, 2.4
 FAST, MID, FLAGSHIP, FLAT = "campaign-agent-gpt-6-luna-1", "campaign-agent-sonnet-1", "campaign-agent-opus-2", "campaign-agent-gemini-4-argon-1"
 STORY_LEAD = 11.8               # ticks before a moment at which story mode is started, to arrive on a word (see shots2)
@@ -221,21 +222,24 @@ def shots2(durations: Dict[str, float], words: Dict[str, List[Dict[str, Any]]], 
              "js": "A.showTitle(false); A.HOLD.lost = 999; A.HOLD.ref_wait = 999; A.follow('%s'); A.seek(%.2f); A.setCam('map'); A.startStory();" % (FLAT, 62 - STORY_LEAD),
              "overlay": [{"kind": "caption", "from": 0.35, "to": round(0.3 + at("n7", "This rover") - 0.1, 2), "text": "THE ONLY FUEL IS THE SUN"}]},
             {"min": 3.0, "thump": 0.0},
+            # a hard cut: the first card goes with the picture it belongs to, without its fade
             {"vo": "n7b", "vo_at": 0.35, "over": True, "until": "!!(A.story.active && A.story.active.kind === 'ref_wait')",
-             "js": "A.stopStory(); A.seek(90.4); A.startStory();", "sfx": [{"t": 0.0, "kind": "cut"}]},
-            {"min": 3.0, "pad": 1.0},
+             "js": "A.card.style.transition = 'none'; A.stopStory(); A.seek(90.4); A.startStory();",
+             "at": [{"t": 0.2, "js": "A.card.style.transition = '';"}], "sfx": [{"t": 0.0, "kind": "cut"}]},
+            {"min": 3.0, "pad": 0.8},
         ]},
         # 5. Every run of all nine models against the planner.
         {"name": "v2_tiers", "page": "film", "scene": "tiers", "beats": [
             {"vo": "n8", "vo_at": 0.4, "pad": 1.5, "min": 8.0,
              "cues": [round(0.4 + at("n8", "The best run") - 0.1, 2), round(0.4 + at("n8", "Ours") - 0.1, 2)]}]},
-        # 6. What our driver is (Kristján's scene), and the 300 fresh worlds on Modal (his).
+        # 6. What our driver is (Kristján's scene), and the 300 fresh worlds on Modal: his chart's look, with every model's
+        #    best program in it instead of Claude's six (Manh: "it's only Claude? ... such that it includes all the models").
         {"name": "v2_reference", "page": "film", "scene": "reference", "beats": [
             {"vo": "n9", "vo_at": 0.4, "pad": 1.3,
              "cues": [round(0.4 + at("n9", "Not an AI") + 0.1, 2), round(0.4 + at("n9", "A planner") - 0.1, 2),
                       round(0.4 + at("n9", "plain code") - 0.1, 2), round(0.4 + at("n9", "before the wheels") - 0.1, 2)]}]},
-        {"name": "v2_farm", "page": "film", "scene": "farm", "beats": [
-            {"vo": "n10", "vo_at": 0.4, "pad": 1.0, "min": 9.0,
+        {"name": "v2_farm", "page": "film", "scene": "worlds", "beats": [
+            {"vo": "n10", "vo_at": 0.4, "pad": 0.7, "min": 9.0,
              "cues": [round(0.4 + at("n10", "The planner won") - 0.1, 2), round(0.4 + at("n10", "Can a machine") - 0.1, 2)]}]},
         # 7. The trained agent beside the planner, and the end card.
         {"name": "v2_drivers", "page": "film", "scene": "drivers", "beats": [{"vo": "n11", "vo_at": 0.5, "pad": 1.6, "min": 7.4}]},

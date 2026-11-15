@@ -123,7 +123,7 @@ def open_page(context: Any, shot: Dict[str, Any], sources: Dict[str, Any], probl
             if key == "rl":                                                                             # the team's own trained agent: its lime network, and whose it is
                 from . import learned
                 icons["marks"]["rl"] = learned.icon_mark()
-                tiers[run] = "OURS · BEST OF 3 SEEDS"                                                   # one rover, so one seed: the best, and it says so
+                tiers[run] = "OUR BEST SEED"                                                           # one rover, so one seed: the best, and it says so
         page.evaluate("m => { window.__MANH = m; }", {"tiles": tiles, "makers": {run: key for run, key in whose.items() if key}, "icons": icons,
                                                          **sources.get("extra", {}), "tiers": tiers})   # a draft's own settings, say cards: "score"
         page.evaluate(sources["tracker.js"])
@@ -243,16 +243,18 @@ def chart_numbers(data: Dict[str, Any]) -> Dict[str, Any]:
     for item in data["campaign"]["claude"]:
         claude.setdefault(item["model"].upper(), []).append(item["score"])
     tiers = makers.tier_table(claude, data["campaign"]["reference"]["score"], facts["rl"])
-    return {"facts": {**facts, "models": len(tiers["rows"]), "below_rl": tiers["below_learned"], "best_model": tiers["best_mean"]}, "tiers": tiers}
+    return {"facts": {**facts, "models": len(tiers["rows"]), "below_rl": tiers["below_learned"], "best_model": tiers["best_mean"]}, "tiers": tiers,
+            "worlds": makers.worlds_table()}
 
 
 def browser_sources() -> Dict[str, Any]:
     data = film_data.build()
     numbers = chart_numbers(data)
-    for key, said in FILM["said"].items():                # the narration states these in words
-        if numbers["tiers"][key] != said:
-            raise SystemExit("{}: the narration says {} = {}, the runs now say {}: change the line in tools/manh_demo/cut.py".format(
-                FILM["name"], key, said, numbers["tiers"][key]))
+    for table, claims in FILM["said"].items():            # the narration states these in words
+        for key, said in claims.items():
+            if numbers[table][key] != said:
+                raise SystemExit("{}: the narration says {} = {}, the runs now say {}: change the line in tools/manh_demo/cut.py".format(
+                    FILM["name"], key, said, numbers[table][key]))
     return {
         "campaign": pages.cast_page(BUILD, FILM["cast"]) if FILM["cast"] else pages.campaign_page(BUILD),
         "film": pages.film_page(BUILD), "overlay.js": pages.overlay_script(),

@@ -252,11 +252,29 @@ class SecondDraftTest(unittest.TestCase):
         table = makers.tier_table(claude, reference, makers.facts()["rl"])
         self.assertEqual(len(table["rows"]), 9)
         self.assertLess(table["best_run"]["score"], reference)                              # "none beat our driver"
-        for key, said in cut.SAID2.items():                                                  # 37 percent, 48, eight of the nine
+        for key, said in cut.SAID2["tiers"].items():                                         # 37 percent, 48, eight of the nine
             self.assertEqual(table[key], said, key)
         self.assertEqual([row["mean"] for row in table["rows"]], sorted((row["mean"] for row in table["rows"]), reverse=True))
         with self.assertRaises(SystemExit):
             makers.tier_table(claude, table["best_run"]["score"], 0.3)                       # a run at the planner's score stops the build
+
+    def test_the_300_worlds_hold_every_model(self):
+        table = makers.worlds_table()
+        self.assertEqual({row["name"] for row in table["rows"]}, {name.upper() for models in makers.LINEUP.values() for name in models})
+        for key, said in cut.SAID2["worlds"].items():                                        # "three hundred fresh worlds ... ninety-five times in a hundred"
+            self.assertEqual(table[key], said, key)
+        for row in table["rows"]:
+            self.assertEqual(len(row["cells"]), table["worlds"])
+            self.assertEqual(row["cells"].count("x"), row["lost"])
+            self.assertEqual(row["reference_higher"] + row["wins"] + row["ties"], table["worlds"])
+            self.assertGreaterEqual(row["left"], 1)
+        self.assertEqual(table["pairs"], 9 * table["worlds"])
+        self.assertEqual(table["reference_higher"], sum(row["reference_higher"] for row in table["rows"]))
+        self.assertGreater(table["all"]["programs"], 9)                                      # the best of several, and the count over all of them is kept beside it
+        self.assertGreaterEqual(table["all"]["reference_higher"] / table["all"]["pairs"], table["reference_higher"] / table["pairs"])
+        scenes = (REPO / "tools" / "manh_demo" / "scenes.js").read_text(encoding="utf-8")
+        self.assertIn("SCENES.worlds", scenes)
+        self.assertEqual(next(shot for shot in self.shots if shot["name"] == "v2_farm")["scene"], "worlds")
 
     def test_the_replay_page_carries_nine_models_and_the_trained_agent(self):
         before = {path: digest(path) for path in KRISTJANS}
