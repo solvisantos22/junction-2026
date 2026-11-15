@@ -632,6 +632,8 @@ No prize submission, sponsor post, redemption, account change or paid run was pe
 - **Evidence:** [review](traverse-integrity.md), [records](traverse-integrity-results/), [tool](../tools/traverse_integrity/), [README](../README.md).
 - **Scope:** new files, `README.md`, the integrity row of `TEAM_STATUS.md`, a notice on `docs/submission-readme.md` and the rows of `docs/submission-checklist.md` this work settles. No task, simulator or reference file was edited. Nothing uploaded or submitted.
 
+- **Codex integration verification:** The scheduled main-push watcher verified source `5c5d46b7859a4e428582ac178dac6ee141b9c6ae` in its isolated checkout: the prior 11 integrity and 75 Traverse passing results were reused after proving all nine tested dependency objects unchanged; the actual integration diff passed whitespace checks; all six changed Python files parsed, three saved JSON reports parsed and retained the exact previously checked bytes, and 64 local documentation links resolved. Automatic merges preserved the concurrent team claims and prize entries. The task, simulator and reference files were unchanged by this increment. No Harbor attack run, archived agent program, model API call, cloud job or deployment was repeated.
+
 ### 14 November — Kristján / Codex: make the 3D mission demo easier to present
 
 - **Human direction:** Kristján asked Codex to inspect the demo and improve its looks, controls and mission presentation. Claude Code authored the existing 3D scene; this increment builds on it.
