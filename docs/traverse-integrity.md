@@ -69,7 +69,7 @@ Two changes would close it and were not made, because the task is frozen: drawin
 
 ## What was not covered
 
-- **A Linux host.** The runs were on Docker Desktop for macOS, where Harbor copies log folders instead of mounting them. Harbor's verifier removes stale reward files on both paths (read in its source, version 0.25.0), but that path was not run.
+- **A Linux host.** Harbor is built to mount the trial's log folders into the agent's container, so there the agent's `/logs/verifier` is the folder the verifier later writes to. In these runs, on Docker Desktop for macOS, it copied the folders instead, so that path was not exercised. Harbor's source (0.25.0, `trial.py` and `verifier.py`) handles it in three steps: it stops the agent's container before it collects the simulator's result, it empties the verifier folder when the fresh verifier container starts, and it removes any reward file once more before running the tests. Read, not run. One probe run on a Linux machine would settle it; it takes about a minute.
 - **Exhausting the simulator** (flooding it with calls or huge requests until it dies). The outcome would be no grade, since the verifier fails loudly when the result file is missing; it was not tried beyond one megabyte.
 - **Escapes from the container, and Harbor itself.**
 - **The one-site task and the MAX tasks.** They use the same service and server code; the probes were run on the campaign only.
