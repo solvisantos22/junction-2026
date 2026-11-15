@@ -116,3 +116,20 @@ The verified stage-adapter snapshot is `/tmp/junction-hybrid-stages-frozen`
 (stages source SHA256 `f59e3e5b432e4b5590801faa7632f9d8019dd3c296c0f822175ff147f0a01641`).
 It retains all original 54 source pins and recovery source `d79172fe…`; use it
 for the later-stage commands. The recovery-only snapshot remains untouched.
+
+## Handoff checkpoint — 15 November 01:11 UTC
+
+[Latest read-only snapshot](progress-at-handoff.json): **2664/5175 recovery
+cases** complete, or **5809/8320 original development cases** including the
+retained prefix. Running, no reported error or pause; watcher read errors zero.
+Recent throughput suggests roughly **20–30 minutes** to finish development,
+conditional on continued health. No group has been selected. Confirmation and
+final maps remain unopened. The recovery watcher will request continuation on
+completion; all prepared later-stage commands still require verified complete
+evidence and a newly published selection/operations freeze before launch.
+
+The separate greedy-prior experiment is closed: five completed 4096-mission runs and
+one interrupted 1760-mission run, audited report/weights/figure published in
+**`d72e65f`**. Fresh 629000–629127 stays unopened. Its original-call downloader
+exited successfully; do not launch or resume any training. The original watcher
+retains its completion event and still watches future hybrid stages.
