@@ -139,3 +139,11 @@ correct source/reservation/receipt/owner identities, and **all 14 earlier
 control records plus both failed-row files unchanged**. The subsequent
 read-only watcher checkpoint records **317/2510** with zero read errors.
 These are progress snapshots; the full development result is still pending.
+
+The delayed greedy-prior completion wake was reconciled at **01:47 UTC**:
+all six original training results still match their published closure, so
+there is no new training action. A [fresh read-only hybrid check](queued-training-completion-status.json)
+confirmed this same recovery call at **850/2510 new completions**, or
+**6660/8320 overall**, with no error or pause/stop marker and an active watcher.
+No new launch, download, selection or fresh map followed this stale alert.
+The next decision remains gated on all 8320 development results.
