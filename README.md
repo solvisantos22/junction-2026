@@ -6,6 +6,8 @@
 
 One rover, three Mars-like sites in a row, a battery charged by the sun, and every command arriving three ticks late. Every rule and formula is public through five tools. A scripted planner scores **0.476**. Twenty-five agent runs by nine models from Anthropic, OpenAI and Google, each through OpenCode in Harbor, all score less. Most are far below, with an average of 0.23; Google's top model comes within 0.003 on its best run.
 
+The job is real. On 8 and 10 December 2025 NASA's Perseverance drove 210 m and 246 m on Mars along waypoints planned by Anthropic's Claude, which NASA calls the first AI-planned drives on Mars; JPL's engineers ran the commands through a digital twin of the rover before sending them ([NASA JPL](https://www.jpl.nasa.gov/news/nasas-perseverance-rover-completes-first-ai-planned-drive-on-mars/), [Anthropic](https://www.anthropic.com/features/claude-on-mars)). Lightlag Traverse is a simulation with no tie to NASA. It asks an agent for that kind of plan with nobody checking it: a whole day, through the delay, with the battery in the plan.
+
 ## Run it
 
 You need Docker and [Harbor](https://docs.harborframework.com), 0.25.0 or 0.26.0 (`uvx --from harbor==0.25.0 harbor` runs it without installing).
