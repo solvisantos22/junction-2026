@@ -4,7 +4,7 @@
 
 ![A rover on Mars-like ground, with the mission's map and battery beside it](docs/demo-video/poster.jpg)
 
-One rover, three Mars-like sites in a row, a battery charged by the sun, and every command arriving three ticks late. Every rule and formula is public through five tools. A scripted planner scores **0.476**. Twenty-five agent runs by nine models from Anthropic, OpenAI and Google, each through OpenCode in Harbor, all score less. Most are far below, with an average of 0.23; Google's top model comes within 0.004 on its best run.
+One rover, three Mars-like sites in a row, a battery charged by the sun, and every command arriving three ticks late. Every rule and formula is public through five tools. A scripted planner scores **0.476**. Twenty-five agent runs by nine models from Anthropic, OpenAI and Google, each through OpenCode in Harbor, all score less. Most are far below, with an average of 0.23; Google's top model comes within 0.003 on its best run.
 
 ## Run it
 
@@ -75,7 +75,7 @@ The GPT and Gemini runs have been scored but not yet read as closely. What shows
 
 The reference is a planner, not a model: [`lightlag_traverse/pilot.py`](lightlag_traverse/pilot.py). It plays through the same five tools and sees nothing an agent does not. It tracks the rover through the delay with a filter, learns how each surface slips from its own odometry, and searches for a route whose every leg the battery can pay for against the sun, ending at the lander.
 
-It is hard to improve. Of fourteen changes to its parts, the best combination gained 0.001 on fresh worlds, with an interval that spans zero ([ablations](docs/reference-ablation-results/README.md)). A model trained on Modal to pick among twelve planner strategies mid-mission gained 0.5 points on 96 fresh worlds, under the 1 point we had set as the bar, so the reference stayed as it was ([learned planner](docs/learned-portfolio-results/README.md)). A second round, with sixteen strategies and four model families over 8,192 missions, found the same: a Random Forest gained 0.2 points on 192 fresh worlds (95% interval 0.10 to 0.30) and the best fixed strategy 0.35 ([planner lab](docs/planner-lab-results/README.md)).
+It is hard to improve. Of fourteen changes to its parts, the best combination gained 0.001 on fresh worlds, with an interval that spans zero ([ablations](docs/reference-ablation-results/README.md)). We also tried to beat it with learning. An Extra Trees model trained on Modal to pick among twelve planner strategies mid-mission gained 0.48 points on 96 fresh worlds (95% interval 0.27 to 0.72), under the 1 point we had set as the bar, so the reference stayed as it was ([learned planner](docs/learned-portfolio-results/README.md)). A second round, with sixteen strategies and four model families over 8,192 missions, found the same. On 192 more fresh worlds the Extra Trees model gained 0.28 (interval −0.07 to 0.52), a new Random Forest 0.20 (0.10 to 0.30) and the best fixed strategy 0.35 ([planner lab](docs/planner-lab-results/README.md)).
 
 ## Reward integrity
 
@@ -124,7 +124,7 @@ Modal ran the rollout farm (about 6,000 missions by Saturday evening, the 300-wo
 
 ## Caveats
 
-- **The top Gemini model nearly closes the gap.** Gemini 4 Carbon's best campaign run is 0.004 below the reference (0.473 against 0.476), and on one site alone one of its runs is above it (0.567 against 0.565). It also scored zero in one campaign run of three, when its session ran out. For the other eight models the best run is 0.03 to 0.48 below.
+- **The top Gemini model nearly closes the gap.** Gemini 4 Carbon's best campaign run is 0.003 below the reference (0.473 against 0.476), and on one site alone one of its runs is above it (0.567 against 0.565). It also scored zero in one campaign run of three, when its session ran out. For the other eight models the best run is 0.03 to 0.48 below.
 - **When the reference was built.** It was improved (0.448 to 0.565 on world 2026) after two early agent runs had beaten its first version there. The campaign's worlds and the 300 fresh worlds were played afterwards, and nothing was tuned on them.
 - **Replays measure programs.** The fresh-world comparison replays saved programs without the agents that wrote them.
 - **Run counts are small.** One to four runs a model; enough to see the spread, not to state a rate. The table is as of Sunday 05:45.

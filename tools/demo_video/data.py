@@ -63,6 +63,8 @@ def read(path: str) -> str:
 def campaign() -> Dict[str, Any]:
     rows = []
     for folder in sorted(RUNS.glob("campaign-*")):
+        if not (folder / "run.json").exists():          # the tier comparison's runs are saved another way: see models()
+            continue
         meta = json.loads((folder / "run.json").read_text(encoding="utf-8"))
         result = json.loads((folder / "artifacts" / "evaluator" / "result.json").read_text(encoding="utf-8"))
         sites = []
@@ -163,6 +165,115 @@ def quotes() -> Dict[str, Any]:
 
 def build() -> Dict[str, Any]:
     return {"campaign": campaign(), "battery": battery(), "farm": farm(), "learning": learning(), "quotes": quotes()}
+
+
+# ---------------------------------------------------------------- what the third cut adds (storyboard3.py)
+LEDGER = "docs/tier-comparison/runs.jsonl"
+TIER_PROGRAMS = "docs/traverse-farm/programs-tiers/evaluation.json"
+FINAL_LEARNING = "docs/learning-final-results/README.md"
+PORTFOLIO = "docs/learned-portfolio-results/final/summary.json"
+PLANNER_LAB = "docs/planner-lab-results/final/summary.json"
+CAMPAIGN_TASK = "harbor/lightlag-traverse-campaign"
+
+
+def model_name(slug: str) -> str:
+    """gpt-6.1-sol -> GPT-6.1 Sol; gemini-4-carbon -> Gemini 4 Carbon."""
+    family, version, tier = slug.split("-", 2)
+    return ("GPT-{} {}" if family == "gpt" else "Gemini {} {}").format(version, tier.capitalize())
+
+
+def models() -> Dict[str, Any]:
+    """Every agent run on the campaign, by model: Kristján's Claude runs (`run.json`) and the tier
+    comparison's GPT and Gemini runs (Manh's ledger), each scored from the evaluator's own result."""
+    runs = []
+    for row in campaign()["claude"]:
+        runs.append({"model": row["model"], "lab": "anthropic", "score": row["score"], "sites": row["sites"], "timed_out": False})
+    for line in read(LEDGER).splitlines():
+        entry = json.loads(line) if line.strip() else None
+        if not entry or entry["task"] != CAMPAIGN_TASK:
+            continue
+        result = json.loads(read("docs/lightlag-runs/{}/artifacts/evaluator/result.json".format(entry["name"])))
+        sites = [{"reward": round(m["reward"], 6), "end": "lost" if not m["alive"] else "home" if m["at_base"] else "away",
+                  "samples": len(m["sampled_targets"])} for m in result["missions"]]
+        runs.append({"model": model_name(entry["model"].split("/")[-1]), "lab": entry["lab"],
+                     "score": round(result["raw_score"] / result["max_available_value"], 6), "sites": sites,
+                     # the session's 45 minutes ran out before the rover had sampled anything
+                     "timed_out": entry["exception"] == "AgentTimeoutError" and all(site["samples"] == 0 for site in sites)})
+    table: Dict[str, Dict[str, Any]] = {}
+    for run in runs:
+        row = table.setdefault(run["model"], {"model": run["model"], "lab": run["lab"], "found": [], "timed_out": 0, "not_home": 0, "sites": 0})
+        # how a run that scored nothing ended: "t" its session ran out, "n" it sampled nothing and was not cut off
+        idle = all(site["samples"] == 0 for site in run["sites"])
+        row["found"].append((run["score"], "t" if run["timed_out"] else "n" if idle else ""))
+        row["timed_out"] += run["timed_out"]
+        row["not_home"] += sum(1 for site in run["sites"] if site["end"] != "home")
+        row["sites"] += len(run["sites"])
+    rows = sorted(table.values(), key=lambda row: -max(score for score, _ in row["found"]))
+    for row in rows:
+        found = sorted(row.pop("found"), key=lambda item: -item[0])
+        row["scores"], row["flags"] = [score for score, _ in found], [flag for _, flag in found]
+        row["best"], row["mean"] = row["scores"][0], round(sum(row["scores"]) / len(row["scores"]), 6)
+    return {"source": "docs/lightlag-runs/campaign-agent-*/artifacts/evaluator/result.json; " + LEDGER,
+            "runs": len(runs), "labs": len({row["lab"] for row in rows}), "rows": rows,
+            "mean": round(sum(run["score"] for run in runs) / len(runs), 6)}
+
+
+def other_programs() -> Dict[str, Any]:
+    """The GPT and Gemini one-request programs on the same 300 worlds as Claude's (Manh, on Modal)."""
+    found = json.loads(read(TIER_PROGRAMS))
+    versus = found["versus"].values()
+    return {"source": TIER_PROGRAMS, "programs": len(found["versus"]), "pairs": found["worlds"] * len(found["versus"]),
+            "reference_higher": sum(v["lower"] for v in versus), "wins": sum(v["higher"] for v in versus),
+            "ties": sum(v["equal"] for v in versus)}
+
+
+def final_learning() -> Dict[str, Any]:
+    """Sölvi's final small controllers: 40 held-out worlds and the campaign, from the tables of his report."""
+    text = read(FINAL_LEARNING)
+
+    def share(label: str, which: int = 0) -> float:
+        found = re.findall(r"^\| {} \| \*{{0,2}}([\d.]+)%".format(re.escape(label)), text, re.M)
+        if len(found) <= which:
+            raise SystemExit("{!r} was not found in {}".format(label, FINAL_LEARNING))
+        return round(float(found[which]) / 100, 4)
+
+    def top(label: str) -> float:
+        found = re.search(r"^\| {} \| [\d.]+% \| [\d.]+–([\d.]+)%".format(re.escape(label)), text, re.M)
+        if not found:
+            raise SystemExit("the range of {!r} was not found in {}".format(label, FINAL_LEARNING))
+        return round(float(found.group(1)) / 100, 4)
+
+    seeds = re.search(r"^\| Latest PPO, mean of 3 seeds \| \*{0,2}[\d.]+%\*{0,2} \| ([\d.]+)–([\d.]+)%", text, re.M)
+    missions = re.search(r"\*\*Training:\*\* ([\d,]+) missions", text)
+    home = re.search(r"^\| Latest PPO \| [\d.]+% \| \*{0,2}(\d+)/(\d+)", text, re.M)
+    if not (seeds and missions and home):
+        raise SystemExit("the final learning report does not read as expected: " + FINAL_LEARNING)
+    return {"source": FINAL_LEARNING, "training_missions": int(missions.group(1).replace(",", "")),
+            # the campaign's table comes first in the report, the held-out worlds' second
+            "campaign": {"initial": share("Initial controller, each method", 0), "ppo": share("Latest PPO, mean of 3 seeds"),
+                         "ppo_seeds": [round(float(seeds.group(1)) / 100, 4), round(float(seeds.group(2)) / 100, 4)],
+                         "replay": share("Latest replay, mean of 3 seeds"), "greedy": share("Greedy, same navigator"),
+                         "reference": share("Frozen reference", 0),
+                         "best_claude": max(top("Recorded Opus, 4 attempts"), top("Recorded Sonnet, 2 attempts"))},
+            "fresh": {"worlds": 40, "initial": share("Initial controller, each method", 1), "ppo": share("Latest PPO"),
+                      "replay": share("Latest replay"), "greedy": share("Greedy"), "reference": share("Frozen reference", 1),
+                      "ppo_home": [int(home.group(1)), int(home.group(2))]}}
+
+
+def planner() -> Dict[str, Any]:
+    """A model trained on Modal to pick the reference planner's strategy mid-mission: the frozen Extra Trees
+    model on its own 96 fresh worlds, and again as the control of the second round on 192 more (Codex)."""
+    def row(path: str, key: str) -> Dict[str, Any]:
+        found = json.loads(read(path))["table"][key]
+        return {"worlds": found["n"], "gain": round(found["delta"] * 100, 2), "low": round(found["ci95"][0] * 100, 2),
+                "high": round(found["ci95"][1] * 100, 2), "home": found["home_alive"]}
+
+    return {"source": PORTFOLIO + "; " + PLANNER_LAB, "model": "EXTRA TREES", "bar": 1.0,
+            "first": row(PORTFOLIO, "extra_trees"), "second": row(PLANNER_LAB, "old_extra_trees")}
+
+
+def extras() -> Dict[str, Any]:
+    return {"models": models(), "others": other_programs(), "final": final_learning(), "planner": planner(), "rovers": 8}
 
 
 def main() -> int:
