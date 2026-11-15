@@ -1,4 +1,4 @@
-# Second development recovery: verified freeze, not yet launched
+# Second development recovery: running
 
 The first recovery stopped at **01:12:02 UTC on 15 November** after collecting
 all 2667 calls it had submitted: 2665 complete and two failed. Together with
@@ -100,3 +100,42 @@ remain compatible with the original watcher at
 The adapter checks the actual original terminal FunctionCall results before
 launch and remotely; final downloads verify both raw worker rows and mapped
 artifact paths. No confirmation/final selection or execution has occurred.
+
+## Live handoff — 15 November 01:43 UTC
+
+The freeze reached `origin/main` in **`c464dec` before launch**. The one-shot
+launcher passed its fresh inventory/call/artifact checks and exited normally.
+App **`ap-Nnis3HCfoeencYU6ipEpe4`**, original coordinator call
+**`fc-01M7EDXYD8614C8X0ST20CR7N3`**. [Receipt](development-receipt.json) ·
+[first live status](initial-status.json) · [read-only watcher](watcher.json).
+The client timed out waiting for final log streaming after submission; this
+was not a new job failure, and the original call is confirmed running.
+
+The first live checkpoint has **74/2510 new attempts complete**, or
+**5884/8320 original unique cases** including retained results. No stop marker
+or failure is reported at that checkpoint. Allow roughly 20–30 minutes for
+development after startup at earlier throughput, conditional on health. Do
+not use that estimate as proof of completion or select from partial results.
+
+The new watcher runs at
+`/Users/solvisantos/.codex/junction-learning-hybrid-recovery2-watch-20261115`,
+PID **68961**, sleep guard **68962**, every 60 seconds. Its identity binds this
+exact receipt, freeze and status module. Original pause/stop marker links are
+shared; no old watcher or training supervisor is restarted. It queues at most
+one completion/error wake and keeps the **05:35 UTC** fallback. The original
+watcher still watches standard confirmation/final receipt paths.
+
+Next: reconcile this exact terminal call, download its metadata once, verify
+all 8320 original jobs and unchanged retained rows, then run the unchanged
+development analysis. Publish any eligible selection, stage and operations
+freeze before opening confirmation maps. If another failure occurs, stop for
+diagnosis and retain partial evidence; no automatic third recovery. Final
+maps require their own later selection freeze. Greedy-prior training stays
+closed and fresh 629000–629127 stays unopened. Keep the current reference.
+
+Independent [live verification](launch-verification.json) at **01:44 UTC**
+confirmed the same original call at **291/2510 completions**, a fresh heartbeat,
+correct source/reservation/receipt/owner identities, and **all 14 earlier
+control records plus both failed-row files unchanged**. The subsequent
+read-only watcher checkpoint records **317/2510** with zero read errors.
+These are progress snapshots; the full development result is still pending.

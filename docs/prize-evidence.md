@@ -1029,3 +1029,16 @@ No candidate was selected and no later-stage job was launched in this increment.
 - **Limit:** lost uncommitted work on the two old failed attempts cannot be
   excluded. No complete case is repeated, no partial-result selection is
   permitted and no hybrid performance gain is claimed by this recovery work.
+
+The published freeze (`c464dec`) preceded the single Modal recovery launch:
+app **`ap-Nnis3HCfoeencYU6ipEpe4`**, original call
+**`fc-01M7EDXYD8614C8X0ST20CR7N3`**. The first live checkpoint confirms
+74/2510 new attempts complete, no reported failure/stop; the client log-stream
+timeout did not stop this detached call. [Receipt, progress and watcher evidence](learning-hybrid-results/development/recovery2/README.md#live-handoff--15-november-0143-utc).
+This is ongoing inference evaluation, not another training result or a claim
+of improvement. Actual compute and outcomes remain to be reconciled.
+
+Independent live verification also confirmed the exact source/receipt/owner
+lineage and preserved all 14 earlier control records plus both failed-row
+files. The watcher subsequently recorded 317/2510 completions with zero read
+errors. These are progress checkpoints, not completed performance findings.
