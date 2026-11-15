@@ -16,7 +16,10 @@ import time
 DEADLINE = 1794720900.0  # 2026-11-15 05:35 UTC; never extend on restart.
 POLL_SECONDS = 60
 PROCESS_SECONDS = 45
-MODULES = {'hybrid':'tools.learning_hybrid.manage','prior':'tools.learning_hybrid_train.modal_job'}
+MODULES = {'hybrid':'tools.learning_hybrid.manage','prior':'tools.learning_hybrid_train.modal_job',
+           'recovery':'tools.learning_hybrid_ops.recovery'}
+RECEIPT_SCHEMAS = {'hybrid':'learning-hybrid-receipt-v1','prior':'greedy-prior-receipt-v1',
+                   'recovery':'learning-hybrid-recovery-receipt-v1'}
 TRAIN_TERMINAL = {'completed','training_incomplete','training_error','stopped_deadline',
                   'stopped_marker','wrapper_error','ambiguous_execution','cancelled'}
 END_STATES = {'disabled','finished','deadline'}
@@ -80,7 +83,7 @@ def local_pause(config):
 def interpret(value,target):
     if not isinstance(value,dict):raise ValueError('status is not an object')
     if value.get('stop_marker') is True:return {'status':'stopped','paused':True,'terminal':False}
-    if target['kind']=='hybrid':
+    if target['kind'] in {'hybrid','recovery'}:
         if value.get('schema')!='learning-hybrid-monitor-v1':raise ValueError('unexpected hybrid status schema')
         state=value['state'];status=state['status']
         if status in {'user_paused','stopped_marker','stopped'}:return {'status':status,'paused':True,'terminal':False}
@@ -116,7 +119,7 @@ def poll(config,target,previous,runner):
     try:
         receipt=read(receipt_path)
         if receipt.get('freeze_sha256')!=target['freeze_sha256']:raise ValueError('receipt freeze differs')
-        schema='learning-hybrid-receipt-v1' if target['kind']=='hybrid' else 'greedy-prior-receipt-v1'
+        schema=RECEIPT_SCHEMAS[target['kind']]
         if receipt.get('schema')!=schema:raise ValueError('receipt schema differs')
         if receipt.get('status') in {'preparing','launching'}:return {'kind':'pending_receipt'}
         if receipt.get('status')!='submitted':raise ValueError('receipt launch requires diagnosis')
@@ -129,7 +132,8 @@ def poll(config,target,previous,runner):
         if result.returncode:raise RuntimeError('read-only status process failed')
         value=json.loads(result.stdout)
         if value.get('receipt_sha256')!=hashed:raise ValueError('observed receipt identity differs')
-        if target['kind']=='hybrid' and value.get('stage')!=receipt.get('stage'):
+        stage_field='recovery_id' if target['kind']=='recovery' else 'stage'
+        if target['kind'] in {'hybrid','recovery'} and value.get('stage')!=receipt.get(stage_field):
             raise ValueError('observed stage differs')
         summary=interpret(value,target)
         return {'kind':'status','receipt_sha256':hashed,'summary':summary,'value':value}

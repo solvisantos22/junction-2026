@@ -79,3 +79,5 @@ No completed mission, existing training run, or protected source is restarted.
 Confirmation **611000–611255** and final **612000–612255** remain unopened.
 
 [Retained failure, original coordinator result and retrieved call evidence](development/interruption/diagnosis.json). An independent metadata/source audit verified every submitted row and the 54 source pins; full episode archives remain on Modal and were not re-downloaded or replayed in this diagnosis.
+
+[Verified continuation protocol, complete absence check and source/resource freeze](development/recovery/README.md). This is restricted to the original unstarted development suffix; no training resumes or policy changes.

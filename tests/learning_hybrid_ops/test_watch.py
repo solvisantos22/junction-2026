@@ -43,8 +43,10 @@ class WatchTests(unittest.TestCase):
         return target
 
     def receipt(self, target, status='submitted'):
-        value = {'schema': 'learning-hybrid-receipt-v1' if target['kind'] == 'hybrid' else 'greedy-prior-receipt-v1',
+        value = {'schema': watch.RECEIPT_SCHEMAS[target['kind']],
                  'status': status, 'freeze_sha256': target['freeze_sha256'], 'stage': target['id']}
+        if target['kind'] == 'recovery':
+            value['recovery_id'] = value.pop('stage')
         Path(target['receipt_path']).write_text(json.dumps(value))
 
     def set_hybrid(self, target, status='running', **extra):
@@ -141,6 +143,50 @@ class WatchTests(unittest.TestCase):
         self.assertEqual(state['targets']['prior']['jobs_complete'], 5)
         self.tick(NOW + 120)
         self.assertEqual(len(self.queues()), 2)
+
+    def test_recovery_uses_only_status_and_queues_completion_once(self):
+        recovery = self.add_target('development-recovery-1', 'recovery')
+        self.config['targets'] = [recovery]
+        self.receipt(recovery)
+        self.set_hybrid(recovery, 'running', jobs_complete=50, jobs_total=5175)
+        self.tick()
+        self.assertEqual(self.queues(), [])
+        self.set_hybrid(recovery, 'complete', jobs_complete=5175, jobs_total=5175)
+        state = self.tick(NOW + 60)
+        self.assertEqual(state['status'], 'finished')
+        self.tick(NOW + 120)
+        self.assertEqual(len(self.queues()), 1)
+        status_commands = [c[0] for c in self.calls if c[0][1] == '-m']
+        self.assertTrue(all(c[2] == 'tools.learning_hybrid_ops.recovery' and c[-2] == '--status'
+                            for c in status_commands))
+
+    def test_recovery_binds_recovery_identity_and_respects_local_pause(self):
+        recovery = self.add_target('development-recovery-1', 'recovery')
+        self.config['targets'] = [recovery]
+        self.receipt(recovery)
+        self.set_hybrid(recovery, 'complete')
+        self.responses[recovery['id']]['stage'] = 'wrong-recovery'
+        state = self.tick()
+        self.assertEqual(state['targets'][recovery['id']]['error_type'], 'ValueError')
+        self.assertEqual(self.queues(), [])
+        self.set_hybrid(recovery, 'complete')
+        (self.monitor / 'wake-stop').touch()
+        state = self.tick(NOW + 60)
+        self.assertEqual(state['status'], 'disabled')
+        self.assertEqual(self.queues(), [])
+
+    def test_recovery_rejects_original_stage_receipt_schema(self):
+        recovery = self.add_target('development-recovery-1', 'recovery')
+        self.config['targets'] = [recovery]
+        self.receipt(recovery)
+        path = Path(recovery['receipt_path'])
+        value = json.loads(path.read_text())
+        value['schema'] = 'learning-hybrid-receipt-v1'
+        path.write_text(json.dumps(value))
+        self.set_hybrid(recovery, 'complete')
+        state = self.tick()
+        self.assertEqual(state['targets'][recovery['id']]['error_type'], 'ValueError')
+        self.assertEqual(self.queues(), [])
 
     def test_one_failed_training_run_wakes_before_other_five_finish(self):
         prior = self.add_target('prior', 'prior')

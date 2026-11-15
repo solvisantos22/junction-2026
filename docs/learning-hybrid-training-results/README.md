@@ -152,3 +152,9 @@ training gradients or replay development physics. The failed wrapper's
 CPU/memory allocation estimate is **$0.18906**, excluding ancillary charges.
 Its stale report still says `running`; the returned original call is terminal
 and takes precedence.
+
+A later read-only system-log query confirms a **container preemption in this
+training app at 00:21:18 UTC**, about five seconds after the failed wrapper
+returned. This supports preemption as the cause; the API did not provide a
+direct container-to-call mapping. [Platform event and limits](interruption/platform-event.json).
+The original call's terminal error and no-resume decision remain unchanged.

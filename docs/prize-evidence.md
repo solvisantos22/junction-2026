@@ -944,3 +944,12 @@ subsequently hash-verified, and its latest 1760-mission optimizer/RNG state
 round-trips exactly with finite tensors. [Sanitized evidence and limits](learning-hybrid-training-results/interruption/failure.json).
 The wrapper estimates $0.18906 running CPU/memory for that call; ancillary
 charges are excluded. No training was restarted to obtain these checks.
+
+Codex then implemented a narrowly bounded continuation for the **5175 original
+unstarted search cases**. A complete 16,059-key remote inventory and independent
+review verified absence of every launch/worker/execution key. Fourteen recovery
+tests and 23 watcher tests passed. The new coordinator is non-preemptible;
+original workers, scientific sources, all weights, map grid and selection rules
+are unchanged. [Published recovery freeze and evidence](learning-hybrid-results/development/recovery/README.md)
+precede launch. Original failed state is preserved, and only the full original
+8320-case matrix can produce a separate combined completion record.
