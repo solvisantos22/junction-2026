@@ -15,4 +15,4 @@
 - [x] Start localhost preview. Inspect 1440, 1024, 768, 390 and 320 px widths, test interaction and run source audits. Fix material findings together.
 - [x] Independent finish review: no material fixes; document actual design and checks; open local URL for user review.
 - [x] Sölvi approved the preview for immediate publication. Integrate exact assets into the existing FastAPI app, verify routes and preserve replay/simulation.
-- [ ] Push verified homepage and deploy to the existing `kristjansolvi03` Modal workspace; verify public result.
+- [x] Push verified homepage; deployment to existing `kristjansolvi03` Modal workspace observed at 10:25:42 Helsinki. Public assets match approved bytes; desktop/mobile browser, form and cached replay checks passed. [Evidence](../../homepage-release/README.md).

@@ -54,3 +54,6 @@ modal deploy tools/traverse_farm/live_app.py
 ```
 
 Use a clean main checkout. The existing image already packages this directory. No cache reskin, new worlds or replay regeneration is needed. Keep the same app name and cache volume. After deployment, verify the homepage, its assets and cached `/world/2027`.
+
+
+Production publication was verified at **10:25:42 Helsinki on 15 November 2026** at the existing submitted URL. All homepage assets matched the approved source; desktop/mobile browser checks and cached replay playback passed. [Release evidence](../../../docs/homepage-release/README.md).
