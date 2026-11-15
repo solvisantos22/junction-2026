@@ -13,9 +13,10 @@
 to up to MAX_CONTAINERS one-core containers, one mission per call: a target-mode mission takes a
 few seconds, so an update of 128 missions on 64 containers, two missions each, takes about as long
 as the slowest pair. Containers stay up (and billed) while the learner updates between rollouts, so
-the cost follows the run's length: a 200-update run of PPO alone cost about $2.70 with 100
-containers (54 minutes) and with 64 (44 and 49 minutes), and $5.60 with curiosity, whose learner
-is slower (83 minutes, 100 containers); measured on 14-15 November. The run folder
+the cost follows the run's length: a 200-update run of PPO alone cost $2.67 with 100 containers
+(54 minutes) and $2.67 and $2.90 with 64 (44 and 49 minutes), and $5.59 with curiosity, whose
+learner is slower (83 minutes, 100 containers); the check on 300 worlds $0.34. Measured on
+14-15 November. The run folder
 (log.jsonl, best.npz, policy.npz, summary.json) lives in the Modal volume `lightlag-ppo-icm-runs`,
 committed after every development check, so a run that stops early keeps its best policy, and
 `fit` with the same `--out` continues it from there.
