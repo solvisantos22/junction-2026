@@ -1,6 +1,6 @@
-# Saved Junction draft — sponsor integration
+# Saved Junction draft — interactive demo and sponsor cases
 
-Prepared 15 November 2026 at Sölvi's request. This is the exact proposed Description field for the existing Lightlag entry; the field limit is 5,000 characters. **Saved as Draft and verified by browser reload/reopen at about 06:43 Helsinki.** The Description persists at 4,205/5,000 characters, all three links persist, and both Best use of Modal and Best Use of Codex remain selected. The existing name, punchline, main challenge and two tech-prize selections are retained. Video and presentation remain with their owners. This does not submit FINAL.
+Prepared at Sölvi's request. This is the exact saved Description field for the existing Lightlag entry; the limit is 5,000 characters. **Verified after saving Draft, reloading and reopening at about 08:12 Helsinki on Sunday 15 November 2026: 4,651/5,000 characters.** The interactive-demo invitation and direct URL now lead the description. The previous 4,205-character project and sponsor text is retained in full. Name, punchline, main challenge, demo/source/video/evidence links and both Best use of Modal and Best Use of Codex selections are retained. The entry remains Draft; this edit did not submit FINAL.
 
 The current project overview uses [Kristján's entry notes](submission-entry.md) and the [README](../README.md); sponsor claims and their limitations are sourced in the [sponsor evidence pack](sponsor-submission.md). No new experiment or benchmark was run.
 
@@ -9,6 +9,11 @@ Team-voice correction saved and verified after reload/reopen at **06:57 Helsinki
 ## Description
 
 ```text
+TRY THE INTERACTIVE DEMO
+https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run/
+
+AfterQuery judges can explore the rover environment in the browser: open a featured world, press Play or Story Mode, and compare the reference planner with model-written autopilots. Inspect their routes, battery use and scores, or choose your own world number. To evaluate your own agent, use the reproducible Harbor task linked in the repository.
+
 Lightlag Traverse is an RL environment for AfterQuery's Break the Agent challenge: one rover, three Mars-like sites, one score. Agents must collect science and get home while commands and telemetry are delayed, wheels slip, slopes block routes, and a solar-charged battery can run flat. Rules and formulas are public through five MCP tools. There is no reset or practice run: the agent must write an autopilot that works.
 
 Our scripted reference planner scores 0.476. Twenty-five campaign runs across nine models from Anthropic, OpenAI and Google all score below it; the closest reaches 0.473. The challenge tests planning over a whole mission: choosing worthwhile targets, forecasting battery and sun, and returning safely. The reward comes from the simulator's true state in a separate container. Doing nothing scores zero; stopping after one site scores 0.149. We ran 27 integrity attacks from the agent's container; none changed the reward.
@@ -32,12 +37,17 @@ We also tested the environment with three OpenAI models in 18 scored agent runs,
 The public source and sponsor evidence document the results, limitations and team contributions. The live Modal demo lets judges explore rover behavior themselves.
 ```
 
-## Links saved and verified
+## Demo check and links saved
+
+The public Modal homepage and featured world **2027** opened while signed out; Story Mode advanced the replay with changing positions, battery values and scores. The invitation describes the current browser experience and points judges to Harbor for evaluating their own agents. This was a sample replay check, not a new benchmark or a test of arbitrary-world execution. The team is still polishing the website; this edit highlights the current stable URL.
+
+The YouTube link was uploaded and saved separately at about 07:56; see the [upload handoff](video-upload.md).
 
 - Project Demo: https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run/
 - Source Code: https://github.com/solvisantos22/junction-2026
+- Video: https://youtu.be/GifcHfCczHo
 - Other Link: https://github.com/solvisantos22/junction-2026/blob/main/docs/sponsor-submission.md
 
 ## Remaining handoff
 
-Persistence was verified after saving Draft, reloading the page and reopening the existing entry. The video link and presentation upload are still empty; neither was edited. The team still needs to add those materials and save FINAL before 10:00 Helsinki. Sölvi explicitly says the sponsor narratives belong in the written submission, not the demo video.
+The **Presentation field is still empty**. The team is finalizing the PDF; attach the chosen deck and save FINAL before **10:00 Helsinki**. Existing video and interactive-demo links are saved. If the finished website uses a different URL, update both Project Demo and the opening description link together. Sölvi specifies sponsor narratives in the written submission, not the demo video.
