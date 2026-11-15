@@ -1,8 +1,10 @@
 # Saved Junction draft — sponsor integration
 
-Prepared 15 November 2026 at Sölvi's request. This is the exact proposed Description field for the existing Lightlag entry; the field limit is 5,000 characters. **Saved as Draft and verified by browser reload/reopen at about 06:43 Helsinki.** The Description persists at 4,207/5,000 characters, all three links persist, and both Best use of Modal and Best Use of Codex remain selected. The existing name, punchline, main challenge and two tech-prize selections are retained. Video and presentation remain with their owners. This does not submit FINAL.
+Prepared 15 November 2026 at Sölvi's request. This is the exact proposed Description field for the existing Lightlag entry; the field limit is 5,000 characters. **Saved as Draft and verified by browser reload/reopen at about 06:43 Helsinki.** The Description persists at 4,205/5,000 characters, all three links persist, and both Best use of Modal and Best Use of Codex remain selected. The existing name, punchline, main challenge and two tech-prize selections are retained. Video and presentation remain with their owners. This does not submit FINAL.
 
 The current project overview uses [Kristján's entry notes](submission-entry.md) and the [README](../README.md); sponsor claims and their limitations are sourced in the [sponsor evidence pack](sponsor-submission.md). No new experiment or benchmark was run.
+
+Team-voice correction saved and verified after reload/reopen at **06:57 Helsinki**: the Codex paragraph says “We used Codex throughout development on Lightlag.”
 
 ## Description
 
@@ -21,7 +23,7 @@ Our case for Modal is the combination of scale, scientific checks and a usable d
 
 BEST USE OF CODEX — From research questions to verified software
 
-Sölvi used Codex throughout his coding on Lightlag: building prototypes, implementing rover controllers and evaluation tools, debugging experiments, and shipping verified increments. Parallel Codex agents worked on implementation and independent reviews, coordinated through shared task claims, isolated worktrees and small commits. Humans chose the hypotheses, budgets, acceptance criteria and stopping decisions.
+We used Codex throughout development on Lightlag: building prototypes, implementing rover controllers and evaluation tools, debugging experiments, and shipping verified increments. Parallel Codex agents worked on implementation and independent reviews, coordinated through shared task claims, isolated worktrees and small commits. Humans chose the hypotheses, budgets, acceptance criteria and stopping decisions.
 
 The contribution went beyond generating code. Codex helped deliver the RL pipeline and Modal orchestration, recover interrupted work without repeating completed training, and turn experimental outputs into reproducible reports. One evaluator fix ensured invalid tool requests could not be swallowed while keeping a valid score. The final hybrid audit checked 2,560 missions across 256 fresh worlds and more than one million replay commands. We reported its modest gain honestly and kept the stronger reference.
 

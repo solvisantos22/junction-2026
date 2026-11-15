@@ -6,7 +6,7 @@ Prepared Sunday 15 November 2026; public-source access verified at **06:12 Helsi
 
 ## Finish the entry
 
-**Saved and verified at about 06:43 Helsinki:** native Chrome access is now working. At Sölvi's request, this session replaced the original proposal with the current project overview and both sponsor cases (4,207/5,000 characters), and saved the public demo, source and sponsor-evidence links. After a page reload and reopening Lightlag, all fields persisted and both prizes remained selected. **Status is Draft. Video link and presentation upload are empty.** Name, punchline and main challenge were retained; Submit Final was not clicked.
+**Saved and verified at about 06:43 Helsinki:** native Chrome access is now working. At Sölvi's request, this session replaced the original proposal with the current project overview and both sponsor cases (4,205/5,000 characters), and saved the public demo, source and sponsor-evidence links. After a page reload and reopening Lightlag, all fields persisted and both prizes remained selected. **Status is Draft. Video link and presentation upload are empty.** Name, punchline and main challenge were retained; Submit Final was not clicked.
 
 One teammate should finish and check the existing [saved Lightlag entry](https://hackjunction.app/participate/45/submissions):
 
@@ -20,13 +20,13 @@ One teammate should finish and check the existing [saved Lightlag entry](https:/
 
 ## Best Use of Codex — copy-ready case
 
-> Sölvi used Codex throughout his development work on Lightlag: turning research ideas into prototypes, implementing controllers and evaluation tools, debugging experiments, and shipping verified increments. The team set the hypotheses, budgets and stopping decisions. Parallel Codex agents implemented and independently reviewed changes; shared task claims and frequent commits kept concurrent work coordinated. Codex helped deliver small reinforcement-learning controllers, Modal orchestration, interruption recovery and reproducible reports, including 2,560 final hybrid evaluations. We also tested the team's frozen environment with three OpenAI models in 18 scored agent runs, retaining configurations, trajectories and rewards. Our case is the complete path from a human research question to implemented software and inspectable experimental evidence, with actual OpenAI agent behavior available for comparison.
+> We used Codex throughout development on Lightlag: turning research ideas into prototypes, implementing controllers and evaluation tools, debugging experiments, and shipping verified increments. The team set the hypotheses, budgets and stopping decisions. Parallel Codex agents implemented and independently reviewed changes; shared task claims and frequent commits kept concurrent work coordinated. Codex helped deliver small reinforcement-learning controllers, Modal orchestration, interruption recovery and reproducible reports, including 2,560 final hybrid evaluations. We also tested the team's frozen environment with three OpenAI models in 18 scored agent runs, retaining configurations, trajectories and rewards. Our case is the complete path from a human research question to implemented software and inspectable experimental evidence, with actual OpenAI agent behavior available for comparison.
 
 Suggested headline: **“Built with Codex. Tested with OpenAI agents.”** In the explanation, give each its precise role: Codex was a development tool; the OpenAI API models were benchmark participants. The short sponsor pitch can focus on Codex without listing every development tool. Detailed ownership remains in the [evidence log](prize-evidence.md#attribution-boundary); this wording does not claim that Codex authored every part of the project or the separate tier-evaluation runner.
 
-Sölvi's 20–25 second version for a sponsor conversation:
+Team version for a 20–25 second sponsor conversation:
 
-> “I used Codex throughout my coding on Lightlag, from prototypes and reinforcement-learning controllers to debugging and verifying experiments. We used parallel agents and small reviewed commits to keep the work reviewable. Then our team tested the environment with three OpenAI models across eighteen scored agent runs. We can show the code, the model behavior and the evidence behind each result.”
+> “We used Codex throughout development on Lightlag, from prototypes and reinforcement-learning controllers to debugging and verifying experiments. We used parallel agents and small reviewed commits to keep the work reviewable. Then our team tested the environment with three OpenAI models across eighteen scored agent runs. We can show the code, the model behavior and the evidence behind each result.”
 
 ### OpenAI evaluation evidence supporting the project
 
