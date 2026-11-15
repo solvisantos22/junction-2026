@@ -164,8 +164,8 @@
       g.restore();
     });
     rise(t, P.note, () => text(F.best_model
-      ? `ON AVERAGE OVER ITS RUNS · THE BEST MODEL, ${F.best_model.name}: ${three(F.best_model.score)} · A SIMPLE "NEAREST ROCK FIRST" DRIVER: ${three(F.greedy)}`
-      : `FOR SCALE · A SIMPLE "NEAREST ROCK FIRST" DRIVER WITH THE SAME NAVIGATOR: ${three(F.greedy)} · THE BEST CLAUDE RUN: ${three(F.best_claude)}`,
+      ? `ON AVERAGE OVER ITS RUNS · THE BEST MODEL, ${F.best_model.name}: ${three(F.best_model.score)} · A SIMPLE GREEDY RULE ON THE SAME NAVIGATOR: ${three(F.greedy)}`
+      : `FOR SCALE · A SIMPLE GREEDY RULE ON THE SAME NAVIGATOR: ${three(F.greedy)} · THE BEST CLAUDE RUN: ${three(F.best_claude)}`,
       120, 946, { size: 24, color: C.dim, spacing: 0.13 }));
   };
 
