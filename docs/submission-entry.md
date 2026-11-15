@@ -46,7 +46,7 @@ WHY THEY LOSE. The agents write working autopilots within minutes. What they get
 
 REWARD INTEGRITY. Doing nothing scores 0 and stopping after one site scores 0.149. The score comes from the rover's true state, computed in the simulator's own container after the agent's has stopped. We ran 27 attacks from inside the agent's container (forged reward files, a fake grader, hidden tools, malformed commands, the delay); none changed the reward.
 
-LEARNING. A small controller trained from scratch on Modal goes from 8% to 36% on held-out worlds and passes every Claude run on the campaign. A model trained to pick the reference planner's strategy gained less than half a point, so the reference stays.
+LEARNING. A small controller trained from scratch on Modal goes from 8% to 36% on held-out worlds and passes every Claude run on the campaign. A model that picks the reference planner's strategy mid-mission beat the planner by under half a point, short of the one point we had set for replacing it.
 
 RERUN IT. harbor run -p harbor/lightlag-traverse-campaign -a oracle gives 0.476257 in about two minutes; -a nop gives 0.
 

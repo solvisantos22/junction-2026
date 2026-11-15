@@ -21,7 +21,7 @@ uv run --no-project --python 3.12 --with playwright python -m tools.pitch_deck.m
 | 5 | The reference | (30) Our reference is a planner, not a model. It tracks the rover through the delay, learns how each surface slips, and prices every leg of its route against the sun. It waits when the battery is low and it is home before dark. |
 | 6 | Results | (40) Through Harbor and OpenCode: the reference scores 0.476. Twenty-five runs by nine models from three labs are all below it. Most are far below. Google's top model comes within 0.003 on its best run, and scores zero when its session runs out. |
 | 7 | 300 fresh worlds | (30) Was it three lucky worlds? On Modal we replayed the models' own programs on 300 worlds none had seen. Against Claude's six, on this slide, the reference scored higher 99 times in 100. Against every model's best program it is 95 in 100, the film's figure. It never lost a rover. |
-| 8 | Models that learn | (35) A small controller trained from scratch goes from 8% to 36% on held-out worlds, past every Claude run on the campaign. And when we tried to beat our own planner with learning, the best model added less than half a point. |
+| 8 | Models that learn | (35) A small controller trained from scratch goes from 8% to 36% on held-out worlds, past every Claude run on the campaign. And a model that picks our planner's strategy does beat the planner, by under half a point: less than the one point we had set for replacing it. |
 | 9 | Hard to game | (30) Doing nothing scores zero; stopping early earns only what was done. The score comes from the rover's true state in a container the agent cannot reach. We ran 27 attacks from inside the agent's container and none changed the reward. |
 | 10 | How it was built | (20) Modal ran the farm, the training and the live demo. Codex and Claude Code built and audited it under our direction. |
 | 11 | End card | (15) One command reruns it. The live demo plays any world you pick. Can your agent make it home? |
@@ -36,7 +36,7 @@ About 300 seconds. Open the live demo on a cached world before the pitch: `https
 - **"Did you tune the reference on the test worlds?"** No. It was improved once, on the one-site world, after two early agent runs had beaten its first version there. The campaign's three worlds and the 300 fresh worlds were played afterwards and nothing was tuned on them.
 - **"Can the reward be gamed?"** See [`docs/traverse-integrity.md`](../traverse-integrity.md). One limit is known: the worlds are fixed by seeds that are public with the code. The judges can change the seeds in one line.
 - **"Is the trained model an LLM?"** No. It is a small controller that picks the next goal above hand-written navigation. It shows the environment can be learned on; it is not a fine-tuned language model.
-- **"Why not replace the reference with the learned model?"** The gains were real and small: 0.48 points for Extra Trees, under the 1-point bar set before the test. The reference stays.
+- **"Your learned model beats the reference. Why is it not the reference?"** It does: the planner with the Extra Trees model on top scored 50.46% against 49.98% on 96 fresh worlds. The bar for replacing the reference, set before the test, was one point, and the reference was already frozen for the agent runs. The task's reference stays; the learned version is in the repository.
 
 ## Where the numbers come from
 

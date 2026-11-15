@@ -33,9 +33,11 @@ LINES.update({
           "Only Google's top model comes close, at zero point four seven. Doing nothing scores zero.",
     "m3": "On Modal, six of Claude's programs replayed three hundred fresh worlds each. "
           "The reference scored higher ninety-nine times in a hundred and never lost a rover.",
+    # The last sentence is about the Extra Trees model, which plays on top of the planner and scored higher
+    # than the planner alone; "gained less than half a point" was heard as falling short of it.
     "m4": "A small policy trained from scratch learns too: from eight to thirty-six percent on unseen worlds, "
           "and past every Claude run on the campaign. "
-          "Even a model trained to pick our planner's strategy gained less than half a point.",
+          "And a model that picks our planner's strategy edged past the planner, by under half a point.",
 })
 
 SUBTITLES: Dict[str, str] = dict(base.SUBTITLES)
@@ -46,7 +48,7 @@ SUBTITLES.update({
           "The reference scored higher 99 times in 100 and never lost a rover.",
     "m4": "A small policy trained from scratch learns too: from 8% to 36% on unseen worlds, "
           "and past every Claude run on the campaign. "
-          "Even a model trained to pick our planner's strategy gained less than half a point.",
+          "And a model that picks our planner's strategy edged past the planner, by under half a point.",
 })
 
 KEPT = ("cold", "world", "ground", "energy", "quote", "reference", "end")
@@ -87,7 +89,7 @@ def shots(durations: Dict[str, float], words: Dict[str, List[Dict[str, Any]]]) -
         # 9. Learning: the held-out result, then the campaign, then learning on top of the planner itself.
         {"name": "learning", "page": "film", "scene": "learning3", "beats": [
             {"vo": "m4", "vo_at": 0.4, "pad": 0.7,
-             "cues": [cue("m4", "and past every", -0.15), cue("m4", "Even a model", -0.15)]}]},
+             "cues": [cue("m4", "and past every", -0.15), cue("m4", "And a model", -0.15)]}]},
         # 10. The end card, held a little shorter than in the second cut to stay inside two minutes.
         dict(kept["end"], beats=[dict(kept["end"]["beats"][0], pad=1.1)]),
     ]
