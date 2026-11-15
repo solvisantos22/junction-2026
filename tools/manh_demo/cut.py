@@ -7,7 +7,6 @@ adds to it:
 - the top-down moment of the opening shot is held a little longer, so the logo trackers have
   about two seconds over the rovers as they leave the lander, before the camera drops in;
 - a few sounds that belong to a moment of a shot (the title, a camera move, a hard cut);
-- which words of the narration ring out into a longer echo;
 - the length: the film is stretched on its last card to `TARGET_SECONDS`, which a player shows
   as 1:59, one second inside the Junction's two-minute limit.
 """
@@ -24,13 +23,17 @@ LIMIT_SECONDS = 119.4           # never over this; the Junction's limit is 120
 
 LINES, SUBTITLES, VOICE, POSTER, LIVE_URL = base.LINES, base.SUBTITLES, base.VOICE, base.POSTER, base.LIVE_URL
 
-# Words that are sent into a long echo as they are said: the end of the verdict and the end of the film.
-# The first build also echoed "zero." (line a1, about 0:10) and "saved it." (line b4, about 0:49). No interface
-# sound plays there, so the echo's tail was the loudest thing once the voice stopped and came across as a whoosh:
-# Manh asked for both to go after listening (15 November).
-THROWS: Dict[str, List[str]] = {
-    "q1": ["planning the day."],
-    "e1": ["make it home?"],
+# Draft pieces: short clips of their own, recorded with `make piece --name ...` and looked at one by one. They are
+# not in the film; the team picks among them first (Manh, 15 November: "a bunch of small clips ... we select").
+PIECES: Dict[str, Dict[str, Any]] = {
+    # three labs, three tiers, nine models, rolled out from the fastest tier to the flagships
+    "lineup": {"page": "film", "scene": "lineup", "fade_out": 0.4, "beats": [{"min": 8.6}]},
+    # what the models are measured against: the reference (a model-based planner) and the team's own RL agent
+    "drivers": {"page": "film", "scene": "drivers", "fade_out": 0.4, "beats": [{"min": 9.0}]},
+    # Kristján's two Modal scenes and his end card, to show Modal's name in its green with its mark
+    "modal_farm": {"page": "film", "scene": "farm", "fade_out": 0.4, "beats": [{"min": 9.0, "cues": [4.6, 6.4]}]},
+    "modal_learning": {"page": "film", "scene": "learning", "fade_out": 0.4, "beats": [{"min": 7.0}]},
+    "modal_end": {"page": "film", "scene": "end", "fade_out": 0.6, "beats": [{"min": 7.0, "cues": [2.6, 4.2]}]},
 }
 
 TITLE_LEAD = 0.25               # the title lands on its own before the narrator names it

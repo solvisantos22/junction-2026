@@ -5,9 +5,9 @@ run whose label names a model gets its maker's mark on a small light tile: over 
 the top-down shots, on the card that explains a failure, in the standings and beside the model
 names on the charts.
 
-The demos to come will show models from Anthropic, Google DeepMind and OpenAI side by side
-(Manh, 15 November 2026), so all three are registered here although this cut only has Claude.
-To add a maker: one entry in `MAKERS` and its mark in `logos/`.
+The demos show models from Anthropic, Google and OpenAI side by side (Manh, 15 November 2026):
+three labs, three tiers each, the lineup of the tier comparison (`tools/tier_agents/`). To add a
+maker: one entry in `MAKERS` and its mark in `logos/`.
 
 The marks are the Simple Icons paths (CC0-1.0, https://simpleicons.org, package 16.37.0),
 unchanged. The logos themselves are trademarks of their owners and are used only to name the
@@ -19,32 +19,51 @@ from __future__ import annotations
 import base64
 import re
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 HERE = Path(__file__).resolve().parent
 LOGOS = HERE / "logos"
 
 # `words` are matched as whole words in a run's label, in lower case; `ink` is the mark's colour
-# and `tile` the square it sits on, chosen to stand out from rust-coloured ground.
+# and `tile` the square it sits on, chosen to stand out from rust-coloured ground; `text` is the
+# company's colour for names and borders on the film's dark charts (OpenAI's own is black and white).
 MAKERS: Dict[str, Dict[str, Any]] = {
     "anthropic": {
-        "name": "Anthropic", "family": "Claude", "mark": "claude.svg", "ink": "#D97757", "tile": "#F4F1E8",
+        "name": "Anthropic", "family": "Claude", "mark": "claude.svg", "ink": "#D97757", "tile": "#F4F1E8", "text": "#D97757",
         "words": ("claude", "opus", "sonnet", "haiku", "anthropic"),
     },
-    "openai": {
-        "name": "OpenAI", "family": "GPT", "mark": "openai.svg", "ink": "#0D0D0D", "tile": "#FFFFFF",
-        "words": ("openai", "gpt", "chatgpt", "codex", "o1", "o3", "o4"),
-    },
-    "google-deepmind": {
-        "name": "Google DeepMind", "family": "Gemini", "mark": "deepmind.svg", "ink": "#4285F4", "tile": "#FFFFFF",
+    "google": {
+        "name": "Google", "family": "Gemini", "mark": "gemini.svg", "ink": "#4285F4", "tile": "#FFFFFF", "text": "#4285F4",
         "words": ("gemini", "deepmind", "google", "gemma"),
+    },
+    "openai": {
+        "name": "OpenAI", "family": "GPT", "mark": "openai.svg", "ink": "#0D0D0D", "tile": "#FFFFFF", "text": "#FFFFFF",
+        "words": ("openai", "gpt", "chatgpt", "codex", "o1", "o3", "o4"),
     },
 }
 
+# The lineup of the tier comparison (Manh's brand tiers of 15 November, `tools/tier_agents/run_tiers.py`),
+# from the fastest model of each lab to its most capable.
+TIERS = ("FAST", "BALANCED", "FLAGSHIP")
+LINEUP: Dict[str, Tuple[str, str, str]] = {
+    "anthropic": ("Claude Haiku 5.5", "Claude Sonnet 5.5", "Claude Opus 5.5"),
+    "google": ("Gemini 4 Hydrogen", "Gemini 4 Argon", "Gemini 4 Carbon"),
+    "openai": ("GPT-6 Luna", "GPT-6.1 Terra", "GPT-6.1 Sol"),
+}
+
+# Modal ran the 300-world replay and the training: its name is drawn in its own green with its mark beside it.
+MODAL = {"name": "Modal", "mark": "modal.svg", "ink": "#7FEE64"}
+
 # The reference is a planner, not a model: it gets a tile of its own colour and a route, not a logo.
+# The team's own trained agent gets the lime of its learning curve and a small network.
 REFERENCE = {"name": "Reference", "family": "Planner", "ink": "#1A120F", "tile": "#FFB224"}
+LEARNED = {"name": "RL agent", "family": "PPO", "ink": "#1A120F", "tile": "#B6E35A"}
 ROUTE = ('<path d="M5 18.5 9.5 9l5 5.5L19 5.5" fill="none" stroke="{ink}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
          '<circle cx="5" cy="18.5" r="2.3" fill="{ink}"/><circle cx="19" cy="5.5" r="2.3" fill="{ink}"/>')
+NETWORK = ('<path d="M5 7 12 4.5M5 7l7 5M5 7l7 12.5M5 17l7-12.5M5 17l7-5M5 17l7 2.5M12 4.5 19 12M12 12h7M12 19.5 19 12" fill="none" stroke="{ink}" stroke-width="1.3" stroke-linecap="round"/>'
+           '<circle cx="5" cy="7" r="2.1" fill="{ink}"/><circle cx="5" cy="17" r="2.1" fill="{ink}"/><circle cx="12" cy="4.5" r="2.1" fill="{ink}"/>'
+           '<circle cx="12" cy="12" r="2.1" fill="{ink}"/><circle cx="12" cy="19.5" r="2.1" fill="{ink}"/><circle cx="19" cy="12" r="2.3" fill="{ink}"/>')
+OWN = {"reference": (REFERENCE, ROUTE), "rl": (LEARNED, NETWORK)}
 
 
 def maker_of(label: str) -> Optional[str]:
@@ -57,18 +76,27 @@ def maker_of(label: str) -> Optional[str]:
 
 
 def mark_path(maker: str) -> str:
-    """The `d` of the maker's mark, on Simple Icons' 24 by 24 grid."""
-    svg = (LOGOS / MAKERS[maker]["mark"]).read_text(encoding="utf-8")
-    found = re.search(r'<path d="([^"]+)"', svg)
+    """The `d` of a mark, on Simple Icons' 24 by 24 grid: a maker's, or Modal's for "modal"."""
+    name = MODAL["mark"] if maker == "modal" else MAKERS[maker]["mark"]
+    found = re.search(r'<path d="([^"]+)"', (LOGOS / name).read_text(encoding="utf-8"))
     if not found:
-        raise ValueError("no path in {}".format(MAKERS[maker]["mark"]))
+        raise ValueError("no path in {}".format(name))
     return found.group(1)
 
 
+def mark_svg(maker: str, size: int = 96) -> str:
+    """A mark alone in its own colour, no tile: Modal's beside its name."""
+    if maker == "modal":                 # Modal's mark is wide and low: its picture is cut to the mark, so it can be drawn as tall as the letters
+        return ('<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{s}" viewBox="0 5.3 24 13.4"><path d="{d}" fill="{ink}"/></svg>').format(
+            w=round(size * 24 / 13.4), s=size, d=mark_path(maker), ink=MODAL["ink"])
+    return ('<svg xmlns="http://www.w3.org/2000/svg" width="{s}" height="{s}" viewBox="0 0 24 24"><path d="{d}" fill="{ink}"/></svg>').format(
+        s=size, d=mark_path(maker), ink=MAKERS[maker]["ink"])
+
+
 def tile_svg(maker: Optional[str], size: int = 96) -> str:
-    """A rounded square with the maker's mark on it; `None` is the reference's route tile."""
-    spec = MAKERS[maker] if maker else REFERENCE
-    inner = ('<path d="{}" fill="{}"/>'.format(mark_path(maker), spec["ink"]) if maker else ROUTE.format(ink=spec["ink"]))
+    """A rounded square with the maker's mark on it; `None` is the reference's route tile, "rl" the trained agent's."""
+    spec, drawing = OWN["reference" if maker is None else maker] if maker in (None, "reference", "rl") else (MAKERS[maker], None)
+    inner = drawing.format(ink=spec["ink"]) if drawing else '<path d="{}" fill="{}"/>'.format(mark_path(maker), spec["ink"])
     # the mark keeps a fifth of the tile as margin on every side
     return ('<svg xmlns="http://www.w3.org/2000/svg" width="{s}" height="{s}" viewBox="0 0 40 40">'
             '<rect x="1" y="1" width="38" height="38" rx="8.5" fill="{tile}" stroke="rgba(0,0,0,.55)" stroke-width="1.6"/>'
@@ -80,8 +108,28 @@ def data_url(svg: str) -> str:
 
 
 def for_page() -> Dict[str, Any]:
-    """What the page add-ons need: a tile per maker (and the reference's), and how to name each."""
-    tiles = {key: {"name": spec["name"], "family": spec["family"], "tile": data_url(tile_svg(key)),
+    """What the page add-ons need: a tile per maker (and the reference's, the trained agent's and Modal's mark),
+    how to name each, and the colour to write its name in."""
+    tiles = {key: {"name": spec["name"], "family": spec["family"], "tile": data_url(tile_svg(key)), "text": spec["text"],
                    "words": list(spec["words"])} for key, spec in MAKERS.items()}
-    tiles["reference"] = {"name": REFERENCE["name"], "family": REFERENCE["family"], "tile": data_url(tile_svg(None)), "words": []}
+    tiles["reference"] = {"name": REFERENCE["name"], "family": REFERENCE["family"], "tile": data_url(tile_svg(None)), "text": REFERENCE["tile"], "words": []}
+    tiles["rl"] = {"name": LEARNED["name"], "family": LEARNED["family"], "tile": data_url(tile_svg("rl")), "text": LEARNED["tile"], "words": []}
+    tiles["modal"] = {"name": MODAL["name"], "family": "", "tile": data_url(mark_svg("modal")), "text": MODAL["ink"], "words": []}
     return tiles
+
+
+def lineup() -> Dict[str, Any]:
+    """The nine models, lab by lab and tier by tier, for the lineup scene."""
+    return {"tiers": list(TIERS), "labs": [{"key": key, "name": MAKERS[key]["name"].upper(), "models": [name.upper() for name in LINEUP[key]]} for key in MAKERS]}
+
+
+def facts() -> Dict[str, Any]:
+    """The numbers the new scenes show, read from the files that hold them: the reference and the team's trained
+    agent on the submission campaign, from Sölvi's matched comparison (`docs/learning-final-results/campaign/`)."""
+    import json
+
+    found = json.loads((HERE.parents[1] / "docs" / "learning-final-results" / "campaign" / "comparison.json").read_text(encoding="utf-8"))
+    learned = [policy for policy in found["latest_policies"] if policy["arm"].startswith("ppo")]
+    return {"reference": found["beam"], "rl": found["mean_latest_reward"]["ppo"], "rl_runs": len(learned),
+            "rl_missions": max(policy["episodes"] for policy in learned), "greedy": found["greedy"],
+            "best_claude": max(found["best_recorded_opus"], found["best_recorded_sonnet"])}

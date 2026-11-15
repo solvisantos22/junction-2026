@@ -1,10 +1,12 @@
 """The sound track of manh_demo_1, synthesised from scratch: no samples, no library, no API.
 
 Five layers, each written to `build/audio/` on its own so one can be listened to or left out
-(`make assemble --mute rover,music`):
+(`make assemble --mute rover,music`; `--mute voice` gives the film without its narration):
 
-- voice   Kristján's narration (Kokoro, run locally), treated for a fuller, closer "trailer" voice:
-          warmth and presence, a compressor, a short room, and a long echo on a few chosen words;
+- voice   Kristján's narration (Kokoro, run locally), dry: no room and no echo. The first build gave it
+          both, and Manh heard them as a reverb and as a whoosh after sentences (15 November). Two
+          styles: `clean`, the voice as it was spoken, and `deep`, the same take two semitones lower
+          with a little more chest. The final film will carry the team's own recorded voice instead;
 - rover   under the chase-camera shots: gravel under the wheels, whose grain depends on the ground
           the rover is really on (regolith, sand, a rock field, bedrock), and a low electric motor
           whose pitch follows its real speed. Both come from what the recorder saw in every frame
@@ -23,6 +25,7 @@ from __future__ import annotations
 
 import json
 import math
+import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -30,26 +33,25 @@ import numpy as np
 import soundfile as sf
 from scipy import signal
 
-from tools.demo_video import storyboard as base
-
 RATE = 48000
 FPS = 30
 
 # Levels in dB relative to full scale; the narration is normalised to VOICE_LUFS and peaks near -6.
 VOICE_LUFS = -16.0
 MIX = {
-    "room": -17.0,        # the short room on the voice, against the voice itself
-    "throw": 0.0,         # the long echo on the last word of the chosen lines
     "gravel": -37.0,      # the gravel at full speed in the chase camera
     "roll": -47.0,        # the low noise of the wheels turning, under the gravel
     "motor": -33.5,       # mostly below 150 Hz: felt on headphones, nearly absent on a laptop
+    "machinery": -37.0,   # the whine and the drive train's tick, 300 Hz to 2.6 kHz: quiet, but a laptop plays it
     "charts": -3.0,       # trim for every chart and interface sound (each has its own level below)
     "wind": -37.0,
     "music": -36.0,
     "thump": 0.0,         # trim for the two batteries running flat
     "duck": {"rover": -3.5, "charts": -1.5, "wind": -3.0, "music": -4.0},     # while the narrator speaks
 }
-LAYERS = ("rover", "charts", "music", "wind", "echo", "treat")
+LAYERS = ("voice", "rover", "charts", "music", "wind", "duck")     # what `mute` can leave out; "duck" is the stepping back under the voice
+VOICE_STYLES = ("clean", "deep")
+DEEP_SEMITONES = 2.0               # how much lower the `deep` voice is
 
 
 def db(value: float) -> float:
@@ -180,27 +182,38 @@ def speaking_level(x: np.ndarray) -> float:
     return 10 * math.log10(float(np.mean(power[power > power.max() * db(-35) ** 2])) + 1e-12)
 
 
-def treat(voice: np.ndarray) -> np.ndarray:
-    """The narrator, closer and fuller, the way a trailer voice is produced: rumble out, more chest, a little
-    presence and air, then a compressor that holds every syllable near the same level and rounds off the peaks."""
-    x = voice * db(-20.0 - speaking_level(voice))                     # every line enters the chain at the same level
-    x = filt(butter("highpass", 72.0), x)
-    for section in (biquad("low", 165.0, 3.0), biquad("peak", 430.0, -1.5, 1.1), biquad("high", 10000.0, 0.8)):
+def deepen(path: Path) -> np.ndarray:
+    """A spoken line `DEEP_SEMITONES` lower, formants and all, so it sounds like a deeper voice and not like the
+    same voice straining down (Rubber Band, through ffmpeg; the length does not change). Then a little more chest,
+    a little more edge so it stays crisp, and a gentle compressor to hold its level even. No room, no echo."""
+    lower = 2.0 ** (-DEEP_SEMITONES / 12.0)
+    done = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-af", "rubberband=pitch={:.5f}:pitchq=quality:formant=shifted".format(lower),
+                           "-ar", str(RATE), "-ac", "1", "-f", "f32le", "-"], capture_output=True)
+    if done.returncode != 0:
+        raise SystemExit("ffmpeg could not lower {}: {}".format(path.name, done.stderr.decode()[-400:]))
+    x = np.frombuffer(done.stdout, dtype=np.float32).astype(np.float64)
+    x = filt(butter("highpass", 55.0), x * db(-20.0 - speaking_level(x)))
+    for section in (biquad("low", 150.0, 2.5), biquad("peak", 4200.0, 1.5, 0.8)):
         x = filt(section, x)
-    x = compress(x, threshold=-24.0, ratio=3.5, knee=8.0, attack=0.005, release=0.12)
-    # a compressor brings the hissing consonants up with everything else: the top of the voice is held back where it is loudest
-    hiss = filt(butter("highpass", 4200.0), x)
-    hop = RATE // 1000
-    frames = hiss[: len(hiss) // hop * hop].reshape(-1, hop)
-    loud = 10 * np.log10(np.mean(frames ** 2, axis=1) + 1e-12)
-    x = (x - hiss) + compress(hiss, threshold=float(np.percentile(loud[loud > loud.max() - 40], 75)), ratio=4.0, knee=6.0, attack=0.001, release=0.06)
-    ceiling = db(speaking_level(x) + 13.0)
-    return ceiling * np.tanh(x / ceiling)                             # the loudest syllables round off instead of poking out
+    return compress(x, threshold=-22.0, ratio=2.2, knee=10.0, attack=0.008, release=0.15)
+
+
+def voice_line(path: Path, style: str) -> np.ndarray:
+    """One line of the narration at 48 kHz, in the chosen style."""
+    raw, rate = sf.read(str(path), dtype="float64")
+    raw = raw if raw.ndim == 1 else raw.mean(axis=1)
+    plain = filt(butter("highpass", 60.0), signal.resample_poly(raw, RATE, rate))
+    if style == "clean":
+        return plain
+    if style != "deep":
+        raise SystemExit("no voice style called {}: choose from {}".format(style, ", ".join(VOICE_STYLES)))
+    deep = deepen(path)[: len(plain)]
+    return np.pad(deep, (0, len(plain) - len(deep)))
 
 
 def impulse(rt60: float, predelay: float, low: float, high: float, seed: int, taps: bool, bloom: float = 0.02) -> np.ndarray:
     """A room as a stereo impulse response: a few early reflections, then noise dying away over `rt60` seconds.
-    `bloom` is how long the tail takes to come up: a long one swells after the word instead of sitting on it."""
+    `bloom` is how long the tail takes to come up. Used for the ring of a battery running flat, never on the voice."""
     rng = np.random.default_rng(seed)
     n, lead = int(rt60 * 1.2 * RATE), int(predelay * RATE)
     t = np.arange(n) / RATE
@@ -223,40 +236,17 @@ def activity(mono: np.ndarray, attack: float = 0.05, release: float = 0.35) -> n
     return np.clip(np.maximum(rise, fall), 0, 1)
 
 
-def voice_bus(spoken: List[Dict[str, Any]], words: Dict[str, List[Dict[str, Any]]], folder: Path, total: float,
-              throws: Dict[str, List[str]], mute: List[str]) -> Tuple[np.ndarray, np.ndarray]:
-    """The narration on the film's time line: (stereo voice with its room and echoes, the dry voice alone)."""
+def voice_bus(spoken: List[Dict[str, Any]], folder: Path, total: float, style: str = "clean") -> Tuple[np.ndarray, np.ndarray]:
+    """The narration on the film's time line, dry: (the voice in both channels, the voice alone)."""
     n = int(round(total * RATE))
-    dry, send = np.zeros(n), np.zeros(n)
-    say = base.Words(words)
+    dry = np.zeros(n)
     for item in spoken:
-        raw, rate = sf.read(str(folder / "{}.wav".format(item["line"])), dtype="float64")
-        raw = raw if raw.ndim == 1 else raw.mean(axis=1)
-        line = signal.resample_poly(raw, RATE, rate)
-        if "treat" not in mute:
-            line = treat(line)
+        line = voice_line(folder / "{}.wav".format(item["line"]), style)
         start = int(round(item["at"] * RATE))
         end = min(n, start + len(line))
         dry[start:end] += line[: end - start]
-        for phrase in throws.get(item["line"], []):                   # the end of a chosen phrase also goes to the long echo
-            last = max(word["t1"] for word in words[item["line"]] if word["t1"] is not None)
-            # only its last half second is sent, so the echo opens after the words instead of lying over them
-            begin = start + int(max(say.at(item["line"], phrase) - 0.04, last - 0.55) * RATE)
-            piece = line[begin - start: end - start].copy()
-            piece[: int(0.08 * RATE)] *= np.linspace(0, 1, int(0.08 * RATE)) ** 2
-            send[begin:begin + len(piece)] += piece
-    level = db(VOICE_LUFS - loudness(dry))
-    dry *= level
-    send *= level
     out = np.repeat(dry[:, None], 2, axis=1)
-    if "echo" not in mute:
-        room, hall = impulse(1.1, 0.022, 280.0, 6500.0, 11, True), impulse(2.9, 0.09, 320.0, 5200.0, 12, False, bloom=0.22)
-        speaking = activity(dry)
-        for side in (0, 1):
-            wet = signal.fftconvolve(dry, room[:, side])[:n]
-            out[:, side] += wet * db(MIX["room"]) * (1.0 - 0.4 * speaking)      # the room opens up in the pauses
-            out[:, side] += signal.fftconvolve(send, hall[:, side])[:n] * db(MIX["throw"])
-    level = db(VOICE_LUFS - loudness(out))                              # the room adds a little: back to the target
+    level = db(VOICE_LUFS - loudness(out))
     return out * level, dry * level
 
 
@@ -265,10 +255,17 @@ GROUND = ("regolith", "sand", "rocks", "bedrock")
 # per kind of ground: grains a second at full speed, and bands of (low Hz, high Hz, decay ms, share of the grains, level)
 GRAVEL = {
     "regolith": (150.0, [(650.0, 2100.0, 9.0, 0.5, 1.0), (2100.0, 6200.0, 5.0, 0.5, 0.8)]),
-    "sand": (300.0, [(2600.0, 9000.0, 15.0, 1.0, 0.55)]),
+    # Sand was first a dense, bright hiss, and Manh heard it as static (15 November). Now it is few, soft, low grains
+    # (the wheels pressing in), and the sifting on top comes in the rhythm of the wheels' treads: see `rover_shot`.
+    # A sixth number is a soft start in milliseconds: on sand a grain swells in instead of snapping on, because the
+    # snap is what Manh heard as clicking in the second try.
+    "sand": (110.0, [(380.0, 1500.0, 36.0, 1.0, 0.3, 12.0)]),
     "rocks": (95.0, [(320.0, 1300.0, 15.0, 0.45, 1.35), (1300.0, 5200.0, 6.0, 0.55, 1.1)]),
     "bedrock": (75.0, [(900.0, 3600.0, 5.0, 1.0, 1.0)]),
 }
+
+
+SAND_SIFT = 1.4        # the sifting off the treads, against the gravel level: the soft rhythm that says "sand"
 
 
 def control(values: np.ndarray, n: int, smooth: float) -> np.ndarray:
@@ -300,19 +297,32 @@ def rover_shot(frames: List[Dict[str, Any]], seed: int) -> np.ndarray:
         if here.max() < 1e-3:
             continue
         rate, bands = GRAVEL[name]
-        for low, high, decay, share, level in bands:
+        for low, high, decay, share, level, *soft in bands:
+            steps = np.arange(int(decay * 5 / 1000 * RATE)) / RATE
+            kernel = np.exp(-steps / (decay / 1000))
+            if soft:
+                kernel = kernel * (1.0 - np.exp(-steps / (soft[0] / 1000)))
+                kernel /= kernel.max()
             for side in (0, 1):                                              # each side's wheels crunch on their own
                 chance = drive * here * rate * share / RATE
                 hits = (rng.random(n) < chance) * rng.lognormal(0.0, 0.45, n)
-                kernel = np.exp(-np.arange(int(decay * 5 / 1000 * RATE)) / (decay / 1000 * RATE))
                 grain = signal.fftconvolve(hits, kernel)[:n] * band(n, low, high, rng)
                 out[:, side] += grain * level * 0.33 * db(MIX["gravel"]) * close
+    # sand sifting off the treads: soft air that comes and goes as each tread bites, left and right in turn,
+    # faster as the rover speeds up. A rhythm is what tells it from static.
+    sandy = control((ground == GROUND.index("sand")).astype(float), n, 0.06)
+    if sandy.max() > 1e-3:
+        tread = np.cumsum(3.4 + 5.6 * drive) / RATE
+        for side in (0, 1):
+            bite = np.clip(np.cos(2 * math.pi * (tread + 0.5 * side)), 0, 1) ** 3
+            sift = band(n, 1500.0, 4200.0, rng, "pink") * bite
+            out[:, side] += sift * drive * sandy * SAND_SIFT * db(MIX["gravel"]) * close
     ceiling = db(MIX["gravel"] + 13.0)
     out = np.tanh(out / ceiling) * ceiling                                   # a rare loud grain is rounded off, so none pokes out
     # the wheels rolling: low noise that pulses with their turning
     turning = np.cumsum(2.2 + 3.2 * drive) / RATE
     roll = band(n, 110.0, 650.0, rng, "pink") * drive ** 0.8 * (1.0 + 0.22 * np.sin(2 * math.pi * turning))
-    out += (roll * db(MIX["roll"]) * 2.4 * close)[:, None]
+    out += (roll * db(MIX["roll"]) * 2.4 * close * (1.0 - 0.45 * sandy))[:, None]          # sand swallows some of the rolling
     # the motor: a low hum with its overtones, and a faint whine, both rising with speed; it winds down when the battery dies
     pitch = (36.0 + 30.0 * drive) * (0.3 + 0.7 * on)
     phase = 2 * math.pi * np.cumsum(pitch * (1.0 + 0.012 * np.sin(2 * math.pi * 5.3 * np.arange(n) / RATE))) / RATE
@@ -321,6 +331,22 @@ def rover_shot(frames: List[Dict[str, Any]], seed: int) -> np.ndarray:
     flutter = 1.0 + 0.16 * filt(butter("lowpass", 11.0), rng.standard_normal(n)) * 6.0
     motor = filt(butter("lowpass", 900.0), (hum + whine) * flutter) * (0.2 + 0.8 * drive) * on
     out += (motor * 0.55 * db(MIX["motor"]) * (0.25 + 0.75 * close))[:, None]
+    # the machinery, where a laptop can play it: an electric whine that climbs with speed, and the drive train's
+    # soft tick, one side after the other. Quiet, but a pitch and a rhythm, so it reads as a machine.
+    t = np.arange(n) / RATE
+    climb = 2 * math.pi * np.cumsum((290.0 + 250.0 * drive) * (0.3 + 0.7 * on) * (1.0 + 0.007 * np.sin(2 * math.pi * 6.1 * t))) / RATE
+    whirr = (np.sin(climb) + 0.4 * np.sin(2 * climb + 0.6) + 0.16 * np.sin(3 * climb + 1.1)) * drive ** 0.7 * on
+    out += (filt(butter("lowpass", 2400.0), whirr) * 0.5 * db(MIX["machinery"]) * (0.3 + 0.7 * close))[:, None]
+    teeth = np.cumsum((5.5 + 7.5 * drive) * (drive > 0.03)) / RATE
+    click = np.exp(-np.arange(int(0.03 * RATE)) / (0.0055 * RATE))
+    steps = np.arange(int(0.1 * RATE)) / RATE
+    thud = np.exp(-steps / 0.02) * (1.0 - np.exp(-steps / 0.006))               # on sand the tick is a soft, low thud: no edge
+    thud /= thud.max()
+    for side in (0, 1):
+        turned = (np.diff(np.floor(teeth + 0.5 * side), prepend=np.floor(0.5 * side)) > 0) * (0.65 + 0.35 * rng.random(n))
+        tick = signal.fftconvolve(turned * (1.0 - sandy), click)[:n] * band(n, 900.0, 2600.0, rng)
+        tick += signal.fftconvolve(turned * sandy, thud)[:n] * band(n, 300.0, 950.0, rng) * 0.55
+        out[:, side] += tick * 1.5 * db(MIX["machinery"]) * on * (0.3 + 0.7 * close)
     return out
 
 
@@ -521,18 +547,21 @@ def ramps(total: float, points: List[Tuple[float, float]]) -> np.ndarray:
 
 
 # ---------------------------------------------------------------- the mix
-def build(timeline: List[Dict[str, Any]], spoken: List[Dict[str, Any]], lengths: Dict[str, float], words: Dict[str, List[Dict[str, Any]]],
-          folder: Path, throws: Dict[str, List[str]], mute: Optional[List[str]] = None) -> Dict[str, Any]:
-    """Write build/audio/mix.wav and one file per layer; return where, and notes on the levels."""
+def build(timeline: List[Dict[str, Any]], spoken: List[Dict[str, Any]], folder: Path, mute: Optional[List[str]] = None,
+          voice_style: str = "clean", into: str = "audio", whole: bool = True) -> Dict[str, Any]:
+    """Write build/audio/mix.wav and one file per layer; return where, and notes on the levels. With "voice" in
+    `mute` the narration is left out of the mix and nothing steps back for it: the film alone, for looking at.
+    A clip that is not the whole film (`whole` false) goes to its own folder `into` and gets an even bed under it
+    instead of the film's swells into the title and the last question."""
     mute = list(mute or [])
     unknown = sorted(set(mute) - set(LAYERS))
     if unknown:
         raise SystemExit("no layer called {}: choose from {}".format(", ".join(unknown), ", ".join(LAYERS)))
     total = sum(item["seconds"] for item in timeline)
     n = int(round(total * RATE))
-    out_folder = folder / "audio"
+    out_folder = folder / into
     out_folder.mkdir(parents=True, exist_ok=True)
-    voice, dry = voice_bus(spoken, words, folder / "voice", total, throws, mute)
+    voice, dry = voice_bus(spoken, folder / "voice", total, voice_style)
 
     starts, offset = {}, 0.0
     for item in timeline:
@@ -587,20 +616,23 @@ def build(timeline: List[Dict[str, Any]], spoken: List[Dict[str, Any]], lengths:
     title = next((starts[item["name"]] for item in timeline if item["name"] == "world"), 11.0)
     end = starts[timeline[-1]["name"]]
     swell = ramps(total, [(0.0, 0.0), (2.5, 0.85), (title - 0.5, 0.9), (title + 0.6, 1.5), (title + 5.0, 0.9), (end - 6.0, 0.8), (end + 1.0, 1.0),
-                          (total - 2.6, 1.6), (total - 0.2, 0.0)])
+                          (total - 2.6, 1.6), (total - 0.2, 0.0)] if whole else [(0.0, 0.0), (0.8, 0.9), (total - 0.8, 0.9), (total - 0.1, 0.0)])
     score = music(total, swell, 3)
 
     speaking = activity(dry)
     layers = {"rover": rover, "charts": charts, "wind": blow, "music": score}
-    mix = voice.copy()
+    silent = "voice" in mute
+    mix = np.zeros_like(voice) if silent else voice.copy()
     for name, layer in layers.items():
         if name in mute:
             layer *= 0.0
             continue
-        layer *= (1.0 - speaking * (1.0 - db(MIX["duck"][name])))[:, None]
+        if not silent and "duck" not in mute:
+            layer *= (1.0 - speaking * (1.0 - db(MIX["duck"][name])))[:, None]
         mix += layer
     close = np.ones(n)                                                        # out with the picture
-    close[-int(1.3 * RATE):] = np.linspace(1, 0, int(1.3 * RATE)) ** 1.5
+    tail = int(min(1.3 if whole else 0.5, total / 3) * RATE)
+    close[-tail:] = np.linspace(1, 0, tail) ** 1.5
     close[: int(0.25 * RATE)] = np.linspace(0, 1, int(0.25 * RATE))
     mix *= close[:, None]
     path = out_folder / "mix.wav"
@@ -613,10 +645,12 @@ def build(timeline: List[Dict[str, Any]], spoken: List[Dict[str, Any]], lengths:
         return 20 * math.log10(float(np.sqrt(np.mean(x ** 2))) + 1e-12) if len(x) else -120.0
 
     talk, quiet = speaking > 0.6, speaking < 0.05
-    notes = ["sound: {:.1f} LUFS overall, voice {:.1f} LUFS, sample peak {:.1f} dBFS".format(loudness(mix), loudness(voice), 20 * math.log10(float(np.max(np.abs(mix))) + 1e-12)),
+    rest = mix if silent else mix - voice
+    notes = ["sound: {:.1f} LUFS overall, voice {} ({}), sample peak {:.1f} dBFS".format(
+                 loudness(mix), "left out" if silent else "{:.1f} LUFS".format(loudness(voice)), voice_style, 20 * math.log10(float(np.max(np.abs(mix))) + 1e-12)),
              "while the narrator speaks: voice {:.1f} dB, everything else {:.1f} dB ({:.1f} dB under it)".format(
-                 rms(voice, talk), rms(mix - voice, talk), rms(voice, talk) - rms(mix - voice, talk)),
-             "in the pauses: everything else {:.1f} dB".format(rms(mix - voice, quiet))]
+                 rms(voice, talk), rms(rest, talk), rms(voice, talk) - rms(rest, talk)),
+             "in the pauses: everything else {:.1f} dB".format(rms(rest, quiet))]
     for name, layer in layers.items():
         if name not in mute:
             loud = np.abs(layer).max(axis=1) > db(-70)

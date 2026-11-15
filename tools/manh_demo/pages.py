@@ -37,8 +37,9 @@ EXPORT_MORE = ("window.LIGHTLAG_TRAVERSE_APP = { THREE, camera, scene, renderer,
 
 
 def swap(text: str, old: str, new: str, times: int, what: str) -> str:
+    """Replace `old` by `new`, which must be there exactly `times` times (or, for 0, at least once)."""
     found = text.count(old)
-    if found != times:
+    if found != times and not (times == 0 and found):
         raise SystemExit("manh_demo: expected {!r} {} time(s) in {}, found {}: the page has changed, "
                          "look at tools/manh_demo/pages.py".format(old[:60], times, what, found))
     return text.replace(old, new)
@@ -60,7 +61,7 @@ def campaign_page(build: Path) -> Path:
     html = swap(html, '--display: "DIN Condensed",', '--display: ' + DISPLAY + '"DIN Condensed",', 1, "the demo page's styles")
     # the cards' running text: the system sans on a Mac, Inter here
     html = swap(html, "font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;",
-                'font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;', 3, "the demo page's styles")
+                'font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;', 0, "the demo page's styles")
     out = build / "pages" / "traverse-campaign.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")

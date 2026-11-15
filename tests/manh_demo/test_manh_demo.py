@@ -52,20 +52,42 @@ class MakersTest(unittest.TestCase):
     def test_a_label_names_its_maker(self):
         self.assertEqual(makers.maker_of("Opus 5.5 · agent 2"), "anthropic")
         self.assertEqual(makers.maker_of("Haiku 5.5 · one shot"), "anthropic")
-        self.assertEqual(makers.maker_of("GPT-5.5 · agent 1"), "openai")
-        self.assertEqual(makers.maker_of("Gemini 3 Pro · agent 1"), "google-deepmind")
+        self.assertEqual(makers.maker_of("GPT-6.1 Sol · agent 1"), "openai")
+        self.assertEqual(makers.maker_of("Gemini 4 Carbon · agent 1"), "google")
         self.assertIsNone(makers.maker_of("Reference"))
         self.assertIsNone(makers.maker_of("Greedy stand-in"))
 
     def test_every_maker_has_a_tile(self):
         tiles = makers.for_page()
-        self.assertEqual(set(tiles), {"anthropic", "openai", "google-deepmind", "reference"})
+        self.assertEqual(set(tiles), {"anthropic", "openai", "google", "reference", "rl", "modal"})
+        self.assertEqual(tiles["modal"]["text"], "#7FEE64")
+        self.assertNotEqual(tiles["anthropic"]["text"], tiles["google"]["text"])            # each lab's name in its own colour
         for key in makers.MAKERS:
             svg = makers.tile_svg(key)
             self.assertIn(makers.mark_path(key), svg)
             self.assertIn(makers.MAKERS[key]["ink"], svg)
             self.assertTrue(tiles[key]["tile"].startswith("data:image/svg+xml;base64,"))
-        self.assertNotIn("<path d=\"m", makers.tile_svg(None).split("stroke=")[0])       # the reference's tile carries no lab's mark
+        for own in (None, "rl"):                                                        # our own drivers carry no lab's mark
+            self.assertFalse(any(makers.mark_path(key) in makers.tile_svg(own) for key in makers.MAKERS))
+
+    def test_the_lineup_is_three_labs_by_three_tiers(self):
+        found = makers.lineup()
+        self.assertEqual(len(found["tiers"]), 3)
+        self.assertEqual([lab["key"] for lab in found["labs"]], list(makers.MAKERS))
+        for lab in found["labs"]:
+            self.assertEqual(len(lab["models"]), 3)
+            for model in lab["models"]:
+                self.assertEqual(makers.maker_of(model), lab["key"], model)             # every model is filed under its own lab
+        # the same nine models as the tier comparison runs
+        runs = (REPO / "tools" / "tier_agents" / "run_tiers.py").read_text(encoding="utf-8")
+        for short in ("gpt-6-luna", "gpt-6.1-terra", "gpt-6.1-sol", "gemini-4-hydrogen", "gemini-4-argon", "gemini-4-carbon"):
+            self.assertIn(short, runs)
+            self.assertTrue(any(short.replace("-", " ") == model.lower().replace("-", " ") for lab in found["labs"] for model in lab["models"]), short)
+
+    def test_the_numbers_on_the_drivers_card_come_from_the_results(self):
+        facts = makers.facts()
+        self.assertGreater(facts["reference"], facts["rl"])
+        self.assertGreater(facts["rl"], facts["best_claude"])
 
 
 class PagesTest(unittest.TestCase):
@@ -119,12 +141,12 @@ class CutTest(unittest.TestCase):
         longer = {shot["name"]: shot for shot in cut.shots(self.lengths, self.words, stretch=1.25)}
         self.assertAlmostEqual(longer["end"]["beats"][-1]["pad"] - self.mine["end"]["beats"][-1]["pad"], 1.25)
 
-    def test_the_echoed_words_are_in_the_script(self):
-        say = base.Words(self.words)
-        for line, phrases in cut.THROWS.items():
-            for phrase in phrases:
-                self.assertIn(phrase, cut.LINES[line])
-                self.assertGreater(say.at(line, phrase), 0.0)
+    def test_the_pieces_are_drafts_outside_the_film(self):
+        film = set(self.mine)
+        for name, piece in cut.PIECES.items():
+            self.assertNotIn(name, film)
+            self.assertIn(piece["page"], ("film", "campaign"))
+            self.assertTrue(piece["beats"])
 
     def test_the_length_leaves_a_second_under_two_minutes(self):
         self.assertLess(cut.LIMIT_SECONDS, 120.0)
@@ -185,17 +207,22 @@ class SoundTest(unittest.TestCase):
             (folder / "tele" / "cold.json").write_text(json.dumps(self.drive(4.8, seconds=3)))
             timeline = [{"name": "cold", "page": "campaign", "seconds": 3.0, "lines": [{"line": "a1", "at": 0.4}], "thumps": [2.5], "sfx": []},
                         {"name": "results", "page": "film", "seconds": 3.0, "lines": [], "thumps": [], "sfx": [{"at": 0.7, "kind": "bar", "score": 0.4}]}]
-            lengths, words = fake_words()
-            report = sound.build(timeline, [{"line": "a1", "at": 0.4}], lengths, words, folder, {})
+            report = sound.build(timeline, [{"line": "a1", "at": 0.4}], folder)
             mix, rate = sf.read(str(report["mix"]))
             self.assertEqual((rate, mix.shape), (sound.RATE, (6 * sound.RATE, 2)))
             voice, _ = sf.read(str(folder / "audio" / "voice.wav"))
             self.assertAlmostEqual(sound.loudness(voice), sound.VOICE_LUFS, delta=1.0)
             self.assertLess(np.abs(mix).max(), 1.0)
-            quiet, _ = sf.read(str(sound.build(timeline, [{"line": "a1", "at": 0.4}], lengths, words, folder, {}, mute=["rover", "charts", "music", "wind"])["mix"]))
+            quiet, _ = sf.read(str(sound.build(timeline, [{"line": "a1", "at": 0.4}], folder, mute=["rover", "charts", "music", "wind"])["mix"]))
             self.assertLess(self.level(quiet[int(4.0 * rate):int(5.0 * rate)]), -80)  # with every layer muted, nothing but the voice
+            alone, _ = sf.read(str(sound.build(timeline, [{"line": "a1", "at": 0.4}], folder, mute=["voice"], into="audio-clip", whole=False)["mix"]))
+            said = slice(int(0.6 * rate), int(2.2 * rate))
+            self.assertLess(self.level(alone[said]), self.level(mix[said]) - 10)      # the film without its narration
+            self.assertTrue((folder / "audio-clip" / "mix.wav").exists())
             with self.assertRaises(SystemExit):
-                sound.build(timeline, [], lengths, words, folder, {}, mute=["drums"])
+                sound.build(timeline, [], folder, mute=["drums"])
+            with self.assertRaises(SystemExit):
+                sound.voice_bus([{"line": "a1", "at": 0.4}], folder / "voice", 6.0, "robot")
 
 
 if __name__ == "__main__":
