@@ -1,0 +1,156 @@
+{
+  "aggregate_alive_count": 8300,
+  "aggregate_death_count": 20,
+  "aggregate_home_count": 8300,
+  "aggregate_invalid_calls": 0,
+  "aggregate_not_home_count": 20,
+  "all_aggregate_home_alive": false,
+  "checks": {
+    "aggregate_complete": true,
+    "aggregate_exact_lineage": true,
+    "aggregate_exact_original_jobs": true,
+    "aggregate_original_identity": true,
+    "aggregate_unchanged_shared_budget_ledger": true,
+    "all_cost_call_ids_unique": true,
+    "all_new_rows_and_calls_exact_terminal": true,
+    "all_retained_rows_and_calls_unchanged": true,
+    "downloaded_aggregate_hash": true,
+    "downloaded_freeze_hash": true,
+    "downloaded_state_matches_original_terminal_call": true,
+    "first_recovery_failure_preserved": true,
+    "full_frozen_source_and_policy_validation": true,
+    "no_retained_call_repeated": true,
+    "old_failed_attempts_retained": true,
+    "original_old_coordinator_failure_preserved": true,
+    "raw_attempt_storage_and_threefold_cost_bound": true,
+    "state_complete": true,
+    "state_exact_new_jobs": true
+  },
+  "distinct_development_worker_calls": 8322,
+  "distinct_hybrid_calls_including_four_coordinators": 8391,
+  "distinct_hybrid_worker_calls_including_smoke": 8387,
+  "input_sha256": {
+    "aggregate-state.json": "142d0b629c1a46ba1cd570fd4c61ce024daf3e5d3bde99ae0c3d5270f056cc80",
+    "freeze.json": "953247698699653d4ea3a8800e3e0710097be4d1f6fd784e3f184393d44f7527",
+    "receipt.json": "aea81faac2488706f77d48b9f88ceebc017c64bdbd27d273fe6b5866454d72d3",
+    "state.json": "35c11717d3e256f60fa826ec792f7cbb4b6a6b89736ae5abfbe95714dc51a278",
+    "status.json": "d29cc4cdd9f0466a94979e7f412cf56cdcf5d14d16bfc37936af9c234dccfdf5"
+  },
+  "limits": [
+    "Audit checks saved metadata identities, source pins, raw-row hash reconstruction and audit bindings; no new physics/controller replay or trajectory download.",
+    "All 5810 retained rows/calls remain exact; the two historical failed attempts are retained separately and only their new attempt results enter the scientific aggregate.",
+    "Recorded running compute estimates are not invoices or remaining credits; they exclude build/startup/storage/egress, idle allocation and potentially lost uncommitted computation on the two interrupted calls.",
+    "This audit performs no selection and opens no confirmation/final maps."
+  ],
+  "new_attempts": 2510,
+  "observed_unix": 1794708076.940182,
+  "ops_source_sha256": {
+    "tools/learning_hybrid_ops/recovery.py": "d79172fec3f9a351542d3c470d3cba8f68dbcff5a08769f121d916370048655b",
+    "tools/learning_hybrid_ops/recovery2.py": "4c76455af19c19d1dd1d5468b74e4dff0ba4e32a401ef8ddd561ed230051353b"
+  },
+  "original_scientific_cases": 8320,
+  "passed": true,
+  "previously_unstarted": 2508,
+  "protected_source_files": 54,
+  "recorded_running_compute": {
+    "combined_recorded_usd": 4.262745153125243,
+    "frozen_conservative_allocation_bound_usd": 65.44299749568555,
+    "hybrid_breakdown": {
+      "original_development": {
+        "completed": 3145,
+        "coordinator_call_id": "fc-01M7E75QF1581XG9HXNT3K0D5Q",
+        "coordinator_estimate_usd": 0.03876433116682052,
+        "coordinator_rate_multiplier": 1,
+        "failed": 0,
+        "total_estimate_usd": 0.49770744847795007,
+        "worker_calls": 3145,
+        "worker_estimate_usd": 0.4589431173111295,
+        "worker_rate_multiplier": 1
+      },
+      "recovery1": {
+        "completed": 2665,
+        "coordinator_call_id": "fc-01M7EB3DJ8C214Z7E14WCVVTNF",
+        "coordinator_estimate_usd": 0.05898497284897327,
+        "coordinator_rate_multiplier": 3,
+        "failed": 2,
+        "total_estimate_usd": 0.42936950362141124,
+        "worker_calls": 2667,
+        "worker_estimate_usd": 0.370384530772438,
+        "worker_rate_multiplier": 1
+      },
+      "recovery2": {
+        "completed": 2510,
+        "coordinator_call_id": "fc-01M7EDXYD8614C8X0ST20CR7N3",
+        "coordinator_estimate_usd": 0.043908847348523135,
+        "coordinator_rate_multiplier": 3,
+        "failed": 0,
+        "total_estimate_usd": 0.9198505311305236,
+        "worker_calls": 2510,
+        "worker_estimate_usd": 0.8759416837820004,
+        "worker_rate_multiplier": 3
+      },
+      "smoke": {
+        "completed": 65,
+        "coordinator_call_id": "fc-01M7E6VMHCJAWJY3SYS1QF79T4",
+        "coordinator_estimate_usd": 0.0011095029684782026,
+        "coordinator_rate_multiplier": 1,
+        "failed": 0,
+        "total_estimate_usd": 0.011450843691172599,
+        "worker_calls": 65,
+        "worker_estimate_usd": 0.010341340722694397,
+        "worker_rate_multiplier": 1
+      }
+    },
+    "hybrid_total_usd": 1.8583783269210574,
+    "prior_training_jobs": [
+      {
+        "call_id": "fc-01M7E7ZJGF5VASQES102QJSAEB",
+        "metadata_sha256": "db3be816ef3ae54c48e53383b3c27b93068805f599da52478641d6f795627c8b",
+        "run_id": "plain-17",
+        "running_compute_estimate_usd": 0.4387657273467254,
+        "status": "completed"
+      },
+      {
+        "call_id": "fc-01M7E7ZKC6SSV88FSM5S2E3XEF",
+        "metadata_sha256": "b75677b95ee872d551c178c76ceeb49c6311d29d415906372d8403ef379e1765",
+        "run_id": "plain-29",
+        "running_compute_estimate_usd": 0.5272320234598159,
+        "status": "completed"
+      },
+      {
+        "call_id": "fc-01M7E7ZM2S86YK6Q4KXJFB37DQ",
+        "metadata_sha256": "adc47223539d1f5c5237dc95ef775db4bb9f8a8281d556955cfcbb59db31f4a7",
+        "run_id": "plain-43",
+        "running_compute_estimate_usd": 0.40715924033473966,
+        "status": "completed"
+      },
+      {
+        "call_id": "fc-01M7E7ZFFPBED193961PP68C9G",
+        "metadata_sha256": "32254491a82aacc33743d22c50c0240041c914f33ff69ae295096c551e6ef054",
+        "run_id": "prior-17",
+        "running_compute_estimate_usd": 0.4192353995261001,
+        "status": "completed"
+      },
+      {
+        "call_id": "fc-01M7E7ZGG2JXNY7Z09VTXECPHV",
+        "metadata_sha256": "3da8f5bececc2b415205d5bc0cb3dc3f58d4802f7a4b84a9c605d6518f12eb24",
+        "run_id": "prior-29",
+        "running_compute_estimate_usd": 0.18906273540706633,
+        "status": "wrapper_error"
+      },
+      {
+        "call_id": "fc-01M7E7ZHG6A6VHK8NZ1HKDCRY2",
+        "metadata_sha256": "dc68244a6968f1748e494711f2a4b5e3d2e264103568c280039e2955a143cbc0",
+        "run_id": "prior-43",
+        "running_compute_estimate_usd": 0.42291170012973783,
+        "status": "completed"
+      }
+    ],
+    "prior_training_separate_usd": 2.404366826204185,
+    "smoke_state_sha256": "a5b136a4ab7176a6cc4f0f484146db4eaae48b57e4aceb0e95645e484f1f46f8",
+    "unchanged_running_allocation_cap_usd": 75
+  },
+  "retained_completed": 5810,
+  "retried_failed_identities": 2,
+  "schema": "learning-hybrid-recovery2-terminal-audit-v1"
+}
