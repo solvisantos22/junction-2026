@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#161819">
+  <meta name="description" content="Watch eight rover autopilots navigate the same terrain, manage their batteries and try to bring their samples home.">
+  <title>Lightlag Traverse: Rover missions</title>
+  <link rel="preload" href="assets/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/fonts.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="home.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to missions</a>
+  <header class="masthead shell">
+    <a class="wordmark" href="/" aria-label="Lightlag Traverse home">Lightlag <span>Traverse</span></a>
+    <nav aria-label="Project"><a href="#controllers">The experiment</a><a href="https://github.com/solvisantos22/junction-2026">Source</a></nav>
+  </header>
+
+  <main id="main" class="shell" tabindex="-1">
+    <section class="mission" aria-labelledby="mission-heading">
+      <div class="briefing">
+        <h1 id="mission-heading">Bring the<br>samples home.</h1>
+        <p class="intro">Eight autopilots cross the same terrain. Follow their routes, watch their batteries, and see who makes it back.</p>
+        <p class="conditions">The sun recharges the rover.<br>Every command arrives three ticks late.</p>
+        <a class="primary" href="/world/2027"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 4 9 6-9 6Z"/></svg>Open a replay</a>
+        <p class="action-note">World 2027 is ready to watch.</p>
+      </div>
+
+      <div class="terrain-panel">
+        <div class="terrain-bar"><span>World <span class="numeric">2027</span></span><span class="numeric">600 × 400 m</span></div>
+        <a class="terrain-link" href="/world/2027" aria-label="Open the replay of world 2027">
+          <img src="assets/world-2027.png" width="1070" height="585" alt="Rover routes around craters and rock fields in world 2027, captured from the actual replay at tick 170." fetchpriority="high">
+          <span class="view-label">Explore this terrain</span>
+        </a>
+        <div class="world-switcher">
+          <span>Other worlds</span>
+          <nav aria-label="Featured world replays">
+            <a href="/world/2028" aria-label="Open world 2028, judged site 2">2028</a>
+            <a href="/world/2029" aria-label="Open world 2029, judged site 3">2029</a>
+            <a href="/world/871" aria-label="Open fresh world 871">871</a>
+            <a href="/world/610" aria-label="Open fresh world 610">610</a>
+          </nav>
+        </div>
+      </div>
+    </section>
+
+    <section class="custom-world" aria-labelledby="custom-heading">
+      <div><h2 id="custom-heading">Choose your own world</h2><p>Same eight autopilots, a different patch of ground.</p></div>
+      <form id="world-form" action="/world" method="get">
+        <div class="form-row">
+          <div class="field"><label for="seed">World number</label><input id="seed" name="seed" type="number" inputmode="numeric" min="1" max="1000000" step="1" placeholder="1–1,000,000" required aria-describedby="seed-note seed-error"></div>
+          <button class="secondary" type="submit">Launch world</button>
+        </div>
+        <p class="form-note" id="seed-note">New worlds take about a minute. The slowest rover may join later.</p>
+        <p class="form-error" id="seed-error" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section id="controllers" class="experiment" aria-labelledby="experiment-heading">
+      <div class="section-intro"><h2 id="experiment-heading">Who’s driving?</h2><p>One reference planner, one textbook controller and six Claude-written programs. Each drives its own rover for a <span class="numeric">420</span>-tick mission.</p><p>The model-written programs are saved and replayed on each world.</p></div>
+      <dl class="controller-list">
+        <div><dt><span class="driver-reference">Our planner</span><span class="driver-count">1 rover</span></dt><dd>Plans the whole route against the battery and the sun.</dd></div>
+        <div><dt>Textbook A* + Kalman<span class="driver-count">1 rover</span></dt><dd>Finds the cheapest path, then takes the best next target.</dd></div>
+        <div><dt>Claude, one request<span class="driver-count">3 rovers</span></dt><dd>Autopilots that Opus, Sonnet and Haiku each wrote in a single answer.</dd></div>
+        <div><dt>Claude, agent runs<span class="driver-count">3 rovers</span></dt><dd>Autopilots that Opus and Sonnet agents wrote during a mission.</dd></div>
+      </dl>
+    </section>
+
+    <details class="field-notes">
+      <summary>What to look for in the featured worlds</summary>
+      <ul>
+        <li><a href="/world/2027">World 2027</a><span>Judged site 1. Two of Claude’s three agent autopilots run their batteries flat.</span></li>
+        <li><a href="/world/2028">World 2028</a><span>Judged site 2. The closest race: 0.457 against our planner’s 0.508.</span></li>
+        <li><a href="/world/2029">World 2029</a><span>Judged site 3. Three Claude rovers run their batteries flat.</span></li>
+        <li><a href="/world/871">World 871</a><span>Opus agent 3 holds 19 samples. Then its battery dies.</span></li>
+        <li><a href="/world/610">World 610</a><span>Our planner brings 28 samples home. Two Claude rovers die by tick 166.</span></li>
+      </ul>
+    </details>
+  </main>
+
+  <footer class="shell footer"><p>Junction 2026 / AfterQuery: Break the Agent</p><p>Runs on <a href="https://modal.com/">Modal</a></p><p class="replay-help">In the replay: <kbd>Enter</kbd> to start, scroll to zoom, drag to move, right-drag to turn, click a rover to follow. <kbd>S</kbd> for Story Mode. <kbd>R</kbd> to reset the view.</p></footer>
+</body>
+</html>

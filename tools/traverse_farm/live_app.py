@@ -211,29 +211,7 @@ def _page(title: str, body: str) -> str:
 
 
 def _landing() -> str:
-    drivers = "".join('<div class="driver"><b><span class="dot {0}"></span>{1}</b><p>{2}</p></div>'.format(
-        css, html.escape(name), html.escape(text)) for css, name, text in DRIVERS)
-    cards = "".join('<a class="card" href="/world/{0}"><div class="n">{0}</div><div class="tag">{1}</div><p>{2}</p></a>'.format(
-        seed, html.escape(tag), html.escape(text)) for seed, tag, text in WORLDS)
-    body = """<section class="hero"><div>
-<p class="eyebrow">Lightlag Traverse · live on Modal</p>
-<h1>One world.<br>Eight rovers.</h1>
-<p class="sub">Only one always makes it home.</p>
-<p class="lead">Mars-like ground, a battery the sun refills, and every command lands three ticks late.
-Pick a world and Modal drives it eight times at once. About a minute later you can watch every run.</p>
-<form onsubmit="location.href='/world/'+encodeURIComponent(this.seed.value);return false;">
-<label for="seed">World number</label>
-<input id="seed" name="seed" type="number" min="__LO__" max="__HI__" placeholder="World 1 to 1,000,000" required>
-<button type="submit">Launch</button></form>
-</div>__CRATER__</section>
-<section class="drivers">__DRIVERS__</section>
-<h2>Worlds worth a look</h2>
-<section class="cards">__CARDS__</section>
-<footer><span>On a replay: <kbd>Enter</kbd> starts · scroll zooms · drag moves · right-drag turns · click a rover to follow it · <kbd>S</kbd> tells the story · <kbd>R</kbd> resets the view</span>
-<span>Junction 2026 · AfterQuery: Break the Agent</span></footer>"""
-    body = (body.replace("__LO__", str(LOWEST)).replace("__HI__", str(HIGHEST)).replace("__CRATER__", CRATER)
-            .replace("__DRIVERS__", drivers).replace("__CARDS__", cards))
-    return _page("Lightlag Traverse · live", body)
+    return (HERE / "home_preview" / "index.html").read_text(encoding="utf-8")
 
 
 def _waiting(seed: int, since: float) -> str:
@@ -297,9 +275,20 @@ def _problem(message: str) -> str:
 @modal.asgi_app()
 def web():
     from fastapi import FastAPI
-    from fastapi.responses import HTMLResponse, JSONResponse
+    from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+    from fastapi.staticfiles import StaticFiles
 
     api = FastAPI(title="Lightlag Traverse, live", docs_url=None, redoc_url=None)
+    home = HERE / "home_preview"
+    api.mount("/assets", StaticFiles(directory=home / "assets"), name="home-assets")
+
+    @api.get("/style.css", include_in_schema=False)
+    def home_style():
+        return FileResponse(home / "style.css", media_type="text/css")
+
+    @api.get("/home.js", include_in_schema=False)
+    def home_script():
+        return FileResponse(home / "home.js", media_type="application/javascript")
 
     def _seed(seed: str):
         return int(seed) if seed.isdigit() and LOWEST <= int(seed) <= HIGHEST else None
@@ -327,6 +316,13 @@ def web():
     @api.get("/", response_class=HTMLResponse)
     def landing():
         return _landing()
+
+    @api.get("/world", include_in_schema=False)
+    def world_form(seed: str = ""):
+        seed_n = _seed(seed)
+        if seed_n is None:
+            return HTMLResponse(_problem("A world is a whole number from {:,} to {:,}.".format(LOWEST, HIGHEST)), 400)
+        return RedirectResponse("/world/{}".format(seed_n), status_code=303)
 
     @api.get("/world/{seed}")
     def world(seed: str):
