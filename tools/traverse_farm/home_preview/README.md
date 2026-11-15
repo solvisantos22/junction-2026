@@ -57,3 +57,11 @@ Use a clean main checkout. The existing image already packages this directory. N
 
 
 Production publication was verified at **10:25:42 Helsinki on 15 November 2026** at the existing submitted URL. All homepage assets matched the approved source; desktop/mobile browser checks and cached replay playback passed. [Release evidence](../../../docs/homepage-release/README.md).
+
+### Which build is running (Kristján / Claude Code, Traverse session)
+
+Kristján asked for the pull and the deploy at about 10:19. The fetch then brought `e047a45` and not yet `d4722a5`. Run as a temporary copy first (`modal serve`, its own `-dev` address, the live site untouched), `e047a45` **failed at startup**: `RuntimeError: Directory '/root/home_preview/assets' does not exist`, because on Modal the app file is `/root/live_app.py`. A straight deploy would have taken the whole site down, cached worlds included.
+
+This session wrote the same correction as `d4722a5` in its own words (`_home()`: the folder beside the file when it exists, otherwise `/root/farm/traverse_farm/home_preview`), tested it on the temporary copy, and ran `modal deploy tools/traverse_farm/live_app.py` (client 1.6.4, Python 3.12, workspace `kristjansolvi03`) at 10:25. **So the build running since 10:25 is `e047a45` plus that equivalent correction, kept as commit `96cea3e` on the unmerged branch `claude-live-home-path`; `d4722a5` itself has not been deployed.** Both resolve to the same folder on Modal and serve the same files, so a redeploy from `main` changes nothing a visitor sees; it was not done during peer review.
+
+Checked on the public address at 10:25:58 without cookies: the homepage (the same bytes as the tested copy), `/style.css`, `/home.js`, `/assets/fonts.css`, two fonts, `/assets/world-2027.png`, the cached worlds 2027, 2028, 2029, 871 and 610 (about 3.2 MB each), `/world?seed=2027` (303 to `/world/2027`) and `/world?seed=0` (400). Seen once in Chrome: three fonts and the image loaded, no sideways scroll.

@@ -1,6 +1,6 @@
 # Homepage release, 15 November 2026
 
-Sölvi reviewed the local mission-control homepage and explicitly approved immediate publication. Source is on main in `e047a451`, with the explicit Modal asset-mount correction in `d4722a54`. Deployment uses Kristján’s existing Modal workspace and the same submitted URL:
+Sölvi reviewed the local mission-control homepage and explicitly approved immediate publication. Source is on main in `e047a451`, with the explicit Modal asset-mount correction in `d4722a54`. The build running since 10:25 was deployed by Kristján's Claude Code session from `e047a451` with its own equivalent of that correction, written before `d4722a54` had been fetched; `d4722a54` itself has not been deployed ([which build is running](../../tools/traverse_farm/home_preview/README.md#which-build-is-running-kristján--claude-code-traverse-session)). Deployment uses Kristján’s existing Modal workspace and the same submitted URL:
 
 https://kristjansolvi03--lightlag-traverse-live-web.us-east.modal.run/
 
