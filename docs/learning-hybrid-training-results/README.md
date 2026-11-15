@@ -158,3 +158,20 @@ training app at 00:21:18 UTC**, about five seconds after the failed wrapper
 returned. This supports preemption as the cause; the API did not provide a
 direct container-to-call mapping. [Platform event and limits](interruption/platform-event.json).
 The original call's terminal error and no-resume decision remain unchanged.
+
+## Descriptive report after the original calls finish
+
+The separate `tools.learning_hybrid_ops.report_training` utility validates the
+terminal six-call download, source/receipt identities, checkpoint restoration
+and saved validation arithmetic without running training or simulations:
+
+```sh
+python -m tools.learning_hybrid_ops.report_training --download TERMINAL_ARCHIVES --freeze docs/learning-hybrid-training-results/freeze.json --output NEW_REPORT_DIRECTORY
+```
+
+It produces JSON and PNG/SVG learning curves. A method mean appears only when
+all three original seeds have that declared checkpoint: the prior mean ends
+at 512 here, with later surviving prior runs shown individually. The missing
+seed is never imputed. Five focused tests and independent review passed; a
+real retained `prior-29` archive also validates. Production figures will be
+published after the remaining original calls finish and their files verify.

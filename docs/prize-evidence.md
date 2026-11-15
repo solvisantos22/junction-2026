@@ -953,3 +953,11 @@ original workers, scientific sources, all weights, map grid and selection rules
 are unchanged. [Published recovery freeze and evidence](learning-hybrid-results/development/recovery/README.md)
 precede launch. Original failed state is preserved, and only the full original
 8320-case matrix can produce a separate combined completion record.
+
+Codex also delivered a source/receipt-bound descriptive six-run reporter with
+five focused tests and independent review. It verifies retained optimizer/RNG
+and policy states plus validation arithmetic, preserves terminal failure over
+a stale trainer report, and suppresses method means whenever a seed is missing.
+The interrupted seed's real archive passed; production JSON/learning curves
+await the remaining original calls. [Reporter handoff](learning-hybrid-training-results/README.md#descriptive-report-after-the-original-calls-finish).
+No new simulations or cloud jobs are used by this reporter.
