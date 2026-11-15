@@ -194,6 +194,13 @@ class SoundTest(unittest.TestCase):
         tone = np.stack([np.sin(2 * np.pi * 997 * t)] * 2, axis=1) * sound.db(-18)
         self.assertAlmostEqual(sound.loudness(tone), -18.0, delta=0.1)               # BS.1770: full scale in both channels reads 0
 
+    def test_a_clip_of_any_length_has_a_bed_of_the_same_length(self):
+        for seconds in (10.2, 14.533, 3.0):                                              # 10.2 s is 489599.99... samples before rounding
+            n = int(round(seconds * sound.RATE))
+            self.assertEqual(sound.wind(seconds, np.ones(n), 7).shape, (n, 2))
+            self.assertEqual(sound.music(seconds, np.ones(n), 3).shape, (n, 2))
+            self.assertEqual(sound.ramps(seconds, [(0.0, 0.0), (seconds, 1.0)]).shape, (n,))
+
     def test_every_sound_renders(self):
         rng = np.random.default_rng(1)
         for kind in ("tick", "tock", "chime", "chime_soft", "bar", "flow", "swell", "riser", "hit", "hit_soft", "typing", "whoosh", "cut",

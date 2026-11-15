@@ -507,7 +507,7 @@ def render(cue: Dict[str, Any], rng: np.random.Generator) -> Tuple[np.ndarray, f
 # ---------------------------------------------------------------- wind and music
 def wind(total: float, ground: np.ndarray, seed: int) -> np.ndarray:
     """A low wind that comes and goes; `ground` is 1 over the ground shots and 0 under the charts."""
-    n = int(total * RATE)
+    n = int(round(total * RATE))
     rng = np.random.default_rng(seed)
     out = np.zeros((n, 2))
     gust = 1.0 + 0.45 * np.clip(filt(butter("lowpass", 0.18), rng.standard_normal(n)) * 60.0, -1, 1)
@@ -522,7 +522,7 @@ def wind(total: float, ground: np.ndarray, seed: int) -> np.ndarray:
 
 def music(total: float, swell: np.ndarray, seed: int) -> np.ndarray:
     """One held D and its fifth, slowly breathing, with a faint high shimmer; `swell` is its loudness over the film."""
-    n = int(total * RATE)
+    n = int(round(total * RATE))
     rng = np.random.default_rng(seed)
     t = np.arange(n) / RATE
     out = np.zeros((n, 2))
@@ -541,7 +541,7 @@ def music(total: float, swell: np.ndarray, seed: int) -> np.ndarray:
 
 def ramps(total: float, points: List[Tuple[float, float]]) -> np.ndarray:
     """A level over the film from (seconds, value) points, joined by straight lines and then smoothed."""
-    n = int(total * RATE)
+    n = int(round(total * RATE))
     xs, ys = zip(*sorted(points))
     return one_pole(np.interp(np.arange(n) / RATE, xs, ys), 0.25)
 
