@@ -65,6 +65,8 @@ def write_run(root: Path, seed: int = SEED) -> Path:
         place.mkdir(parents=True, exist_ok=True)
         (place / "replay.json").write_text(json.dumps(replay, separators=(",", ":")), encoding="utf-8")
         (place / "result.json").write_text(json.dumps(result, indent=1), encoding="utf-8")
+    whole = dict(bundle["result"], reward=bundle["result"]["raw_score"] / bundle["result"]["max_available_value"])
+    (folder / "artifacts" / "evaluator" / "result.json").write_text(json.dumps(whole, indent=1), encoding="utf-8")   # the campaign as a whole
     meta = dict(RUN, seed=seed, checkpoint=CHECKPOINT, campaign_reward=bundle["reward"],
                 source="docs/learning-final-results/campaign/evaluation/cases/ppo-{}-{:05d}.json.gz".format(seed, CHECKPOINT))
     (folder / "run.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
