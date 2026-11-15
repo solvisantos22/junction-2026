@@ -30,6 +30,20 @@ PIECES: Dict[str, Dict[str, Any]] = {
     "lineup": {"page": "film", "scene": "lineup", "fade_out": 0.4, "beats": [{"min": 8.6}]},
     # what the models are measured against: the reference (a model-based planner) and the team's own RL agent
     "drivers": {"page": "film", "scene": "drivers", "fade_out": 0.4, "beats": [{"min": 9.0}]},
+    # the opening: Mars from orbit, a dive through the dust, a landing on the real map, the title (`intro.js`)
+    "intro": {"page": "campaign", "site": 1, "addon": "intro.js", "addon_settings": {"orbit": 9.0, "dive": 2.6, "land": 3.2},
+              "vacuum": [0.0, 10.4], "fade_in": 0.9, "fade_out": 0.5, "beats": [
+        {"min": 11.6, "trackers": False, "js": "A.showTitle(false); A.seek(0); A.setCam('map'); A.setPlaying(false);",
+         "sfx": [{"t": 0.4, "kind": "hit_soft"}, {"t": 8.7, "kind": "riser", "len": 2.9}]},
+        {"min": 3.2, "trackers": False, "sfx": [{"t": 0.0, "kind": "whoosh", "len": 2.2}]},
+        {"min": 4.4, "trackers": False, "js": "A.setSpeed(4); A.setPlaying(true);",
+         "overlay": [{"kind": "title", "from": 0.1, "to": 3.9}], "sfx": [{"t": 0.15, "kind": "hit"}]},
+    ]},
+    # four drafts of a 3D icon floating over the rover, in a studio with three of the film's rovers (`icons.js`)
+    "icons": {"page": "campaign", "site": 1, "addon": "icons.js", "addon_settings": {"show": 5.0}, "vacuum": [0.0, 20.4], "fade_in": 0.5, "fade_out": 0.4, "beats": [
+        {"min": 20.0, "trackers": False, "js": "A.showTitle(false); A.seek(210); A.setCam('map'); A.setPlaying(false);",
+         "sfx": [{"t": 0.25 + 5.0 * k, "kind": "chime_soft", "step": k} for k in range(4)]},
+    ]},
     # Kristján's two Modal scenes and his end card, to show Modal's name in its green with its mark
     "modal_farm": {"page": "film", "scene": "farm", "fade_out": 0.4, "beats": [{"min": 9.0, "cues": [4.6, 6.4]}]},
     "modal_learning": {"page": "film", "scene": "learning", "fade_out": 0.4, "beats": [{"min": 7.0}]},

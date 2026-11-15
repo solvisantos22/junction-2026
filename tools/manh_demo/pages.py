@@ -33,7 +33,7 @@ FILM = REPO / "tools" / "demo_video" / "film.html"
 DISPLAY = '"Barlow Condensed", '
 EXPORT = "window.LIGHTLAG_TRAVERSE_APP = { state, story, view,"
 EXPORT_MORE = ("window.LIGHTLAG_TRAVERSE_APP = { THREE, camera, scene, renderer, ACTORS, REF, OTHERS, CFG, DATA, card, "
-               "classAt, slopeAt, drawnHeight, P, short, state, story, view,")
+               "classAt, slopeAt, drawnHeight, P, short, roverParts, state, story, view,")
 
 
 def swap(text: str, old: str, new: str, times: int, what: str) -> str:
@@ -108,3 +108,15 @@ def font_environment(build: Path) -> Dict[str, str]:
 
 def fonts() -> Tuple[str, ...]:
     return tuple(sorted(path.name for path in FONTS.glob("*.ttf")))
+
+
+def svg_loader() -> str:
+    """three.js's own SVG loader (`vendor/SVGLoader.js`, MIT, the version of the three.js in the repository) as the
+    body of a function of THREE: its import and export lines are swapped for plain ones, so an add-on can use it
+    with the page's own copy of three.js, which is loaded from a blob and cannot be imported by name."""
+    source = (HERE / "vendor" / "SVGLoader.js").read_text(encoding="utf-8")
+    head = re.match(r"import \{([^}]*)\} from 'three';", source, re.S)
+    if not head:
+        raise SystemExit("manh_demo: vendor/SVGLoader.js no longer starts with its import from three")
+    body = "const {" + head.group(1) + "} = THREE;" + source[head.end():]
+    return swap(body, "export { SVGLoader };", "return SVGLoader;", 1, "vendor/SVGLoader.js")

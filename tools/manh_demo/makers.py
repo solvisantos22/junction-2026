@@ -133,3 +133,12 @@ def facts() -> Dict[str, Any]:
     return {"reference": found["beam"], "rl": found["mean_latest_reward"]["ppo"], "rl_runs": len(learned),
             "rl_missions": max(policy["episodes"] for policy in learned), "greedy": found["greedy"],
             "best_claude": max(found["best_recorded_opus"], found["best_recorded_sonnet"])}
+
+
+def icon_settings() -> Dict[str, Any]:
+    """What the floating-icon drafts need: each lab's mark as a path with its colours, and three.js's SVG loader."""
+    from . import pages
+
+    return {"loader": pages.svg_loader(),
+            "labs": [{"key": key, "name": spec["family"].upper(), "path": mark_path(key), "ink": spec["ink"], "tile": spec["tile"], "text": spec["text"]}
+                     for key, spec in MAKERS.items()]}
