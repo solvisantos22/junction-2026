@@ -1,0 +1,28 @@
+{
+    "task": {
+        "path": "harbor/lightlag-traverse"
+    },
+    "trial_name": "lightlag-traverse__uxdknYZ",
+    "trials_dir": "jobs/traverse-agent-gemini-4-argon-3",
+    "agent_setup_timeout_multiplier": 3.0,
+    "agent": {
+        "name": "opencode",
+        "model_name": "gemini/gemini-4-argon",
+        "kwargs": {
+            "version": "1.19.5",
+            "opencode_config": {
+                "provider": {
+                    "google": {
+                        "options": {
+                            "apiKey": "{env:GOOGLE_GENERATIVE_AI_API_KEY}"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "environment": {
+        "type": "modal"
+    },
+    "job_id": "406cf8c1-46e1-4a2e-b1d8-de4021e1639c"
+}
