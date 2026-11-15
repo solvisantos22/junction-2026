@@ -255,6 +255,80 @@ SCENES.results = (t, D, data, cues) => {
   });
 };
 
+// The third cut's results: the reference, every model's campaign runs across three labs, two baselines.
+// Needs data.models (data.py: models()). A bar reaches the model's best run; every run is a mark on it.
+const LAB = { anthropic: C.ice, openai: C.lime, google: '#d6a8ff' };
+SCENES.results3 = (t, D, data, cues) => {
+  backdrop('RESULTS');
+  const M = data.models, c = data.campaign;
+  const close = cues && cues[0] !== undefined ? appear(t, cues[0], 0.35) : 0;      // "only Google's top model comes close"
+  const idle = cues && cues[1] !== undefined ? appear(t, cues[1], 0.35) : 0;       // "doing nothing scores zero"
+  heading(t, 'THREE SITES · ONE SCORE', `THROUGH HARBOR + OPENCODE · ${M.runs} RUNS BY ${M.rows.length} MODELS FROM ${M.labs} LABS · NO RESET, NO PRACTICE RUN`);
+  const x0 = 540, scale = 1850, top = 286, rowH = 56, refX = x0 + c.reference.score * scale;
+  const rows = [{ label: 'REFERENCE', sub: 'PLANNER', scores: [c.reference.score], color: C.gold, at: 0.7 }];
+  M.rows.forEach((row, i) => rows.push({ label: row.model.toUpperCase(), scores: row.scores, flags: row.flags, color: LAB[row.lab], at: 1.5 + i * 0.24, model: true }));
+  const nothing = c.baselines.find(r => r.id.includes('nothing')), early = c.baselines.find(r => r.id.includes('stop'));
+  rows.push({ label: 'STOP AFTER SITE 1', scores: [early.score], color: C.shade, at: 4.3, gap: 20 });
+  rows.push({ label: 'DO NOTHING', scores: [nothing.score], color: C.shade, at: 4.6, gap: 20, lit: idle });
+  rows.forEach((row, i) => {
+    const y = top + i * rowH + (row.gap || 0), k = appear(t, row.at, 0.3), grow = out((t - row.at - 0.1) / 0.9);
+    if (k <= 0.003) return;
+    const best = row.scores[0], wide = Math.max(3, best * scale * grow);
+    g.save(); g.globalAlpha = k;
+    if (row.lit) { rect(98, y + 6, 8, 36, C.ink, row.lit); text(row.label, 122, y + 35, { size: 33, color: C.ink, spacing: 0.09, alpha: row.lit }); }
+    text(row.label, 122, y + 35, { size: 33, color: row.color === C.shade ? C.dim : row.color, spacing: 0.09, alpha: 1 - (row.lit || 0) });
+    if (row.sub) text(row.sub, 122 + measure(row.label, { size: 33, spacing: 0.09 }) + 16, y + 35, { size: 22, color: C.faint, spacing: 0.12 });
+    rect(x0, y + 8, 1010, 32, 'rgba(243,234,217,.05)');
+    rect(x0, y + 8, wide, 32, row.lit ? C.ink : row.color, row.model ? 0.42 : 1);
+    if (row.model) {
+      let empty = 0;
+      row.scores.forEach((score, n) => {
+        const show = appear(t, row.at + 0.6 + n * 0.1, 0.25), flag = row.flags[n], cy = y + 24;
+        const cx = flag ? x0 + 14 + 26 * empty++ : x0 + score * scale;
+        g.save(); g.globalAlpha *= show; g.lineWidth = 3;
+        if (flag === 'n') rect(cx - 9, cy - 2, 18, 4, C.faint);                    // sampled nothing, was not cut off
+        else { g.beginPath(); g.arc(cx, cy, 9, 0, Math.PI * 2);
+          if (flag === 't') { g.strokeStyle = row.color; g.stroke(); }             // its session ran out first
+          else { g.fillStyle = row.color; g.strokeStyle = C.bg; g.fill(); g.stroke(); } }
+        g.restore();
+      });
+    }
+    // the score sits after the bar: clear of the marks at zero, and of the reference's line where the bar ends just short of it
+    const label = three(best * grow), rest = x0 + best * scale + 20, across = measure(three(best), { size: 36, spacing: 0.05 });
+    let vx = x0 + wide + 20;
+    if (row.model && best === 0) vx = x0 + 14 + 26 * row.flags.filter(Boolean).length + 4;
+    else if (row.model && rest < refX + 8 && rest + across > refX - 8) vx += (refX + 16 - rest) * grow;
+    text(label, vx, y + 36, { size: 36, color: row.color === C.shade && !row.lit ? C.dim : C.ink, spacing: 0.05 });
+    g.restore();
+  });
+  // the reference's score carried down past every model
+  const mark = appear(t, 3.7, 0.6);
+  g.save(); g.globalAlpha = mark * 0.8; g.strokeStyle = C.gold; g.lineWidth = 2; g.setLineDash([8, 8]); g.beginPath();
+  g.moveTo(refX, top + rowH); g.lineTo(refX, top + rowH + (rowH * M.rows.length - 10) * out((t - 3.7) / 0.8)); g.stroke(); g.restore();
+  // the one model that comes close, when the voice names it: it is the first row under the reference
+  if (close > 0.003) {
+    const first = M.rows[0], y = top + rowH;
+    const x = x0 + first.best * scale + 20 + measure(three(first.best), { size: 36, spacing: 0.05 }) + 28;
+    g.save(); g.globalAlpha = close;
+    rect(x, y + 9, 6, 30, C.gold);
+    text(`${three(c.reference.score - first.best)} BELOW THE REFERENCE`, x + 20, y + 34, { size: 27, color: C.gold, spacing: 0.1 });
+    g.restore();
+  }
+  rise(t, 4.9, () => text(`EVERY ONE OF ${M.runs} RUNS IS BELOW THE REFERENCE`, W - 110, 166, { size: 31, color: C.gold, align: 'right', spacing: 0.12 }));
+  rise(t, 5.3, () => {
+    const y = 1012; let x = 122;
+    g.save(); g.fillStyle = C.ink; g.beginPath(); g.arc(x + 9, y - 9, 9, 0, Math.PI * 2); g.fill(); g.restore(); x += 32;
+    x += text('ONE RUN · THE BAR REACHES THE BEST', x, y, { size: 23, color: C.dim, spacing: 0.12 }) + 40;
+    g.save(); g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.arc(x + 9, y - 9, 9, 0, Math.PI * 2); g.stroke(); g.restore(); x += 32;
+    x += text('SESSION RAN OUT BEFORE A SAMPLE', x, y, { size: 23, color: C.dim, spacing: 0.12 }) + 40;
+    rect(x, y - 11, 18, 4, C.faint); x += 30;
+    x += text('NO COMMAND SENT', x, y, { size: 23, color: C.dim, spacing: 0.12 }) + 56;
+    for (const [color, label] of [[LAB.anthropic, 'ANTHROPIC'], [LAB.openai, 'OPENAI'], [LAB.google, 'GOOGLE']]) {
+      rect(x, y - 18, 18, 18, color); x += 28; x += text(label, x, y, { size: 23, color: C.dim, spacing: 0.12 }) + 30;
+    }
+  });
+};
+
 // 300 fresh worlds on Modal: every world of every saved Claude program against the reference.
 SCENES.farm = (t, D, data, cues) => {
   backdrop('AT SCALE · MODAL');
@@ -301,9 +375,12 @@ SCENES.farm = (t, D, data, cues) => {
   }));
   rise(t, note, () => {
     const y = top + 6 * rowH + 62, [fewer, more] = f.lost_of_two;
-    rect(x0, y - 24, 6, 62, C.ice);
+    rect(x0, y - 24, 6, data.others ? 96 : 62, C.ice);
     text(`CLAUDE AHEAD IN ${f.claude_wins} OF ${f.pairs.toLocaleString('en-US')}, NEVER BY MORE THAN ${two(f.widest_win)} · ${f.ties} TIES`, x0 + 22, y, { size: 25, color: C.ink, spacing: 0.12 });
     text(`${f.wins_of_two} OF THOSE ${f.claude_wins} BY THE TWO PROGRAMS THAT RAN THEIR BATTERY FLAT ON ${fewer} AND ${more} OF ${f.worlds} WORLDS`, x0 + 22, y + 34, { size: 25, color: C.dim, spacing: 0.12 });
+    // the third cut: the other labs' one-request programs on the same worlds (data.py: other_programs())
+    if (data.others) text(`GPT AND GEMINI'S ${data.others.programs} ONE-REQUEST PROGRAMS: THE REFERENCE HIGHER IN ${data.others.reference_higher.toLocaleString('en-US')} OF ${data.others.pairs.toLocaleString('en-US')}`,
+      x0 + 22, y + 68, { size: 25, color: C.dim, spacing: 0.12 });
   });
 };
 
@@ -349,6 +426,57 @@ SCENES.learning = (t, D, data) => {
   });
 };
 
+// The third cut's learning slide: Sölvi's final controllers on held-out worlds and on the campaign, then the
+// model that picks the reference planner's strategy. Needs data.final and data.planner (data.py).
+SCENES.learning3 = (t, D, data, cues) => {
+  backdrop('AT SCALE · MODAL');
+  const L = data.final, P = data.planner, F = L.fresh, K = L.campaign;
+  const pct = v => `${Math.round(v * 100)}%`, sign = v => (v >= 0 ? '+' : '−') + two(Math.abs(v));
+  heading(t, 'AND MODELS THAT LEARN', `SMALL CONTROLLERS TRAINED FROM SCRATCH ON MODAL · ${L.training_missions.toLocaleString('en-US')} TRAINING MISSIONS · 3 SEEDS EACH`);
+  const x0 = 580, scale = 1500, top = 300, rowH = 58;
+  rise(t, 0.6, () => text(`${F.worlds} WORLDS NONE OF THEM HAD SEEN`, 122, top - 22, { size: 25, color: C.faint, spacing: 0.14 }));
+  [['BEFORE TRAINING', F.initial, C.shade, 0.9], ['PPO · TRAINED', F.ppo, C.lime, 1.4], ['REPLAY LEARNER · TRAINED', F.replay, C.lime, 1.7],
+    ['GREEDY RULE', F.greedy, C.dim, 2.0], ['REFERENCE PLANNER', F.reference, C.gold, 2.3]].forEach(([label, value, color, at], i) => {
+    const y = top + i * rowH, k = appear(t, at, 0.3), grow = out((t - at - 0.1) / 0.9), wide = Math.max(3, value * scale * grow);
+    if (k <= 0.003) return;
+    g.save(); g.globalAlpha = k;
+    text(label, 122, y + 37, { size: 33, color: color === C.shade ? C.dim : color, spacing: 0.09 });
+    rect(x0, y + 8, 800, 34, 'rgba(243,234,217,.05)');
+    rect(x0, y + 8, wide, 34, color);
+    text(three(value * grow), x0 + wide + 20, y + 38, { size: 36, color: C.ink, spacing: 0.05 });
+    g.restore();
+  });
+  // where it started and where it got to
+  rise(t, 2.6, () => {
+    text(`${pct(F.initial)} → ${pct(F.ppo)}`, W - 110, top + 150, { size: 120, color: C.lime, align: 'right', spacing: 0.03 });
+    text('PPO, MEAN OF THREE SEEDS', W - 110, top + 196, { size: 24, color: C.dim, align: 'right', spacing: 0.13 });
+  });
+  rise(t, 3.0, () => text(`A SMALL CONTROLLER ON HAND-WRITTEN NAVIGATION, NOT A FINE-TUNED LANGUAGE MODEL · PPO CAME HOME ON ${F.ppo_home[0]} OF ${F.ppo_home[1]} MISSIONS`,
+    122, top + 5 * rowH + 30, { size: 22, color: C.faint, spacing: 0.12 }));
+  // on the campaign, when the voice gets to it
+  const camp = cues && cues[0] !== undefined ? cues[0] : 3.4;
+  rise(t, camp, () => {
+    const y = 662;
+    rect(120, y, 1690, 84, '#120c0a'); rect(120, y, 8, 84, C.lime);
+    const w = text('ON THE CAMPAIGN', 160, y + 54, { size: 34, color: C.lime, spacing: 0.14 });
+    text(`PPO ${three(K.ppo)} · EVERY TRAINED SEED ABOVE EVERY CLAUDE RUN (BEST ${three(K.best_claude)}) · REFERENCE ${three(K.reference)}`,
+      160 + w + 36, y + 53, { size: 27, color: C.ink, spacing: 0.11 });
+  });
+  // and learning on top of the reference itself
+  const plan = cues && cues[1] !== undefined ? cues[1] : camp + 3;
+  rise(t, plan, () => {
+    const y = 774, a = P.first, b = P.second;
+    rect(120, y, 1690, 236, '#120c0a'); rect(120, y, 8, 236, C.gold);
+    text('CAN LEARNING BEAT THE PLANNER ITSELF?', 160, y + 56, { size: 36, color: C.gold, spacing: 0.13 });
+    text(`AN ${P.model} MODEL, TRAINED ON MODAL, PICKS THE PLANNER'S STRATEGY MID-MISSION`, 160, y + 94, { size: 25, color: C.dim, spacing: 0.12 });
+    const w = text(sign(a.gain), 160, y + 204, { size: 112, color: C.gold, spacing: 0.02 });
+    text(`POINTS ON ${a.worlds} FRESH WORLDS · 95% INTERVAL ${sign(a.low)} TO ${sign(a.high)}`, 160 + w + 32, y + 156, { size: 27, color: C.ink, spacing: 0.11 });
+    text(`${sign(b.gain)} ON ${b.worlds} MORE · INTERVAL ${sign(b.low)} TO ${sign(b.high)}`, 160 + w + 32, y + 196, { size: 27, color: C.dim, spacing: 0.11 });
+    text(`UNDER OUR ${P.bar.toFixed(0)}-POINT BAR`, 1770, y + 156, { size: 27, color: C.dim, align: 'right', spacing: 0.11 });
+    text('THE PLANNER STAYS', 1770, y + 198, { size: 36, color: C.gold, align: 'right', spacing: 0.12 });
+  });
+};
+
 // The last card: the name, the command that reruns it, the question.
 SCENES.end = (t, D, data, cues) => {
   g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
@@ -369,7 +497,8 @@ SCENES.end = (t, D, data, cues) => {
   rise(t, live, () => {
     rect(x, 618, wide, 96, '#120c0a'); rect(x, 618, 8, 96, C.gold);
     text('LIVE ON MODAL', x + 40, 660, { size: 30, color: C.gold, spacing: 0.16 });
-    text('PICK ANY WORLD · FOUR CONTROLLERS DRIVE IT', x + 40 + measure('LIVE ON MODAL', { size: 30, spacing: 0.16 }) + 26, 659, { size: 24, color: C.dim, spacing: 0.13 });
+    // the live site drove four controllers when the second cut was made; data.rovers says what it drives now
+    text(`PICK ANY WORLD · ${data.rovers === 8 ? 'EIGHT ROVERS' : 'FOUR CONTROLLERS'} DRIVE IT`, x + 40 + measure('LIVE ON MODAL', { size: 30, spacing: 0.16 }) + 26, 659, { size: 24, color: C.dim, spacing: 0.13 });
     text(data.live_url || '', x + 40, 698, { size: 25, font: MONO, weight: 400, color: C.ink, spacing: 0 });
   });
   const ask = cues && cues[1] !== undefined ? cues[1] : live + 1.6;
