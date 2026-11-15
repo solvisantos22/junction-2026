@@ -44,6 +44,6 @@ At 08:18 the required **Video** field still contained the first **1:59** upload;
 
 The YouTube description includes the live demo and public repository URLs. It describes the rover task without adding benchmark claims.
 
-## Remaining submission work — latest check about 08:35
+## Submission state — latest check about 09:45
 
-The entry is still **Draft**. Every field is filled: the Video field holds the corrected video and the PDF deck is attached (about 08:25). The submitting teammate saves **FINAL before 10:00 Helsinki**. The table number on the Team page is empty. None of the upload tasks finalized the entry or changed its table selection.
+The entry is **Submitted**: Kristján pressed Submit Final. It shows the corrected video link, the PDF deck and the unchanged description; on the submitted page the video is a link that opens YouTube in a new tab, not an embedded player. No table number is needed: the organisers moved peer review online (announcement pasted by Kristján at about 09:45): no pitch, reviews only from the submission, table numbers irrelevant; each member reviews 5 assigned projects in the Peer Review tab, 10:30 to 11:30.

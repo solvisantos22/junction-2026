@@ -12,8 +12,8 @@ Deadline: **10:00 Helsinki, saved as FINAL.** A draft is not reviewed. The entry
 | 2 | Choose the video and upload it as a public video of at most two minutes | Kristján | ✅ Public at https://youtu.be/NYYjwijLLm4 since about 08:20, on Kristján's channel: [`docs/submission-video/lightlag-traverse-submission.mp4`](submission-video/lightlag-traverse-submission.mp4), 1:59, Manh's film with the team's own narration and line 11 recorded again ([what was checked](submission-video/README.md), [upload notes](video-upload.md)). The first upload, on Sölvi's channel since 07:56, has the old line. The fallback, not uploaded, stays [`docs/demo-video/lightlag-traverse-demo.mp4`](demo-video/lightlag-traverse-demo.mp4), 1:58 |
 | 3 | Put the video's link in the README's "See it" section | whoever uploads | ✅ The README's Video line links it |
 | 4 | Fill the saved **Lightlag** entry with the text below, attach the deck, select both sponsor challenges | one teammate | ✅ Filled by Sölvi's session (description, links, both challenges; [the saved text](submission-draft.md)); the Video link replaced and the deck attached at about 08:25. Still a Draft |
-| 5 | Save as FINAL, reopen it, and check every link without being logged in | the same teammate | |
-| 6 | Reselect the table number: Platform → Team → Team Management → Table Number | Kristján | Reset by the organisers on Saturday |
+| 5 | Save as FINAL, reopen it, and check every link without being logged in | the same teammate | ✅ Submitted by Kristján; the entry showed **Submitted** at 09:45 with the corrected video link, the deck and the unchanged description. The links were checked without cookies at 08:35 |
+| 6 | Reselect the table number: Platform → Team → Team Management → Table Number | Kristján | Not needed: the organisers moved peer review online (announcement pasted by Kristján at about 09:45): no pitch, reviews only from the submission, table numbers irrelevant; each member reviews 5 assigned projects in the Peer Review tab, 10:30 to 11:30 |
 
 ## Text to paste
 
