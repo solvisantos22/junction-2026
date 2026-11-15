@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import json
 import queue
+import os
 import shutil
 import subprocess
 import sys
@@ -49,6 +50,9 @@ def run(policy: Path, out: Path, seed: int, program: bool = False, entry: str = 
     name = "lightlag-sandbox-" + uuid.uuid4().hex[:12]
     with tempfile.TemporaryDirectory() as folder:
         work = Path(folder)
+        # mkdtemp makes the folder 0700; on Linux the container's user 65534 could not read it
+        # (Docker Desktop on macOS ignores this). Read-only for others, as the :ro mount is.
+        os.chmod(folder, 0o755)
         shutil.copyfile(surface, work / "lightlag_surface.py")
         if program:
             for path in Path(policy).glob("*.py"):

@@ -164,11 +164,18 @@ def play(folder: Path, name: str, label: str, seed: int) -> int:
         if (folder / item).exists():
             shutil.copyfile(folder / item, out / item)
     names = {"claude-fable-5-2": "Claude Fable 5.2", "claude-opus-5-5": "Claude Opus 5.5",
-             "claude-sonnet-5-5": "Claude Sonnet 5.5", "claude-haiku-5-5": "Claude Haiku 5.5"}
-    run_meta = {"kind": "claude", "label": label, "model": names.get(meta.get("model"), meta.get("model", "")),
+             "claude-sonnet-5-5": "Claude Sonnet 5.5", "claude-haiku-5-5": "Claude Haiku 5.5",
+             "gpt-6.1-sol": "GPT-6.1 Sol", "gpt-6.1-terra": "GPT-6.1 Terra", "gpt-6-luna": "GPT-6 Luna",
+             "gemini-4-carbon": "Gemini 4 Carbon", "gemini-4-argon": "Gemini 4 Argon",
+             "gemini-4-hydrogen": "Gemini 4 Hydrogen"}
+    # A GPT or Gemini reply comes from tools/tier_agents/oneshot_ask.py, which records its API in meta.json.
+    model_id = meta.get("model", "")
+    kind = "gpt" if model_id.startswith("gpt") else "gemini" if model_id.startswith("gemini") else "claude"
+    api = meta.get("api", "Messages API")
+    run_meta = {"kind": kind, "label": label, "model": names.get(model_id, model_id),
                 "how": "one request, one program",
-                "source": "one Messages API request at effort {}; the reply's module run once by "
-                          "lightlag_traverse.sandbox on seed {}".format(meta.get("effort"), seed),
+                "source": "one {} request at effort {}; the reply's module run once by "
+                          "lightlag_traverse.sandbox on seed {}".format(api, meta.get("effort"), seed),
                 "cost_usd": meta.get("cost_usd"), "sandbox_status": summary["status"]}
     (out / "run.json").write_text(json.dumps(run_meta, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     print("{}: reward {:.3f}, {} samples, alive {}, at base {}, status {}{}".format(
