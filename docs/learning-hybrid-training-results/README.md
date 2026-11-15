@@ -141,3 +141,14 @@ will be retained as **descriptive development evidence**. They cannot rescue
 the six-run primary comparison. No final policy freeze or fresh evaluation
 will be represented as complete; worlds **629000–629127 stay unopened**.
 Remaining jobs are not restarted, and the team reference stays unchanged.
+
+[Verified failed-run evidence](interruption/failure.json) and
+[six-original-call snapshot](interruption/current-six-status.json) retain the
+actual outcome. The 0/512 policy, optimizer-checkpoint and 64-map validation
+files match their recorded hashes. The latest 1760-mission optimizer/RNG state
+restores exactly, with finite tensors, 55 batches and 1100 gradient steps;
+repeated artifact reads are unchanged. These checks do not reconstruct the
+training gradients or replay development physics. The failed wrapper's
+CPU/memory allocation estimate is **$0.18906**, excluding ancillary charges.
+Its stale report still says `running`; the returned original call is terminal
+and takes precedence.

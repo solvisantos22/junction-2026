@@ -938,3 +938,9 @@ continue as descriptive development evidence. External interruption cause is
 unconfirmed. [Training handoff](learning-hybrid-training-results/README.md#interrupted-seed--15-november-0033-utc).
 No new cloud job, model API call, reference change or claimed improvement in
 this diagnosis increment.
+
+The failed seed's initial/512 policies, checkpoints and validation files were
+subsequently hash-verified, and its latest 1760-mission optimizer/RNG state
+round-trips exactly with finite tensors. [Sanitized evidence and limits](learning-hybrid-training-results/interruption/failure.json).
+The wrapper estimates $0.18906 running CPU/memory for that call; ancillary
+charges are excluded. No training was restarted to obtain these checks.
