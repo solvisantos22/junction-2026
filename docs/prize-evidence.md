@@ -968,3 +968,39 @@ selection/matrices, live recovery provenance, actual terminal confirmation
 result/receipt binding, original-failure preservation and one-shot resource
 limits; 55 combined operations tests pass. [Commands and gates](learning-hybrid-results/development/recovery/README.md#later-stage-commands-and-gates).
 No candidate was selected and no later-stage job was launched in this increment.
+
+### 15 November — Sölvi / Codex: close interrupted greedy-prior comparison honestly
+
+- **Human direction:** Sölvi authorized a parallel attempt to improve learned
+  rover control with greedy and requested retained failures, source freezes,
+  verified results and a team handoff. No frozen task/reference changed.
+- **Codex contribution:** reconciled all six original Modal call IDs; retained
+  the interrupted seed without resuming/replacing it; downloaded and checked
+  all 22 declared policy/optimizer/validation pairs; produced an audited
+  descriptive report, PNG/SVG curves and [submission copy](learning-hybrid-training-results/submission-copy.md).
+  Independent code review passed. Six reporter tests pass; actual plots were
+  inspected, and a shared-axis clipping issue was fixed with a regression test.
+- **Measured outcome:** five runs completed 4096 missions and `prior-29` stopped
+  at 1760: **22,240 training missions** total. On 64 reused development worlds,
+  plain PPO's three-seed mean improved from deterministic home-only zero to
+  **0.370550**; greedy/initial-prior scored **0.363980**. Completed prior seeds
+  finish at 0.365150 and 0.363492. No missing seed is imputed. The required
+  six-run primary comparison is incomplete, so **629000–629127 stay unopened**;
+  no fresh-world greedy-prior gain is claimed.
+- **Verification limits:** all 1408 development validation missions are home/alive
+  with zero invalid calls. Training summaries separately retain 59 deaths and
+  58 away endings. Audits verify file/source/call identity, optimizer/RNG
+  restoration, policy equality and reward arithmetic; production gradients and
+  mission physics were not independently re-executed in this report.
+- **Modal evidence:** app **`ap-59QwuUBGJ18ZztGfLBhd9u`**, [original receipt](learning-hybrid-training-results/receipt.json).
+  Six returned wrappers total **$2.4043668262 estimated running CPU/memory**,
+  excluding ancillary charges; not an invoice. The original failed call is
+  retained, with a contemporaneous platform-preemption event documented.
+  No GPU, model API call or additional training in this closure.
+- **Handoff:** [results/figure](learning-hybrid-training-results/README.md),
+  [audited report](learning-hybrid-training-results/descriptive/report.json),
+  [all retained policies/checkpoints and archive hashes](learning-hybrid-training-results/archive-manifest.json).
+  About 206 MB of validation trajectories remain on Modal/private download;
+  private wrapper metadata/logs are not copied to the repository. Use the
+  completed original final-learning evidence for the headline submission claim;
+  keep the current reference. The separate hybrid-composition search continues.

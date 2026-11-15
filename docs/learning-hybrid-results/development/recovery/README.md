@@ -111,3 +111,8 @@ The later-stage adapter is now verified: **13 focused tests** and independent
 review passed, including the terminal remote confirmation-result hash and
 receipt binding; **55 combined operations tests** pass. This preparation does
 not open any map or choose a group.
+
+The verified stage-adapter snapshot is `/tmp/junction-hybrid-stages-frozen`
+(stages source SHA256 `f59e3e5b432e4b5590801faa7632f9d8019dd3c296c0f822175ff147f0a01641`).
+It retains all original 54 source pins and recovery source `d79172fe…`; use it
+for the later-stage commands. The recovery-only snapshot remains untouched.

@@ -1,6 +1,65 @@
 # Greedy-prior PPO training
 
-Five original training calls continue; `prior-29` terminated with a wrapper interruption after 1760 recorded missions. The published all-six completion gate cannot pass, so fresh worlds 629000–629127 remain unopened. Source and resources were published before launch.
+**Closed as an incomplete primary comparison:** five original runs completed 4096 missions, while `prior-29` stopped at 1760. All six terminal calls and retained milestones are reconciled. The published all-six gate fails, so fresh worlds **629000–629127 remain unopened**. No run was resumed or replaced. Source and resources were published before launch.
+## Final descriptive findings
+
+On the same repeatedly used 64 development worlds, the three plain-PPO seeds
+improve from **0.000000 to 0.370550** after 4096 training missions. Their
+zero-head initial deterministic policy chooses home; this is the stated
+initialization, not a representative pretrained-model baseline. Initial prior
+policies are exactly greedy, scoring **0.363980**. The plain final mean is
+0.006570 higher on these development data; no fresh-world or significance claim
+is made. The two completed prior seeds finish at **0.365150** and **0.363492**.
+There is **no three-seed prior mean after 512**, because seed 29 is missing.
+
+| Original run | Terminal state | Training missions | Initial | At 512 | At 2048 | At 4096 |
+|---|---|---:|---:|---:|---:|---:|
+| prior-17 | completed | 4096 | 0.363980 | 0.363980 | 0.363718 | 0.365150 |
+| prior-29 | wrapper_error | 1760 | 0.363980 | 0.363980 | — | — |
+| prior-43 | completed | 4096 | 0.363980 | 0.363980 | 0.363291 | 0.363492 |
+| plain-17 | completed | 4096 | 0.000000 | 0.331265 | 0.377478 | 0.369297 |
+| plain-29 | completed | 4096 | 0.000000 | 0.327461 | 0.379025 | 0.371018 |
+| plain-43 | completed | 4096 | 0.000000 | 0.343901 | 0.364665 | 0.371333 |
+
+![Descriptive learning curves, retaining missing-seed coverage](descriptive/learning-curves.png)
+
+[Audited report](descriptive/report.json) · [SVG figure](descriptive/learning-curves.svg) ·
+[artifact hashes](descriptive/artifacts.json) · [all retained policies/checkpoints and archive locations](archive-manifest.json).
+
+Independent review also reproduced all 22 development summaries from the
+retained episodes and checked the terminal download hashes. All
+**22 checkpoint/validation pairs** verify, covering **1408 development
+missions**, all home/alive with zero invalid calls. The audit verifies
+source/receipt identities, file hashes, optimizer/RNG restoration, exported
+policy equality, initial behavior and official reward/summary arithmetic. It
+does not re-execute production gradients or mission physics. The actual PNG
+was visually checked; a shared-axis clipping issue was corrected and covered
+by a regression test. Six reporter tests pass.
+
+The runs retain **22,240 training missions**. Their batch summaries record
+**59 deaths, 58 away endings and zero invalid calls**; the overlap of deaths
+and away endings was not reconstructed. These training outcomes are separate
+from the clean development validation outcomes. The six returned wrappers sum
+to **$2.40437 estimated running CPU/memory**, excluding ancillary costs; this
+is not an invoice. App **`ap-59QwuUBGJ18ZztGfLBhd9u`** and all original call IDs
+remain in [the receipt](receipt.json).
+
+The repository retains all 22 declared policies and optimizer checkpoints, six
+trainer reports, and the interrupted seed's separately labeled **unvalidated
+1760-mission latest optimizer state**. About 206 MB of validation trajectories
+remain on Modal volume `junction-greedy-prior` and in the private terminal
+download; every path/hash is in the manifest. Private wrapper metadata and
+console logs are not published. Reproduce by downloading the original receipt
+with `--archives`, then running the descriptive reporter on that complete
+download.
+
+**Handoff:** use the [completed original final experiment](../learning-final-results/README.md)
+for the submission's headline learning evidence. This follow-up does not
+establish an improvement from the greedy prior. Keep the reference unchanged.
+The separately frozen hybrid composition search continues under its own
+[recovery and stage gates](../learning-hybrid-results/development/recovery/README.md).
+
+
 [Protocol](../learning-hybrid-training.md) · [six-run configuration](campaign.json).
 
 The new learner starts with greedy as its most likely action and learns
@@ -73,7 +132,7 @@ proof. Final audits repeat complete controller execution. Production optimizer
 updates and full training batch bytes are retained but not independently
 reconstructed by the final evaluator.
 
-App IDs, progress, measured estimates, results and submission copy will follow.
+Final app IDs, measured estimates, results and submission copy are now linked above.
 The existing reference stays in place regardless of this experiment's result.
 
 ## Live launch and continuation
@@ -136,8 +195,8 @@ and 512-mission validations retained. The precise external interruption cause
 is unconfirmed. No resume, replacement seed or substituted checkpoint is
 authorized by this experiment's fixed protocol.
 
-The other five original calls continue within their original allocation and
-will be retained as **descriptive development evidence**. They cannot rescue
+The other five original calls continued within their original allocation and
+have now completed, retained as **descriptive development evidence**. They cannot rescue
 the six-run primary comparison. No final policy freeze or fresh evaluation
 will be represented as complete; worlds **629000–629127 stay unopened**.
 Remaining jobs are not restarted, and the team reference stays unchanged.
@@ -172,6 +231,6 @@ python -m tools.learning_hybrid_ops.report_training --download TERMINAL_ARCHIVES
 It produces JSON and PNG/SVG learning curves. A method mean appears only when
 all three original seeds have that declared checkpoint: the prior mean ends
 at 512 here, with later surviving prior runs shown individually. The missing
-seed is never imputed. Five focused tests and independent review passed; a
-real retained `prior-29` archive also validates. Production figures will be
-published after the remaining original calls finish and their files verify.
+seed is never imputed. Six focused tests and independent review of the reporter passed; all 22 actual
+archived milestones now validate. The production figures and data are published
+above; the additional plotting regression prevents clipping higher points.

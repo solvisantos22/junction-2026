@@ -2,6 +2,7 @@ from copy import deepcopy
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import torch
 
@@ -182,6 +183,23 @@ class ReportTrainingTests(unittest.TestCase):
                 r.build_report(self.download, self.freeze_path)
         finally:
             receipt_path.write_bytes(original)
+
+    def test_shared_plot_axis_contains_both_methods_higher_points(self):
+        report = deepcopy(self.report)
+        for row in report["runs"]:
+            if row["variant"] == "plain":
+                row["validations"]["4096"]["mean_reward"] = .7
+        report["curves"] = r.aggregate(report["runs"])
+        observed = []
+        def capture(figure, *args, **kwargs):
+            for axis in figure.axes:
+                lower, upper = axis.get_ylim()
+                for line in axis.lines:
+                    observed.extend(lower <= y <= upper for y in line.get_ydata())
+        with patch("matplotlib.figure.Figure.savefig", autospec=True, side_effect=capture):
+            r.plot_report(report, self.root)
+        self.assertTrue(observed)
+        self.assertTrue(all(observed), "a method's points were clipped by the shared axis")
 
 
 if __name__ == "__main__":

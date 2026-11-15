@@ -214,6 +214,8 @@ def plot_report(report, output):
     import matplotlib.pyplot as plt
     fig, axes = plt.subplots(1, 2, figsize=(11.8, 4.8), sharey=True)
     colors = {17: "#2563eb", 29: "#d97706", 43: "#16856b"}
+    upper = max(1., 110 * max((s["mean_reward"] for row in report["runs"]
+                              for s in row["validations"].values()), default=0.))
     for ax, variant in zip(axes, VARIANTS):
         for row in report["runs"]:
             if row["variant"] != variant:
@@ -231,7 +233,7 @@ def plot_report(report, output):
         ax.set_title("Greedy-prior PPO" if variant == "prior" else "Plain PPO", pad=27)
         ax.set_xticks(MILESTONES)
         ax.set_xlim(-120, 4216)
-        ax.set_ylim(bottom=0)
+        ax.set_ylim(0, upper)
         ax.set_xlabel("Completed training missions (coverage shown above)")
         ax.grid(alpha=.2)
         ax.legend(loc="lower right", fontsize=7.5)
