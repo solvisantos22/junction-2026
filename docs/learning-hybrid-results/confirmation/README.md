@@ -1,4 +1,6 @@
-# Confirmation selection freeze — running
+# Confirmation selection freeze — complete
+
+**Completed and independently audited:** 5376/5376 cases, 5372 jointly home/alive, 3 deaths, zero invalid calls. The unchanged rule selects `ensemble-all-rho090`: 0.380209 versus greedy 0.375202 and reference 0.500510. Its gain interval includes zero; this remains selection evidence. [Complete results](completed/README.md) and [final selection freeze](../final/README.md). Earlier launch/status records below are retained as history.
 
 The [complete development analysis](../development/completed/analysis.json)
 selects exactly six groups using the original rule: the top two safe groups

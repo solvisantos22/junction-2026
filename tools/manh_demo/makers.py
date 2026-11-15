@@ -27,17 +27,18 @@ LOGOS = HERE / "logos"
 # `words` are matched as whole words in a run's label, in lower case; `ink` is the mark's colour
 # and `tile` the square it sits on, chosen to stand out from rust-coloured ground; `text` is the
 # company's colour for names and borders on the film's dark charts (OpenAI's own is black and white).
+# `mark` is the model family's mark (on the tiles); `logo` and `lab` the company's own, for the floating icons.
 MAKERS: Dict[str, Dict[str, Any]] = {
     "anthropic": {
-        "name": "Anthropic", "family": "Claude", "mark": "claude.svg", "ink": "#D97757", "tile": "#F4F1E8", "text": "#D97757",
+        "name": "Anthropic", "family": "Claude", "mark": "claude.svg", "lab": "Anthropic", "logo": "anthropic.svg", "ink": "#D97757", "tile": "#F4F1E8", "text": "#D97757",
         "words": ("claude", "opus", "sonnet", "haiku", "anthropic"),
     },
     "google": {
-        "name": "Google", "family": "Gemini", "mark": "gemini.svg", "ink": "#4285F4", "tile": "#FFFFFF", "text": "#4285F4",
+        "name": "Google", "family": "Gemini", "mark": "gemini.svg", "lab": "Google DeepMind", "logo": "deepmind.svg", "ink": "#4285F4", "tile": "#FFFFFF", "text": "#4285F4",
         "words": ("gemini", "deepmind", "google", "gemma"),
     },
     "openai": {
-        "name": "OpenAI", "family": "GPT", "mark": "openai.svg", "ink": "#0D0D0D", "tile": "#FFFFFF", "text": "#FFFFFF",
+        "name": "OpenAI", "family": "GPT", "mark": "openai.svg", "lab": "OpenAI", "logo": "openai.svg", "ink": "#0D0D0D", "tile": "#FFFFFF", "text": "#FFFFFF",
         "words": ("openai", "gpt", "chatgpt", "codex", "o1", "o3", "o4"),
     },
 }
@@ -75,9 +76,10 @@ def maker_of(label: str) -> Optional[str]:
     return None
 
 
-def mark_path(maker: str) -> str:
-    """The `d` of a mark, on Simple Icons' 24 by 24 grid: a maker's, or Modal's for "modal"."""
-    name = MODAL["mark"] if maker == "modal" else MAKERS[maker]["mark"]
+def mark_path(maker: str, company: bool = False) -> str:
+    """The `d` of a mark, on Simple Icons' 24 by 24 grid: a maker's model family (or, with `company`, the lab's own
+    logo: Anthropic, Google DeepMind, OpenAI), or Modal's for "modal"."""
+    name = MODAL["mark"] if maker == "modal" else MAKERS[maker]["logo" if company else "mark"]
     found = re.search(r'<path d="([^"]+)"', (LOGOS / name).read_text(encoding="utf-8"))
     if not found:
         raise ValueError("no path in {}".format(name))
@@ -136,9 +138,10 @@ def facts() -> Dict[str, Any]:
 
 
 def icon_settings() -> Dict[str, Any]:
-    """What the floating-icon drafts need: each lab's mark as a path with its colours, and three.js's SVG loader."""
+    """What the floating-icon drafts need: each lab's own logo (Anthropic, Google DeepMind, OpenAI) as a path with
+    its colours, and three.js's SVG loader."""
     from . import pages
 
     return {"loader": pages.svg_loader(),
-            "labs": [{"key": key, "name": spec["family"].upper(), "path": mark_path(key), "ink": spec["ink"], "tile": spec["tile"], "text": spec["text"]}
+            "labs": [{"key": key, "name": spec["lab"].upper(), "path": mark_path(key, company=True), "ink": spec["ink"], "tile": spec["tile"], "text": spec["text"]}
                      for key, spec in MAKERS.items()]}

@@ -1,0 +1,11 @@
+{
+ "kind": "gpt",
+ "label": "GPT-6.1 Terra · agent 2",
+ "model": "GPT-6.1 Terra",
+ "how": "OpenCode agent",
+ "source": "harbor run -p harbor/lightlag-traverse -a opencode -m openai/gpt-6.1-terra --ak version=1.19.5 (Harbor 0.25.0); tools/tier_agents/run.sh",
+ "cost_usd": 0.0425,
+ "harbor_exception": "NonZeroAgentExitCodeError",
+ "task_version": "0.1.2",
+ "program": "program/ was rebuilt from the trajectory (agent/trajectory.json) by tools/tier_agents/rebuild_program.py: the agent's file writes and later edits replayed in order, nothing executed. Entry: rover.py (the last program the agent started that sends commands; 2 such start(s) in all; the agent's folder was /app)."
+}

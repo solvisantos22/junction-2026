@@ -1,6 +1,6 @@
 # RL–greedy hybrid search
 
-**Development is complete:** all 8320 cases on 128 maps are audited, with 8300 home/alive, 20 rover deaths and zero invalid calls. The fixed rule selects six groups for [confirmation](confirmation/README.md). The best development group scores 39.4404%, versus greedy 38.3869% and reference 50.1834%; this is screening evidence, not a confirmed gain. [Full results and preserved execution failures](development/completed/README.md). Confirmation is now running under the selection/operations freeze published in `2256f63`; final maps remain unopened. [Fixed protocol](../learning-hybrid.md).
+**Confirmation is complete:** all 5376 cases are audited, with 5372 jointly home/alive, 3 deaths and zero invalid calls. The fixed rule selects `ensemble-all-rho090` for the [final test](final/README.md): mean 0.380209 versus greedy 0.375202 and reference 0.500510; paired gain +0.005007, 95% interval [−0.000188, +0.010190]. This is selection evidence, not a confirmed improvement. [Full confirmation results](confirmation/completed/README.md). All [8320 development cases and earlier execution failures](development/completed/README.md) remain retained. Final selection/source/weights/resources are frozen before opening 612000–612255. [Fixed protocol](../learning-hybrid.md).
 
 The 65-arm development search compares individual-policy shortlists, rank
 ensembles across all retained seeds, and RL–greedy rank blends. It uses new
