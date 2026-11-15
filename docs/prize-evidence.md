@@ -1108,3 +1108,14 @@ prior results, tasks and teammate jobs are unchanged. [Artifacts](planner-lab-re
 - **Measured outcome:** selected all-six ensemble with 90% greedy-efficiency shortlist scores **0.380209**, greedy **0.375202**, frozen reference **0.500510**. Paired gain **0.005007**, 95% interval **[−0.000188, 0.010190]**; selection evidence, not a confirmed gain. Two higher-scoring candidates each lost a rover and are excluded by the fixed safety gate. All outcomes retained: 5372 jointly home/alive, 3 deaths, 3 away endings, zero invalid calls.
 - **Modal evidence:** app `ap-mAROrYr7XrA7sT2t7Z5zMI`, original call `fc-01M7EFBZEQXETSYPQH3PCREV4D`, completed at 02:43:53 UTC. Confirmation recorded running compute **$2.278476**; cumulative hybrid **$4.136855**, closed prior training **$2.404367**, combined **$6.541221**. Excludes ancillary, idle and lost unrecorded work; not an invoice or credit balance.
 - **Artifacts and next decision:** [all confirmation results, hashes and independent audits](learning-hybrid-results/confirmation/completed/README.md); [final selection and operations freeze](learning-hybrid-results/final/README.md), SHA `f79ce4f9b42549aed0ccdfd53c6ce17da03e259a5c400323ab816ddc3892864d`. Ten arms ×256 reserved worlds, unchanged weights/source and reference. This freeze must reach main before final launch; the final 1 pp/significance/safety gate is unchanged.
+
+
+Final evaluation was launched once after **`67a9203f`** published the selection
+and exact source/weight/resource freeze: app **`ap-GzqnjGbRi4h0x0SqO4xiQW`**,
+original call **`fc-01M7EHYJ7272Q4Z5432990CT78`**. Independent live audit at
+02:54 UTC confirms 30/2560 complete; the existing watcher recognizes the same
+receipt at 58/2560 with no errors or pauses. All source/weight/receipt bindings
+and 20 parent failure/recovery/confirmation records are unchanged.
+[Live evidence and completion handoff](learning-hybrid-results/final/README.md#live-handoff--15-november-0254-utc).
+This is progress evidence only; final performance, safety and cost await the
+complete audit. It is the last planned run of this experiment.
