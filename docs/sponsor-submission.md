@@ -20,7 +20,19 @@ One teammate should finish and check the existing [saved Lightlag entry](https:/
 
 ## Best Use of Codex — copy-ready case
 
-> Codex was our implementation and verification partner throughout Lightlag. With the team setting the research direction, budgets and stopping decisions, it built the early simulator and public-tool evaluator, then small reinforcement-learning controllers, Modal orchestration and reproducible reports around the final Traverse environment. Parallel Codex agents implemented and independently reviewed changes while shared claims and small verified commits kept three teammates coordinated. Codex reconciled interrupted jobs, preserved failures, froze policies before fresh tests and packaged auditable results instead of selecting only successes. Our final hybrid evaluation contains 2,560 matched missions and a reproducible source bundle. We retained the stronger reference when learning fell short. Kristján and Claude Code authored the final Traverse simulator and reference; Manh's Claude Code contributions remain separately credited. The evidence log connects human decisions to code, tests, commits and results.
+> Sölvi used Codex throughout his development work on Lightlag: turning research ideas into prototypes, implementing controllers and evaluation tools, debugging experiments, and shipping verified increments. The team set the hypotheses, budgets and stopping decisions. Parallel Codex agents implemented and independently reviewed changes; shared task claims and frequent commits kept concurrent work coordinated. Codex helped deliver small reinforcement-learning controllers, Modal orchestration, interruption recovery and reproducible reports, including 2,560 final hybrid evaluations. We also tested the team's frozen environment with three OpenAI models in 18 scored agent runs, retaining configurations, trajectories and rewards. Our case is the complete path from a human research question to implemented software and inspectable experimental evidence, with actual OpenAI agent behavior available for comparison.
+
+Suggested headline: **“Built with Codex. Tested with OpenAI agents.”** In the explanation, give each its precise role: Codex was a development tool; the OpenAI API models were benchmark participants. The short sponsor pitch can focus on Codex without listing every development tool. Detailed ownership remains in the [evidence log](prize-evidence.md#attribution-boundary); this wording does not claim that Codex authored every part of the project or the separate tier-evaluation runner.
+
+Sölvi's 20–25 second spoken version:
+
+> “I used Codex throughout my coding on Lightlag, from prototypes and reinforcement-learning controllers to debugging and verifying experiments. We used parallel agents and small reviewed commits to keep the work reviewable. Then our team tested the environment with three OpenAI models across eighteen scored agent runs. We can show the code, the model behavior and the evidence behind each result.”
+
+### OpenAI evaluation evidence supporting the project
+
+The saved [run ledger](tier-comparison/runs.jsonl), [method](tier-comparison.md) and [tables](tier-comparison/tables.md) record **18 scored OpenAI agent runs**: GPT-6.1 Sol, GPT-6.1 Terra and GPT-6 Luna, three repeats per model on each of two tasks. Nine runs use the three-mission campaign (worlds 2027–2029); nine use the single-mission task (world 2026). All 18 saved model configurations and rewards match the ledger. The agents used **OpenCode 1.19.5 in Harbor 0.25.0** to operate the rover through its tools.
+
+This strengthens the project's evidence of testing with real OpenAI agents. It is separate from evidence of **using Codex to develop software**: the tested agents are not Codex sessions, and their model names do not identify the model behind our development sessions. The tier-evaluation implementation remains credited to its owner in the linked report. Seventeen of the 18 saved runs retain nonzero-exit errors; the verifier still saved their scores. Say “scored runs,” not “18 error-free completions.” Three additional OpenAI one-request program evaluations are a separate set, excluded from the 18 count. No new inference was run for this submission narrative.
 
 Three concrete things to show a Codex judge:
 
@@ -75,11 +87,11 @@ Use efficiency, not spend, as the argument. The original final training's **$7.2
 
 ## Short combined copy for the description or deck
 
-> Built with Codex and Claude Code under human direction. Codex implemented and reviewed evaluation, learning and experiment orchestration, preserving reproducible evidence and unsuccessful results. Modal powered parallel rover rollouts, 47,840 missions across six controller-training calls, and our public interactive demo. Our repository links code, checkpoints, app IDs, audits and measured outcomes to the people and tools that produced them. Entering Best Use of Codex and Best Use of Modal alongside AfterQuery.
+> Codex supported implementation, review, debugging and reproducible experiments under human direction. The team also tested its environment with three OpenAI models in 18 scored agent runs. Modal powered parallel rover rollouts, 47,840 missions across six controller-training calls, and our public interactive demo. Our repository links code, checkpoints, app IDs, audits and measured outcomes to their contributors. We have selected Best Use of Codex and Best Use of Modal alongside AfterQuery.
 
 Both selections are now saved according to Sölvi. This does not establish that the overall project is FINAL; retain the final-status check above.
 
-Optional video line (about 12 seconds): **“Codex helped us build, test and audit the experiment pipeline. Modal ran the parallel rollouts and training, and hosts the live demo you can try.”** Put the demo URL and `docs/sponsor-submission.md` on the closing slide. Keep the full video within its two-minute limit; the video owners decide placement.
+Optional video line (about 12 seconds): **“Codex helped us build and audit the learning pipeline. We tested OpenAI agents, trained controllers in parallel on Modal, and deployed a live demo.”** Put the demo URL and `docs/sponsor-submission.md` on the closing slide. Keep the full video within its two-minute limit; the video owners decide placement.
 
 ## Source freshness and checks
 

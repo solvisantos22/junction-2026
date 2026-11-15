@@ -21,6 +21,8 @@ The detailed sponsor briefs were last read directly on the logged-in platform on
 
 The OpenAI participant pack was previously recorded as **Codex usage credits, not API inference credits**. AfterQuery's [credit cancellation](afterquery-update-2026-11-14.md) does not change that distinction. Using a provider and having an API budget are separate from prize selection.
 
+**Codex pitch refinement:** Sölvi reports using Codex for all his development work. The [focused sponsor copy](sponsor-submission.md#best-use-of-codex--copy-ready-case) leads with attributable implementation, debugging, parallel review and reproducible delivery. It also links **18 scored OpenAI agent runs** across GPT-6.1 Sol, GPT-6.1 Terra and GPT-6 Luna, three repeats on each of two tasks. Those are OpenCode/Harbor benchmark participants, not Codex development sessions; 17 retained nonzero-exit errors remain in the [run ledger](tier-comparison/runs.jsonl). The short pitch omits the full tool inventory; the detailed author/tool attribution below is unchanged. No new inference or experiment was needed.
+
 ## Backfilled Codex evidence
 
 These rows were reconstructed from repository commits, designs, tests, handoffs and the project conversation on 14 November. They are **task summaries, not preserved verbatim prompts or a complete session recording**. Product attribution is Codex; an exact underlying model/version was not recorded here and is not inferred. Verification counts refer to the recorded increment, not fresh test runs during this documentation audit.
