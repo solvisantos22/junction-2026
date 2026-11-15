@@ -472,8 +472,9 @@ SCENES.learning3 = (t, D, data, cues) => {
     const w = text(sign(a.gain), 160, y + 204, { size: 112, color: C.gold, spacing: 0.02 });
     text(`POINTS ON ${a.worlds} FRESH WORLDS · 95% INTERVAL ${sign(a.low)} TO ${sign(a.high)}`, 160 + w + 32, y + 156, { size: 27, color: C.ink, spacing: 0.11 });
     text(`${sign(b.gain)} ON ${b.worlds} MORE · INTERVAL ${sign(b.low)} TO ${sign(b.high)}`, 160 + w + 32, y + 196, { size: 27, color: C.dim, spacing: 0.11 });
-    text(`UNDER OUR ${P.bar.toFixed(0)}-POINT BAR`, 1770, y + 156, { size: 27, color: C.dim, align: 'right', spacing: 0.11 });
-    text('THE PLANNER STAYS', 1770, y + 198, { size: 36, color: C.gold, align: 'right', spacing: 0.12 });
+    // the answer is yes: the model plays on top of the planner and scores higher, by less than the bar set for replacing it
+    text(`IT DOES, BY LESS THAN OUR ${P.bar.toFixed(0)}-POINT BAR`, 1770, y + 156, { size: 27, color: C.dim, align: 'right', spacing: 0.11 });
+    text('THE PLANNER STAYS THE REFERENCE', 1770, y + 198, { size: 34, color: C.gold, align: 'right', spacing: 0.12 });
   });
 };
 
