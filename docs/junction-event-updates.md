@@ -2,6 +2,12 @@
 
 Shared event and AfterQuery notices for the team. All times are **Helsinki (UTC+2)**. Each entry distinguishes official guidance from unanswered participant questions. Junction Watch publishes new actionable information here on its 30-minute checks, through Sunday 15 November at 17:00; checks with no changes stay in its private log.
 
+## Monitoring coverage gap — Sunday 15 November, 03:51
+
+**No current source content could be read in the check starting at 03:46.** Native Discord access timed out twice; browser-tab access was unavailable, and native Chrome returned a window-access error. All ten regular sources are affected, including both forum indexes, the platform pages, saved Lightlag and discovery of new AfterQuery resources. This is a watcher access failure; it does not establish a Discord or Junction outage.
+
+The latest successful full check remains **03:23**, with Lightlag last observed at approximately **03:22**. The instructions and submission snapshot below are retained from that check, not freshly reconfirmed. Until coverage recovers, verify urgent organizer changes and the saved entry directly before the last verified **10:00 final deadline**. The next scheduled attempt must catch up from the retained successful checkpoints. [Organizer questions](https://discord.com/channels/1268184974784336004/1434817084570861658) · [Saved submissions](https://hackjunction.app/participate/45/submissions).
+
 ## Current actions — full check Sunday 15 November, 03:23
 
 **[Sunday presentation plan](sunday-presentation-plan.md)** collects the confirmed formats, team roles and schedule. All ten regular sources were checked. New Info Team replies clarify peer-review prize eligibility, the video/demo fields and submission by one teammate; these later updates are recorded below.
