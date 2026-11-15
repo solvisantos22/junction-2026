@@ -257,3 +257,22 @@ def shots2(durations: Dict[str, float], words: Dict[str, List[Dict[str, Any]]], 
             {"vo": "n12", "vo_at": 0.5, "pad": round(1.2 + stretch, 3), "min": 6.0,
              "cues": [round(0.5 + at("n12", "It can't yet") - 0.1, 2), round(0.5 + at("n12", "Can your agent") - 0.15, 2)]}]},
     ]
+
+
+# For the narration kit (`make kit --film 2`): what the picture does at a moment of a shot, so that whoever records
+# the narration can land the same words on it. `cues` name a chart scene's cues in order (None: not shown), `events`
+# the first time something happens to the followed rover (as the recorder's telemetry calls it), `parts` the opening.
+SYNC2: Dict[str, Dict[str, Any]] = {
+    "v2_intro": {"parts": {"dive": "the camera starts to fall towards Mars (on \"So who\")", "title": "the title LIGHTLAG TRAVERSE comes up"}},
+    "v2_fast": {"events": {"miss": "MISS appears over the rover (on \"misses\")"}},
+    "v2_mid": {"events": {"stop": "STOPPED appears over the rover (on \"freezes\")"}},
+    "v2_flagship": {"events": {"dead": "the battery runs flat and the picture dips (as \"It will not make it\" ends)", "card": "the score-card comes up"}},
+    "v2_quote": {"cues": ["the first quotation comes up", "the second quotation comes up (on \"And it played\")", None]},
+    "v2_energy": {"events": {"dead": "the rover's battery runs flat (on \"flat\")", "gold": "the planner's card WAITS FOR THE SUN comes up"}},
+    "v2_tiers": {"cues": ["a ring marks the best single run (on \"The best run\")", "the planner's label lights up (on \"Ours\")"]},
+    "v2_reference": {"cues": ["the first link lights (on \"Not an AI\")", "the second link lights (on \"A planner\")",
+                              "the third link lights (on \"plain code\")", "the last link lights (on \"before the wheels\")"]},
+    "v2_farm": {"cues": ["the totals come up (on \"The planner won\")", "the small note comes up (on \"Can a machine\")"]},
+    "v2_learning": {"cues": ["the campaign row comes up (on \"still short\")", "the panel about the planner itself comes up (on \"Even a model\")"]},
+    "v2_end": {"cues": ["the live-demo line comes up (on \"It can't yet\")", "the question comes up (on \"Can your agent\")"]},
+}

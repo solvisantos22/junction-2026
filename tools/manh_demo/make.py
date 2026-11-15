@@ -13,6 +13,7 @@
     ... make check       # a speech recogniser writes down the finished sound track; compare with the script
     ... make frames --shot energy --at 2.5,9   # look at single frames of one shot without recording it
     ... make all --film 2                      # the second draft (manh_demo_2): script v2, nine models in the replay
+    ... make kit --film 2                      # docs/manh-demo/narration-kit/: the film without its narrator, the lines with their times
 
 `--film 2` goes with every step. The second draft has its own script, shots and build folder
 (`build/film2/`), so the first cut and its recordings stay as they are.
@@ -485,6 +486,90 @@ def split() -> List[Path]:
     return made
 
 
+def kit() -> Path:
+    """The narration kit, for a teammate who records the narration himself: the film without its narrator under a
+    name that says so, every line with when it starts and how long it may be, what the picture does on which words,
+    the lines as subtitles, and the placeholder narrator alone as a guide for pace. The folder's README and its
+    helper (`lay_narration.py`) are kept by hand; this writes the rest from the film as it was last built."""
+    import soundfile as sf
+
+    from . import sound
+
+    folder = OUT / "narration-kit"
+    folder.mkdir(parents=True, exist_ok=True)
+    timeline, lengths = json.loads((BUILD / "timeline.json").read_text(encoding="utf-8")), kmake.durations()
+    shots = {shot["name"]: shot for shot in plan()}
+    if [item["name"] for item in timeline] != list(shots):
+        raise SystemExit("not every shot is recorded yet: run `make capture`")
+    starts, total = {}, 0.0
+    for item in timeline:
+        starts[item["name"]], total = total, total + item["seconds"]
+    spoken = spoken_lines(timeline)
+
+    # what the picture does, and when, in seconds from the start of the film
+    moments: List[Dict[str, Any]] = []
+    for name, sync in getattr(cut, "SYNC2", {}).items():
+        shot, begin = shots[name], starts[name]
+        if "parts" in sync:
+            given = shot["addon_settings"]
+            moments.append({"at": begin + given["orbit"], "what": sync["parts"]["dive"]})
+            moments.append({"at": begin + given["orbit"] + given["dive"] + given["land"] + given["rise"] + 0.1, "what": sync["parts"]["title"]})
+        if "cues" in sync:
+            at, frames_before = None, 0.0
+            for beat in shot["beats"]:
+                if beat.get("cues"):
+                    for cue, what in zip(beat["cues"], sync["cues"]):
+                        if what:
+                            moments.append({"at": begin + frames_before + cue, "what": what})
+        if "events" in sync:
+            seen = json.loads((BUILD / "tele" / "{}.json".format(name)).read_text(encoding="utf-8"))
+            for kind, what in sync["events"].items():
+                frame = next((number for number, state in enumerate(seen) for event in state["events"]
+                              if (event["k"] == kind and event.get("who", "on") == "on") or (kind == "gold" and event["k"] == "card" and event.get("tone") == "gold")
+                              or (kind == "card" and event["k"] == "card")), None)
+                if frame is None:
+                    raise SystemExit("{}: the picture no longer shows {!r}: look at SYNC2 in tools/manh_demo/cut.py".format(name, kind))
+                moments.append({"at": begin + frame / FPS, "what": what})
+    moments.sort(key=lambda moment: moment["at"])
+
+    lines = []
+    for number, item in enumerate(spoken):
+        following = spoken[number + 1]["at"] if number + 1 < len(spoken) else total - 0.3
+        shot = next(name for name in reversed(list(starts)) if starts[name] <= item["at"] + 1e-6)
+        lines.append({"id": item["line"], "start": round(item["at"], 2), "placeholder_seconds": round(lengths[item["line"]], 2),
+                      "must_end_by": round(following - 0.2, 2), "shot": shot, "text": FILM["subtitles"][item["line"]],
+                      "sync": [{"at": round(moment["at"], 2), "what": moment["what"]} for moment in moments if item["at"] - 0.3 <= moment["at"] < following - 0.3]})
+    film = "{}_no_narrator.mp4".format(FILM["name"])
+    (folder / "timing.json").write_text(json.dumps({"film": film, "seconds": round(total, 2), "fps": FPS, "lines": lines}, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    clock = lambda seconds: "{}:{:04.1f}".format(int(seconds // 60), seconds % 60)                      # noqa: E731
+    text = ["# The narration, line by line", "",
+            "The draft narration of `{}` ({:.1f} s), written from the film as it was last built (`make kit --film {}`). ".format(film, total, [n for n, f in FILMS.items() if f is FILM][0])
+            + "Times are minutes:seconds from the first frame. A line may start a little later than its time, never earlier than the line before it ends; "
+              "it has to be over by **must end by**, where the next line starts. The placeholder's length is what the synthetic voice needed at a brisk, clear pace.", "",
+            "| Line | Starts | Must end by | Placeholder | Say |", "|---|---|---|---|---|"]
+    for line in lines:
+        text.append("| `{}` | {} | {} | {:.1f} s | {} |".format(line["id"], clock(line["start"]), clock(line["must_end_by"]), line["placeholder_seconds"], line["text"]))
+    text += ["", "## What the picture does on which words", "",
+             "The picture was recorded to the placeholder's timing. These are the moments worth landing; half a second early or late is fine, and nothing breaks if one is missed.", "",
+             "| At | During | The picture |", "|---|---|---|"]
+    for line in lines:
+        for moment in line["sync"]:
+            text.append("| {} | `{}` | {} |".format(clock(moment["at"]), line["id"], moment["what"]))
+    text += ["", "## Reading copy", ""] + ["{}".format(line["text"]) + "\n" for line in lines]
+    (folder / "narration.md").write_text("\n".join(text).rstrip("\n") + "\n", encoding="utf-8")
+
+    shutil.copyfile(assemble(mute=["voice"], variant="no_voice"), folder / film)
+    shutil.copyfile(VIDEO.with_suffix(".srt"), folder / "narration.srt")
+    _, alone = sound.voice_bus(spoken, BUILD / "voice", total, FILM["style"])
+    guide = BUILD / "guide_voice.wav"
+    sf.write(str(guide), alone * min(1.0, 0.7 / float(abs(alone).max())), sound.RATE, subtype="PCM_16")
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(guide), "-ac", "1", "-c:a", "aac", "-b:a", "96k", str(folder / "guide_voice.m4a")])
+    for path in sorted(folder.iterdir()):
+        print("  {} ({:.1f} MB)".format(path.relative_to(REPO), path.stat().st_size / 1e6))
+    return folder
+
+
 def levels() -> None:
     """The finished sound track's loudness, as ffmpeg's EBU R128 meter reads it."""
     done = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", str(VIDEO), "-vn", "-af", "ebur128=peak=true", "-f", "null", "-"],
@@ -495,7 +580,7 @@ def levels() -> None:
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("step", choices=["voice", "capture", "fit", "assemble", "all", "check", "frames", "levels", "split", "voices", "clip", "piece", "alt"])
+    parser.add_argument("step", choices=["voice", "capture", "fit", "assemble", "all", "check", "frames", "levels", "split", "voices", "clip", "piece", "alt", "kit"])
     parser.add_argument("--only", default=None, help="capture: comma-separated shot names")
     parser.add_argument("--shot", default=None, help="frames, clip: the shot")
     parser.add_argument("--tag", default=None, help="clip: the name of the file written to build/out/")
@@ -538,6 +623,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.step == "split":
         print("apart:")
         split()
+    if args.step == "kit":
+        print("narration kit:")
+        kit()
     if args.step == "voices":
         print("voices:")
         voices()

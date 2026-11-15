@@ -302,6 +302,57 @@ class SecondDraftTest(unittest.TestCase):
         self.assertEqual(before, {path: digest(path) for path in KRISTJANS})
 
 
+class NarrationKitTest(unittest.TestCase):
+    """docs/manh-demo/narration-kit/: what a teammate records the narration from."""
+
+    KIT = REPO / "docs" / "manh-demo" / "narration-kit"
+
+    def setUp(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("lay_narration", self.KIT / "lay_narration.py")
+        self.tool = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.tool)
+
+    def test_the_kit_holds_the_films_lines_in_order(self):
+        timing = json.loads((self.KIT / "timing.json").read_text(encoding="utf-8"))
+        self.assertEqual([line["id"] for line in timing["lines"]], list(cut.LINES2))
+        self.assertEqual({line["id"]: line["text"] for line in timing["lines"]}, cut.SUBTITLES2)
+        self.assertLess(timing["seconds"], 120.0)
+        for line, following in zip(timing["lines"], timing["lines"][1:]):
+            self.assertLess(line["start"] + line["placeholder_seconds"], following["start"])      # the placeholder itself fits
+            self.assertLessEqual(line["must_end_by"], following["start"])
+        for name in (timing["film"], "narration.md", "narration.srt", "guide_voice.m4a", "README.md"):
+            self.assertTrue((self.KIT / name).exists(), name)
+        self.assertIn("no_narrator", timing["film"])
+        sheet = (self.KIT / "narration.md").read_text(encoding="utf-8")
+        for text in cut.SUBTITLES2.values():
+            self.assertIn(text, sheet)
+
+    def test_line_pauses_are_told_from_short_ones(self):
+        # five lines with two-second pauses between them, a breath of 0.7 s inside the third, and silence at both ends
+        quiet = [(0.0, 0.4), (5.0, 7.0), (11.0, 13.0), (15.0, 15.7), (18.0, 20.1), (24.0, 26.0), (30.0, 31.0)]
+        blocks, limit = self.tool.spoken_blocks(quiet, 31.0, 5, None)
+        self.assertEqual(blocks, [(0.4, 5.0), (7.0, 11.0), (13.0, 18.0), (20.1, 24.0), (26.0, 30.0)])
+        self.assertAlmostEqual(limit, 1.0)
+        said_twice = quiet[:3] + [(15.0, 17.0)] + quiet[4:]             # the breath is now a full pause: six blocks, and the tool says so
+        self.assertEqual(len(self.tool.spoken_blocks(said_twice, 31.0, 5, None)[0]), 6)
+        self.assertEqual(len(self.tool.spoken_blocks(quiet, 31.0, 5, 0.5)[0]), 6)                # --pause set too low splits at the breath
+
+    def test_the_voice_chain_ends_at_the_films_loudness(self):
+        full = {"afftdn", "agate", "deesser", "acompressor", "rubberband"}
+        chain, skipped = self.tool.voice_chain(full, False, 1.0, 0.0)
+        self.assertEqual(skipped, [])
+        self.assertIn("loudnorm=I=-16", chain)
+        self.assertLess(chain.index("afftdn"), chain.index("acompressor"))                       # cleaned before it is levelled
+        self.assertIn("rubberband=pitch=0.94387", chain)
+        raw, _ = self.tool.voice_chain(full, True, 0.0, 0.0)
+        self.assertNotIn("equalizer", raw)
+        self.assertIn("loudnorm=I=-16", raw)
+        bare, skipped = self.tool.voice_chain(set(), False, 1.0, 0.0)                            # a minimal ffmpeg: the steps it lacks are named, the rest still runs
+        self.assertEqual(set(skipped), {"afftdn", "agate", "deesser", "acompressor"})
+        self.assertIn("asetrate", bare)
+
+
 @unittest.skipIf(sound is None, "numpy, scipy and soundfile are needed for the sound tests")
 class SoundTest(unittest.TestCase):
     def drive(self, speed, alive=True, chase=1.0, seconds=4):
