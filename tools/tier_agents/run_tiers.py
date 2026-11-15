@@ -125,7 +125,22 @@ def main(argv=None) -> int:
     parser.add_argument("--budget", type=float, default=18.0, help="dollars per lab before it stops taking runs")
     parser.add_argument("--only", help="comma-separated short model names to run, e.g. gpt-6-luna")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--resave", action="store_true",
+                        help="save again every ledger run marked unsaved (save_run.py --check-env .env), then stop")
     args = parser.parse_args(argv)
+
+    if args.resave:
+        rows = [json.loads(line) for line in LEDGER.read_text().splitlines()]
+        for row in rows:
+            trials = sorted((REPO / "jobs" / row["name"]).glob("*__*"))
+            if row.get("saved") or not trials:
+                continue
+            saved = subprocess.run([sys.executable, str(REPO / "harbor" / "save_run.py"), str(trials[0]), row["name"],
+                                    "--check-env", str(REPO / ".env")], cwd=REPO, capture_output=True, text=True)
+            row["saved"] = saved.returncode == 0
+            print(row["name"], "saved" if row["saved"] else "NOT saved: " + saved.stderr.strip()[:200])
+        LEDGER.write_text("".join(json.dumps(row) + "\n" for row in rows))
+        return 0
 
     runs = [r for r in plan() if not (RUNS / r["name"]).exists()]
     if args.only:
@@ -168,7 +183,8 @@ def main(argv=None) -> int:
             print(f'{run["name"]}: no trial result', flush=True)
             return
         row = summarise(run, trials[0])
-        saved = subprocess.run([sys.executable, str(REPO / "harbor" / "save_run.py"), str(trials[0]), run["name"]],
+        saved = subprocess.run([sys.executable, str(REPO / "harbor" / "save_run.py"), str(trials[0]), run["name"],
+                                "--check-env", str(REPO / ".env")],
                                cwd=REPO, capture_output=True, text=True)
         row["saved"] = saved.returncode == 0
         with lock:
