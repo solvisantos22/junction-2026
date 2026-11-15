@@ -1,6 +1,6 @@
 # RL–greedy hybrid search
 
-The 65-mission Modal smoke passed. The development coordinator was interrupted after submitting 3145 of 8320 missions; all 3145 submitted cases completed successfully. An audited continuation of only the 5175 never-submitted cases is being prepared, with no new launch yet. [Fixed protocol](../learning-hybrid.md).
+The 65-mission Modal smoke passed. The development coordinator was interrupted after submitting 3145 of 8320 missions; all 3145 submitted cases completed successfully. The audited continuation of only the 5175 never-submitted cases is now running; no completed case is repeated. [Fixed protocol](../learning-hybrid.md).
 
 The 65-arm development search compares individual-policy shortlists, rank
 ensembles across all retained seeds, and RL–greedy rank blends. It uses new
@@ -81,3 +81,11 @@ Confirmation **611000–611255** and final **612000–612255** remain unopened.
 [Retained failure, original coordinator result and retrieved call evidence](development/interruption/diagnosis.json). An independent metadata/source audit verified every submitted row and the 54 source pins; full episode archives remain on Modal and were not re-downloaded or replayed in this diagnosis.
 
 [Verified continuation protocol, complete absence check and source/resource freeze](development/recovery/README.md). This is restricted to the original unstarted development suffix; no training resumes or policy changes.
+
+Recovery app [`ap-VMFyA1rZFxPhVr14SGth33`](https://modal.com/apps/solvisantos22/main/ap-VMFyA1rZFxPhVr14SGth33),
+call `fc-01M7EB3DJ8C214Z7E14WCVVTNF`, was submitted once after freeze
+**`e098ade`** reached `main`. [Receipt, source freeze and live handoff](development/recovery/README.md).
+A live check confirms the original failed coordinator state and owner are
+unchanged. The continuation has successful audited completions and no reported
+error. Allow roughly one hour from its 00:53 UTC start at the earlier measured
+rate; this will be revised from actual recovery throughput.
